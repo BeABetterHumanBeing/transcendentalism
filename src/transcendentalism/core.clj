@@ -26,6 +26,27 @@
    ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
    ])
 
+; The graph is just a collection of triples, associated by their subjects.
+(def graph-data
+  (reduce
+    (fn [graph triple]
+      (assoc graph (:sub triple) (conj (graph (:sub triple)) triple)))
+    {}
+    (concat
+      monad
+      )))
+
+; The Graph protocol is the interface through which a graph is accessed.
+(defprotocol Graph
+  (all-triples [graph]
+    "Returns a collection of all the triples in the graph, in any order."))
+
+; Construct the graph.
+(def graph
+  (reify Graph
+    (all-triples [graph]
+      (flatten (map second (seq graph-data))))))
+
 ; The schema determines what predicates are allowed in the graph, as well as all
 ; constraints that bound the triples to which those predicates belong.
 (def schema-data {
@@ -136,10 +157,39 @@
 ; The Schema protocal is the interface through which the schema data above is
 ; accessed.
 (defprotocol Schema
-  (exists [pred] "Whether the given predicate exists")
-  (is-type [pred] "Whether the given predicate is a type"))
+  (exists? [schema pred] "Whether the given predicate exists"))
+
+; Construct the schema.
+(def schema
+  (reify Schema
+    (exists? [schema pred]
+      (let [result (contains? schema-data pred)]
+        (if (not result)
+          (println (str "Schema doesn't contain pred \"" pred "\"")))
+        result))))
+
+(defn preds-all-valid?
+  "Validates that all triples in the graph exist"
+  [schema graph]
+  (reduce
+    (fn [all-exist triple]
+      (and all-exist (exists? schema (:pred triple))))
+    true
+    (all-triples graph)))
+
+(defn validate-graph
+  "Validates that a given graph conforms to a given schema."
+  [schema graph]
+  (reduce
+    (fn [valid validation-check]
+      (and valid (validation-check schema graph)))
+    true
+    [preds-all-valid?]))
 
 (defn -main
   "I don't do a whole lot."
   [& args]
-  (println "Hello, World!"))
+  (println
+    (if (validate-graph schema graph)
+      "Graph passes validation!"
+      "Graph fails validation!")))
