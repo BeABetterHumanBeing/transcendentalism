@@ -1,5 +1,31 @@
 (ns transcendentalism.core)
 
+; The graph is composed of triples. Each triple relates a subject to an object
+; by means of a predicate.
+(defrecord Triple [sub pred obj])
+
+; The monad
+; This essay_segment serves as the default entry point into the graph.
+(def monad
+  [(->Triple :monad "/type/essay_segment" nil)
+   (->Triple :monad "/essay/contains" :monad-contents)
+   (->Triple :monad "/essay/title" "Transcendental Metaphysics")
+   (->Triple :monad-contents "/type/item/ordered_set" nil)
+   (->Triple :monad-contents "/item/order" :CHRONO)
+   (->Triple :monad-contents "/item/contains" :monad-image)
+   (->Triple :monad-contents "/item/contains" :monad-intro-text)
+   (->Triple :monad-image "/type/item/image" nil)
+   (->Triple :monad-image "/item/image/url" "todo_monad_image_url.svg")
+   (->Triple :monad-intro-text "/type/item/text" nil)
+   (->Triple :monad-intro-text "/item/text/text" (clojure.string/join " "
+    ["\"The Monad is the symbol of unity."
+     "It is the godhead, the point from which all things originate,"
+     "and the point to which all things return.\"\n"
+     "-Daniel Gierl"]))
+   ; TODO - Add /essay/flow/next to the full introduction.
+   ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
+   ])
+
 ; The schema determines what predicates are allowed in the graph, as well as all
 ; constraints that bound the triples to which those predicates belong.
 (def schema-data {
@@ -20,6 +46,11 @@
   "/type/item/ordered_set" {
     :description "An ordered collection of items",
     :super-type "/type/item",
+  },
+  "/essay/title" {
+    :description "The text that appears centered at the top of an essay segment",
+    :domain-type "/type/essay_segment",
+    :range-type :string
   },
   "/essay/flow/next" {
     :description "Relation to the next essay segment",
