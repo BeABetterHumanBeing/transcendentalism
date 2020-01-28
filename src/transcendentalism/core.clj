@@ -1,9 +1,6 @@
 (ns transcendentalism.core
   (:require [clojure.java.io :as io]))
-
-; The graph is composed of triples. Each triple relates a subject to an object
-; by means of a predicate.
-(defrecord Triple [sub pred obj])
+(use 'transcendentalism.graph)
 
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
@@ -27,33 +24,7 @@
    ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
    ])
 
-; The graph is just a collection of triples, associated by their subjects.
-(def graph-data
-  (reduce
-    (fn [graph triple]
-      (assoc graph (:sub triple) (conj (graph (:sub triple)) triple)))
-    {}
-    (concat
-      monad
-      )))
-
-; The Graph protocol is the interface through which a graph is accessed.
-(defprotocol Graph
-  (all-triples [graph] "Returns a collection of all the triples in the graph.")
-  (all-nodes [graph] "Returns a collection of all nodes in the graph.")
-  (has-type? [graph sub type] "Returns whether the given sub has the given type."))
-
-; Construct the graph.
-(def graph
-  (reify Graph
-    (all-triples [graph]
-      (flatten (map second (seq graph-data))))
-    (all-nodes [graph]
-      (keys graph-data))
-    (has-type? [graph sub type]
-      (if (contains? graph-data sub)
-        (not (nil? (some #(= (:pred %) type) (sub graph-data))))
-        false))))
+(def graph (construct-graph (concat monad)))
 
 ; Code for encoding sub values as random alphanumeric keys.
 (defn gen-key
