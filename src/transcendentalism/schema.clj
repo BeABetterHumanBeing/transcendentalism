@@ -1,4 +1,6 @@
-(ns transcendentalism.schema)
+(ns transcendentalism.schema
+  (:require [clojure.string :as str]
+    [clojure.set :as set]))
 (use 'transcendentalism.graph)
 
 ; The schema determines what predicates are allowed in the graph, as well as all
@@ -48,6 +50,7 @@
     :domain-type "/type/essay_segment",
     :range-type "/type/item",
     :unique true,
+    :required true,
   },
   "/essay/label" {
     :description "Symbol label that ascribes a metadata to the essay segment",
@@ -99,7 +102,9 @@
       ; Order is chronological.
       :CHRONO
       ; Order is random.
-      :RANDOM]
+      :RANDOM],
+    :unique true,
+    :required true,
   },
   "/item/image/url" {
     :description "URL of image",
@@ -111,7 +116,10 @@
 ; The Schema protocal is the interface through which the schema data above is
 ; accessed.
 (defprotocol Schema
-  (exists? [schema pred] "Whether the given predicate exists"))
+  (exists? [schema pred] "Whether the given predicate exists")
+  (is-type? [schema pred] "Whether the given predicate is a type")
+  (pred-required-by-type? [schema pred type]
+    "Whether the given predicate is required by the given type"))
 
 (defn create-schema
   []
@@ -120,7 +128,24 @@
       (let [result (contains? schema-data pred)]
         (if (not result)
           (println (str "Schema doesn't contain pred \"" pred "\"")))
-        result))))
+        result))
+    (is-type? [schema pred] (str/starts-with? pred "/type"))
+    (pred-required-by-type? [schema pred type]
+      (let [pred-data (schema-data pred)]
+        (and (= (:domain-type pred-data) type)
+          (contains? pred-data :required)
+          (:required pred-data))))))
+
+(defn required-preds
+  "Returns the predicates that are required by a given type"
+  [schema type]
+  (reduce
+    (fn [result pred]
+      (if (pred-required-by-type? schema pred type)
+        (conj result pred)
+        result))
+    #{}
+    (keys schema-data)))
 
 ; Code validation. The purpose of validation is to check the assumptions that
 ; are made by code generation.
@@ -129,19 +154,24 @@
   "Validates that all triples in the graph exist"
   [schema graph]
   (reduce
-    (fn [all-exist triple]
-      (and all-exist (exists? schema (:pred triple))))
+    (fn [result triple]
+      (and result (exists? schema (:pred triple))))
     true
     (all-triples graph)))
 
-(defn- essay-segments-have-items?
+(defn- required-preds-exist?
+  "Validates that all required predicates exist"
   [schema graph]
   (reduce
-    (fn [segments-have-items sub]
-      (and segments-have-items
-        (some #(= (:pred %) "/essay/contains") (all-triples graph sub))))
+    (fn [result sub]
+      (and result
+        (let
+          [triple-preds (set (map :pred (all-triples graph sub))),
+           types (filter #(is-type? schema %) triple-preds),
+           required-preds (apply set/union (map #(required-preds schema %) types))]
+          (set/subset? required-preds triple-preds))))
     true
-    (all-nodes graph "/type/essay_segment")))
+    (all-nodes graph)))
 
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
@@ -150,4 +180,4 @@
     (fn [valid validation-check]
       (and valid (validation-check schema graph)))
     true
-    [preds-all-valid? essay-segments-have-items?]))
+    [preds-all-valid? required-preds-exist?]))
