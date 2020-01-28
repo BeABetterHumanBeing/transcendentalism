@@ -55,6 +55,26 @@
         (not (nil? (some #(= (:pred %) type) (sub graph-data))))
         false))))
 
+; Code for encoding sub values as random alphanumeric keys.
+(defn gen-key
+  [len]
+  (let [my-key (char-array len)]
+    (dotimes [n len]
+      (aset my-key n (.charAt "0123456789abcdefghijklmnopqrstuvwxyz" (rand-int 36))))
+    (apply str (seq my-key))))
+
+(def encodings
+  (reduce
+    (fn [codings sub]
+      (assoc
+        codings
+        sub
+        (if (= sub :monad)
+          "index"
+          (gen-key 8))))
+    {}
+    (all-nodes graph)))
+
 ; The schema determines what predicates are allowed in the graph, as well as all
 ; constraints that bound the triples to which those predicates belong.
 (def schema-data {
@@ -210,7 +230,7 @@
     (doseq
       [sub (filter #(has-type? graph % "/type/essay_segment") (all-nodes graph))]
       (let
-        [filename (str "output/" "monad" ".html")] ; TODO - create node<->id encoding
+        [filename (str "output/" (sub encodings) ".html")]
         (do
           (spit filename "<html>Test Output</html>")
           (println "Output" filename))))))
