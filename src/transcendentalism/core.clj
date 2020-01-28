@@ -1,4 +1,5 @@
-(ns transcendentalism.core)
+(ns transcendentalism.core
+  (:require [clojure.java.io :as io]))
 
 ; The graph is composed of triples. Each triple relates a subject to an object
 ; by means of a predicate.
@@ -38,14 +39,21 @@
 
 ; The Graph protocol is the interface through which a graph is accessed.
 (defprotocol Graph
-  (all-triples [graph]
-    "Returns a collection of all the triples in the graph, in any order."))
+  (all-triples [graph] "Returns a collection of all the triples in the graph.")
+  (all-nodes [graph] "Returns a collection of all nodes in the graph.")
+  (has-type? [graph sub type] "Returns whether the given sub has the given type."))
 
 ; Construct the graph.
 (def graph
   (reify Graph
     (all-triples [graph]
-      (flatten (map second (seq graph-data))))))
+      (flatten (map second (seq graph-data))))
+    (all-nodes [graph]
+      (keys graph-data))
+    (has-type? [graph sub type]
+      (if (contains? graph-data sub)
+        (not (nil? (some #(= (:pred %) type) (sub graph-data))))
+        false))))
 
 ; The schema determines what predicates are allowed in the graph, as well as all
 ; constraints that bound the triples to which those predicates belong.
@@ -168,6 +176,8 @@
           (println (str "Schema doesn't contain pred \"" pred "\"")))
         result))))
 
+; Code validation. The purpose of validation is to check the assumptions that
+; are made by code generation.
 (defn preds-all-valid?
   "Validates that all triples in the graph exist"
   [schema graph]
@@ -186,10 +196,28 @@
     true
     [preds-all-valid?]))
 
+; Code generation.
+(defn clear-directory
+  [dirname]
+  (doseq [file (.listFiles (io/as-file dirname))]
+    (io/delete-file file)))
+
+(defn generate-output
+  "Convert a validated graph into the HTML, CSS, and JS files that compose the website"
+  [graph]
+  (do
+    (clear-directory "output")
+    (doseq
+      [sub (filter #(has-type? graph % "/type/essay_segment") (all-nodes graph))]
+      (let
+        [filename (str "output/" "monad" ".html")] ; TODO - create node<->id encoding
+        (do
+          (spit filename "<html>Test Output</html>")
+          (println "Output" filename))))))
+
 (defn -main
   "I don't do a whole lot."
   [& args]
-  (println
-    (if (validate-graph schema graph)
-      "Graph passes validation!"
-      "Graph fails validation!")))
+  (if (validate-graph schema graph)
+    (generate-output graph)
+    (println "Graph fails validation!")))
