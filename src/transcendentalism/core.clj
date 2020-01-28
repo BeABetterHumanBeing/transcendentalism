@@ -1,6 +1,6 @@
-(ns transcendentalism.core
-  (:require [clojure.java.io :as io]))
+(ns transcendentalism.core)
 (use
+  'transcendentalism.generate
   'transcendentalism.graph
   'transcendentalism.schema)
 
@@ -28,46 +28,7 @@
 
 (def graph (construct-graph (concat monad)))
 
-; Code for encoding sub values as random alphanumeric keys.
-(defn gen-key
-  [len]
-  (let [my-key (char-array len)]
-    (dotimes [n len]
-      (aset my-key n (.charAt "0123456789abcdefghijklmnopqrstuvwxyz" (rand-int 36))))
-    (apply str (seq my-key))))
-
-(def encodings
-  (reduce
-    (fn [codings sub]
-      (assoc
-        codings
-        sub
-        (if (= sub :monad)
-          "index"
-          (gen-key 8))))
-    {}
-    (all-nodes graph)))
-
 (def schema (create-schema))
-
-; Code generation.
-(defn clear-directory
-  [dirname]
-  (doseq [file (.listFiles (io/as-file dirname))]
-    (io/delete-file file)))
-
-(defn generate-output
-  "Convert a validated graph into the HTML, CSS, and JS files that compose the website"
-  [graph]
-  (do
-    (clear-directory "output")
-    (doseq
-      [sub (filter #(has-type? graph % "/type/essay_segment") (all-nodes graph))]
-      (let
-        [filename (str "output/" (sub encodings) ".html")]
-        (do
-          (spit filename "<html>Test Output</html>")
-          (println "Output" filename))))))
 
 (defn -main
   "I don't do a whole lot."
