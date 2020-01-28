@@ -1,4 +1,5 @@
 (ns transcendentalism.schema)
+(use 'transcendentalism.graph)
 
 ; The schema determines what predicates are allowed in the graph, as well as all
 ; constraints that bound the triples to which those predicates belong.
@@ -120,3 +121,23 @@
         (if (not result)
           (println (str "Schema doesn't contain pred \"" pred "\"")))
         result))))
+
+; Code validation. The purpose of validation is to check the assumptions that
+; are made by code generation.
+(defn preds-all-valid?
+  "Validates that all triples in the graph exist"
+  [schema graph]
+  (reduce
+    (fn [all-exist triple]
+      (and all-exist (exists? schema (:pred triple))))
+    true
+    (all-triples graph)))
+
+(defn validate-graph
+  "Validates that a given graph conforms to a given schema."
+  [schema graph]
+  (reduce
+    (fn [valid validation-check]
+      (and valid (validation-check schema graph)))
+    true
+    [preds-all-valid?]))
