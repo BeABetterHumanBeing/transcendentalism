@@ -29,15 +29,34 @@
   (doseq [file (.listFiles (io/as-file dirname))]
     (io/delete-file file)))
 
+(defn- html
+  [contents]
+  (str "<html>" contents "</html>"))
+
+(defn- ul
+  [contents]
+  (str "<ul>" contents "</ul>"))
+
+(defn- li
+  [contents]
+  (apply str
+    (map (fn [content] (str "<li>" content "</li>"))
+      contents)))
+
+(defn- generate-essay-segment
+  "Returns the HTML corresponding to a given essay segment"
+  [graph encodings sub]
+  (html (ul (li (map print-triple (all-triples graph sub))))))
+
 (defn generate-output
   "Convert a validated graph into the HTML, CSS, and JS files that compose the website"
   [graph]
   (let [encodings (create-encodings graph)]
     (clear-directory "output")
     (doseq
-      [sub (filter #(has-type? graph % "/type/essay_segment") (all-nodes graph))]
+      [sub (all-nodes graph "/type/essay_segment")]
       (let
         [filename (str "output/" (sub encodings) ".html")]
         (do
-          (spit filename "<html>Test Output</html>")
-          (println "Output" filename))))))
+          (spit filename (generate-essay-segment graph encodings sub))
+          (println "Generated" filename))))))

@@ -124,7 +124,8 @@
 
 ; Code validation. The purpose of validation is to check the assumptions that
 ; are made by code generation.
-(defn preds-all-valid?
+
+(defn- preds-all-valid?
   "Validates that all triples in the graph exist"
   [schema graph]
   (reduce
@@ -133,6 +134,15 @@
     true
     (all-triples graph)))
 
+(defn- essay-segments-have-items?
+  [schema graph]
+  (reduce
+    (fn [segments-have-items sub]
+      (and segments-have-items
+        (some #(= (:pred %) "/essay/contains") (all-triples graph sub))))
+    true
+    (all-nodes graph "/type/essay_segment")))
+
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]
@@ -140,4 +150,4 @@
     (fn [valid validation-check]
       (and valid (validation-check schema graph)))
     true
-    [preds-all-valid?]))
+    [preds-all-valid? essay-segments-have-items?]))
