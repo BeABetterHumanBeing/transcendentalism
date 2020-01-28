@@ -119,7 +119,8 @@
   (exists? [schema pred] "Whether the given predicate exists")
   (is-type? [schema pred] "Whether the given predicate is a type")
   (pred-required-by-type? [schema pred type]
-    "Whether the given predicate is required by the given type"))
+    "Whether the given predicate is required by the given type")
+  (is-unique? [schema pred] "Whether the given predicate is unique"))
 
 (defn create-schema
   []
@@ -134,9 +135,13 @@
       (let [pred-data (schema-data pred)]
         (and (= (:domain-type pred-data) type)
           (contains? pred-data :required)
-          (:required pred-data))))))
+          (pred-data :required))))
+    (is-unique? [schema pred]
+      (let [pred-data (schema-data pred)]
+        (and (contains? pred-data :unique)
+          (pred-data :unique))))))
 
-(defn required-preds
+(defn- required-preds
   "Returns the predicates that are required by a given type"
   [schema type]
   (reduce
@@ -146,6 +151,15 @@
         result))
     #{}
     (keys schema-data)))
+
+(defn- pred-counts
+  "Returns a map associating predicates with the number of times they appear"
+  [preds]
+  (reduce
+    (fn [result pred]
+      (assoc result pred (if (contains? result pred) (inc (result pred)) 1)))
+    {}
+    preds))
 
 ; Code validation. The purpose of validation is to check the assumptions that
 ; are made by code generation.
@@ -173,6 +187,21 @@
     true
     (all-nodes graph)))
 
+(defn- unique-preds-unique?
+  "Validates that unique predicates are not duplicated"
+  [schema graph]
+  (reduce
+    (fn [result sub]
+      (and result
+        (let [pred-count (pred-counts (map :pred (all-triples graph sub)))]
+          (reduce
+            (fn [result pred-cnt]
+              (and result (if (is-unique? schema (first pred-cnt)) (= (second pred-cnt) 1) true)))
+            true
+            (seq pred-count)))))
+    true
+    (all-nodes graph)))
+
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]
@@ -180,4 +209,4 @@
     (fn [valid validation-check]
       (and valid (validation-check schema graph)))
     true
-    [preds-all-valid? required-preds-exist?]))
+    [preds-all-valid? required-preds-exist? unique-preds-unique?]))
