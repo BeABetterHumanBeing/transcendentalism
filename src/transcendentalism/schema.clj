@@ -125,11 +125,7 @@
 (defn create-schema
   []
   (reify Schema
-    (exists? [schema pred]
-      (let [result (contains? schema-data pred)]
-        (if (not result)
-          (println (str "Schema doesn't contain pred \"" pred "\"")))
-        result))
+    (exists? [schema pred] (contains? schema-data pred))
     (is-type? [schema pred] (str/starts-with? pred "/type"))
     (pred-required-by-type? [schema pred type]
       (let [pred-data (schema-data pred)]
@@ -169,8 +165,11 @@
   [schema graph]
   (reduce
     (fn [result triple]
-      (and result (exists? schema (:pred triple))))
-    true
+      (conj result
+        (if (exists? schema (:pred triple))
+          nil
+          (str "Schema doesn't contain pred \"" (:pred triple) "\""))))
+    #{}
     (all-triples graph)))
 
 (defn- required-preds-exist?
@@ -178,13 +177,15 @@
   [schema graph]
   (reduce
     (fn [result sub]
-      (and result
+      (conj result
         (let
           [triple-preds (set (map :pred (all-triples graph sub))),
            types (filter #(is-type? schema %) triple-preds),
            required-preds (apply set/union (map #(required-preds schema %) types))]
-          (set/subset? required-preds triple-preds))))
-    true
+          (if (set/subset? required-preds triple-preds)
+            nil
+            (str sub " requires " required-preds " but only has " triple-preds)))))
+    #{}
     (all-nodes graph)))
 
 (defn- unique-preds-unique?
@@ -192,21 +193,32 @@
   [schema graph]
   (reduce
     (fn [result sub]
-      (and result
+      (set/union result
         (let [pred-count (pred-counts (map :pred (all-triples graph sub)))]
           (reduce
             (fn [result pred-cnt]
-              (and result (if (is-unique? schema (first pred-cnt)) (= (second pred-cnt) 1) true)))
-            true
+              (conj result
+                (if
+                  (and
+                    (is-unique? schema (first pred-cnt))
+                    (not (= (second pred-cnt) 1)))
+                  (str sub " has " (second pred-cnt) " " (first pred-cnt) ", but can only have 1")
+                  nil)))
+            #{}
             (seq pred-count)))))
-    true
+    #{}
     (all-nodes graph)))
 
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]
-  (reduce
-    (fn [valid validation-check]
-      (and valid (validation-check schema graph)))
-    true
-    [preds-all-valid? required-preds-exist? unique-preds-unique?]))
+  (let
+    [validation-errors (reduce
+      (fn [result validation-check]
+        (set/union result (validation-check schema graph)))
+      #{}
+      [preds-all-valid? required-preds-exist? unique-preds-unique?]),
+     ; nil ends up in the set, and ought to be weeded out.
+     errors (set/difference validation-errors #{nil})]
+    (doall (map println errors))
+    (empty? errors)))
