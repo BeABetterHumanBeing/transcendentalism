@@ -120,7 +120,8 @@
   (is-type? [schema pred] "Whether the given predicate is a type")
   (pred-required-by-type? [schema pred type]
     "Whether the given predicate is required by the given type")
-  (is-unique? [schema pred] "Whether the given predicate is unique"))
+  (is-unique? [schema pred] "Whether the given predicate is unique")
+  (get-supertypes [schema type] "Returns the set of supertypes of a given type"))
 
 (defn create-schema
   []
@@ -135,7 +136,24 @@
     (is-unique? [schema pred]
       (let [pred-data (schema-data pred)]
         (and (contains? pred-data :unique)
-          (pred-data :unique))))))
+          (pred-data :unique))))
+    (get-supertypes [schema type]
+      (loop [supertypes #{},
+             untested-types #{type}]
+             (if (empty? untested-types)
+              supertypes
+              (let [t (first untested-types),
+                    pred-data (schema-data t),
+                    super-types (if (contains? pred-data :super-type)
+                      (if (set? (pred-data :super-type))
+                        (pred-data :super-type)
+                        #{(pred-data :super-type)})
+                      #{})]
+                ; Note that this logic will recur indefinitely if the supertype
+                ; graph has cycles.
+                (recur
+                  (set/union supertypes super-types)
+                  (set/difference (set/union untested-types super-types) #{t}))))))))
 
 (defn- required-preds
   "Returns the predicates that are required by a given type"
@@ -209,6 +227,25 @@
     #{}
     (all-nodes graph)))
 
+(defn- required-supertypes-exist?
+  "Validates that required supertypes exist"
+  [schema graph]
+  (reduce
+    (fn [result sub]
+      (conj result
+        (let [types (set (filter #(is-type? schema %)
+                                 (map :pred (all-triples graph sub)))),
+              supertypes (reduce
+                (fn [result type]
+                  (set/union result (get-supertypes schema type)))
+                #{}
+                types)]
+          (if (set/subset? supertypes types)
+            nil
+            (str sub " has types " types " which require supertypes " supertypes)))))
+    #{}
+    (all-nodes graph)))
+
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]
@@ -217,7 +254,8 @@
       (fn [result validation-check]
         (set/union result (validation-check schema graph)))
       #{}
-      [preds-all-valid? required-preds-exist? unique-preds-unique?]),
+      [preds-all-valid? required-preds-exist? unique-preds-unique?
+       required-supertypes-exist?]),
      ; nil ends up in the set, and ought to be weeded out.
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))
