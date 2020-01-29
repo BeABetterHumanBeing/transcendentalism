@@ -121,7 +121,8 @@
   (pred-required-by-type? [schema pred type]
     "Whether the given predicate is required by the given type")
   (is-unique? [schema pred] "Whether the given predicate is unique")
-  (get-supertypes [schema type] "Returns the set of supertypes of a given type"))
+  (get-supertypes [schema type] "Returns the set of supertypes of a given type")
+  (get-domain-type [schema pred] "Returns the domain type, or nil"))
 
 (defn create-schema
   []
@@ -153,7 +154,12 @@
                 ; graph has cycles.
                 (recur
                   (set/union supertypes super-types)
-                  (set/difference (set/union untested-types super-types) #{t}))))))))
+                  (set/difference (set/union untested-types super-types) #{t}))))))
+    (get-domain-type [schema pred]
+      (let [pred-data (schema-data pred)]
+        (if (contains? pred-data :domain-type)
+          (pred-data :domain-type)
+          nil)))))
 
 (defn- required-preds
   "Returns the predicates that are required by a given type"
@@ -246,6 +252,21 @@
     #{}
     (all-nodes graph)))
 
+(defn- domain-type-exists?
+  "Validates that the subject has the required domain type"
+  [schema graph]
+  (reduce
+    (fn [result triple]
+      (let [domain-type (get-domain-type schema (:pred triple))]
+        (conj result
+          (if (or (nil? domain-type)
+                  (has-type? graph (:sub triple) domain-type))
+            nil
+            (str (:sub triple) " has pred " (:pred triple)
+              " but is missing required domain type " domain-type)))))
+    #{}
+    (all-triples graph)))
+
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]
@@ -255,7 +276,7 @@
         (set/union result (validation-check schema graph)))
       #{}
       [preds-all-valid? required-preds-exist? unique-preds-unique?
-       required-supertypes-exist?]),
+       required-supertypes-exist? domain-type-exists?]),
      ; nil ends up in the set, and ought to be weeded out.
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))
