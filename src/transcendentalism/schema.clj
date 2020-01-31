@@ -122,7 +122,8 @@
     "Whether the given predicate is required by the given type")
   (is-unique? [schema pred] "Whether the given predicate is unique")
   (get-supertypes [schema type] "Returns the set of supertypes of a given type")
-  (get-domain-type [schema pred] "Returns the domain type, or nil"))
+  (get-domain-type [schema pred] "Returns the domain type, or nil")
+  (get-range-type [schema pred] "Returns the range type, or nil"))
 
 (defn create-schema
   []
@@ -159,6 +160,11 @@
       (let [pred-data (schema-data pred)]
         (if (contains? pred-data :domain-type)
           (pred-data :domain-type)
+          nil)))
+    (get-range-type [schema pred]
+      (let [pred-data (schema-data pred)]
+        (if (contains? pred-data :range-type)
+          (pred-data :range-type)
           nil)))))
 
 (defn- required-preds
@@ -267,6 +273,27 @@
     #{}
     (all-triples graph)))
 
+(defn- range-type-exists?
+  "Validates that the object has the required range type"
+  [schema graph]
+  (reduce
+    (fn [result triple]
+      (let [range-type (get-range-type schema (:pred triple))]
+        (conj result
+          (if (or (nil? range-type)
+                  (and (= range-type :string)
+                       (string? (:obj triple)))
+                  (and (string? range-type)
+                       (has-type? graph (:obj triple) range-type))
+                  (and (vector? range-type)
+                       (not (nil? (some #(= (:obj triple) %) range-type)))))
+            nil
+            (str (:sub triple) " has pred " (:pred triple)
+              " but obj " (:obj triple) " doesn't match required range type "
+              range-type)))))
+    #{}
+    (all-triples graph)))
+
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]
@@ -276,7 +303,7 @@
         (set/union result (validation-check schema graph)))
       #{}
       [preds-all-valid? required-preds-exist? unique-preds-unique?
-       required-supertypes-exist? domain-type-exists?]),
+       required-supertypes-exist? domain-type-exists? range-type-exists?]),
      ; nil ends up in the set, and ought to be weeded out.
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))
