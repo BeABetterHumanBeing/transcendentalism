@@ -4,7 +4,7 @@
 (use 'transcendentalism.graph)
 
 ; Whether to generate debugging HTML or not.
-(def debug true)
+(def debugging-mode true)
 
 (defn- gen-key
   "Generates a random alphanumeric key of given length"
@@ -32,6 +32,11 @@
   [dirname]
   (doseq [file (.listFiles (io/as-file dirname))]
     (io/delete-file file)))
+
+(defn- debug
+  "Passes through content if in debugging-mode, otherwise nullifies it"
+  [content]
+  (if debugging-mode content ""))
 
 (defn- attr-aware
   "Adds attributes to a given opening tag."
@@ -75,16 +80,44 @@
     (map (fn [content] (str "<li>" content "</li>"))
       contents)))
 
+(defn- css-div
+  [attrs & contents]
+  (let [selector
+        (if (contains? attrs "class")
+          (str "." (attrs "class"))
+          (if (contains? attrs "id")
+            (str "#" (attrs "id"))
+            ""))]
+    (str/join "\n" [(str "div" selector) " {" (str/join "\n" contents) "}"])))
+
+(defn- font-family
+  [& contents]
+  (str "font-family: " (str/join ", " contents) ";"))
+
+(defn- border-style
+  [contents]
+  (str "border-style: " contents ";"))
+
+(defn- border-width
+  [contents]
+  (str "border-width: " contents ";"))
+
+(defn- border-color
+  [contents]
+  (str "border-color: " contents ";"))
+
+(defn- padding
+  [& contents]
+  (str "padding: " (str/join " " contents) ";"))
+
 (defn- stylesheet
   []
-  (str "div.debug {"
-    "font-family: Monaco, monospace;"
-    "border-style: dashed;"
-    "border-width: 1px;"
-    "border-color: red;"
-    "padding: 5px 10px 5px;"
-    (if debug "" "visibility:hidden")
-    "}"))
+  (debug (css-div {"class" "debug"}
+    (font-family "Monaco" "monospace")
+    (border-style "dashed")
+    (border-width "1px")
+    (border-color "red")
+    (padding "5px" "10px" "5px"))))
 
 (defn- generate-essay-segment
   "Returns the HTML corresponding to a given essay segment"
@@ -92,9 +125,10 @@
   (html
     (head (link "stylesheet" "styles.css"))
     (body
-      (if debug
-        (div {"class" "debug"} (p "Triples") (ul (li (map print-triple (all-triples graph sub)))))
-        ""))))
+      (debug
+        (div {"class" "debug"}
+          (p "Triples")
+          (ul (li (map print-triple (all-triples graph sub)))))))))
 
 (defn generate-output
   "Convert a validated graph into the HTML, CSS, and JS files that compose the website"
