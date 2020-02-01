@@ -80,6 +80,8 @@
     (map (fn [content] (str "<li>" content "</li>"))
       contents)))
 
+(defn- hr [] (str "<hr>"))
+
 (defn- css-div
   [attrs & contents]
   (let [selector
@@ -110,14 +112,32 @@
   [& contents]
   (str "padding: " (str/join " " contents) ";"))
 
+(defn- media
+  [condition & contents]
+  (str/join "\n"
+    [(str "@media (" condition ") {") (str/join "\n" contents) "}"]))
+
 (defn- stylesheet
   []
-  (debug (css-div {"class" "debug"}
-    (font-family "Monaco" "monospace")
-    (border-style "dashed")
-    (border-width "1px")
-    (border-color "red")
-    (padding "5px" "10px" "5px"))))
+  (str/join "\n"
+    [(debug (css-div {"class" "debug"}
+      (font-family "Monaco" "monospace")
+      (border-style "dashed")
+      (border-width "1px")
+      (border-color "red")
+      (padding "5px" "10px" "5px")))
+    (media "min-width: 1000px"
+      (css-div {"class" "segment"}
+        "display: grid;"
+        "grid-template-columns: auto 800px auto;"))
+    (media "max-width: 1000px"
+      (css-div {"class" "segment"}
+        "display: grid;"
+        "grid-template-columns: 100px auto 100px;"))
+    (css-div {"class" "header"}
+      "text-align: center;")
+    (css-div {"class" "content"} "")
+    (css-div {"class" "footer"} "")]))
 
 (defn- generate-essay-segment
   "Returns the HTML corresponding to a given essay segment"
@@ -126,9 +146,19 @@
     (head (link "stylesheet" "styles.css"))
     (body
       (debug
+        ; Debugging information appears up top.
         (div {"class" "debug"}
           (p "Triples")
-          (ul (li (map print-triple (all-triples graph sub)))))))))
+          (ul (li (map print-triple (all-triples graph sub))))))
+      ; The contents of the segment appear within a single div.
+      (div {"class" "segment"}
+        (div "")
+        (div {}
+          (div {"class" "header"} "TODO - Title goes here")
+          (hr)
+          (div {"class" "content"} "TODO - Content goes here")
+          (hr)
+          (div {"class" "footer"} "TODO - Relations go here"))))))
 
 (defn generate-output
   "Convert a validated graph into the HTML, CSS, and JS files that compose the website"
