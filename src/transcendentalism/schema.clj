@@ -117,6 +117,26 @@
   },
 })
 
+(defn- type-to-supertypes
+  "Returns a set of all transitive supertypes of a given type"
+  [type]
+  (loop [supertypes #{},
+         untested-types #{type}]
+    (if (empty? untested-types)
+      supertypes
+      (let [t (first untested-types),
+            pred-data (schema-data t),
+            super-types (if (contains? pred-data :super-type)
+              (if (set? (pred-data :super-type))
+                (pred-data :super-type)
+                #{(pred-data :super-type)})
+              #{})]
+        ; Note that this logic will recur indefinitely if the supertype
+        ; graph has cycles.
+        (recur
+          (set/union supertypes super-types)
+          (set/difference (set/union untested-types super-types) #{t}))))))
+
 ; The Schema protocal is the interface through which the schema data above is
 ; accessed.
 (defprotocol Schema
@@ -143,23 +163,7 @@
       (let [pred-data (schema-data pred)]
         (and (contains? pred-data :unique)
           (pred-data :unique))))
-    (get-supertypes [schema type]
-      (loop [supertypes #{},
-             untested-types #{type}]
-             (if (empty? untested-types)
-              supertypes
-              (let [t (first untested-types),
-                    pred-data (schema-data t),
-                    super-types (if (contains? pred-data :super-type)
-                      (if (set? (pred-data :super-type))
-                        (pred-data :super-type)
-                        #{(pred-data :super-type)})
-                      #{})]
-                ; Note that this logic will recur indefinitely if the supertype
-                ; graph has cycles.
-                (recur
-                  (set/union supertypes super-types)
-                  (set/difference (set/union untested-types super-types) #{t}))))))
+    (get-supertypes [schema type] (type-to-supertypes type))
     (get-domain-type [schema pred]
       (let [pred-data (schema-data pred)]
         (if (contains? pred-data :domain-type)
@@ -170,6 +174,14 @@
         (if (contains? pred-data :range-type)
           (pred-data :range-type)
           nil)))))
+
+(defn types
+  "Given a sub and list of types (without \"type\" prefix), returns the corresponding type triples."
+  [sub & type-suffixes]
+  (let [full-types (map #(str "/type" %) type-suffixes),
+        inferred-types (apply set/union (map #(type-to-supertypes %) full-types)),
+        all-types (set/union inferred-types full-types)]
+    (map #(->Triple sub % nil) all-types)))
 
 (defn- required-preds
   "Returns the predicates that are required by a given type"

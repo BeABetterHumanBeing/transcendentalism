@@ -173,7 +173,7 @@
           (let [title-triple (first (all-triples graph sub "/essay/title"))]
             (if (empty? title-triple)
               ""
-              (h1 {"class" "header"} (:obj title-triples))))
+              (h1 {"class" "header"} (:obj title-triple))))
           (hr)
           (div {"class" "content"} "TODO - Content goes here")
           (hr)
