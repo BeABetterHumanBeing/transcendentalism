@@ -43,3 +43,8 @@
         (if (contains? graph-data sub)
           (not (nil? (some #(= (:pred %) type) (sub graph-data))))
           false)))))
+
+; TODO(gierl): Add chronological orders (i.e. vectors, with tail-append attached
+; to timestamp).
+
+; TODO(gierl): Add graups (i.e. sets, with type specialization[s] attached).

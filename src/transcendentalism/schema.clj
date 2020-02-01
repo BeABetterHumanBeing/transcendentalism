@@ -5,6 +5,9 @@
 
 ; The schema determines what predicates are allowed in the graph, as well as all
 ; constraints that bound the triples to which those predicates belong.
+; TODO(gierl): Pull out the symmetrically-typed relations into their omn
+; 'specializations' under that type. It acts as a 'class' of knowledge for that
+; type, which the main body of schema-data inter-operates with.
 (def schema-data {
   "/type/essay_segment" {
     :description "Nodes that are externally link-able",
