@@ -82,15 +82,19 @@
 
 (defn- hr [] (str "<hr>"))
 
-(defn- css-div
-  [attrs & contents]
+(defn- h1
+  [attrs contents]
+  (str (attr-aware "h1" attrs) contents "</h1>"))
+
+(defn- css
+  [tagname attrs & contents]
   (let [selector
         (if (contains? attrs "class")
           (str "." (attrs "class"))
           (if (contains? attrs "id")
             (str "#" (attrs "id"))
             ""))]
-    (str/join "\n" [(str "div" selector) " {" (str/join "\n" contents) "}"])))
+    (str/join "\n" [(str tagname selector) " {" (str/join "\n" contents) "}"])))
 
 (defn- font-family
   [& contents]
@@ -112,6 +116,18 @@
   [& contents]
   (str "padding: " (str/join " " contents) ";"))
 
+(defn- display
+  [contents]
+  (str "display: " contents ";"))
+
+(defn- text-align
+  [contents]
+  (str "text-align: " contents ";"))
+
+(defn- grid-template-columns
+  [& contents]
+  (str "grid-template-columns: " (str/join " " contents) ";"))
+
 (defn- media
   [condition & contents]
   (str/join "\n"
@@ -120,24 +136,24 @@
 (defn- stylesheet
   []
   (str/join "\n"
-    [(debug (css-div {"class" "debug"}
+    [(debug (css "div" {"class" "debug"}
       (font-family "Monaco" "monospace")
       (border-style "dashed")
       (border-width "1px")
       (border-color "red")
       (padding "5px" "10px" "5px")))
     (media "min-width: 1000px"
-      (css-div {"class" "segment"}
-        "display: grid;"
-        "grid-template-columns: auto 800px auto;"))
+      (css "div" {"class" "segment"}
+        (display "grid")
+        (grid-template-columns "auto" "800px" "auto")))
     (media "max-width: 1000px"
-      (css-div {"class" "segment"}
-        "display: grid;"
-        "grid-template-columns: 100px auto 100px;"))
-    (css-div {"class" "header"}
-      "text-align: center;")
-    (css-div {"class" "content"} "")
-    (css-div {"class" "footer"} "")]))
+      (css "div" {"class" "segment"}
+        (display "grid")
+        (grid-template-columns "100px" "auto" "100px")))
+    (css "h1" {"class" "header"}
+      (text-align "center"))
+    (css "div" {"class" "content"} "")
+    (css "div" {"class" "footer"} "")]))
 
 (defn- generate-essay-segment
   "Returns the HTML corresponding to a given essay segment"
@@ -154,7 +170,10 @@
       (div {"class" "segment"}
         (div "")
         (div {}
-          (div {"class" "header"} "TODO - Title goes here")
+          (let [title-triple (first (all-triples graph sub "/essay/title"))]
+            (if (empty? title-triple)
+              ""
+              (h1 {"class" "header"} (:obj title-triples))))
           (hr)
           (div {"class" "content"} "TODO - Content goes here")
           (hr)

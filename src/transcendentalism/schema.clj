@@ -30,7 +30,8 @@
   "/essay/title" {
     :description "The text that appears centered at the top of an essay segment",
     :domain-type "/type/essay_segment",
-    :range-type :string
+    :range-type :string,
+    :unique true,
   },
   "/essay/flow/next" {
     :description "Relation to the next essay segment",

@@ -20,8 +20,8 @@
 
 ; The Graph protocol is the interface through which a graph is accessed.
 (defprotocol Graph
-  (all-triples [graph] [graph sub]
-    "Returns a collection of all the triples in the graph [for a given sub]")
+  (all-triples [graph] [graph sub] [graph sub pred]
+    "Returns a collection of all the triples in the graph [for a given [sub and pred]]")
   (all-nodes [graph] [graph type]
     "Returns a collection of all nodes in the graph [with a given type]")
   (has-type? [graph sub type] "Returns whether the given sub has the given type."))
@@ -35,6 +35,8 @@
         (flatten (map second (seq graph-data))))
       (all-triples [graph sub]
         (sub graph-data))
+      (all-triples [graph sub pred]
+        (filter #(= (:pred %) pred) (all-triples graph sub)))
       (all-nodes [graph]
         (keys graph-data))
       (all-nodes [graph type]
