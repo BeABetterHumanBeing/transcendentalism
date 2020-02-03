@@ -100,17 +100,6 @@
     :domain-type "/type/item/text",
     :range-type :string,
   },
-  "/item/order" {
-    :description "Type of order of a set",
-    :domain-type "/type/item/ordered_set",
-    :range-type [
-      ; Order is chronological.
-      :CHRONO
-      ; Order is random.
-      :RANDOM],
-    :unique true,
-    :required true,
-  },
   "/item/image/url" {
     :description "URL of image",
     :domain-type "/type/item/image",
@@ -303,7 +292,10 @@
                   (and (= range-type :string)
                        (string? (:obj triple)))
                   (and (string? range-type)
-                       (has-type? graph (:obj triple) range-type))
+                       (has-type? graph
+                        (let [obj (:obj triple)]
+                          (if (vector? obj) (first obj) obj))
+                        range-type))
                   (and (vector? range-type)
                        (not (nil? (some #(= (:obj triple) %) range-type)))))
             nil
@@ -312,6 +304,38 @@
               range-type)))))
     #{}
     (all-triples graph)))
+
+(defn- ordered-sets-have-order?
+  "Validates that all /item/contains triples have an order"
+  [schema graph]
+  (:error-statuses (reduce
+    (fn [result triple]
+      (let [metadata (meta (:obj triple)),
+            return-error (fn [error-msg]
+                           (assoc result
+                             :error-statuses
+                             (conj (:error-statuses result) error-msg)))]
+        (if (not (contains? metadata :order))
+          (return-error (str (print-triple triple) " is missing :order metadata"))
+          (let [ordinal (:order metadata)]
+            (if (not (number? ordinal))
+              (return-error (str (print-triple triple) " has order " ordinal
+                                 ", which is not a number"))
+              (let [sub-to-ordinals (:sub-to-ordinals result),
+                    sub (:sub triple),
+                    ordinals (if (contains? sub-to-ordinals sub)
+                                (sub sub-to-ordinals)
+                                []),
+                    new-ordinals (conj ordinals ordinal)]
+                (if (not (apply distinct? new-ordinals))
+                  (return-error (str (print-triple triple) " has ordinal "
+                                     ordinal ", which is not distinct"))
+                  (assoc result
+                    :sub-to-ordinals
+                    (assoc (:sub-to-ordinals result)
+                      sub new-ordinals)))))))))
+    {:sub-to-ordinals {}, :error-statuses #{}}
+    (filter #(= (:pred %) "/item/contains") (all-triples graph)))))
 
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
@@ -322,7 +346,8 @@
         (set/union result (validation-check schema graph)))
       #{}
       [preds-all-valid? required-preds-exist? unique-preds-unique?
-       required-supertypes-exist? domain-type-exists? range-type-exists?]),
+       required-supertypes-exist? domain-type-exists? range-type-exists?
+       ordered-sets-have-order?]),
      ; nil ends up in the set, and ought to be weeded out.
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))
