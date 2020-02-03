@@ -176,24 +176,25 @@
       ; TODO(gierl): Add alt-text.
       (img {"src" (:obj image-url-triple)}))))
 
-(defn- generate-item-ordered-set
-  "Returns the HTML corresponding to a /type/item/ordered_set"
-  [triples]
-  (div {"class" "content"}
-    ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
-    ; TODO(gierl): Handle /item/order, and /item/contains
-    "TODO ordered set"))
-
 (defn- generate-item
   "Returns the HTML corresponding to a /type/item"
   [graph sub]
-  (let [triples (all-triples graph sub),
-        item-type (filter #(and (str/starts-with? (:pred %) "/type")
-                                (not (= (:pred %) "/type/item"))) triples)]
-    ({"/type/item/text" (generate-item-text triples),
-      "/type/item/image" (generate-item-image triples),
-      "/type/item/ordered_set" (generate-item-ordered-set triples)}
-      (:pred (first item-type)))))
+  ; The call for generating ordered set items must be included here so that it
+  ; can recursively call its parent function.
+  (letfn [(generate-item-ordered-set [triples]
+            (div {"class" "content"}
+              ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
+              (let [contents (sort #(< (:order (meta (:obj %1)))
+                                       (:order (meta (:obj %2))))
+                                   (filter #(= (:pred %) "/item/contains") triples))]
+                (apply str (map #(generate-item graph (first (:obj %))) contents)))))]
+    (let [triples (all-triples graph sub),
+          item-type (filter #(and (str/starts-with? (:pred %) "/type")
+                                  (not (= (:pred %) "/type/item"))) triples)]
+      ({"/type/item/text" (generate-item-text triples),
+        "/type/item/image" (generate-item-image triples),
+        "/type/item/ordered_set" (generate-item-ordered-set triples)}
+        (:pred (first item-type))))))
 
 (defn- generate-essay-segment
   "Returns the HTML corresponding to a /type/essay_segment"
