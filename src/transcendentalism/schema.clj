@@ -93,6 +93,7 @@
     :description "The contents of a text item",
     :domain-type "/type/item/text",
     :range-type :string,
+    :required true,
   },
   "/item/text/url" {
     :description "External URL to which a piece of text is linked",
@@ -114,6 +115,8 @@
     :description "URL of image",
     :domain-type "/type/item/image",
     :range-type :string,
+    :required true,
+    :unique true,
   },
 })
 

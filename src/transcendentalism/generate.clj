@@ -86,6 +86,8 @@
   [attrs contents]
   (str (attr-aware "h1" attrs) contents "</h1>"))
 
+(defn- img [attrs] (attr-aware "img" attrs))
+
 (defn- css
   [tagname attrs & contents]
   (let [selector
@@ -152,11 +154,49 @@
         (grid-template-columns "100px" "auto" "100px")))
     (css "h1" {"class" "header"}
       (text-align "center"))
-    (css "div" {"class" "content"} "")
+    (css "div" {"class" "content"}
+      (border-style "dashed")
+      (border-width "1px"))
     (css "div" {"class" "footer"} "")]))
 
+(defn- generate-item-text
+  "Returns the HTML corresponding to a /type/item/text"
+  [triples]
+  (div {"class" "content"}
+    ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
+    ; TODO(gierl): Handle /item/text/url
+    "TODO text"))
+
+(defn- generate-item-image
+  "Returns the HTML corresponding to a /type/item/image"
+  [triples]
+  (div {"class" "content"}
+    (let [image-url-triple (first (filter #(= (:pred %) "/item/image/url") triples))]
+      ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
+      ; TODO(gierl): Add alt-text.
+      (img {"src" (:obj image-url-triple)}))))
+
+(defn- generate-item-ordered-set
+  "Returns the HTML corresponding to a /type/item/ordered_set"
+  [triples]
+  (div {"class" "content"}
+    ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
+    ; TODO(gierl): Handle /item/order, and /item/contains
+    "TODO ordered set"))
+
+(defn- generate-item
+  "Returns the HTML corresponding to a /type/item"
+  [graph sub]
+  (let [triples (all-triples graph sub),
+        item-type (filter #(and (str/starts-with? (:pred %) "/type")
+                                (not (= (:pred %) "/type/item"))) triples)]
+    ({"/type/item/text" (generate-item-text triples),
+      "/type/item/image" (generate-item-image triples),
+      "/type/item/ordered_set" (generate-item-ordered-set triples)}
+      (:pred (first item-type)))))
+
 (defn- generate-essay-segment
-  "Returns the HTML corresponding to a given essay segment"
+  "Returns the HTML corresponding to a /type/essay_segment"
   [graph encodings sub]
   (html
     (head (link "stylesheet" "styles.css"))
@@ -175,7 +215,8 @@
               ""
               (h1 {"class" "header"} (:obj title-triple))))
           (hr)
-          (div {"class" "content"} "TODO - Content goes here")
+          (let [content-sub (:obj (first (all-triples graph sub "/essay/contains")))]
+            (generate-item graph content-sub))
           (hr)
           (div {"class" "footer"} "TODO - Relations go here"))))))
 
