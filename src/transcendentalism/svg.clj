@@ -28,8 +28,8 @@
 (defn- t-to-r
   "Converts a timestamp into a radius"
   [dim k t]
-  (let [seconds-before-present (jt/as (jt/duration (jt/instant) t) :seconds)]
-    (* (max-r dim) (Math/pow k seconds-before-present))))
+  (let [days-before-present (jt/as (jt/duration (jt/instant) t) :days)]
+    (* (max-r dim) (Math/pow k days-before-present))))
 
 (defn- svg
   "Returns the XML for an SVG"
@@ -59,14 +59,15 @@
   "Determines an aesthetically-pleasing radius for a circle"
   [dim r]
   (let [circle-max (/ dim 40)]
-    (if (= r 0)
+    (if (< r 0.001)
       circle-max
       (* circle-max (/ r (max-r dim))))))
 
 (defn- aesthetic-circle
   "Updates a set of attrs to include an aesthetic standard for circles"
-  [dim attrs r tau & contents]
-  (let [coords (polar-to-cartesian dim dim r tau),
+  [dim k attrs timestamp tau & contents]
+  (let [r (t-to-r dim k timestamp),
+        coords (polar-to-cartesian dim dim r tau),
         radius (circle-r dim r)]
     (circle
       (merge attrs {
@@ -119,29 +120,30 @@
   ; The monad will only generate a square size.
   {:pre [(= width height)]}
   (let [graph (monad-graph),
-        dim width]
+        dim width,
+        k 1.2]
     (svg dim dim
       (g {}
         ; The monad circle
-        (aesthetic-circle dim {
+        (aesthetic-circle dim k {
           "fill" "white",
-        } 0 0)
+        } (jt/minus (jt/instant) (jt/days 10000)) 0)
         ; The seven subject circles
         (str/join "\n"
           (map (fn [color-number]
-            (aesthetic-circle dim {
+            (aesthetic-circle dim k {
               "fill" (first color-number),
-            } (max-r dim) (/ (second color-number) 7)))
+            } (jt/instant) (/ (second color-number) 7)))
             (seq (zipmap
               ["#f6bb05" "#f81308" "#3c35ff" "#08caf8" "#c853ff" "#29db01" "#f58705"]
               (range 7)))))
         ; A bunch of evenly-spaced temporal circles
         (str/join "\n"
           (map (fn [timestamp]
-            (aesthetic-circle dim {
+            (aesthetic-circle dim k {
               "fill" "white",
-            } (t-to-r dim 1.2 timestamp) 0))
-          (take 10 (jt/iterate jt/minus (jt/minus (jt/instant) (jt/seconds 1)) (jt/seconds 1)))))
+            } timestamp 0))
+          (take 10 (jt/iterate jt/minus (jt/minus (jt/instant) (jt/days 1)) (jt/days 1)))))
         ))))
 
 (defn svg-to-image
