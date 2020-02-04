@@ -154,9 +154,9 @@
         (grid-template-columns "100px" "auto" "100px")))
     (css "h1" {"class" "header"}
       (text-align "center"))
-    (css "div" {"class" "content"}
+    (debug (css "div" {"class" "content"}
       (border-style "dashed")
-      (border-width "1px"))
+      (border-width "1px")))
     (css "div" {"class" "footer"} "")]))
 
 (defn- generate-item-text
