@@ -38,7 +38,7 @@
   [content]
   (if debugging-mode content ""))
 
-(defn- attr-aware
+(defn attr-aware
   "Adds attributes to a given opening tag."
   [tagname attrs]
   (if (empty? attrs)

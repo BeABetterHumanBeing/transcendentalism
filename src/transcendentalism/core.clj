@@ -2,7 +2,8 @@
 (use
   'transcendentalism.generate
   'transcendentalism.graph
-  'transcendentalism.schema)
+  'transcendentalism.schema
+  'transcendentalism.svg)
 
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
@@ -15,7 +16,7 @@
     (->Triple :monad-contents "/item/contains" ^{:order 1} [:monad-image])
     (->Triple :monad-contents "/item/contains" ^{:order 2} [:monad-intro-text])
     (types :monad-image "/item/image")
-    (->Triple :monad-image "/item/image/url" "todo_monad_image_url.svg")
+    (->Triple :monad-image "/item/image/url" (svg-to-image "monad" 800 800 'svg-monad))
     (types :monad-intro-text "/item/text")
     (->Triple :monad-intro-text "/item/text/text" (clojure.string/join " "
       ["\"The Monad is the symbol of unity."
