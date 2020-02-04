@@ -1,7 +1,6 @@
 (ns transcendentalism.schema
   (:require [clojure.string :as str]
-    [clojure.set :as set]
-    [java-time :as jt]))
+    [clojure.set :as set]))
 (use 'transcendentalism.graph)
 
 ; The schema determines what predicates are allowed in the graph, as well as all
@@ -308,9 +307,7 @@
                   (and (= range-type :string)
                        (string? (:obj triple)))
                   (and (= range-type :time)
-                       (or (= (:obj triple) "present")
-                           (= (:obj triple) "past")
-                           (jt/instant? (:obj triple))))
+                       (is-valid-time (:obj triple)))
                   (and (string? range-type)
                        (has-type? graph
                         (let [obj (:obj triple)]
@@ -357,6 +354,20 @@
     {:sub-to-ordinals {}, :error-statuses #{}}
     (filter #(= (:pred %) "/item/contains") (all-triples graph)))))
 
+(defn- events-obey-causality?
+  "Validates that events' timestamps are strickly before their leads_to"
+  [schema graph]
+  (reduce
+    (fn [result triple]
+      (let [sub-time (get-time graph (:sub triple)),
+            obj-time (get-time graph (:obj triple))]
+        (conj result
+          (if (before? sub-time obj-time)
+            nil
+            (str :sub " leads_to " :obj ", but doesn't occur before it")))))
+    #{}
+    (filter #(= (:pred %) "/event/leads_to") (all-triples graph))))
+
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]
@@ -367,7 +378,7 @@
       #{}
       [preds-all-valid? required-preds-exist? unique-preds-unique?
        required-supertypes-exist? domain-type-exists? range-type-exists?
-       ordered-sets-have-order?]),
+       ordered-sets-have-order? events-obey-causality?]),
      ; nil ends up in the set, and ought to be weeded out.
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))
