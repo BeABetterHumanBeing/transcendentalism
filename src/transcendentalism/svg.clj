@@ -20,11 +20,16 @@
     [(+ (/ width 2) (* r (Math/cos (* t factor))))
      (+ (/ height 2) (* r (Math/sin (* t factor))))]))
 
+(defn- max-r
+  "Determines the maximum r-coord of a node for a SVG of given dimension"
+  [dim]
+  (* dim 0.45))
+
 (defn- t-to-r
   "Converts a timestamp into a radius"
-  [k max-r t]
+  [dim k t]
   (let [seconds-before-present (jt/as (jt/duration (jt/instant) t) :seconds)]
-    (* max-r (Math/pow k seconds-before-present))))
+    (* (max-r dim) (Math/pow k seconds-before-present))))
 
 (defn- svg
   "Returns the XML for an SVG"
@@ -49,6 +54,28 @@
 (defn- circle
   [attrs & contents]
   (str/join "\n" (concat [(attr-aware "circle" attrs)] contents ["</circle>"])))
+
+(defn- circle-r
+  "Determines an aesthetically-pleasing radius for a circle"
+  [dim r]
+  (let [circle-max (/ dim 40)]
+    (if (= r 0)
+      circle-max
+      (* circle-max (/ r (max-r dim))))))
+
+(defn- aesthetic-circle
+  "Updates a set of attrs to include an aesthetic standard for circles"
+  [dim attrs r tau & contents]
+  (let [coords (polar-to-cartesian dim dim r tau),
+        radius (circle-r dim r)]
+    (circle
+      (merge attrs {
+        "cx" (first coords),
+        "cy" (second coords),
+        "r" radius,
+        "stroke" "black",
+        "stroke-width" (/ radius 4),
+        }) contents)))
 
 (defn- monad-graph
   "Returns the graph form of the monad"
@@ -91,49 +118,29 @@
   [width height]
   ; The monad will only generate a square size.
   {:pre [(= width height)]}
-  (let [graph (monad-graph)]
-    (svg width height
+  (let [graph (monad-graph),
+        dim width]
+    (svg dim dim
       (g {}
         ; The monad circle
-        (circle {
-          "cx" (/ width 2),
-          "cy" (/ height 2),
-          "r" 20,
+        (aesthetic-circle dim {
           "fill" "white",
-          "stroke" "black",
-          "stroke-width" 5,
-        })
+        } 0 0)
         ; The seven subject circles
         (str/join "\n"
           (map (fn [color-number]
-            (let [coords (polar-to-cartesian width height
-                           (* width 0.45) (/ (second color-number) 7))]
-              (circle {
-                "cx" (first coords),
-                "cy" (second coords),
-                "r" 20,
-                "fill" (first color-number),
-                "stroke" "black",
-                "stroke-width" 5,
-              })))
+            (aesthetic-circle dim {
+              "fill" (first color-number),
+            } (max-r dim) (/ (second color-number) 7)))
             (seq (zipmap
               ["#f6bb05" "#f81308" "#3c35ff" "#08caf8" "#c853ff" "#29db01" "#f58705"]
               (range 7)))))
         ; A bunch of evenly-spaced temporal circles
         (str/join "\n"
           (map (fn [timestamp]
-            (let [max-r (* width 0.45),
-                  r (t-to-r 1.2 max-r timestamp),
-                  coords (polar-to-cartesian width height r 0),
-                  radius (+ (* 12 (/ r max-r)) 1)]
-              (circle {
-                "cx" (first coords),
-                "cy" (second coords),
-                "r" radius,
-                "fill" "white",
-                "stroke" "black",
-                "stroke-width" (/ radius 3),
-              })))
+            (aesthetic-circle dim {
+              "fill" "white",
+            } (t-to-r dim 1.2 timestamp) 0))
           (take 10 (jt/iterate jt/minus (jt/minus (jt/instant) (jt/seconds 1)) (jt/seconds 1)))))
         ))))
 
