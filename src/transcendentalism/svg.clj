@@ -29,7 +29,6 @@
   "Converts a timestamp into a radius"
   [dim k t]
   (let [days-before-present (days-ago t)]
-    (println days-before-present)
     (* (max-r dim) (Math/pow k days-before-present))))
 
 (defn- svg

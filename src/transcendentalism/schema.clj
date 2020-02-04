@@ -352,7 +352,7 @@
                     (assoc (:sub-to-ordinals result)
                       sub new-ordinals)))))))))
     {:sub-to-ordinals {}, :error-statuses #{}}
-    (filter #(= (:pred %) "/item/contains") (all-triples graph)))))
+    (all-triples graph "/item/contains"))))
 
 (defn- events-obey-causality?
   "Validates that events' timestamps are strickly before their leads_to"
@@ -366,7 +366,7 @@
             nil
             (str :sub " leads_to " :obj ", but doesn't occur before it")))))
     #{}
-    (filter #(= (:pred %) "/event/leads_to") (all-triples graph))))
+    (all-triples graph "/event/leads_to")))
 
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."

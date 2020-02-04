@@ -72,9 +72,10 @@
     (reify Graph
       (all-triples [graph]
         (flatten (map second (seq graph-data))))
-      ; TODO(gierl): Make this function sub-or-pred matching.
-      (all-triples [graph sub]
-        (sub graph-data))
+      (all-triples [graph sub-or-pred]
+        (if (string? sub-or-pred)
+          (filter #(= (:pred %) sub-or-pred) (all-triples graph))
+          (sub-or-pred graph-data)))
       (all-triples [graph sub pred]
         (filter #(= (:pred %) pred) (all-triples graph sub)))
       (all-nodes [graph]
