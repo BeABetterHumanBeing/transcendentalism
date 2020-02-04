@@ -29,8 +29,6 @@
 
 (def graph (construct-graph (concat monad)))
 
-(def schema (create-schema))
-
 (defn -main
   "I don't do a whole lot."
   [& args]

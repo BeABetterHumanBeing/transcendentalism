@@ -1,6 +1,7 @@
 (ns transcendentalism.schema
   (:require [clojure.string :as str]
-    [clojure.set :as set]))
+    [clojure.set :as set]
+    [java-time :as jt]))
 (use 'transcendentalism.graph)
 
 ; The schema determines what predicates are allowed in the graph, as well as all
@@ -9,6 +10,9 @@
 ; 'specializations' under that type. It acts as a 'class' of knowledge for that
 ; type, which the main body of schema-data inter-operates with.
 (def schema-data {
+  "/type/event" {
+    :description "An event",
+  },
   "/type/essay_segment" {
     :description "Nodes that are externally link-able",
   },
@@ -26,6 +30,18 @@
   "/type/item/ordered_set" {
     :description "An ordered collection of items",
     :super-type "/type/item",
+  },
+  "/event/leads_to" {
+    :description "Relation from one event to its subsequent impacts",
+    :domain-type "/type/event",
+    :range-type "/type/event",
+  },
+  "/event/time" {
+    :description "When an event happened",
+    :domain-type "/type/event",
+    :range-type :time,
+    :required true,
+    :unique true,
   },
   "/essay/title" {
     :description "The text that appears centered at the top of an essay segment",
@@ -291,6 +307,10 @@
           (if (or (nil? range-type)
                   (and (= range-type :string)
                        (string? (:obj triple)))
+                  (and (= range-type :time)
+                       (or (= (:obj triple) "present")
+                           (= (:obj triple) "past")
+                           (jt/instant? (:obj triple))))
                   (and (string? range-type)
                        (has-type? graph
                         (let [obj (:obj triple)]
@@ -352,3 +372,5 @@
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))
     (empty? errors)))
+
+(def schema (create-schema))
