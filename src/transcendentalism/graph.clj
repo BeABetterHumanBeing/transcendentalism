@@ -15,7 +15,8 @@
 ; uses java-time instants.
 (defprotocol Time
   (at [t] "Returns the given time")
-  (before? [t other] "Returns whether this time strictly precedes another time"))
+  (before? [t other] "Returns whether this time strictly precedes another time")
+  (days-ago [t] "Returns the number of days ago that this time occurred"))
 
 (defn to-time
   "Constructs a Time from a value"
@@ -30,7 +31,13 @@
             true
             (if (or (= t-obj "present") (= other-obj "past"))
               false
-              (< t-obj other-obj))))))))
+              (< t-obj other-obj))))))
+    (days-ago [t]
+      (if (= t-obj "past")
+        -100000
+        (if (= t-obj "present")
+          0
+          (jt/as (jt/duration (jt/instant) t-obj) :days))))))
 
 (defn is-valid-time
   "Returns whether the given value is a valid time"

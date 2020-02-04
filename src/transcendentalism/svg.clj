@@ -28,7 +28,8 @@
 (defn- t-to-r
   "Converts a timestamp into a radius"
   [dim k t]
-  (let [days-before-present (jt/as (jt/duration (jt/instant) t) :days)]
+  (let [days-before-present (days-ago t)]
+    (println days-before-present)
     (* (max-r dim) (Math/pow k days-before-present))))
 
 (defn- svg
@@ -65,8 +66,8 @@
 
 (defn- aesthetic-circle
   "Updates a set of attrs to include an aesthetic standard for circles"
-  [dim k attrs timestamp tau & contents]
-  (let [r (t-to-r dim k timestamp),
+  [dim k attrs t tau & contents]
+  (let [r (t-to-r dim k t),
         coords (polar-to-cartesian dim dim r tau),
         radius (circle-r dim r)]
     (circle
@@ -127,13 +128,13 @@
         ; The monad circle
         (aesthetic-circle dim k {
           "fill" "white",
-        } (jt/minus (jt/instant) (jt/days 10000)) 0)
+        } (to-time "past") 0)
         ; The seven subject circles
         (str/join "\n"
           (map (fn [color-number]
             (aesthetic-circle dim k {
               "fill" (first color-number),
-            } (jt/instant) (/ (second color-number) 7)))
+            } (to-time "present") (/ (second color-number) 7)))
             (seq (zipmap
               ["#f6bb05" "#f81308" "#3c35ff" "#08caf8" "#c853ff" "#29db01" "#f58705"]
               (range 7)))))
@@ -142,7 +143,7 @@
           (map (fn [timestamp]
             (aesthetic-circle dim k {
               "fill" "white",
-            } timestamp 0))
+            } (to-time timestamp) 0))
           (take 10 (jt/iterate jt/minus (jt/minus (jt/instant) (jt/days 1)) (jt/days 1)))))
         ))))
 
