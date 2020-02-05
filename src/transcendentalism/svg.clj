@@ -31,6 +31,25 @@
   (let [days-before-present (days-ago t)]
     (* (max-r dim) (Math/pow k days-before-present))))
 
+(defprotocol Monad
+  (r [monad sub] "Returns the r-value of a given subject")
+  (tau [monad sub] "Returns the tau-value of a given subject")
+  (color [monad sub] "Returns the color-value of a given subject"))
+
+(defn- monadic-canonicalization
+  [graph dim k]
+  (reify Monad
+    (r [monad sub]
+      (t-to-r dim k (get-time graph sub)))
+    (tau [monad sub]
+      ; TODO(gierl) A subject's tau is the value [0, 1) which:
+      ;   1) Minimizes the length of descendent edges, and
+      ;   2) Doesn't cause it to overlap with other subjects.
+      0)
+    (color [monad sub]
+      ; TODO(gierl) A subject's color is the average of its descedents.
+      "white")))
+
 (defn- svg
   "Returns the XML for an SVG"
   [width height & contents]
@@ -119,9 +138,9 @@
   [width height]
   ; The monad will only generate a square size.
   {:pre [(= width height)]}
-  (let [graph (monad-graph),
-        dim width,
-        k 1.2]
+  (let [dim width,
+        k 1.2,
+        monad (monadic-canonicalization (monad-graph) dim k)]
     (svg dim dim
       (g {}
         ; The monad circle
