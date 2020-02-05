@@ -81,7 +81,7 @@
       (all-nodes [graph]
         (keys graph-data))
       (all-nodes [graph type]
-        (filter #(has-type? graph % "/type/essay_segment") (all-nodes graph)))
+        (filter #(has-type? graph % type) (all-nodes graph)))
       (has-type? [graph sub type]
         (if (contains? graph-data sub)
           (not (nil? (some #(= (:pred %) type) (sub graph-data))))

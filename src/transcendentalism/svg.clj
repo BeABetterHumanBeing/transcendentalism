@@ -38,17 +38,49 @@
 
 (defn- monadic-canonicalization
   [graph dim k]
-  (reify Monad
-    (r [monad sub]
-      (t-to-r dim k (get-time graph sub)))
-    (tau [monad sub]
-      ; TODO(gierl) A subject's tau is the value [0, 1) which:
-      ;   1) Minimizes the length of descendent edges, and
-      ;   2) Doesn't cause it to overlap with other subjects.
-      0)
-    (color [monad sub]
-      ; TODO(gierl) A subject's color is the average of its descedents.
-      "white")))
+  (let [events (all-nodes graph "/type/event"),
+        r-values (reduce
+          (fn [result sub]
+            (assoc result sub (t-to-r dim k (get-time graph sub))))
+          {} events),
+        ; Most calculations work from the outside in.
+        ordered-events (sort #(> (r-values %1) (r-values %2)) events),
+        ordered-chunks (reduce
+          (fn [result sub]
+            (if (or (empty? result)
+                    (not (= (r-values (first (last result))) (r-values sub))))
+              (conj result [sub])
+              (assoc result (dec (count result)) (conj (last result) sub))))
+          [] ordered-events),
+        primary-colors (seq ["#f6bb05" "#f81308" "#3c35ff" "#08caf8" "#c853ff"
+                             "#29db01" "#f58705"]),
+        color-values (reduce
+          (fn [result subs]
+            (let [leads-to-triples (reduce
+                  (fn [result sub]
+                    (assoc result sub
+                      (map #(:obj %) (all-triples graph sub "/event/leads_to"))))
+                  {} subs)]
+              (if (empty? (first leads-to-triples))
+                ; The first chunk are all 'present', and have no leads_to.
+                (reduce (fn
+                  [result pair] (assoc result (first pair) (second pair)))
+                  result (map vector subs primary-colors))
+                ; TODO(gierl): Change interior nodes to non-white.
+                (reduce (fn
+                  [result sub] (assoc result sub "white"))
+                  result subs))))
+          {} ordered-chunks)]
+    (reify Monad
+      (r [monad sub] (r-values sub))
+      (tau [monad sub]
+        ; TODO(gierl) A subject's tau is the value [0, 1) which:
+        ;   1) Minimizes the length of descendent edges, and
+        ;   2) Doesn't cause it to overlap with other subjects.
+        0)
+      (color [monad sub]
+        ; TODO(gierl) A subject's color is the average of its descedents.
+        "white"))))
 
 (defn- svg
   "Returns the XML for an SVG"
