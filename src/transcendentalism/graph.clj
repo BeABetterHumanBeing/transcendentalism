@@ -31,7 +31,7 @@
             true
             (if (or (= t-obj "present") (= other-obj "past"))
               false
-              (< t-obj other-obj))))))
+              (jt/before? t-obj other-obj))))))
     (days-ago [t]
       (if (= t-obj "past")
         -100000

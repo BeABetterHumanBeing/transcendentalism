@@ -59,7 +59,7 @@
           (fn [result subs]
             (reduce (fn
               [result pair] (assoc result (first pair) (second pair)))
-            result (map vector (map #(/ % (count subs)) (range (count subs))) subs)))
+            result (map vector subs (map #(/ % (count subs)) (range (count subs))))))
           {} ordered-chunks)
         primary-colors (seq ["#f6bb05" "#f81308" "#3c35ff" "#08caf8" "#c853ff"
                              "#29db01" "#f58705"]),
@@ -70,7 +70,7 @@
                     (assoc result sub
                       (map #(:obj %) (all-triples graph sub "/event/leads_to"))))
                   {} subs)]
-              (if (empty? (first leads-to-triples))
+              (if (empty? (second (first leads-to-triples)))
                 ; The first chunk are all 'present', and have no leads_to.
                 (reduce (fn
                   [result pair] (assoc result (first pair) (second pair)))
@@ -119,9 +119,8 @@
 
 (defn- aesthetic-circle
   "Updates a set of attrs to include an aesthetic standard for circles"
-  [dim k attrs t tau & contents]
-  (let [r (t-to-r dim k t),
-        coords (polar-to-cartesian dim dim r tau),
+  [dim k attrs r tau & contents]
+  (let [coords (polar-to-cartesian dim dim r tau),
         radius (circle-r dim r)]
     (circle
       (merge attrs {
@@ -139,7 +138,7 @@
     (construct-graph (concat (flatten [
       (types :monad "/event")
       (->Triple :monad "/event/time" "past")
-      (->Triple :monad "/event/leads_to" :intermediate-1)
+      (->Triple :monad "/event/leads_to" :intermediate-10)
       (->Triple :monad "/event/leads_to" :subject-2)
       (->Triple :monad "/event/leads_to" :subject-3)
       (->Triple :monad "/event/leads_to" :subject-4)
@@ -147,8 +146,35 @@
       (->Triple :monad "/event/leads_to" :subject-6)
       (->Triple :monad "/event/leads_to" :subject-7)
       (types :intermediate-1 "/event")
-      (->Triple :intermediate-1 "/event/time" (jt/instant (jt/offset-date-time 2020 02 03 1)))
+      (->Triple :intermediate-1 "/event/time" (jt/instant (jt/offset-date-time 2020 02 04 1)))
       (->Triple :intermediate-1 "/event/leads_to" :subject-1)
+      (types :intermediate-2 "/event")
+      (->Triple :intermediate-2 "/event/time" (jt/instant (jt/offset-date-time 2020 02 03 1)))
+      (->Triple :intermediate-2 "/event/leads_to" :intermediate-1)
+      (types :intermediate-3 "/event")
+      (->Triple :intermediate-3 "/event/time" (jt/instant (jt/offset-date-time 2020 02 02 1)))
+      (->Triple :intermediate-3 "/event/leads_to" :intermediate-2)
+      (types :intermediate-4 "/event")
+      (->Triple :intermediate-4 "/event/time" (jt/instant (jt/offset-date-time 2020 02 01 1)))
+      (->Triple :intermediate-4 "/event/leads_to" :intermediate-3)
+      (types :intermediate-5 "/event")
+      (->Triple :intermediate-5 "/event/time" (jt/instant (jt/offset-date-time 2020 01 31 1)))
+      (->Triple :intermediate-5 "/event/leads_to" :intermediate-4)
+      (types :intermediate-6 "/event")
+      (->Triple :intermediate-6 "/event/time" (jt/instant (jt/offset-date-time 2020 01 30 1)))
+      (->Triple :intermediate-6 "/event/leads_to" :intermediate-5)
+      (types :intermediate-7 "/event")
+      (->Triple :intermediate-7 "/event/time" (jt/instant (jt/offset-date-time 2020 01 29 1)))
+      (->Triple :intermediate-7 "/event/leads_to" :intermediate-6)
+      (types :intermediate-8 "/event")
+      (->Triple :intermediate-8 "/event/time" (jt/instant (jt/offset-date-time 2020 01 28 1)))
+      (->Triple :intermediate-8 "/event/leads_to" :intermediate-7)
+      (types :intermediate-9 "/event")
+      (->Triple :intermediate-9 "/event/time" (jt/instant (jt/offset-date-time 2020 01 27 1)))
+      (->Triple :intermediate-9 "/event/leads_to" :intermediate-8)
+      (types :intermediate-10 "/event")
+      (->Triple :intermediate-10 "/event/time" (jt/instant (jt/offset-date-time 2020 01 26 1)))
+      (->Triple :intermediate-10 "/event/leads_to" :intermediate-9)
       (types :subject-1 "/event")
       (->Triple :subject-1 "/event/time" "present")
       (types :subject-2 "/event")
@@ -175,29 +201,17 @@
   {:pre [(= width height)]}
   (let [dim width,
         k 1.2,
-        monad (monadic-canonicalization (monad-graph) dim k)]
+        graph (monad-graph),
+        monad (monadic-canonicalization graph dim k)]
     (svg dim dim
       (g {}
-        ; The monad circle
-        (aesthetic-circle dim k {
-          "fill" "white",
-        } (to-time "past") 0)
-        ; The seven subject circles
         (str/join "\n"
-          (map (fn [color-number]
-            (aesthetic-circle dim k {
-              "fill" (first color-number),
-            } (to-time "present") (/ (second color-number) 7)))
-            (seq (zipmap
-              ["#f6bb05" "#f81308" "#3c35ff" "#08caf8" "#c853ff" "#29db01" "#f58705"]
-              (range 7)))))
-        ; A bunch of evenly-spaced temporal circles
-        (str/join "\n"
-          (map (fn [timestamp]
-            (aesthetic-circle dim k {
-              "fill" "white",
-            } (to-time timestamp) 0))
-          (take 10 (jt/iterate jt/minus (jt/minus (jt/instant) (jt/days 1)) (jt/days 1)))))
+          (map
+            (fn [sub]
+              (aesthetic-circle dim k {
+                "fill" (color monad sub),
+              } (r monad sub) (tau monad sub)))
+            (all-nodes graph)))
         ))))
 
 (defn svg-to-image
