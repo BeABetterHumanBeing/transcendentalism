@@ -133,6 +133,10 @@
   [attrs & contents]
   (str/join "\n" (concat [(attr-aware "g" attrs)] contents ["</g>"])))
 
+(defn- line
+  [attrs & contents]
+  (str/join "\n" (concat [(attr-aware "line" attrs)] contents ["</line>"])))
+
 (defn- circle
   [attrs & contents]
   (str/join "\n" (concat [(attr-aware "circle" attrs)] contents ["</circle>"])))
@@ -145,9 +149,24 @@
       circle-max
       (* circle-max (/ r (max-r dim))))))
 
+(defn- aesthetic-line
+  "Makes a line with a particular aesthetic standard"
+  [dim r1 tau1 r2 tau2 & contents]
+  (let [coords-1 (polar-to-cartesian dim dim r1 tau1),
+        coords-2 (polar-to-cartesian dim dim r2 tau2),
+        radius (/ (+ (circle-r dim r1) (circle-r dim r2)) 2)]
+    (line {
+      "x1" (first coords-1),
+      "y1" (second coords-1),
+      "x2" (first coords-2),
+      "y2" (second coords-2),
+      "stroke" "black",
+      "stroke-width" (/ radius 4),
+      } contents)))
+
 (defn- aesthetic-circle
-  "Updates a set of attrs to include an aesthetic standard for circles"
-  [dim k attrs r tau & contents]
+  "Makes a circle with a particular aesthetic standard"
+  [dim attrs r tau & contents]
   (let [coords (polar-to-cartesian dim dim r tau),
         radius (circle-r dim r)]
     (circle
@@ -235,8 +254,16 @@
       (g {}
         (str/join "\n"
           (map
+            (fn [triple]
+              (let [sub (:sub triple),
+                    obj (:obj triple)]
+                (aesthetic-line dim
+                  (r monad sub) (tau monad sub) (r monad obj) (tau monad obj))))
+            (all-triples graph "/event/leads_to")))
+        (str/join "\n"
+          (map
             (fn [sub]
-              (aesthetic-circle dim k {
+              (aesthetic-circle dim {
                 "fill" (to-css-color (color monad sub)),
               } (r monad sub) (tau monad sub)))
             (all-nodes graph)))
