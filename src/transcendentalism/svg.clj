@@ -31,6 +31,31 @@
   (let [days-before-present (days-ago t)]
     (* (max-r dim) (Math/pow k days-before-present))))
 
+(defrecord Color [red green blue])
+
+(defn- to-css-color
+  "Converts an RGB color to its hex equivalent"
+  [color]
+  (str "rgb(" (:red color) "," (:green color) "," (:blue color) ")"))
+
+(defn- interpolate
+  "Interpolates between two numbers. Returns a when ratio=0, b when =1."
+  [a b ratio]
+  (+ (* b ratio) (* a (- 1 ratio))))
+
+(defn- avg-and-whiten
+  "Averages together a collection of colors, and slightly whitens the result."
+  [colors]
+  (let [num (count colors),
+        avg-r (/ (apply + (map :red colors)) num),
+        avg-g (/ (apply + (map :green colors)) num),
+        avg-b (/ (apply + (map :blue colors)) num),
+        ratio 0.1,
+        r (int (interpolate avg-r 255 ratio)),
+        g (int (interpolate avg-g 255 ratio)),
+        b (int (interpolate avg-b 255 ratio))]
+    (->Color r g b)))
+
 (defprotocol Monad
   (r [monad sub] "Returns the r-value of a given subject")
   (tau [monad sub] "Returns the tau-value of a given subject")
@@ -61,8 +86,10 @@
               [result pair] (assoc result (first pair) (second pair)))
             result (map vector subs (map #(/ % (count subs)) (range (count subs))))))
           {} ordered-chunks)
-        primary-colors (seq ["#f6bb05" "#f81308" "#3c35ff" "#08caf8" "#c853ff"
-                             "#29db01" "#f58705"]),
+        primary-colors [
+          (->Color 248 18 7), (->Color 245 186 5), (->Color 200 83 254),
+          (->Color 7 202 248), (->Color 60 53 254), (->Color 41 219 0),
+          (->Color 244 134 4)],
         color-values (reduce
           (fn [result subs]
             (let [leads-to-triples (reduce
@@ -75,9 +102,10 @@
                 (reduce (fn
                   [result pair] (assoc result (first pair) (second pair)))
                   result (map vector subs primary-colors))
-                ; TODO(gierl): Change interior nodes to non-white.
                 (reduce (fn
-                  [result sub] (assoc result sub "white"))
+                  [result sub]
+                  (assoc result sub
+                    (avg-and-whiten (map #(result %) (leads-to-triples sub)))))
                   result subs))))
           {} ordered-chunks)]
     (reify Monad
@@ -209,7 +237,7 @@
           (map
             (fn [sub]
               (aesthetic-circle dim k {
-                "fill" (color monad sub),
+                "fill" (to-css-color (color monad sub)),
               } (r monad sub) (tau monad sub)))
             (all-nodes graph)))
         ))))
