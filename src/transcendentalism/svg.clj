@@ -52,6 +52,15 @@
               (conj result [sub])
               (assoc result (dec (count result)) (conj (last result) sub))))
           [] ordered-events),
+        ; TODO(gierl) A subject's tau is the value [0, 1) which:
+        ;   1) Minimizes the length of descendent edges, and
+        ;   2) Doesn't cause it to overlap with other subjects.
+        tau-values (reduce
+          (fn [result subs]
+            (reduce (fn
+              [result pair] (assoc result (first pair) (second pair)))
+            result (map vector (map #(/ % (count subs)) (range (count subs))) subs)))
+          {} ordered-chunks)
         primary-colors (seq ["#f6bb05" "#f81308" "#3c35ff" "#08caf8" "#c853ff"
                              "#29db01" "#f58705"]),
         color-values (reduce
@@ -73,14 +82,8 @@
           {} ordered-chunks)]
     (reify Monad
       (r [monad sub] (r-values sub))
-      (tau [monad sub]
-        ; TODO(gierl) A subject's tau is the value [0, 1) which:
-        ;   1) Minimizes the length of descendent edges, and
-        ;   2) Doesn't cause it to overlap with other subjects.
-        0)
-      (color [monad sub]
-        ; TODO(gierl) A subject's color is the average of its descedents.
-        "white"))))
+      (tau [monad sub] (tau-values sub))
+      (color [monad sub] (color-values sub)))))
 
 (defn- svg
   "Returns the XML for an SVG"
