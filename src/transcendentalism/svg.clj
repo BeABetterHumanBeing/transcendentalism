@@ -147,9 +147,9 @@
             )
           {} ordered-chunks)
         primary-colors [
-          (->Color 248 18 7), (->Color 245 186 5), (->Color 200 83 254),
-          (->Color 7 202 248), (->Color 60 53 254), (->Color 41 219 0),
-          (->Color 244 134 4)],
+          (->Color 248 18 7), (->Color 244 134 4), (->Color 245 186 5),
+          (->Color 41 219 0), (->Color 7 202 248), (->Color 60 53 254),
+          (->Color 200 83 254)],
         color-values (reduce
           (fn [result subs]
             (let [leads-to-objs (get-objs graph subs "/event/leads_to")]
@@ -280,42 +280,32 @@
      (->Triple rootname "/event/time" (get-days-ago 10))
      (->Triple rootname "/event/leads_to" (inter 9))]))
 
+; Courtesy Michal Marczyk
+(defn rotate [n s]
+  (lazy-cat (drop n s)
+            (take n s)))
+
+(defn- seq-pairs
+  "Returns adjacent pairs from a sequence"
+  [sequence]
+  (map vector sequence (rotate 1 sequence)))
+
 (defn- monad-graph
   "Returns the graph form of the monad"
   []
-  (let [graph
+  (let [vertex-sequence [3 6 7 2 4 5 1],
+        vertex-pairs (seq-pairs vertex-sequence),
+        graph
     (construct-graph (concat (flatten [
       (types :monad "/event")
       (->Triple :monad "/event/time" "past")
-      (->Triple :monad "/event/leads_to" (subname "root" 1 3))
-      (->Triple :monad "/event/leads_to" (subname "root" 2 4))
-      (->Triple :monad "/event/leads_to" (subname "root" 3 6))
-      (->Triple :monad "/event/leads_to" (subname "root" 4 5))
-      (->Triple :monad "/event/leads_to" (subname "root" 5 1))
-      (->Triple :monad "/event/leads_to" (subname "root" 6 7))
-      (->Triple :monad "/event/leads_to" (subname "root" 7 2))
-      (interior-triples 1 3)
-      (interior-triples 2 4)
-      (interior-triples 3 6)
-      (interior-triples 4 5)
-      (interior-triples 5 1)
-      (interior-triples 6 7)
-      (interior-triples 7 2)
-      (types :subject-1 "/event")
-      (->Triple :subject-1 "/event/time" "present")
-      (types :subject-2 "/event")
-      (->Triple :subject-2 "/event/time" "present")
-      (types :subject-3 "/event")
-      (->Triple :subject-3 "/event/time" "present")
-      (types :subject-4 "/event")
-      (->Triple :subject-4 "/event/time" "present")
-      (types :subject-5 "/event")
-      (->Triple :subject-5 "/event/time" "present")
-      (types :subject-6 "/event")
-      (->Triple :subject-6 "/event/time" "present")
-      (types :subject-7 "/event")
-      (->Triple :subject-7 "/event/time" "present")
-      ; TODO - Add intermediate nodes.
+      (map #(->Triple :monad "/event/leads_to"
+             (subname "root" (first %) (second %)))
+        vertex-pairs)
+      (map #(interior-triples (first %) (second %)) vertex-pairs)
+      (map #(types (subname "subject" %) "/event") vertex-sequence)
+      (map #(->Triple (subname "subject" %) "/event/time" "present")
+        vertex-sequence)
      ])))]
     (assert (validate-graph schema graph))
     graph))
@@ -340,8 +330,10 @@
             (fn [triple]
               (let [sub (:sub triple),
                     obj (:obj triple)]
-                (aesthetic-line dim
-                  (r monad sub) (tau monad sub) (r monad obj) (tau monad obj))))
+                (if (= sub :monad)
+                  ""
+                  (aesthetic-line dim
+                    (r monad sub) (tau monad sub) (r monad obj) (tau monad obj)))))
             (all-triples graph "/event/leads_to")))
         (str/join "\n"
           (map
