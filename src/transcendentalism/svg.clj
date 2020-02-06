@@ -245,40 +245,47 @@
 
 (defn- interior-triples
   "Returns a vector of triples for an interior slice of the graph between two subjects"
-  [sub-1 sub-2]
-  (let [rootname (subname "root" sub-1 sub-2),
-        inter (fn [n] (subname "inner" n sub-1 sub-2))]
-    [(types (inter 1) "/event")
-     (->Triple (inter 1) "/event/time" (get-days-ago 1))
-     (->Triple (inter 1) "/event/leads_to" (subname "subject" sub-1))
-     (->Triple (inter 1) "/event/leads_to" (subname "subject" sub-2))
-     (types (inter 2) "/event")
-     (->Triple (inter 2) "/event/time" (get-days-ago 2))
-     (->Triple (inter 2) "/event/leads_to" (inter 1))
-     (types (inter 3) "/event")
-     (->Triple (inter 3) "/event/time" (get-days-ago 3))
-     (->Triple (inter 3) "/event/leads_to" (inter 2))
-     (types (inter 4) "/event")
-     (->Triple (inter 4) "/event/time" (get-days-ago 4))
-     (->Triple (inter 4) "/event/leads_to" (inter 3))
-     (types (inter 5) "/event")
-     (->Triple (inter 5) "/event/time" (get-days-ago 5))
-     (->Triple (inter 5) "/event/leads_to" (inter 4))
-     (types (inter 6) "/event")
-     (->Triple (inter 6) "/event/time" (get-days-ago 6))
-     (->Triple (inter 6) "/event/leads_to" (inter 5))
-     (types (inter 7) "/event")
-     (->Triple (inter 7) "/event/time" (get-days-ago 7))
-     (->Triple (inter 7) "/event/leads_to" (inter 6))
-     (types (inter 8) "/event")
-     (->Triple (inter 8) "/event/time" (get-days-ago 8))
-     (->Triple (inter 8) "/event/leads_to" (inter 7))
-     (types (inter 9) "/event")
-     (->Triple (inter 9) "/event/time" (get-days-ago 9))
-     (->Triple (inter 9) "/event/leads_to" (inter 8))
+  [vertex-map sub]
+  (let [succ (fn [n]
+               (loop [cnt n
+                      value sub]
+                 (if (zero? cnt)
+                   value
+                   (recur (dec cnt) (vertex-map value))))),
+        rootname (subname "root" sub (succ 1)),
+        inner (fn [lvl n] (subname "inner" lvl (succ (dec n)) (succ n)))]
+    [(types (inner 1 1) "/event")
+     (->Triple (inner 1 1) "/event/time" (get-days-ago 1))
+     (->Triple (inner 1 1) "/event/leads_to" (subname "subject" sub))
+     (->Triple (inner 1 1) "/event/leads_to" (subname "subject" (succ 1)))
+     (types (inner 2 1) "/event")
+     (->Triple (inner 2 1) "/event/time" (get-days-ago 2))
+     (->Triple (inner 2 1) "/event/leads_to" (inner 1 1))
+     (->Triple (inner 2 1) "/event/leads_to" (inner 1 2))
+     (types (inner 3 1) "/event")
+     (->Triple (inner 3 1) "/event/time" (get-days-ago 3))
+     (->Triple (inner 3 1) "/event/leads_to" (inner 2 1))
+     (types (inner 4 1) "/event")
+     (->Triple (inner 4 1) "/event/time" (get-days-ago 4))
+     (->Triple (inner 4 1) "/event/leads_to" (inner 3 1))
+     (types (inner 5 1) "/event")
+     (->Triple (inner 5 1) "/event/time" (get-days-ago 5))
+     (->Triple (inner 5 1) "/event/leads_to" (inner 4 1))
+     (types (inner 6 1) "/event")
+     (->Triple (inner 6 1) "/event/time" (get-days-ago 6))
+     (->Triple (inner 6 1) "/event/leads_to" (inner 5 1))
+     (types (inner 7 1) "/event")
+     (->Triple (inner 7 1) "/event/time" (get-days-ago 7))
+     (->Triple (inner 7 1) "/event/leads_to" (inner 6 1))
+     (types (inner 8 1) "/event")
+     (->Triple (inner 8 1) "/event/time" (get-days-ago 8))
+     (->Triple (inner 8 1) "/event/leads_to" (inner 7 1))
+     (types (inner 9 1) "/event")
+     (->Triple (inner 9 1) "/event/time" (get-days-ago 9))
+     (->Triple (inner 9 1) "/event/leads_to" (inner 8 1))
      (types rootname "/event")
      (->Triple rootname "/event/time" (get-days-ago 10))
-     (->Triple rootname "/event/leads_to" (inter 9))]))
+     (->Triple rootname "/event/leads_to" (inner 9 1))]))
 
 ; Courtesy Michal Marczyk
 (defn rotate [n s]
@@ -288,21 +295,25 @@
 (defn- seq-pairs
   "Returns adjacent pairs from a sequence"
   [sequence]
-  (map vector sequence (rotate 1 sequence)))
+  (let [pairs (map vector sequence (rotate 1 sequence))]
+    (reduce
+      (fn [result pair]
+        (assoc result (first pair) (second pair)))
+      {} pairs)))
 
 (defn- monad-graph
   "Returns the graph form of the monad"
   []
   (let [vertex-sequence [3 6 7 2 4 5 1],
-        vertex-pairs (seq-pairs vertex-sequence),
+        vertex-map (seq-pairs vertex-sequence),
         graph
     (construct-graph (concat (flatten [
       (types :monad "/event")
       (->Triple :monad "/event/time" "past")
       (map #(->Triple :monad "/event/leads_to"
              (subname "root" (first %) (second %)))
-        vertex-pairs)
-      (map #(interior-triples (first %) (second %)) vertex-pairs)
+        vertex-map)
+      (map #(interior-triples vertex-map %) vertex-sequence)
       (map #(types (subname "subject" %) "/event") vertex-sequence)
       (map #(->Triple (subname "subject" %) "/event/time" "present")
         vertex-sequence)
