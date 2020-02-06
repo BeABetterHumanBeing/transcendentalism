@@ -4,6 +4,7 @@
 
 (use 'transcendentalism.css
      'transcendentalism.graph
+     'transcendentalism.js
      'transcendentalism.xml)
 
 (defn- gen-key
@@ -37,7 +38,7 @@
 
 (defn- head [contents] (xml-tag "head" {} contents))
 
-(defn- body [& contents] (xml-tag "body" {} (apply str contents)))
+(defn- body [attrs & contents] (xml-tag "body" attrs (apply str contents)))
 
 (defn- div [attrs & contents] (xml-tag "div" attrs (apply str contents)))
 
@@ -138,10 +139,19 @@
   "Returns the HTML corresponding to a /type/essay_segment"
   [graph encodings sub]
   (html
-    (head (xml-open "link" {
-      "rel" "stylesheet",
-      "href" "styles.css"}))
+    (head (str
+      (xml-open "link" {
+        "rel" "stylesheet",
+        "href" "styles.css"})
+      (if static-html-mode
+        ""
+        (xml-tag "script" {"src" "script.js"} ""))))
     (body
+      (if static-html-mode
+        {}
+        {
+          "onload" (call-js "segmentLoadedCallback" (sub encodings)),
+        })
       (debug
         ; Debugging information appears up top.
         (div {"class" "debug"}
@@ -174,4 +184,5 @@
         (do
           (spit filename (generate-essay-segment graph encodings sub))
           (println "Generated" filename))))
-    (spit "output/styles.css" (stylesheet))))
+    (spit "output/styles.css" (stylesheet))
+    (if static-html-mode nil (spit "output/script.js" (script)))))
