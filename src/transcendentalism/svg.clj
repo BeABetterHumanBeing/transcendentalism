@@ -3,11 +3,9 @@
             [java-time :as jt]
             [clojure.math.numeric-tower :as math]))
 
-; TODO(gierl): generate is only called for some of the XML-related convenience
-; functions. Move these into their own file.
-(use 'transcendentalism.generate
-     'transcendentalism.graph
-     'transcendentalism.schema)
+(use 'transcendentalism.graph
+     'transcendentalism.schema
+     'transcendentalism.xml)
 
 ; Whether to generate SVGs, or assume that they've already been created. Helps
 ; optimize the process when changing non-SVG code.
@@ -177,35 +175,24 @@
   (str/join "\n"
     ["<?xml version=\"1.0\" encoding=\"utf-8\"?>"
      "<!DOCTYPE svg>"
-     (attr-aware "svg" {
+     (xml-tag "svg" {
       "version" "1.1",
       "width" width,
       "height" height,
       "xmlns" "http://www.w3.org/2000/svg",
       "xmlns:xlink" "http://www.w3.org/1999/xlink",
-      })
-     (apply str contents)
-     "</svg>"]))
+      }
+      (apply str contents))]))
 
-(defn- g
-  [attrs & contents]
-  (str/join "\n" (concat [(attr-aware "g" attrs)] contents ["</g>"])))
+(defn- g [attrs & contents] (xml-tag "g" attrs (str/join "\n" contents)))
 
-(defn- animate
-  [attrs]
-  (str (attr-aware "animate" attrs) "</animate>"))
+(defn- animate [attrs] (xml-tag "animate" attrs ""))
 
-(defn- text
-  [attrs contents]
-  (str (attr-aware "text" attrs) contents "</text>"))
+(defn- text [attrs contents] (xml-tag "text" attrs contents))
 
-(defn- line
-  [attrs contents]
-  (str/join "\n" [(attr-aware "line" attrs) contents "</line>"]))
+(defn- line [attrs contents] (xml-tag "line" attrs contents))
 
-(defn- circle
-  [attrs contents]
-  (str/join "\n" [(attr-aware "circle" attrs) contents "</circle>"]))
+(defn- circle [attrs contents] (xml-tag "circle" attrs contents))
 
 (defn- circle-r
   "Determines an aesthetically-pleasing radius for a circle"

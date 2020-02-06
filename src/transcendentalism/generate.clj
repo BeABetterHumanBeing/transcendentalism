@@ -1,10 +1,9 @@
 (ns transcendentalism.generate
   (:require [clojure.java.io :as io]
     [clojure.string :as str]))
-(use 'transcendentalism.graph)
 
-; Whether to generate debugging HTML or not.
-(def debugging-mode true)
+(use 'transcendentalism.graph
+     'transcendentalism.xml)
 
 (defn- gen-key
   "Generates a random alphanumeric key of given length"
@@ -33,64 +32,30 @@
   (doseq [file (.listFiles (io/as-file dirname))]
     (io/delete-file file)))
 
-(defn debug
-  "Passes through content if in debugging-mode, otherwise nullifies it"
-  [content]
-  (if debugging-mode content ""))
+(defn- html [& contents] (xml-tag "html" {} (apply str contents)))
 
-(defn attr-aware
-  "Adds attributes to a given opening tag."
-  [tagname attrs]
-  (if (empty? attrs)
-    (str "<" tagname ">")
-    (let [formatted-attrs (map #(str (first %) "=\"" (second %) "\"") (seq attrs))]
-      (str "<" tagname " " (str/join " " formatted-attrs) ">"))))
+(defn- head [contents] (xml-tag "head" {} contents))
 
-(defn- html
-  [& contents]
-  (str "<html>" (apply str contents) "</html>"))
+(defn- body [& contents] (xml-tag "body" {} (apply str contents)))
 
-(defn- head
-  [contents]
-  (str "<head>" contents "</head>"))
+(defn- div [attrs & contents] (xml-tag "div" attrs (apply str contents)))
 
-(defn- link
-  [rel href]
-  (str "<link rel=\"" rel "\" href=\"" href "\">"))
+(defn- p [attrs contents] (xml-tag "p" attrs contents))
 
-(defn- body
-  [& contents]
-  (str "<body>" (apply str contents) "</body>"))
+(defn- a [attrs contents] (xml-tag "a" attrs contents))
 
-(defn- div
-  [attrs & contents]
-  (str (attr-aware "div" attrs) (apply str contents) "</div>"))
-
-(defn- p
-  [attrs contents]
-  (str (attr-aware "p" attrs) contents "</p>"))
-
-(defn- a
-  [attrs contents]
-  (str (attr-aware "a" attrs) contents "</a>"))
-
-(defn- ul
-  [contents]
-  (str "<ul>" contents "</ul>"))
+(defn- ul [contents] (xml-tag "ul" {} contents))
 
 (defn- li
   [contents]
   (apply str
-    (map (fn [content] (str "<li>" content "</li>"))
-      contents)))
+    (map #(xml-tag "li" {} %) contents)))
 
 (defn- hr [] (str "<hr>"))
 
-(defn- h1
-  [attrs contents]
-  (str (attr-aware "h1" attrs) contents "</h1>"))
+(defn- h1 [attrs contents] (xml-tag "h1" attrs contents))
 
-(defn- img [attrs] (attr-aware "img" attrs))
+(defn- img [attrs] (xml-open "img" attrs))
 
 (defn- css
   [tagname attrs & contents]
@@ -258,7 +223,9 @@
   "Returns the HTML corresponding to a /type/essay_segment"
   [graph encodings sub]
   (html
-    (head (link "stylesheet" "styles.css"))
+    (head (xml-open "link" {
+      "rel" "stylesheet",
+      "href" "styles.css"}))
     (body
       (debug
         ; Debugging information appears up top.
