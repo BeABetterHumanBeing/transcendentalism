@@ -39,6 +39,7 @@
     (->Triple :welcome "/essay/title" "Welcome")
     (types :welcome-contents "/item/ordered_set")
     ; TODO(gierl) apologize for shitty website, explain purpose of site
+    (->Triple :welcome "/essay/flow/next" :i-am-dan)
 
     ; I Am Dan
     (types :i-am-dan "/essay_segment")
@@ -46,6 +47,7 @@
     (->Triple :i-am-dan "/essay/title" "I Am Dan")
     (types :i-am-dan-contents "/item/ordered_set")
     ; TODO(gierl) brief history
+    (->Triple :i-am-dan "/essay/flow/next" :connections)
 
     ; Connections
     (types :connections "/essay_segment")
@@ -53,6 +55,7 @@
     (->Triple :connections "/essay/title" "Connections")
     (types :connections-contents "/item/ordered_set")
     ; TODO(gierl) contact information, respective responsibilities
+    (->Triple :connections "/essay/flow/next" :apologies)
 
     ; Apologies
     (types :apologies "/essay_segment")
@@ -60,6 +63,7 @@
     (->Triple :apologies "/essay/title" "Apologies")
     (types :apologies-contents "/item/ordered_set")
     ; TODO(gierl) apologize
+    (->Triple :apologies "/essay/flow/home" :monad)
   ]))
 
 (def graph (construct-graph (concat monad about)))

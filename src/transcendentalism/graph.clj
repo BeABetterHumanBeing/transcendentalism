@@ -74,6 +74,8 @@
   (all-nodes [graph] [graph type]
     "Returns a collection of all nodes in the graph [with a given type]")
   (has-type? [graph sub type] "Returns whether the given sub has the given type.")
+  (get-unique [graph sub pred]
+    "Returns the obj of the unique triple on sub with pred, or nil if none exists")
   (get-time [graph sub]
     "Returns the time associated with the given sub, or nil if it has none"))
 
@@ -98,11 +100,12 @@
         (if (contains? graph-data sub)
           (not (nil? (some #(= (:pred %) type) (sub graph-data))))
           false))
+      (get-unique [graph sub pred]
+        (let [triples (all-triples graph sub pred)]
+          (if (empty? triples) nil (:obj (first triples)))))
       (get-time [graph sub]
-        (let [triples (all-triples graph sub "/event/time")]
-          (if (empty? triples)
-            nil
-            (to-time (:obj (first triples)))))))))
+        (let [value (get-unique graph sub "/event/time")]
+          (if (nil? value) nil (to-time value)))))))
 
 ; TODO(gierl): Add chronological orders (i.e. vectors, with tail-append attached
 ; to timestamp).

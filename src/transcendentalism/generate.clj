@@ -70,6 +70,10 @@
   [attrs contents]
   (str (attr-aware "p" attrs) contents "</p>"))
 
+(defn- a
+  [attrs contents]
+  (str (attr-aware "a" attrs) contents "</a>"))
+
 (defn- ul
   [contents]
   (str "<ul>" contents "</ul>"))
@@ -224,7 +228,31 @@
         "/type/item/quote" (generate-item-quote triples),
         "/type/item/image" (generate-item-image triples),
         "/type/item/ordered_set" (generate-item-ordered-set triples),
-        (str "ERROR - Type " item-type " not supported")))))
+        (assert false
+          (str "ERROR - Type " (:pred (first item-type)) "not supported"))))))
+
+(defrecord Cxn [link name])
+
+(defn- build-cxns
+  "Determines the connections available from a given sub"
+  [graph encodings sub]
+  (map
+    (fn [triple]
+      (let [obj (:obj triple),
+            link (str (obj encodings) ".html"),
+            title (get-unique graph obj "/essay/title")]
+        (case (:pred triple)
+          ; TODO(gierl) Differentiate the types of flows by their types.
+          "/essay/flow/home" (->Cxn link title)
+          "/essay/flow/next" (->Cxn link title)
+          "/essay/flow/see_also" (->Cxn link title)
+          (assert false (str "ERROR - Type" (:pred triple) "not supported")))))
+    (filter #(str/starts-with? (:pred %) "/essay/flow") (all-triples graph sub))))
+
+(defn- generate-link
+  "Returns the HTML for a link in the footer"
+  [cxn]
+  (a {"href" (:link cxn)} (:name cxn)))
 
 (defn- generate-essay-segment
   "Returns the HTML corresponding to a /type/essay_segment"
@@ -241,15 +269,16 @@
       (div {"class" "segment"}
         (div "")
         (div {}
-          (let [title-triple (first (all-triples graph sub "/essay/title"))]
-            (if (empty? title-triple)
-              ""
-              (h1 {"class" "header"} (:obj title-triple))))
+          (let [title (get-unique graph sub "/essay/title")]
+            (h1 {"class" "header"} title))
           (hr)
-          (let [content-sub (:obj (first (all-triples graph sub "/essay/contains")))]
+          (let [content-sub (get-unique graph sub "/essay/contains")]
             (generate-item graph content-sub))
           (hr)
-          (div {"class" "footer"} "TODO - Relations go here"))))))
+          (div {"class" "footer"}
+            (let [cxns (build-cxns graph encodings sub)]
+              (str/join " " (map #(generate-link %) cxns)))
+            ))))))
 
 (defn generate-output
   "Convert a validated graph into the HTML, CSS, and JS files that compose the website"
