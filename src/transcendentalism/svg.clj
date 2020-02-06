@@ -11,7 +11,7 @@
 
 ; Whether to generate SVGs, or assume that they've already been created. Helps
 ; optimize the process when changing non-SVG code.
-(def generate-svg true)
+(def generate-svg false)
 
 ; Factor for converting from a TAU-based system to a PI-based one.
 (def TAU-2-PI (* Math/PI 2))
@@ -31,8 +31,8 @@
 (defn- t-to-r
   "Converts a timestamp into a radius"
   [dim k t]
-  (let [days-before-present (days-ago t)]
-    (* (max-r dim) (Math/pow k days-before-present))))
+  (let [hours-before-present (hours-ago t)]
+    (* (max-r dim) (Math/pow k hours-before-present))))
 
 (defrecord Color [red green blue])
 
@@ -53,7 +53,7 @@
         avg-r (/ (apply + (map :red colors)) num),
         avg-g (/ (apply + (map :green colors)) num),
         avg-b (/ (apply + (map :blue colors)) num),
-        ratio 0.1,
+        ratio 0.15,
         r (int (interpolate avg-r 255 ratio)),
         g (int (interpolate avg-g 255 ratio)),
         b (int (interpolate avg-b 255 ratio))]
@@ -158,11 +158,13 @@
                 (reduce (fn
                   [result pair] (assoc result (first pair) (second pair)))
                   result (map vector subs primary-colors))
-                (reduce (fn
-                  [result sub]
-                  (assoc result sub
-                    (avg-and-whiten (map #(result %) (leads-to-objs sub)))))
-                  result subs))))
+                (if (and (= (count subs) 1) (= (first subs) :monad))
+                  (assoc result :monad (->Color 255 255 255))
+                  (reduce (fn
+                    [result sub]
+                    (assoc result sub
+                      (avg-and-whiten (map #(result %) (leads-to-objs sub)))))
+                    result subs)))))
           {} ordered-chunks)]
     (reify Monad
       (r [monad sub] (r-values sub))
@@ -198,8 +200,8 @@
   (str (attr-aware "text" attrs) contents "</text>"))
 
 (defn- line
-  [attrs & contents]
-  (str/join "\n" (concat [(attr-aware "line" attrs)] contents ["</line>"])))
+  [attrs contents]
+  (str/join "\n" [(attr-aware "line" attrs) contents "</line>"]))
 
 (defn- circle
   [attrs contents]
@@ -215,18 +217,34 @@
 
 (defn- aesthetic-line
   "Makes a line with a particular aesthetic standard"
-  [dim r1 tau1 r2 tau2 & contents]
+  [obj dim r1 tau1 r2 tau2]
   (let [coords-1 (polar-to-cartesian dim dim r1 tau1),
         coords-2 (polar-to-cartesian dim dim r2 tau2),
-        radius (/ (+ (circle-r dim r1) (circle-r dim r2)) 2)]
+        radius (/ (+ (circle-r dim r1) (circle-r dim r2)) 2),
+        width (/ radius 4)]
     (line {
       "x1" (first coords-1),
       "y1" (second coords-1),
       "x2" (first coords-2),
       "y2" (second coords-2),
-      "stroke" "black",
-      "stroke-width" (/ radius 4),
-      } contents)))
+      "stroke" "gray",
+      "stroke-width" width,
+      }
+      (str/join "\n" [
+        (animate {
+          "attributeType" "XML",
+          "attributeName" "stroke-width",
+          "values" (str width ";" (* width 1.4) ";" width),
+          "begin" (str obj ".end+0.02s"),
+          "dur" "0.2s",
+        })
+        (animate {
+          "attributeType" "XML",
+          "attributeName" "stroke",
+          "values" "gray;black;gray",
+          "begin" (str obj ".end+0.02s"),
+          "dur" "0.2s",
+        })]))))
 
 (defn- aesthetic-circle
   "Makes a circle with a particular aesthetic standard"
@@ -243,8 +261,8 @@
         })
       (let [base-animation {
           "id" sub,
-          "attributeName" "r",
           "attributeType" "XML",
+          "attributeName" "r",
           "values" (str radius ";" (* radius 1.4) ";" radius),
         }]
         (if (= sub :monad)
@@ -255,17 +273,16 @@
           }))
           (if (empty? objs)
             ; Subject nodes pulse irregularly at random.
-            (let [period (format "%.1f" (double (/ (+ 30 (rand-int 150)) 10)))]
+            (let [period (format "%.1f" (double (/ (+ 20 (rand-int 90)) 10)))]
               (animate (merge base-animation {
                 "begin" (str period "s;" sub ".end+" period "s;"),
                 "dur" "0.5s",
               })))
             ; Interior nodes cascade from their descendents.
             (animate (merge base-animation {
-              "begin" (str/join ";" (map #(str % ".end+0.1s") objs)),
-              "dur" "0.3s",
-            })))))
-      )))
+              "begin" (str/join ";" (map #(str % ".end+0.02s") objs)),
+              "dur" "0.2s",
+            }))))))))
 
 (defn- subname
   "Returns a keyword name for a subject"
@@ -284,37 +301,21 @@
         rootname (subname "root" sub (succ 1)),
         inner (fn [lvl n] (subname "inner" lvl (succ (dec n)) (succ n)))]
     [(types (inner 1 1) "/event")
-     (->Triple (inner 1 1) "/event/time" (get-days-ago 1))
+     (->Triple (inner 1 1) "/event/time" (get-hours-ago 2))
      (->Triple (inner 1 1) "/event/leads_to" (subname "subject" sub))
      (->Triple (inner 1 1) "/event/leads_to" (subname "subject" (succ 1)))
-     (types (inner 2 1) "/event")
-     (->Triple (inner 2 1) "/event/time" (get-days-ago 2))
-     (->Triple (inner 2 1) "/event/leads_to" (inner 1 1))
-     (->Triple (inner 2 1) "/event/leads_to" (inner 1 2))
-     (types (inner 3 1) "/event")
-     (->Triple (inner 3 1) "/event/time" (get-days-ago 3))
-     (->Triple (inner 3 1) "/event/leads_to" (inner 2 1))
-     (types (inner 4 1) "/event")
-     (->Triple (inner 4 1) "/event/time" (get-days-ago 4))
-     (->Triple (inner 4 1) "/event/leads_to" (inner 3 1))
-     (types (inner 5 1) "/event")
-     (->Triple (inner 5 1) "/event/time" (get-days-ago 5))
-     (->Triple (inner 5 1) "/event/leads_to" (inner 4 1))
-     (types (inner 6 1) "/event")
-     (->Triple (inner 6 1) "/event/time" (get-days-ago 6))
-     (->Triple (inner 6 1) "/event/leads_to" (inner 5 1))
-     (types (inner 7 1) "/event")
-     (->Triple (inner 7 1) "/event/time" (get-days-ago 7))
-     (->Triple (inner 7 1) "/event/leads_to" (inner 6 1))
-     (types (inner 8 1) "/event")
-     (->Triple (inner 8 1) "/event/time" (get-days-ago 8))
-     (->Triple (inner 8 1) "/event/leads_to" (inner 7 1))
-     (types (inner 9 1) "/event")
-     (->Triple (inner 9 1) "/event/time" (get-days-ago 9))
-     (->Triple (inner 9 1) "/event/leads_to" (inner 8 1))
+     (map
+      (fn [n]
+        [(types (inner n 1) "/event")
+         (->Triple (inner n 1) "/event/time" (get-hours-ago (* 2 n)))
+         (->Triple (inner n 1) "/event/leads_to" (inner (dec n) 1))
+         (->Triple (inner n 1) "/event/leads_to" (inner (dec n) 2))])
+      (range 2 6))
      (types rootname "/event")
-     (->Triple rootname "/event/time" (get-days-ago 10))
-     (->Triple rootname "/event/leads_to" (inner 9 1))]))
+     (->Triple rootname "/event/time" (get-hours-ago 12))
+     (->Triple rootname "/event/leads_to" (inner 5 1))
+     (->Triple rootname "/event/leads_to" (inner 5 2))
+     ]))
 
 ; Courtesy Michal Marczyk
 (defn rotate [n s]
@@ -373,7 +374,7 @@
                     obj (:obj triple)]
                 (if (= sub :monad)
                   ""
-                  (aesthetic-line dim
+                  (aesthetic-line obj dim
                     (r monad sub) (tau monad sub) (r monad obj) (tau monad obj)))))
             (all-triples graph "/event/leads_to")))
         (str/join "\n"

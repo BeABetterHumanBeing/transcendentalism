@@ -4,7 +4,7 @@
 (use 'transcendentalism.graph)
 
 ; Whether to generate debugging HTML or not.
-(def debugging-mode true)
+(def debugging-mode false)
 
 (defn- gen-key
   "Generates a random alphanumeric key of given length"

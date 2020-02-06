@@ -16,7 +16,7 @@
 (defprotocol Time
   (at [t] "Returns the given time")
   (before? [t other] "Returns whether this time strictly precedes another time")
-  (days-ago [t] "Returns the number of days ago that this time occurred"))
+  (hours-ago [t] "Returns the number of hours ago that this time occurred"))
 
 (defn to-time
   "Constructs a Time from a value"
@@ -32,17 +32,17 @@
             (if (or (= t-obj "present") (= other-obj "past"))
               false
               (jt/before? t-obj other-obj))))))
-    (days-ago [t]
+    (hours-ago [t]
       (if (= t-obj "past")
-        -100000
+        -1000000
         (if (= t-obj "present")
           0
-          (jt/as (jt/duration (jt/instant) t-obj) :days))))))
+          (jt/as (jt/duration (jt/instant) t-obj) :hours))))))
 
-(defn get-days-ago
-  "Constructs a value corresponding to a given number of days ago"
-  [days]
-  (jt/minus (jt/instant) (jt/days days)))
+(defn get-hours-ago
+  "Constructs a value corresponding to a given number of hours ago"
+  [hours]
+  (jt/minus (jt/instant) (jt/hours hours)))
 
 (defn is-valid-time
   "Returns whether the given value is a valid time"
