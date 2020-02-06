@@ -39,6 +39,11 @@
           0
           (jt/as (jt/duration (jt/instant) t-obj) :days))))))
 
+(defn get-days-ago
+  "Constructs a value corresponding to a given number of days ago"
+  [days]
+  (jt/minus (jt/instant) (jt/days days)))
+
 (defn is-valid-time
   "Returns whether the given value is a valid time"
   [value]
