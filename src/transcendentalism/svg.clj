@@ -1,6 +1,7 @@
 (ns transcendentalism.svg
   (:require [clojure.string :as str]
-            [java-time :as jt]))
+            [java-time :as jt]
+            [clojure.math.numeric-tower :as math]))
 
 ; TODO(gierl): generate is only called for some of the XML-related convenience
 ; functions. Move these into their own file.
@@ -12,13 +13,15 @@
 ; optimize the process when changing non-SVG code.
 (def generate-svg true)
 
+; Factor for converting from a TAU-based system to a PI-based one.
+(def TAU-2-PI (* Math/PI 2))
+
 (defn- polar-to-cartesian
   "Transforms polar coordinates into their cartesian equivalents"
   [width height r tau]
-  (let [t (- tau 0.25), ; To rotate shape so that 0 is up
-        factor (* Math/PI 2)] ; To get to PI-based system
-    [(+ (/ width 2) (* r (Math/cos (* t factor))))
-     (+ (/ height 2) (* r (Math/sin (* t factor))))]))
+  (let [t (- tau 0.25)] ; To rotate shape so that 0 is up
+    [(+ (/ width 2) (* r (Math/cos (* t TAU-2-PI))))
+     (+ (/ height 2) (* r (Math/sin (* t TAU-2-PI))))]))
 
 (defn- max-r
   "Determines the maximum r-coord of a node for a SVG of given dimension"
@@ -68,7 +71,10 @@
 (defn- polar-distance
   "Calculates the Euclidean distance between two polar coordinates"
   [r1 tau1 r2 tau2]
-  (Math/pow 2 (+ (* r1 r1) (* r2 r2) (* -2 r1 r2 (Math/cos (- tau1 tau2))))))
+  (math/sqrt
+    (+ (* r1 r1)
+       (* r2 r2)
+       (* -2 r1 r2 (Math/cos (- (* tau1 TAU-2-PI) (* tau2 TAU-2-PI)))))))
 
 (defprotocol Monad
   (r [monad sub] "Returns the r-value of a given subject")
@@ -245,6 +251,7 @@
       (types :intermediate-1 "/event")
       (->Triple :intermediate-1 "/event/time" (jt/instant (jt/offset-date-time 2020 02 04 1)))
       (->Triple :intermediate-1 "/event/leads_to" :subject-1)
+      (->Triple :intermediate-1 "/event/leads_to" :subject-3)
       (types :intermediate-2 "/event")
       (->Triple :intermediate-2 "/event/time" (jt/instant (jt/offset-date-time 2020 02 03 1)))
       (->Triple :intermediate-2 "/event/leads_to" :intermediate-1)
