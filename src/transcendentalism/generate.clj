@@ -33,7 +33,7 @@
   (doseq [file (.listFiles (io/as-file dirname))]
     (io/delete-file file)))
 
-(defn- debug
+(defn debug
   "Passes through content if in debugging-mode, otherwise nullifies it"
   [content]
   (if debugging-mode content ""))

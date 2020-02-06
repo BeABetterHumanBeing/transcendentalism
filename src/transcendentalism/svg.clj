@@ -189,6 +189,10 @@
   [attrs & contents]
   (str/join "\n" (concat [(attr-aware "g" attrs)] contents ["</g>"])))
 
+(defn- text
+  [attrs contents]
+  (str (attr-aware "text" attrs) contents "</text>"))
+
 (defn- line
   [attrs & contents]
   (str/join "\n" (concat [(attr-aware "line" attrs)] contents ["</line>"])))
@@ -308,6 +312,10 @@
         graph (monad-graph),
         monad (monadic-canonicalization graph dim k)]
     (svg dim dim
+      (str/join "\n"
+       ["<style>"
+        ".dbg-txt { font: 8px sans-serif; }"
+        "</style>"])
       (g {}
         (str/join "\n"
           (map
@@ -324,6 +332,17 @@
                 "fill" (to-css-color (color monad sub)),
               } (r monad sub) (tau monad sub)))
             (all-nodes graph)))
+        (debug
+          (str/join "\n"
+            (map
+              (fn [sub]
+                (let [coords (polar-to-cartesian dim dim (r monad sub) (tau monad sub))]
+                  (text {
+                    "x" (first coords),
+                    "y" (second coords),
+                    "class" "dbg-txt",
+                    } sub)))
+              (all-nodes graph))))
         ))))
 
 (defn svg-to-image
