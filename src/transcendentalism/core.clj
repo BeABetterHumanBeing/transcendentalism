@@ -14,15 +14,16 @@
     (->Triple :monad "/essay/title" "Transcendental Metaphysics")
     (types :monad-contents "/item/ordered_set")
     (->Triple :monad-contents "/item/contains" ^{:order 1} [:monad-image])
-    (->Triple :monad-contents "/item/contains" ^{:order 2} [:monad-intro-text])
+    (->Triple :monad-contents "/item/contains" ^{:order 2} [:monad-intro-quote])
     (types :monad-image "/item/image")
     (->Triple :monad-image "/item/image/url" (svg-to-image "monad" 800 800 'svg-monad))
-    (types :monad-intro-text "/item/text")
-    (->Triple :monad-intro-text "/item/text/text" (clojure.string/join " "
-      ["\"The Monad is the symbol of unity."
-      "It is the godhead, the point from which all things originate,"
-      "and the point to which all things return.\"\n"
-      "-Daniel Gierl"]))
+    (types :monad-intro-quote "/item/quote")
+    (->Triple :monad-intro-quote "/item/quote/text"
+      (clojure.string/join " "
+        ["The Monad is the symbol of unity."
+        "It is the godhead, the point from which all things originate,"
+        "and the point to which all things return."]))
+    (->Triple :monad-intro-quote "/item/quote/author" "Daniel Gierl")
     ; TODO - Add /essay/flow/next to the full introduction.
     ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
    ]))

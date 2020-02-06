@@ -22,6 +22,10 @@
     :description "Textual content",
     :super-type "/type/item",
   },
+  "/type/item/quote" {
+    :description "A quote",
+    :super-type "/type/item",
+  },
   "/type/item/image" {
     :description "Image content",
     :super-type "/type/item",
@@ -109,6 +113,19 @@
     :domain-type "/type/item/text",
     :range-type :string,
     :required true,
+  },
+  "/item/quote/text" {
+    :description "The text contents of the quote",
+    :domain-type "/type/item/quote",
+    :range-type :string,
+    :required true,
+    :unique true,
+  },
+  "/item/quote/author" {
+    :description "To whom the quote is attributed",
+    :domain-type "/type/item/quote",
+    :range-type :string,
+    :unique true,
   },
   "/item/text/url" {
     :description "External URL to which a piece of text is linked",

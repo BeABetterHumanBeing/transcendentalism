@@ -4,7 +4,7 @@
 (use 'transcendentalism.graph)
 
 ; Whether to generate debugging HTML or not.
-(def debugging-mode false)
+(def debugging-mode true)
 
 (defn- gen-key
   "Generates a random alphanumeric key of given length"
@@ -67,8 +67,8 @@
   (str (attr-aware "div" attrs) (apply str contents) "</div>"))
 
 (defn- p
-  [contents]
-  (str "<p>" contents "</p>"))
+  [attrs contents]
+  (str (attr-aware "p" attrs) contents "</p>"))
 
 (defn- ul
   [contents]
@@ -101,6 +101,14 @@
 (defn- font-family
   [& contents]
   (str "font-family: " (str/join ", " contents) ";"))
+
+(defn- font-style
+  [contents]
+  (str "font-style: " contents ";"))
+
+(defn- font-size
+  [contents]
+  (str "font-size: " contents ";"))
 
 (defn- border-style
   [contents]
@@ -157,15 +165,35 @@
     (debug (css "div" {"class" "content"}
       (border-style "dashed")
       (border-width "1px")))
+    (css "div" {"class" "quote"}
+      (padding "0px" "100px")
+      (font-size "large")
+      (font-family "Times" "serif")
+      (font-style "italic"))
+    (css "p" {"class" "author"}
+      (text-align "right"))
     (css "div" {"class" "footer"} "")]))
 
 (defn- generate-item-text
   "Returns the HTML corresponding to a /type/item/text"
   [triples]
-  (div {"class" "content"}
-    ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
-    ; TODO(gierl): Handle /item/text/url
-    "TODO text"))
+  (let [text-triples (filter #(= (:pred %) "/item/text/text") triples),
+        text (str/join "\n" (map :obj text-triples))]
+    (div {"class" "content"}
+      ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
+      ; TODO(gierl): Handle /item/text/url
+      text)))
+
+(defn- generate-item-quote
+  "Returns the HTML corresponding to a /type/item/quote"
+  [triples]
+  (let [pred-triples (collect-triples-by-pred triples),
+        quote-text (:obj (pred-triples "/item/quote/text")),
+        author (:obj (pred-triples "/item/quote/author"
+                                   [(->Triple nil nil "Anonymous")]))]
+    (div {"class" "content quote"}
+      (p {} (str "\"" quote-text "\""))
+      (p {"class" "author"} (str "-" author)))))
 
 (defn- generate-item-image
   "Returns the HTML corresponding to a /type/item/image"
@@ -191,10 +219,12 @@
     (let [triples (all-triples graph sub),
           item-type (filter #(and (str/starts-with? (:pred %) "/type")
                                   (not (= (:pred %) "/type/item"))) triples)]
-      ({"/type/item/text" (generate-item-text triples),
+      (case (:pred (first item-type))
+        "/type/item/text" (generate-item-text triples),
+        "/type/item/quote" (generate-item-quote triples),
         "/type/item/image" (generate-item-image triples),
-        "/type/item/ordered_set" (generate-item-ordered-set triples)}
-        (:pred (first item-type))))))
+        "/type/item/ordered_set" (generate-item-ordered-set triples),
+        (str "ERROR - Type " item-type " not supported")))))
 
 (defn- generate-essay-segment
   "Returns the HTML corresponding to a /type/essay_segment"
@@ -205,7 +235,7 @@
       (debug
         ; Debugging information appears up top.
         (div {"class" "debug"}
-          (p "Triples")
+          (p {} "Triples")
           (ul (li (map print-triple (all-triples graph sub))))))
       ; The contents of the segment appear within a single div.
       (div {"class" "segment"}

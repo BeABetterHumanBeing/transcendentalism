@@ -51,6 +51,13 @@
       (= value "past")
       (jt/instant? value)))
 
+(defn collect-triples-by-pred
+  "Collects triples into a hash-map by their predicates"
+  [triples]
+  (reduce (fn [result triple]
+    (assoc result (:pred triple) triple))
+    {} triples))
+
 (defn- graph-data-from-triples
   "Constructs a graph by associating triples by subject"
   [triples]
