@@ -56,6 +56,20 @@
         b (int (interpolate avg-b 255 ratio))]
     (->Color r g b)))
 
+(defn- get-objs
+  "Returns the objects of the triples on the given subjects with the given pred"
+  [graph subs pred]
+  (reduce
+    (fn [result sub]
+      (assoc result sub
+        (map #(:obj %) (all-triples graph sub pred))))
+    {} subs))
+
+(defn- polar-distance
+  "Calculates the Euclidean distance between two polar coordinates"
+  [r1 tau1 r2 tau2]
+  (Math/pow 2 (+ (* r1 r1) (* r2 r2) (* -2 r1 r2 (Math/cos (- tau1 tau2))))))
+
 (defprotocol Monad
   (r [monad sub] "Returns the r-value of a given subject")
   (tau [monad sub] "Returns the tau-value of a given subject")
@@ -77,14 +91,54 @@
               (conj result [sub])
               (assoc result (dec (count result)) (conj (last result) sub))))
           [] ordered-events),
-        ; TODO(gierl) A subject's tau is the value [0, 1) which:
-        ;   1) Minimizes the length of descendent edges, and
-        ;   2) Doesn't cause it to overlap with other subjects.
+        ; TODO(gierl) A subject's tau is the value [0, 1) which doesn't cause it
+        ; to overlap with other subjects.
         tau-values (reduce
           (fn [result subs]
-            (reduce (fn
-              [result pair] (assoc result (first pair) (second pair)))
-            result (map vector subs (map #(/ % (count subs)) (range (count subs))))))
+            (let [leads-to-objs (get-objs graph subs "/event/leads_to")]
+              (if (empty? (second (first leads-to-objs)))
+                ; The first chunk are all 'present', and so are evenly spaced.
+                (reduce
+                  (fn [result pair]
+                    (assoc result (first pair) (second pair)))
+                  result
+                  (map vector subs (map #(/ % (count subs))
+                                   (range (count subs)))))
+                (reduce
+                  (fn [result sub]
+                    (let [objs (leads-to-objs sub)]
+                      (if (= (count objs) 1)
+                        ; If the node only leads to one object, the shortest
+                        ; path is for it to have the same tau value.
+                        (assoc result sub (result (first objs)))
+                        (if (= (count objs) 2)
+                          ; If the node leads to two objects, the shortest path
+                          ; is the min of the two modular midpoints.
+                          (let [obj-1 (first objs),
+                                obj-2 (second objs),
+                                obj-1-tau (result obj-1),
+                                obj-2-tau (result obj-2),
+                                calc-dist-from-tau
+                                  (fn [tau]
+                                    (+ (polar-distance
+                                         (r-values obj-1) obj-1-tau
+                                         (r-values sub) tau)
+                                       (polar-distance
+                                         (r-values obj-2) obj-2-tau
+                                         (r-values sub) tau))),
+                                tau-1 (/ (+ obj-1-tau obj-2-tau) 2),
+                                tau-2 (if (< tau-1 0.5) (+ tau-1 0.5) (- tau-1 0.5)),
+                                dist-1 (calc-dist-from-tau tau-1),
+                                dist-2 (calc-dist-from-tau tau-2)]
+                            (assoc result sub (if (< dist-1 dist-2) tau-1 tau-2)))
+                          (do
+                            ; TODO(gierl): Complete the case where the node leads
+                            ; to >2 others. In this case, a binary search should
+                            ; be conducted to find the correct value.
+                            (println "Skipping advanced tau calculation for" sub)
+                            (assoc result sub 0))))))
+                  result subs)))
+            )
           {} ordered-chunks)
         primary-colors [
           (->Color 248 18 7), (->Color 245 186 5), (->Color 200 83 254),
@@ -92,12 +146,8 @@
           (->Color 244 134 4)],
         color-values (reduce
           (fn [result subs]
-            (let [leads-to-triples (reduce
-                  (fn [result sub]
-                    (assoc result sub
-                      (map #(:obj %) (all-triples graph sub "/event/leads_to"))))
-                  {} subs)]
-              (if (empty? (second (first leads-to-triples)))
+            (let [leads-to-objs (get-objs graph subs "/event/leads_to")]
+              (if (empty? (second (first leads-to-objs)))
                 ; The first chunk are all 'present', and have no leads_to.
                 (reduce (fn
                   [result pair] (assoc result (first pair) (second pair)))
@@ -105,7 +155,7 @@
                 (reduce (fn
                   [result sub]
                   (assoc result sub
-                    (avg-and-whiten (map #(result %) (leads-to-triples sub)))))
+                    (avg-and-whiten (map #(result %) (leads-to-objs sub)))))
                   result subs))))
           {} ordered-chunks)]
     (reify Monad
