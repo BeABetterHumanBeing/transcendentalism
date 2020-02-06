@@ -189,6 +189,10 @@
   [attrs & contents]
   (str/join "\n" (concat [(attr-aware "g" attrs)] contents ["</g>"])))
 
+(defn- animate
+  [attrs]
+  (str (attr-aware "animate" attrs) "</animate>"))
+
 (defn- text
   [attrs contents]
   (str (attr-aware "text" attrs) contents "</text>"))
@@ -198,8 +202,8 @@
   (str/join "\n" (concat [(attr-aware "line" attrs)] contents ["</line>"])))
 
 (defn- circle
-  [attrs & contents]
-  (str/join "\n" (concat [(attr-aware "circle" attrs)] contents ["</circle>"])))
+  [attrs contents]
+  (str/join "\n" [(attr-aware "circle" attrs) contents "</circle>"]))
 
 (defn- circle-r
   "Determines an aesthetically-pleasing radius for a circle"
@@ -226,7 +230,7 @@
 
 (defn- aesthetic-circle
   "Makes a circle with a particular aesthetic standard"
-  [dim attrs r tau & contents]
+  [dim attrs sub objs r tau]
   (let [coords (polar-to-cartesian dim dim r tau),
         radius (circle-r dim r)]
     (circle
@@ -236,7 +240,32 @@
         "r" radius,
         "stroke" "black",
         "stroke-width" (/ radius 4),
-        }) contents)))
+        })
+      (let [base-animation {
+          "id" sub,
+          "attributeName" "r",
+          "attributeType" "XML",
+          "values" (str radius ";" (* radius 1.4) ";" radius),
+        }]
+        (if (= sub :monad)
+          ; The Monad merely beats like a heart.
+          (animate (merge base-animation {
+            "dur" "2s",
+            "repeatCount" "indefinite",
+          }))
+          (if (empty? objs)
+            ; Subject nodes pulse irregularly at random.
+            (let [period (format "%.1f" (double (/ (+ 30 (rand-int 150)) 10)))]
+              (animate (merge base-animation {
+                "begin" (str period "s;" sub ".end+" period "s;"),
+                "dur" "0.5s",
+              })))
+            ; Interior nodes cascade from their descendents.
+            (animate (merge base-animation {
+              "begin" (str/join ";" (map #(str % ".end+0.1s") objs)),
+              "dur" "0.3s",
+            })))))
+      )))
 
 (defn- subname
   "Returns a keyword name for a subject"
@@ -329,7 +358,8 @@
   (let [dim width,
         k 1.2,
         graph (monad-graph),
-        monad (monadic-canonicalization graph dim k)]
+        monad (monadic-canonicalization graph dim k),
+        leads-to-objs (get-objs graph (all-nodes graph) "/event/leads_to")]
     (svg dim dim
       (str/join "\n"
        ["<style>"
@@ -351,7 +381,7 @@
             (fn [sub]
               (aesthetic-circle dim {
                 "fill" (to-css-color (color monad sub)),
-              } (r monad sub) (tau monad sub)))
+              } sub (leads-to-objs sub) (r monad sub) (tau monad sub)))
             (all-nodes graph)))
         (debug
           (str/join "\n"
