@@ -29,6 +29,25 @@
     {}
     (all-nodes graph)))
 
+(defn- create-homes
+  "Produces a sub->home map of /essay/flow/home"
+  [graph]
+  (reduce
+    (fn [result sub]
+      (assoc result sub
+        (get-unique graph sub "/essay/flow/home")))
+    {} (all-nodes graph "/type/essay_segment")))
+
+(defn- find-transitive-homes
+  "Returns the transitive closure of all homes of a sub"
+  [homes sub]
+  (loop [all-homes '()
+         curr sub]
+    (if (= curr (homes curr))
+      ; At the ur-home, the monad.
+      all-homes
+      (recur (conj all-homes (homes curr)) (homes curr)))))
+
 (defn- clear-directory
   [dirname]
   (doseq [file (.listFiles (io/as-file dirname))]
@@ -137,7 +156,7 @@
 
 (defn- generate-essay-segment
   "Returns the HTML corresponding to a /type/essay_segment"
-  [graph encodings sub]
+  [graph encodings homes sub]
   (html
     (head (str
       (xml-open "link" {
@@ -150,7 +169,11 @@
       (if static-html-mode
         {}
         {
-          "onload" (call-js "segmentLoadedCallback" (sub encodings)),
+          "onload" (call-js "segmentLoadedCallback"
+                     (format-as-string (sub encodings))
+                     (format-as-array
+                       (map #(format-as-string (% encodings))
+                            (find-transitive-homes homes sub)))),
         })
       (debug
         ; Debugging information appears up top.
@@ -175,14 +198,15 @@
 (defn generate-output
   "Convert a validated graph into the HTML, CSS, and JS files that compose the website"
   [graph]
-  (let [encodings (create-encodings graph)]
+  (let [encodings (create-encodings graph),
+        homes (create-homes graph)]
     (clear-directory "output")
     (doseq
       [sub (all-nodes graph "/type/essay_segment")]
       (let
         [filename (str "output/" (sub encodings) ".html")]
         (do
-          (spit filename (generate-essay-segment graph encodings sub))
+          (spit filename (generate-essay-segment graph encodings homes sub))
           (println "Generated" filename))))
     (spit "output/styles.css" (stylesheet))
     (if static-html-mode nil (spit "output/script.js" (script)))))

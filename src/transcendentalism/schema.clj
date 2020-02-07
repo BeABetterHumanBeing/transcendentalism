@@ -62,6 +62,7 @@
     :description "Relation to the monad",
     :domain-type "/type/essay_segment",
     :range-type "/type/essay_segment",
+    :required true,
     :unique true,
   },
   "/essay/flow/see_also" {
@@ -394,6 +395,8 @@
       (fn [result validation-check]
         (set/union result (validation-check schema graph)))
       #{}
+      ; TODO(gierl): Validate that /essay/flow/home is a monad-rooted DAG.
+      ; TODO(gierl): Validate that /event/leads_to is single-past, >=1 present.
       [preds-all-valid? required-preds-exist? unique-preds-unique?
        required-supertypes-exist? domain-type-exists? range-type-exists?
        ordered-sets-have-order? events-obey-causality?]),

@@ -24,6 +24,8 @@
         "It is the godhead, the point from which all things originate,"
         "and the point to which all things return."]))
     (->Triple :monad-intro-quote "/item/quote/author" "Daniel Gierl")
+    ; The monad is the only segment whose home is reflexive.
+    (->Triple :monad "/essay/flow/home" :monad)
     (->Triple :monad "/essay/flow/next" :welcome)
     ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
    ]))
@@ -39,6 +41,7 @@
     (->Triple :welcome "/essay/title" "Welcome")
     (types :welcome-contents "/item/ordered_set")
     ; TODO(gierl) apologize for shitty website, explain purpose of site
+    (->Triple :welcome "/essay/flow/home" :monad)
     (->Triple :welcome "/essay/flow/next" :i-am-dan)
 
     ; I Am Dan
@@ -47,6 +50,7 @@
     (->Triple :i-am-dan "/essay/title" "I Am Dan")
     (types :i-am-dan-contents "/item/ordered_set")
     ; TODO(gierl) brief history
+    (->Triple :i-am-dan "/essay/flow/home" :monad)
     (->Triple :i-am-dan "/essay/flow/next" :connections)
 
     ; Connections
@@ -55,6 +59,7 @@
     (->Triple :connections "/essay/title" "Connections")
     (types :connections-contents "/item/ordered_set")
     ; TODO(gierl) contact information, respective responsibilities
+    (->Triple :connections "/essay/flow/home" :monad)
     (->Triple :connections "/essay/flow/next" :apologies)
 
     ; Apologies
@@ -69,7 +74,7 @@
 (def graph (construct-graph (concat monad about)))
 
 (defn -main
-  "I don't do a whole lot."
+  "Validates the website's graph, and generates its files"
   [& args]
   (if (validate-graph schema graph)
     (generate-output graph)
