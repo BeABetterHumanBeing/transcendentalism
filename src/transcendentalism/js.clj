@@ -46,8 +46,9 @@
   "Moves the window to center the view on the start of a given segment"
   []
   (str/join "\n" [
+    ; TODO(gierl): Change URL to new segment, caching old one in history.
     "function centerViewOn(encoded_id) {"
-      "$('#' + encoded_id).get(0).scrollIntoView();"
+      "$('#' + encoded_id).get(0).scrollIntoView({behavior: 'smooth'});"
     "};"
   ]))
 
@@ -79,9 +80,10 @@
         "centerViewOn(encoded_to);"
       "} else {"
         ; TODO(gierl): Clear all segments beneath encoded_from.
-        "$('<div id=\"insertion-pt\">INSERT NEW SEGMENT HERE</div>').insertAfter($('#' + encoded_from + '-footer'));"
+        "$('<div id=\"insertion-pt\"></div>').insertAfter($('#' + encoded_from + '-footer'));"
         "loadWith($('#insertion-pt'), encoded_to + '.html', function() {"
           "$('#' + encoded_to + '-above').remove();"
+          "$('#' + encoded_from + '-buffer').remove();"
           "centerViewOn(encoded_to);"
         "});"
       "}"

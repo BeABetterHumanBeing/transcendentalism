@@ -223,7 +223,10 @@
           (div {"id" (str (sub encodings) "-footer"),
                 "class" "footer"}
             (let [cxns (build-cxns graph encodings sub)]
-              (str/join " " (map #(generate-link (sub encodings) %) cxns)))))))))
+              (str/join " " (map #(generate-link (sub encodings) %) cxns))))
+          ; TODO(gierl): Add a cute watermark to the background of the buffer.
+          (div {"id" (str (sub encodings) "-buffer"),
+                "class" "buffer"}))))))
 
 (defn generate-output
   "Convert a validated graph into the HTML, CSS, and JS files that compose the website"

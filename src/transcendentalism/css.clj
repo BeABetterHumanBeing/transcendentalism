@@ -92,4 +92,7 @@
       (border-width "10px")
       (border-color "black")
       (height "100px")
-      (margin "100px" "400px"))]))
+      (margin "100px" "400px"))
+    (css "div" {"class" "buffer"}
+      (height "600px")
+      (debug (border-style "dashed")))]))
