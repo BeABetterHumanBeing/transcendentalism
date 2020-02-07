@@ -189,44 +189,45 @@
           ; Include JQuery from Google CDN.
           (xml-tag "script" {"src" "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"} "")
           (xml-tag "script" {"src" "script.js"} "")))))
-    (body
-      (if static-html-mode
-        {}
-        {
-          "onload" (call-js "segmentLoadedCallback"
-                     (format-as-string (sub encodings))
-                     (format-as-string (sub encodings))
-                     (format-as-array
-                       (map #(format-as-string (% encodings))
-                            (find-transitive-homes homes sub)))),
-        })
-      (if (= sub :monad)
-        "" ; No segments are inserted above the monad.
-        (div (enable-debugging {"id" (top-insertion-id (sub encodings))})
-          (debug "Insert Top Segments Here")))
-      (debug
-        ; Debugging information appears up top.
-        (div {"class" "debug"}
-          (p {} "Triples")
-          (ul (li (map print-triple (all-triples graph sub))))))
-      ; The contents of the segment appear within a single div.
-      (div {"class" "segment",
-            "id" (sub encodings)}
-        (div "") ; Empty divs occupy first and last cells in grid.
-        (div {}
-          (let [title (get-unique graph sub "/essay/title")]
-            (h1 {"class" "header"} title))
-          (hr)
-          (let [content-sub (get-unique graph sub "/essay/contains")]
-            (generate-item graph content-sub))
-          (hr)
-          (div {"id" (str (sub encodings) "-footer"),
-                "class" "footer"}
-            (let [cxns (build-cxns graph encodings sub)]
-              (str/join " " (map #(generate-link (sub encodings) %) cxns))))
-          ; TODO(gierl): Add a cute watermark to the background of the buffer.
-          (div {"id" (str (sub encodings) "-buffer"),
-                "class" "buffer"}))))))
+    (let [id (sub encodings)]
+      (body
+        (if static-html-mode
+          {}
+          {
+            "onload" (call-js "segmentLoadedCallback"
+                       (format-as-string id)
+                       (format-as-string id)
+                       (format-as-array
+                         (map #(format-as-string (% encodings))
+                              (find-transitive-homes homes sub)))),
+          })
+        (if (= sub :monad)
+          "" ; No segments are inserted above the monad.
+          (div (enable-debugging {"id" (seg-id id "above")})
+            (debug "Insert Top Segments Here")))
+        (debug
+          ; Debugging information appears up top.
+          (div {"class" "debug"}
+            (p {} "Triples")
+            (ul (li (map print-triple (all-triples graph sub))))))
+        ; The contents of the segment appear within a single div.
+        (div {"class" "segment",
+              "id" id}
+          (div "") ; Empty divs occupy first and last cells in grid.
+          (div {}
+            (let [title (get-unique graph sub "/essay/title")]
+              (h1 {"class" "header"} title))
+            (hr)
+            (let [content-sub (get-unique graph sub "/essay/contains")]
+              (generate-item graph content-sub))
+            (hr)
+            (div {"id" (seg-id id "footer"),
+                  "class" "footer"}
+              (let [cxns (build-cxns graph encodings sub)]
+                (str/join " " (map #(generate-link id %) cxns))))
+            ; TODO(gierl): Add a cute watermark to the background of the buffer.
+            (div {"id" (seg-id id "buffer"),
+                  "class" "buffer"})))))))
 
 (defn generate-output
   "Convert a validated graph into the HTML, CSS, and JS files that compose the website"

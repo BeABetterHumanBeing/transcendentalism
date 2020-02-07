@@ -7,6 +7,18 @@
 ; to each other as static pages.
 (def static-html-mode false)
 
+(defn seg-id
+  "Creates a segment-specific id"
+  [encoded_id constant]
+  (str encoded_id "-" constant))
+
+(defn- js-seg-id
+  "Same as seg-id, but returns js code"
+  [encoded_id constant]
+  (if (empty? constant)
+    (str "'#' + " encoded_id)
+    (str "'#' + " encoded_id " + '-" constant "'")))
+
 (defn format-as-string [value] (str "'" value "'"))
 
 (defn format-as-array
@@ -14,16 +26,12 @@
   [values]
   (str "[" (str/join "," values) "]"))
 
-(defn top-insertion-id
-  "Id of the element into which segments are inserted above a given encoded_id"
-  [encoded_id]
-  (str encoded_id "-above"))
-
 (defn- loadwith
   "Function for replacing a div with the results of a load call"
   []
   (str/join "\n" [
     "function loadWith(elem, url, callback) {"
+      ; Courtesy Victor 'Chris' Cabral
       "$.get(url,function(d){"
         "elem.replaceWith(d);"
         "callback();"
@@ -37,7 +45,7 @@
   (str/join "\n" [
     "function maybeInsertDivider(a, b) {"
       "if(!($('#' + a + '-' + b).length)) {"
-        "$('<div class=\"ellipsis\"></div>').insertAfter('#' + a + '-footer');"
+        (str "$('<div class=\"ellipsis\"></div>').insertAfter(" (js-seg-id "a" "footer") ");")
       "}"
     "}"
   ]))
@@ -48,7 +56,7 @@
   (str/join "\n" [
     ; TODO(gierl): Change URL to new segment, caching old one in history.
     "function centerViewOn(encoded_id) {"
-      "$('#' + encoded_id).get(0).scrollIntoView({behavior: 'smooth'});"
+      (str "$(" (js-seg-id "encoded_id" "") ").get(0).scrollIntoView({behavior: 'smooth'});")
     "};"
   ]))
 
@@ -57,10 +65,8 @@
   []
   (str/join "\n" [
     "function segmentLoadedCallback(origin, encoded_id,homes) {"
-      "var top_insertion_pt = encoded_id + '-above';"
       "if (homes.length > 0) {"
-        (debug "console.log('inserting ' + homes[0] + ' into ' + top_insertion_pt);")
-        "loadWith($('#' + top_insertion_pt), homes[0] + '.html', function() {"
+        (str "loadWith($(" (js-seg-id "encoded_id" "above") "), homes[0] + '.html', function() {")
           "maybeInsertDivider(homes[0], encoded_id);"
           "segmentLoadedCallback(origin, homes[0], homes.slice(1, homes.length));"
         "});"
@@ -76,14 +82,14 @@
   (str/join "\n" [
     "function openSegment(encoded_from,encoded_to) {"
       (debug "console.log('Opening ' + encoded_to + ' from ' + encoded_from);")
-      "if ($('#' + encoded_to).length) {"
+      (str "if ($(" (js-seg-id "encoded_to" "") ").length) {")
         "centerViewOn(encoded_to);"
       "} else {"
         ; TODO(gierl): Clear all segments beneath encoded_from.
-        "$('<div id=\"insertion-pt\"></div>').insertAfter($('#' + encoded_from + '-footer'));"
+        (str "$('<div id=\"insertion-pt\"></div>').insertAfter($(" (js-seg-id "encoded_from" "footer") "));")
         "loadWith($('#insertion-pt'), encoded_to + '.html', function() {"
-          "$('#' + encoded_to + '-above').remove();"
-          "$('#' + encoded_from + '-buffer').remove();"
+          (str "$(" (js-seg-id "encoded_to" "above") ").remove();")
+          (str "$(" (js-seg-id "encoded_from" "buffer") ").remove();")
           "centerViewOn(encoded_to);"
         "});"
       "}"
