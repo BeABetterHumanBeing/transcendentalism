@@ -37,6 +37,17 @@
     "};"
   ]))
 
+(defn- maybe-insert-divider
+  "Inserts a divider between two segments if they are non-adjacent"
+  []
+  (str/join "\n" [
+    "function maybeInsertDivider(a, b) {"
+      "if(!($('#' + a + '-' + b).length)) {"
+        "$('<div class=\"ellipsis\"></div>').insertAfter('#' + a + '-footer');"
+      "}"
+    "}"
+  ]))
+
 (defn- segment-loaded-callback
   "Function that is called when a segment's body is loaded"
   []
@@ -46,8 +57,12 @@
       "if (homes.length > 0) {"
         (debug "console.log('inserting ' + homes[0] + ' into ' + top_insertion_pt);")
         "$('#' + top_insertion_pt).loadWith(homes[0] + '.html', function() {"
+          "maybeInsertDivider(homes[0], encoded_id);"
           "segmentLoadedCallback(homes[0], homes.slice(1, homes.length));"
         "});"
+      "} else {"
+        ; TODO(gierl): Once we're done inserting segments, auto-scroll down to
+        ; the original target.
       "}"
     "}"
   ]))
@@ -57,6 +72,7 @@
   []
   (str/join "\n" [
     (loadwith)
+    (maybe-insert-divider)
     (segment-loaded-callback)
   ]))
 

@@ -21,13 +21,17 @@
 
 (defn- font-size [contents] (style "font-size" contents))
 
-(defn- border-style [contents] (style "border-style" contents))
+(defn- border-style [& contents] (style "border-style" (str/join " " contents)))
 
 (defn- border-width [contents] (style "border-width" contents))
 
 (defn- border-color [contents] (style "border-color" contents))
 
+(defn- height [contents] (style "height" contents))
+
 (defn- padding [& contents] (style "padding" (str/join " " contents)))
+
+(defn- margin [& contents] (style "margin" (str/join " " contents)))
 
 (defn- display [contents] (style "display" contents))
 
@@ -71,4 +75,10 @@
       (font-style "italic"))
     (css "p" {"class" "author"}
       (text-align "right"))
-    (css "div" {"class" "footer"} "")]))
+    (css "div" {"class" "footer"} "")
+    (css "div" {"class" "ellipsis"}
+      (border-style "none" "dashed" "none" "none")
+      (border-width "10px")
+      (border-color "black")
+      (height "100px")
+      (margin "0px" "400px"))]))

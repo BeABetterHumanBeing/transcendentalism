@@ -14,6 +14,8 @@
     (assoc attrs "class" (str (attrs "class" "") " debug"))
     attrs))
 
+; TODO(gierl): Come up with an encoding scheme that's more stable, so that links
+; aren't broken every time the website is regenerated.
 (defn- gen-key
   "Generates a random alphanumeric key of given length"
   [len]
@@ -138,7 +140,7 @@
         (assert false
           (str "ERROR - Type " (:pred (first item-type)) "not supported"))))))
 
-(defrecord Cxn [link name])
+(defrecord Cxn [encoded_obj name])
 
 (defn- build-cxns
   "Determines the connections available from a given sub"
@@ -146,20 +148,22 @@
   (map
     (fn [triple]
       (let [obj (:obj triple),
-            link (str (obj encodings) ".html"),
+            encoded_obj (obj encodings),
             title (get-unique graph obj "/essay/title")]
         (case (:pred triple)
           ; TODO(gierl) Differentiate the types of flows by their types.
-          "/essay/flow/home" (->Cxn link title)
-          "/essay/flow/next" (->Cxn link title)
-          "/essay/flow/see_also" (->Cxn link title)
+          "/essay/flow/home" (->Cxn encoded_obj title)
+          "/essay/flow/next" (->Cxn encoded_obj title)
+          "/essay/flow/see_also" (->Cxn encoded_obj title)
           (assert false (str "ERROR - Type" (:pred triple) "not supported")))))
     (filter #(str/starts-with? (:pred %) "/essay/flow") (all-triples graph sub))))
 
 (defn- generate-link
   "Returns the HTML for a link in the footer"
-  [cxn]
-  (a {"href" (:link cxn)} (:name cxn)))
+  [encoded_id, cxn]
+  (a {"id" (str encoded_id "-" (:encoded_obj cxn)),
+      "href" (str (:encoded_obj cxn) ".html")}
+    (:name cxn)))
 
 (defn- generate-essay-segment
   "Returns the HTML corresponding to a /type/essay_segment"
@@ -185,8 +189,10 @@
                        (map #(format-as-string (% encodings))
                             (find-transitive-homes homes sub)))),
         })
-      (div (enable-debugging {"id" (top-insertion-id (sub encodings))})
-        (debug "Insert Top Segments Here"))
+      (if (= sub :monad)
+        "" ; No segments are inserted above the monad.
+        (div (enable-debugging {"id" (top-insertion-id (sub encodings))})
+          (debug "Insert Top Segments Here")))
       (debug
         ; Debugging information appears up top.
         (div {"class" "debug"}
@@ -203,10 +209,10 @@
           (let [content-sub (get-unique graph sub "/essay/contains")]
             (generate-item graph content-sub))
           (hr)
-          (div {"class" "footer"}
+          (div {"id" (str (sub encodings) "-footer"),
+                "class" "footer"}
             (let [cxns (build-cxns graph encodings sub)]
-              (str/join " " (map #(generate-link %) cxns)))
-            )))
+              (str/join " " (map #(generate-link (sub encodings) %) cxns))))))
         (div (enable-debugging {"id" (bottom-insertion-id (sub encodings))})
           (debug "Insert Bottom Segments Here")))))
 
