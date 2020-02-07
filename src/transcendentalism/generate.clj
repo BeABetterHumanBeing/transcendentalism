@@ -87,6 +87,8 @@
 
 (defn- img [attrs] (xml-open "img" attrs))
 
+(defn- button [attrs contents] (xml-tag "button" attrs contents))
+
 (defn- generate-item-text
   "Returns the HTML corresponding to a /type/item/text"
   [triples]
@@ -161,9 +163,17 @@
 (defn- generate-link
   "Returns the HTML for a link in the footer"
   [encoded_id, cxn]
-  (a {"id" (str encoded_id "-" (:encoded_obj cxn)),
-      "href" (str (:encoded_obj cxn) ".html")}
-    (:name cxn)))
+  (let [link-id (str encoded_id "-" (:encoded_obj cxn))]
+    (if static-html-mode
+      (a {"id" link-id,
+          "href" (str (:encoded_obj cxn) ".html")}
+        (:name cxn))
+      (button {"id" link-id,
+               "class" "link_segment",
+               "onclick" (call-js "openSegment"
+                           (format-as-string encoded_id)
+                           (format-as-string (:encoded_obj cxn)))}
+              (:name cxn)))))
 
 (defn- generate-essay-segment
   "Returns the HTML corresponding to a /type/essay_segment"
@@ -185,6 +195,7 @@
         {
           "onload" (call-js "segmentLoadedCallback"
                      (format-as-string (sub encodings))
+                     (format-as-string (sub encodings))
                      (format-as-array
                        (map #(format-as-string (% encodings))
                             (find-transitive-homes homes sub)))),
@@ -201,7 +212,7 @@
       ; The contents of the segment appear within a single div.
       (div {"class" "segment",
             "id" (sub encodings)}
-        (div "") ; Empty div occupies first cell in grid.
+        (div "") ; Empty divs occupy first and last cells in grid.
         (div {}
           (let [title (get-unique graph sub "/essay/title")]
             (h1 {"class" "header"} title))
@@ -212,9 +223,7 @@
           (div {"id" (str (sub encodings) "-footer"),
                 "class" "footer"}
             (let [cxns (build-cxns graph encodings sub)]
-              (str/join " " (map #(generate-link (sub encodings) %) cxns))))))
-        (div (enable-debugging {"id" (bottom-insertion-id (sub encodings))})
-          (debug "Insert Bottom Segments Here")))))
+              (str/join " " (map #(generate-link (sub encodings) %) cxns)))))))))
 
 (defn generate-output
   "Convert a validated graph into the HTML, CSS, and JS files that compose the website"

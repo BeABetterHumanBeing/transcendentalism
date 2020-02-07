@@ -21,6 +21,10 @@
 
 (defn- font-size [contents] (style "font-size" contents))
 
+(defn- color [contents] (style "color" contents))
+
+(defn- border [contents] (style "border" contents))
+
 (defn- border-style [& contents] (style "border-style" (str/join " " contents)))
 
 (defn- border-width [contents] (style "border-width" contents))
@@ -76,9 +80,16 @@
     (css "p" {"class" "author"}
       (text-align "right"))
     (css "div" {"class" "footer"} "")
+    ; TODO(gierl): Stylize buttons with hover attributes.
+    (css "button" {"class" "link_segment"}
+      (border "none")
+      (color "blue")
+      (font-size "medium"))
+    ; TODO(gierl): Find a way s.t. the ellipsis is horizontally centered, even
+    ; when the overall element is less than 800px wide.
     (css "div" {"class" "ellipsis"}
       (border-style "none" "dashed" "none" "none")
       (border-width "10px")
       (border-color "black")
       (height "100px")
-      (margin "0px" "400px"))]))
+      (margin "100px" "400px"))]))

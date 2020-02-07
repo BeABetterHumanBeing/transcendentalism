@@ -19,22 +19,16 @@
   [encoded_id]
   (str encoded_id "-above"))
 
-(defn bottom-insertion-id
-  "Id of the element into which segments are inserted below a given encoded_id"
-  [encoded_id]
-  (str encoded_id "-below"))
-
 (defn- loadwith
   "Function for replacing a div with the results of a load call"
   []
   (str/join "\n" [
-    "$.fn.loadWith = function(url, callback){"
-      "var c=$(this);"
+    "function loadWith(elem, url, callback) {"
       "$.get(url,function(d){"
-        "c.replaceWith(d);"
+        "elem.replaceWith(d);"
         "callback();"
       "});"
-    "};"
+    "}"
   ]))
 
 (defn- maybe-insert-divider
@@ -48,21 +42,48 @@
     "}"
   ]))
 
+(defn- center-view-on
+  "Moves the window to center the view on the start of a given segment"
+  []
+  (str/join "\n" [
+    "function centerViewOn(encoded_id) {"
+      "$('#' + encoded_id).get(0).scrollIntoView();"
+    "};"
+  ]))
+
 (defn- segment-loaded-callback
   "Function that is called when a segment's body is loaded"
   []
   (str/join "\n" [
-    "function segmentLoadedCallback(encoded_id,homes) {"
+    "function segmentLoadedCallback(origin, encoded_id,homes) {"
       "var top_insertion_pt = encoded_id + '-above';"
       "if (homes.length > 0) {"
         (debug "console.log('inserting ' + homes[0] + ' into ' + top_insertion_pt);")
-        "$('#' + top_insertion_pt).loadWith(homes[0] + '.html', function() {"
+        "loadWith($('#' + top_insertion_pt), homes[0] + '.html', function() {"
           "maybeInsertDivider(homes[0], encoded_id);"
-          "segmentLoadedCallback(homes[0], homes.slice(1, homes.length));"
+          "segmentLoadedCallback(origin, homes[0], homes.slice(1, homes.length));"
         "});"
       "} else {"
-        ; TODO(gierl): Once we're done inserting segments, auto-scroll down to
-        ; the original target.
+        "centerViewOn(origin);"
+      "}"
+    "}"
+  ]))
+
+(defn- openSegment
+  "Function that is called when an internal link is clicked"
+  []
+  (str/join "\n" [
+    "function openSegment(encoded_from,encoded_to) {"
+      (debug "console.log('Opening ' + encoded_to + ' from ' + encoded_from);")
+      "if ($('#' + encoded_to).length) {"
+        "centerViewOn(encoded_to);"
+      "} else {"
+        ; TODO(gierl): Clear all segments beneath encoded_from.
+        "$('<div id=\"insertion-pt\">INSERT NEW SEGMENT HERE</div>').insertAfter($('#' + encoded_from + '-footer'));"
+        "loadWith($('#insertion-pt'), encoded_to + '.html', function() {"
+          "$('#' + encoded_to + '-above').remove();"
+          "centerViewOn(encoded_to);"
+        "});"
       "}"
     "}"
   ]))
@@ -73,7 +94,9 @@
   (str/join "\n" [
     (loadwith)
     (maybe-insert-divider)
+    (center-view-on)
     (segment-loaded-callback)
+    (openSegment)
   ]))
 
 (defn call-js
