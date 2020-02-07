@@ -7,6 +7,13 @@
      'transcendentalism.js
      'transcendentalism.xml)
 
+(defn- enable-debugging
+  "Adds the 'debug' class to attrs if debugging is enabled"
+  [attrs]
+  (if debugging-mode
+    (assoc attrs "class" (str (attrs "class" "") " debug"))
+    attrs))
+
 (defn- gen-key
   "Generates a random alphanumeric key of given length"
   [len]
@@ -41,7 +48,7 @@
 (defn- find-transitive-homes
   "Returns the transitive closure of all homes of a sub"
   [homes sub]
-  (loop [all-homes '()
+  (loop [all-homes []
          curr sub]
     (if (= curr (homes curr))
       ; At the ur-home, the monad.
@@ -164,7 +171,10 @@
         "href" "styles.css"})
       (if static-html-mode
         ""
-        (xml-tag "script" {"src" "script.js"} ""))))
+        (str
+          ; Include JQuery from Google CDN.
+          (xml-tag "script" {"src" "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"} "")
+          (xml-tag "script" {"src" "script.js"} "")))))
     (body
       (if static-html-mode
         {}
@@ -175,14 +185,17 @@
                        (map #(format-as-string (% encodings))
                             (find-transitive-homes homes sub)))),
         })
+      (div (enable-debugging {"id" (top-insertion-id (sub encodings))})
+        (debug "Insert Top Segments Here"))
       (debug
         ; Debugging information appears up top.
         (div {"class" "debug"}
           (p {} "Triples")
           (ul (li (map print-triple (all-triples graph sub))))))
       ; The contents of the segment appear within a single div.
-      (div {"class" "segment"}
-        (div "")
+      (div {"class" "segment",
+            "id" (sub encodings)}
+        (div "") ; Empty div occupies first cell in grid.
         (div {}
           (let [title (get-unique graph sub "/essay/title")]
             (h1 {"class" "header"} title))
@@ -193,7 +206,9 @@
           (div {"class" "footer"}
             (let [cxns (build-cxns graph encodings sub)]
               (str/join " " (map #(generate-link %) cxns)))
-            ))))))
+            )))
+        (div (enable-debugging {"id" (bottom-insertion-id (sub encodings))})
+          (debug "Insert Bottom Segments Here")))))
 
 (defn generate-output
   "Convert a validated graph into the HTML, CSS, and JS files that compose the website"

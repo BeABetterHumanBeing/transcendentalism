@@ -47,10 +47,10 @@
   (str/join "\n"
     [(debug (css "div" {"class" "debug"}
       (font-family "Monaco" "monospace")
+      (font-size "small")
       (border-style "dashed")
       (border-width "1px")
-      (border-color "red")
-      (padding "5px" "10px" "5px")))
+      (border-color "red")))
     (media "min-width: 1000px"
       (css "div" {"class" "segment"}
         (display "grid")
