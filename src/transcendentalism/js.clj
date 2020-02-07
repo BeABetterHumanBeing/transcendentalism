@@ -19,12 +19,9 @@
     (str "'#' + " encoded_id)
     (str "'#' + " encoded_id " + '-" constant "'")))
 
-(defn format-as-string [value] (str "'" value "'"))
+(defn js-str [value] (str "'" value "'"))
 
-(defn format-as-array
-  "Formats a list of strings into an array of strings"
-  [values]
-  (str "[" (str/join "," values) "]"))
+(defn js-array [values] (str "[" (str/join "," values) "]"))
 
 (defn- loadwith
   "Function for replacing a div with the results of a load call"

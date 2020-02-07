@@ -171,8 +171,8 @@
       (button {"id" link-id,
                "class" "link_segment",
                "onclick" (call-js "openSegment"
-                           (format-as-string encoded_id)
-                           (format-as-string (:encoded_obj cxn)))}
+                           (js-str encoded_id)
+                           (js-str (:encoded_obj cxn)))}
               (:name cxn)))))
 
 (defn- generate-essay-segment
@@ -195,10 +195,10 @@
           {}
           {
             "onload" (call-js "segmentLoadedCallback"
-                       (format-as-string id)
-                       (format-as-string id)
-                       (format-as-array
-                         (map #(format-as-string (% encodings))
+                       (js-str id)
+                       (js-str id)
+                       (js-array
+                         (map #(js-str (% encodings))
                               (find-transitive-homes homes sub)))),
           })
         (if (= sub :monad)
