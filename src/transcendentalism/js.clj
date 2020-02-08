@@ -29,6 +29,10 @@
      (str/join "\n" contents)
      "}"]))
 
+(defn- jq
+ [content]
+ (str "$(" content ")"))
+
 (defn- loadwith
   "Function for replacing a div with the results of a load call"
   []
@@ -43,8 +47,8 @@
   "Inserts a divider between two segments if they are non-adjacent"
   []
   (js-fn "maybeInsertDivider" ["a" "b"]
-    "if(!($('#' + a + '-' + b).length)) {"
-      (str "$('<div class=\"ellipsis\"></div>').insertAfter(" (js-seg-id "a" "footer") ");")
+    (str "if(!(" (jq "'#' + a + '-' + b") ".length)) {")
+      (str (jq "'<div class=\"ellipsis\"></div>'") ".insertAfter(" (js-seg-id "a" "footer") ");")
     "}"))
 
 (defn- center-view-on
@@ -52,14 +56,14 @@
   []
   (js-fn "centerViewOn" ["encoded_id"]
     ; TODO(gierl): Change URL to new segment, caching old one in history.
-    (str "$(" (js-seg-id "encoded_id" "") ").get(0).scrollIntoView({behavior: 'smooth'});")))
+    (str (jq (js-seg-id "encoded_id" "")) ".get(0).scrollIntoView({behavior: 'smooth'});")))
 
 (defn- segment-loaded-callback
   "Function that is called when a segment's body is loaded"
   []
   (js-fn "segmentLoadedCallback" ["origin" "encoded_id" "homes"]
     "if (homes.length > 0) {"
-      (str "loadWith($(" (js-seg-id "encoded_id" "above") "), homes[0] + '.html', function() {")
+      (str "loadWith(" (jq (js-seg-id "encoded_id" "above")) ", homes[0] + '.html', function() {")
         "maybeInsertDivider(homes[0], encoded_id);"
         "segmentLoadedCallback(origin, homes[0], homes.slice(1, homes.length));"
       "});"
@@ -72,14 +76,14 @@
   []
   (js-fn "openSegment" ["encoded_from" "encoded_to"]
     (debug "console.log('Opening ' + encoded_to + ' from ' + encoded_from);")
-    (str "if ($(" (js-seg-id "encoded_to" "") ").length) {")
+    (str "if (" (jq (js-seg-id "encoded_to" "")) ".length) {")
       "centerViewOn(encoded_to);"
     "} else {"
       ; TODO(gierl): Clear all segments beneath encoded_from.
-      (str "$('<div id=\"insertion-pt\"></div>').insertAfter($(" (js-seg-id "encoded_from" "footer") "));")
-      "loadWith($('#insertion-pt'), encoded_to + '.html', function() {"
-        (str "$(" (js-seg-id "encoded_to" "above") ").remove();")
-        (str "$(" (js-seg-id "encoded_from" "buffer") ").remove();")
+      (str (jq "'<div id=\"insertion-pt\"></div>'") ".insertAfter(" (jq (js-seg-id "encoded_from" "footer")) ");")
+      "loadWith(" (jq "'#insertion-pt'") ", encoded_to + '.html', function() {"
+        (str (jq (js-seg-id "encoded_to" "above")) ".remove();")
+        (str (jq (js-seg-id "encoded_from" "buffer")) ".remove();")
         "centerViewOn(encoded_to);"
       "});"
     "}"))
