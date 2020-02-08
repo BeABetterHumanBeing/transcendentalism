@@ -23,11 +23,17 @@
 
 (defn js-array [values] (str "[" (str/join "," values) "]"))
 
-(defn- js-fn [name args & contents]
+(defn- js-fn
+  [name args & contents]
   (str/join "\n"
     [(str "function " name "(" (str/join ", " args) ") {")
      (str/join "\n" contents)
      "}"]))
+
+(defn- js-anon-fn
+  "Anonymous functions, typically used for callbacks"
+  [args & contents]
+  (apply js-fn "" args contents))
 
 (defn- js-if
   "Expects if-contents and else-contents to be vectors."
@@ -52,11 +58,12 @@
   "Function for replacing a div with the results of a load call"
   []
   (js-fn "loadWith" ["elem" "url" "callback"]
-    ; Courtesy Victor 'Chris' Cabral
-    "$.get(url,function(d){"
+    ; Courtesy Victor 'Chris' Cabral for original JS
+    "$.get(url, "
+    (js-anon-fn ["d"]
       "elem.replaceWith(d);"
-      "callback();"
-    "});"))
+      "callback();")
+    ");"))
 
 (defn- maybe-insert-divider
   "Inserts a divider between two segments if they are non-adjacent"
@@ -78,10 +85,11 @@
   []
   (js-fn "segmentLoadedCallback" ["origin" "encoded_id" "homes"]
     (js-if "homes.length > 0"
-      [(str "loadWith(" (jq (js-seg-id "encoded_id" "above")) ", homes[0] + '.html', function() {")
-         "maybeInsertDivider(homes[0], encoded_id);"
-         "segmentLoadedCallback(origin, homes[0], homes.slice(1, homes.length));"
-       "});"]
+      [(str "loadWith(" (jq (js-seg-id "encoded_id" "above")) ", homes[0] + '.html', ")
+        (js-anon-fn []
+          "maybeInsertDivider(homes[0], encoded_id);"
+          "segmentLoadedCallback(origin, homes[0], homes.slice(1, homes.length));")
+      ");"]
       ["centerViewOn(origin);"])))
 
 (defn- openSegment
@@ -93,11 +101,12 @@
       ["centerViewOn(encoded_to);"]
       ; TODO(gierl): Clear all segments beneath encoded_from.
       [(str (jq "'<div id=\"insertion-pt\"></div>'") ".insertAfter(" (jq (js-seg-id "encoded_from" "footer")) ");")
-       "loadWith(" (jq "'#insertion-pt'") ", encoded_to + '.html', function() {"
+       "loadWith(" (jq "'#insertion-pt'") ", encoded_to + '.html', "
+       (js-anon-fn []
          (str (jq (js-seg-id "encoded_to" "above")) ".remove();")
          (str (jq (js-seg-id "encoded_from" "buffer")) ".remove();")
-         "centerViewOn(encoded_to);"
-       "});"])))
+         "centerViewOn(encoded_to);")
+       ");"])))
 
 (defn script
   "Return the JavaScript for the website"
