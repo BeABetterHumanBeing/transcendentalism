@@ -77,6 +77,15 @@
         (c "elem.replaceWith" "d")
         (c "callback")))))
 
+(defn- on-pop-state
+  "Handles history changes"
+  []
+  (str
+    "window.onpopstate = "
+    (js-anon-fn ["event"]
+      (log "'OnPopState was Called: encoded_id: ' + event.state.encoded_id + ' title: ' + event.state.title")
+      (c "centerViewOn" "event.state.encoded_id" "event.state.title" "false"))))
+
 (defn- maybe-insert-divider
   "Inserts a divider between two segments if they are non-adjacent"
   []
@@ -89,13 +98,21 @@
 (defn- center-view-on
   "Moves the window to center the view on the start of a given segment"
   []
-  (js-fn "centerViewOn" ["encoded_id" "title"]
-    ; TODO(gierl): Change URL to new segment, caching old one in history.
+  (js-fn "centerViewOn" ["encoded_id" "title" "recordHistory"]
+    ; Change URL to new segment, caching old one in history.
+    (js-if "recordHistory"
+      [(c "window.history.pushState"
+         "{'encoded_id':encoded_id, 'title':title}"
+         (js-str "") "encoded_id + '.html'")])
     "document.title = title"
+    "window.history.scrollRestoration = 'manual'"
+    ; Scroll to the newly focused segment.
     (chain
       (jq (js-seg-id "encoded_id"))
       "get(0)"
-      (c "scrollIntoView" "{behavior: 'smooth'}"))))
+      ; TODO(gierl) Bug: When linking in partway with dot-dot-dot, scrolling
+      ; stops just before element comes into view.
+      (c "scrollIntoView" "{behavior: 'smooth', block: 'start'}"))))
 
 (defn- segment-loaded-callback
   "Function that is called when a segment's body is loaded"
@@ -104,10 +121,12 @@
     (js-if "homes.length > 0"
       [(c "loadWith" (jq (js-seg-id "encoded_id" "above")) "homes[0] + '.html'"
           (js-anon-fn []
+            (chain (jq (js-seg-id "homes[0]" "buffer")) (c "remove"))
             (c "maybeInsertDivider" "homes[0]" "encoded_id")
             (c "segmentLoadedCallback"
-              "origin" "homes[0]" (c "homes.slice" "1" "homes.length"))))]
-      [(c "centerViewOn" "origin" "origin_title")])))
+              "origin" "origin_title" "homes[0]"
+              (c "homes.slice" "1" "homes.length"))))]
+      [(c "centerViewOn" "origin" "origin_title" "true")])))
 
 (defn- openSegment
   "Function that is called when an internal link is clicked"
@@ -115,7 +134,7 @@
   (js-fn "openSegment" ["encoded_from" "encoded_to" "title_to"]
     (log "'Opening ' + encoded_to + ' from ' + encoded_from")
     (js-if (chain (jq (js-seg-id "encoded_to")) "length")
-      [(c "centerViewOn" "encoded_to" "title_to")]
+      [(c "centerViewOn" "encoded_to" "title_to" "true")]
       ; TODO(gierl): Clear all segments beneath encoded_from.
       [(chain
          (jq (js-str (xml-tag "div" {"id" "insertion-pt"} "")))
@@ -124,13 +143,14 @@
          (js-anon-fn []
            (chain (jq (js-seg-id "encoded_to" "above")) (c "remove"))
            (chain (jq (js-seg-id "encoded_from" "buffer")) (c "remove"))
-           (c "centerViewOn" "encoded_to" "title_to")))])))
+           (c "centerViewOn" "encoded_to" "title_to" "true")))])))
 
 (defn script
   "Return the JavaScript for the website"
   []
   (str/join "\n" [
     (loadwith)
+    (on-pop-state)
     (maybe-insert-divider)
     (center-view-on)
     (segment-loaded-callback)
