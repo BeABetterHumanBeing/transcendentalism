@@ -172,7 +172,8 @@
                "class" "link_segment",
                "onclick" (call-js "openSegment"
                            (js-str encoded_id)
-                           (js-str (:encoded_obj cxn)))}
+                           (js-str (:encoded_obj cxn))
+                           (js-str (:name cxn)))}
               (:name cxn)))))
 
 (defn- generate-essay-segment
@@ -196,6 +197,7 @@
           {
             "onload" (call-js "segmentLoadedCallback"
                        (js-str id)
+                       (js-str (get-unique graph sub "/essay/title"))
                        (js-str id)
                        (js-array
                          (map #(js-str (% encodings))

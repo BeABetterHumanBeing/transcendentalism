@@ -89,8 +89,9 @@
 (defn- center-view-on
   "Moves the window to center the view on the start of a given segment"
   []
-  (js-fn "centerViewOn" ["encoded_id"]
+  (js-fn "centerViewOn" ["encoded_id" "title"]
     ; TODO(gierl): Change URL to new segment, caching old one in history.
+    "document.title = title"
     (chain
       (jq (js-seg-id "encoded_id"))
       "get(0)"
@@ -99,22 +100,22 @@
 (defn- segment-loaded-callback
   "Function that is called when a segment's body is loaded"
   []
-  (js-fn "segmentLoadedCallback" ["origin" "encoded_id" "homes"]
+  (js-fn "segmentLoadedCallback" ["origin" "origin_title" "encoded_id" "homes"]
     (js-if "homes.length > 0"
       [(c "loadWith" (jq (js-seg-id "encoded_id" "above")) "homes[0] + '.html'"
           (js-anon-fn []
             (c "maybeInsertDivider" "homes[0]" "encoded_id")
             (c "segmentLoadedCallback"
               "origin" "homes[0]" (c "homes.slice" "1" "homes.length"))))]
-      [(c "centerViewOn" "origin")])))
+      [(c "centerViewOn" "origin" "origin_title")])))
 
 (defn- openSegment
   "Function that is called when an internal link is clicked"
   []
-  (js-fn "openSegment" ["encoded_from" "encoded_to"]
+  (js-fn "openSegment" ["encoded_from" "encoded_to" "title_to"]
     (log "'Opening ' + encoded_to + ' from ' + encoded_from")
     (js-if (chain (jq (js-seg-id "encoded_to")) "length")
-      [(c "centerViewOn" "encoded_to")]
+      [(c "centerViewOn" "encoded_to" "title_to")]
       ; TODO(gierl): Clear all segments beneath encoded_from.
       [(chain
          (jq (js-str (xml-tag "div" {"id" "insertion-pt"} "")))
@@ -123,7 +124,7 @@
          (js-anon-fn []
            (chain (jq (js-seg-id "encoded_to" "above")) (c "remove"))
            (chain (jq (js-seg-id "encoded_from" "buffer")) (c "remove"))
-           "centerViewOn(encoded_to)"))])))
+           (c "centerViewOn" "encoded_to" "title_to")))])))
 
 (defn script
   "Return the JavaScript for the website"
