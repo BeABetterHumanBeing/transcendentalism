@@ -14,10 +14,10 @@
 
 (defn- js-seg-id
   "Same as seg-id, but returns js code"
-  [encoded_id constant]
-  (if (empty? constant)
-    (str "'#' + " encoded_id)
-    (str "'#' + " encoded_id " + '-" constant "'")))
+  ([encoded_id]
+    (str "'#' + " encoded_id))
+  ([encoded_id constant]
+   (str "'#' + " encoded_id " + '-" constant "'")))
 
 (defn js-str [value] (str "'" value "'"))
 
@@ -37,18 +37,20 @@
 
 (defn- js-if
   "Expects if-contents and else-contents to be vectors."
-  [condition if-contents else-contents]
-  (str/join "\n"
-    (concat
-      [(str "if (" condition ") {")]
-      if-contents
-      (if (empty? else-contents)
-        ["}"]
-        ["} else {"])
-      else-contents
-      (if (empty? else-contents)
-        []
-        ["}"]))))
+  ([condition if-contents]
+    (str/join "\n"
+     (concat
+       [(str "if (" condition ") {")]
+       if-contents
+       ["}"])))
+  ([condition if-contents else-contents]
+   (str/join "\n"
+     (concat
+       [(str "if (" condition ") {")]
+       if-contents
+       ["} else {"]
+       else-contents
+       ["}"]))))
 
 (defn- jq
  [content]
@@ -70,15 +72,14 @@
   []
   (js-fn "maybeInsertDivider" ["a" "b"]
     (js-if (str "!(" (jq "'#' + a + '-' + b") ".length)")
-      [(str (jq "'<div class=\"ellipsis\"></div>'") ".insertAfter(" (js-seg-id "a" "footer") ");")]
-      [])))
+      [(str (jq "'<div class=\"ellipsis\"></div>'") ".insertAfter(" (js-seg-id "a" "footer") ");")])))
 
 (defn- center-view-on
   "Moves the window to center the view on the start of a given segment"
   []
   (js-fn "centerViewOn" ["encoded_id"]
     ; TODO(gierl): Change URL to new segment, caching old one in history.
-    (str (jq (js-seg-id "encoded_id" "")) ".get(0).scrollIntoView({behavior: 'smooth'});")))
+    (str (jq (js-seg-id "encoded_id")) ".get(0).scrollIntoView({behavior: 'smooth'});")))
 
 (defn- segment-loaded-callback
   "Function that is called when a segment's body is loaded"
@@ -97,7 +98,7 @@
   []
   (js-fn "openSegment" ["encoded_from" "encoded_to"]
     (debug "console.log('Opening ' + encoded_to + ' from ' + encoded_from);")
-    (js-if (str (jq (js-seg-id "encoded_to" "")) ".length")
+    (js-if (str (jq (js-seg-id "encoded_to")) ".length")
       ["centerViewOn(encoded_to);"]
       ; TODO(gierl): Clear all segments beneath encoded_from.
       [(str (jq "'<div id=\"insertion-pt\"></div>'") ".insertAfter(" (jq (js-seg-id "encoded_from" "footer")) ");")
