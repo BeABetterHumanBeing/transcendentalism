@@ -19,6 +19,10 @@
   ([encoded_id constant]
    (str "'#' + " encoded_id " + '-" constant "'")))
 
+(defn- js-stmt
+  [contents]
+  (str contents ";"))
+
 (defn js-str [value] (str "'" value "'"))
 
 (defn js-array [values] (str "[" (str/join "," values) "]"))
@@ -27,7 +31,7 @@
   [name args & contents]
   (str/join "\n"
     [(str "function " name "(" (str/join ", " args) ") {")
-     (str/join "\n" contents)
+     (str/join "\n" (map js-stmt contents))
      "}"]))
 
 (defn- js-anon-fn
@@ -41,15 +45,15 @@
     (str/join "\n"
      (concat
        [(str "if (" condition ") {")]
-       if-contents
+       (map js-stmt if-contents)
        ["}"])))
   ([condition if-contents else-contents]
    (str/join "\n"
      (concat
        [(str "if (" condition ") {")]
-       if-contents
+       (map js-stmt if-contents)
        ["} else {"]
-       else-contents
+       (map js-stmt else-contents)
        ["}"]))))
 
 (defn- jq
@@ -61,53 +65,53 @@
   []
   (js-fn "loadWith" ["elem" "url" "callback"]
     ; Courtesy Victor 'Chris' Cabral for original JS
-    "$.get(url, "
-    (js-anon-fn ["d"]
-      "elem.replaceWith(d);"
-      "callback();")
-    ");"))
+    (str "$.get(url, "
+      (js-anon-fn ["d"]
+        "elem.replaceWith(d)"
+        "callback()")
+      ")")))
 
 (defn- maybe-insert-divider
   "Inserts a divider between two segments if they are non-adjacent"
   []
   (js-fn "maybeInsertDivider" ["a" "b"]
     (js-if (str "!(" (jq "'#' + a + '-' + b") ".length)")
-      [(str (jq "'<div class=\"ellipsis\"></div>'") ".insertAfter(" (js-seg-id "a" "footer") ");")])))
+      [(str (jq "'<div class=\"ellipsis\"></div>'") ".insertAfter(" (js-seg-id "a" "footer") ")")])))
 
 (defn- center-view-on
   "Moves the window to center the view on the start of a given segment"
   []
   (js-fn "centerViewOn" ["encoded_id"]
     ; TODO(gierl): Change URL to new segment, caching old one in history.
-    (str (jq (js-seg-id "encoded_id")) ".get(0).scrollIntoView({behavior: 'smooth'});")))
+    (str (jq (js-seg-id "encoded_id")) ".get(0).scrollIntoView({behavior: 'smooth'})")))
 
 (defn- segment-loaded-callback
   "Function that is called when a segment's body is loaded"
   []
   (js-fn "segmentLoadedCallback" ["origin" "encoded_id" "homes"]
     (js-if "homes.length > 0"
-      [(str "loadWith(" (jq (js-seg-id "encoded_id" "above")) ", homes[0] + '.html', ")
+      [(str (str "loadWith(" (jq (js-seg-id "encoded_id" "above")) ", homes[0] + '.html', ")
         (js-anon-fn []
-          "maybeInsertDivider(homes[0], encoded_id);"
-          "segmentLoadedCallback(origin, homes[0], homes.slice(1, homes.length));")
-      ");"]
-      ["centerViewOn(origin);"])))
+          "maybeInsertDivider(homes[0], encoded_id)"
+          "segmentLoadedCallback(origin, homes[0], homes.slice(1, homes.length))")
+      ")")]
+      ["centerViewOn(origin)"])))
 
 (defn- openSegment
   "Function that is called when an internal link is clicked"
   []
   (js-fn "openSegment" ["encoded_from" "encoded_to"]
-    (debug "console.log('Opening ' + encoded_to + ' from ' + encoded_from);")
+    (debug "console.log('Opening ' + encoded_to + ' from ' + encoded_from)")
     (js-if (str (jq (js-seg-id "encoded_to")) ".length")
-      ["centerViewOn(encoded_to);"]
+      ["centerViewOn(encoded_to)"]
       ; TODO(gierl): Clear all segments beneath encoded_from.
-      [(str (jq "'<div id=\"insertion-pt\"></div>'") ".insertAfter(" (jq (js-seg-id "encoded_from" "footer")) ");")
-       "loadWith(" (jq "'#insertion-pt'") ", encoded_to + '.html', "
+      [(str (jq "'<div id=\"insertion-pt\"></div>'") ".insertAfter(" (jq (js-seg-id "encoded_from" "footer")) ")")
+       (str "loadWith(" (jq "'#insertion-pt'") ", encoded_to + '.html', "
        (js-anon-fn []
-         (str (jq (js-seg-id "encoded_to" "above")) ".remove();")
-         (str (jq (js-seg-id "encoded_from" "buffer")) ".remove();")
+         (str (jq (js-seg-id "encoded_to" "above")) ".remove()")
+         (str (jq (js-seg-id "encoded_from" "buffer")) ".remove()")
          "centerViewOn(encoded_to);")
-       ");"])))
+       ")")])))
 
 (defn script
   "Return the JavaScript for the website"
