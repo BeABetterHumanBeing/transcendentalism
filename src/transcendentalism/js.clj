@@ -29,6 +29,21 @@
      (str/join "\n" contents)
      "}"]))
 
+(defn- js-if
+  "Expects if-contents and else-contents to be vectors."
+  [condition if-contents else-contents]
+  (str/join "\n"
+    (concat
+      [(str "if (" condition ") {")]
+      if-contents
+      (if (empty? else-contents)
+        ["}"]
+        ["} else {"])
+      else-contents
+      (if (empty? else-contents)
+        []
+        ["}"]))))
+
 (defn- jq
  [content]
  (str "$(" content ")"))
@@ -47,9 +62,9 @@
   "Inserts a divider between two segments if they are non-adjacent"
   []
   (js-fn "maybeInsertDivider" ["a" "b"]
-    (str "if(!(" (jq "'#' + a + '-' + b") ".length)) {")
-      (str (jq "'<div class=\"ellipsis\"></div>'") ".insertAfter(" (js-seg-id "a" "footer") ");")
-    "}"))
+    (js-if (str "!(" (jq "'#' + a + '-' + b") ".length)")
+      [(str (jq "'<div class=\"ellipsis\"></div>'") ".insertAfter(" (js-seg-id "a" "footer") ");")]
+      [])))
 
 (defn- center-view-on
   "Moves the window to center the view on the start of a given segment"
@@ -62,31 +77,27 @@
   "Function that is called when a segment's body is loaded"
   []
   (js-fn "segmentLoadedCallback" ["origin" "encoded_id" "homes"]
-    "if (homes.length > 0) {"
-      (str "loadWith(" (jq (js-seg-id "encoded_id" "above")) ", homes[0] + '.html', function() {")
-        "maybeInsertDivider(homes[0], encoded_id);"
-        "segmentLoadedCallback(origin, homes[0], homes.slice(1, homes.length));"
-      "});"
-    "} else {"
-      "centerViewOn(origin);"
-    "}"))
+    (js-if "homes.length > 0"
+      [(str "loadWith(" (jq (js-seg-id "encoded_id" "above")) ", homes[0] + '.html', function() {")
+         "maybeInsertDivider(homes[0], encoded_id);"
+         "segmentLoadedCallback(origin, homes[0], homes.slice(1, homes.length));"
+       "});"]
+      ["centerViewOn(origin);"])))
 
 (defn- openSegment
   "Function that is called when an internal link is clicked"
   []
   (js-fn "openSegment" ["encoded_from" "encoded_to"]
     (debug "console.log('Opening ' + encoded_to + ' from ' + encoded_from);")
-    (str "if (" (jq (js-seg-id "encoded_to" "")) ".length) {")
-      "centerViewOn(encoded_to);"
-    "} else {"
+    (js-if (str (jq (js-seg-id "encoded_to" "")) ".length")
+      ["centerViewOn(encoded_to);"]
       ; TODO(gierl): Clear all segments beneath encoded_from.
-      (str (jq "'<div id=\"insertion-pt\"></div>'") ".insertAfter(" (jq (js-seg-id "encoded_from" "footer")) ");")
-      "loadWith(" (jq "'#insertion-pt'") ", encoded_to + '.html', function() {"
-        (str (jq (js-seg-id "encoded_to" "above")) ".remove();")
-        (str (jq (js-seg-id "encoded_from" "buffer")) ".remove();")
-        "centerViewOn(encoded_to);"
-      "});"
-    "}"))
+      [(str (jq "'<div id=\"insertion-pt\"></div>'") ".insertAfter(" (jq (js-seg-id "encoded_from" "footer")) ");")
+       "loadWith(" (jq "'#insertion-pt'") ", encoded_to + '.html', function() {"
+         (str (jq (js-seg-id "encoded_to" "above")) ".remove();")
+         (str (jq (js-seg-id "encoded_from" "buffer")) ".remove();")
+         "centerViewOn(encoded_to);"
+       "});"])))
 
 (defn script
   "Return the JavaScript for the website"
