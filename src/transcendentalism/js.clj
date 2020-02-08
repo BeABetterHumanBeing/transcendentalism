@@ -39,6 +39,11 @@
   [args & contents]
   (apply js-fn "" args contents))
 
+(defn- c
+  "Call that JS function!"
+  [fn-name & args]
+  (str fn-name "(" (str/join ", " args) ")"))
+
 (defn- js-if
   "Expects if-contents and else-contents to be vectors."
   ([condition if-contents]
@@ -60,58 +65,65 @@
  [content]
  (str "$(" content ")"))
 
+(defn- log [content] (c "console.log" content))
+
 (defn- loadwith
   "Function for replacing a div with the results of a load call"
   []
   (js-fn "loadWith" ["elem" "url" "callback"]
     ; Courtesy Victor 'Chris' Cabral for original JS
-    (str "$.get(url, "
+    (c "$.get" "url"
       (js-anon-fn ["d"]
-        "elem.replaceWith(d)"
-        "callback()")
-      ")")))
+        (c "elem.replaceWith" "d")
+        (c "callback")))))
 
 (defn- maybe-insert-divider
   "Inserts a divider between two segments if they are non-adjacent"
   []
   (js-fn "maybeInsertDivider" ["a" "b"]
-    (js-if (str "!(" (chain (jq "'#' + a + '-' + b") "length") ")")
-      [(chain (jq "'<div class=\"ellipsis\"></div>'") (str "insertAfter(" (js-seg-id "a" "footer") ")"))])))
+    (js-if (c "!" (chain (jq "'#' + a + '-' + b") "length"))
+      [(chain
+         (jq (js-str (xml-tag "div" {"class" "ellipsis"} "")))
+         (c "insertAfter" (js-seg-id "a" "footer")))])))
 
 (defn- center-view-on
   "Moves the window to center the view on the start of a given segment"
   []
   (js-fn "centerViewOn" ["encoded_id"]
     ; TODO(gierl): Change URL to new segment, caching old one in history.
-    (chain (jq (js-seg-id "encoded_id")) "get(0)" "scrollIntoView({behavior: 'smooth'})")))
+    (chain
+      (jq (js-seg-id "encoded_id"))
+      "get(0)"
+      (c "scrollIntoView" "{behavior: 'smooth'}"))))
 
 (defn- segment-loaded-callback
   "Function that is called when a segment's body is loaded"
   []
   (js-fn "segmentLoadedCallback" ["origin" "encoded_id" "homes"]
     (js-if "homes.length > 0"
-      [(str "loadWith(" (jq (js-seg-id "encoded_id" "above")) ", homes[0] + '.html', "
-        (js-anon-fn []
-          "maybeInsertDivider(homes[0], encoded_id)"
-          "segmentLoadedCallback(origin, homes[0], homes.slice(1, homes.length))")
-      ")")]
-      ["centerViewOn(origin)"])))
+      [(c "loadWith" (jq (js-seg-id "encoded_id" "above")) "homes[0] + '.html'"
+          (js-anon-fn []
+            (c "maybeInsertDivider" "homes[0]" "encoded_id")
+            (c "segmentLoadedCallback"
+              "origin" "homes[0]" (c "homes.slice" "1" "homes.length"))))]
+      [(c "centerViewOn" "origin")])))
 
 (defn- openSegment
   "Function that is called when an internal link is clicked"
   []
   (js-fn "openSegment" ["encoded_from" "encoded_to"]
-    (debug "console.log('Opening ' + encoded_to + ' from ' + encoded_from)")
+    (log "'Opening ' + encoded_to + ' from ' + encoded_from")
     (js-if (chain (jq (js-seg-id "encoded_to")) "length")
-      ["centerViewOn(encoded_to)"]
+      [(c "centerViewOn" "encoded_to")]
       ; TODO(gierl): Clear all segments beneath encoded_from.
-      [(chain (jq "'<div id=\"insertion-pt\"></div>'") (str "insertAfter(" (jq (js-seg-id "encoded_from" "footer")) ")"))
-       (str "loadWith(" (jq "'#insertion-pt'") ", encoded_to + '.html', "
-       (js-anon-fn []
-         (chain (jq (js-seg-id "encoded_to" "above")) "remove()")
-         (chain (jq (js-seg-id "encoded_from" "buffer")) "remove()")
-         "centerViewOn(encoded_to)")
-       ")")])))
+      [(chain
+         (jq (js-str (xml-tag "div" {"id" "insertion-pt"} "")))
+         (c "insertAfter" (jq (js-seg-id "encoded_from" "footer"))))
+       (c "loadWith" (jq "'#insertion-pt'") "encoded_to + '.html'"
+         (js-anon-fn []
+           (chain (jq (js-seg-id "encoded_to" "above")) (c "remove"))
+           (chain (jq (js-seg-id "encoded_from" "buffer")) (c "remove"))
+           "centerViewOn(encoded_to)"))])))
 
 (defn script
   "Return the JavaScript for the website"
