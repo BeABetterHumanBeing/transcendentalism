@@ -211,7 +211,6 @@
                   "class" "footer"}
               (let [cxns (build-cxns graph encodings sub)]
                 (str/join " " (map #(generate-link id %) cxns))))
-            ; TODO(gierl): Add a cute watermark to the background of the buffer.
             (div {"id" (seg-id id "buffer"),
                   "class" "buffer"})))))))
 

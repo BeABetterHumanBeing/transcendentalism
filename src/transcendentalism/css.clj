@@ -41,6 +41,14 @@
 
 (defn- text-align [contents] (style "text-align" contents))
 
+(defn- background-image [contents] (style "background-image" contents))
+
+(defn- background-position [contents] (style "background-position" contents))
+
+(defn- background-repeat [contents] (style "background-repeat" contents))
+
+(defn- background-size [& contents] (style "background-size" (str/join " " contents)))
+
 (defn- grid-template-columns
   [& contents]
   (style "grid-template-columns" (str/join " " contents)))
@@ -101,4 +109,9 @@
       (margin "100px" "400px"))
     (css "div" {"class" "buffer"}
       (height "600px")
-      (debug (border-style "dashed")))]))
+      (debug (border-style "dashed"))
+      ; TODO(gierl): Swap out crown image for the official one.
+      (background-image "url(\"../resources/crown_tmp.png\")")
+      (background-position "center")
+      (background-repeat "no-repeat")
+      (background-size "300px" "200px"))]))
