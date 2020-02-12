@@ -3,6 +3,7 @@
     [clojure.string :as str]))
 
 (use 'transcendentalism.css
+     'transcendentalism.encoding
      'transcendentalism.graph
      'transcendentalism.js
      'transcendentalism.xml)
@@ -13,30 +14,6 @@
   (if debugging-mode
     (assoc attrs "class" (str (attrs "class" "") " debug"))
     attrs))
-
-; TODO(gierl): Come up with an encoding scheme that's more stable, so that links
-; aren't broken every time the website is regenerated.
-(defn- gen-key
-  "Generates a random alphanumeric key of given length"
-  [len]
-  (let [my-key (char-array len)]
-    (dotimes [n len]
-      (aset my-key n (.charAt "0123456789abcdefghijklmnopqrstuvwxyz" (rand-int 36))))
-    (apply str (seq my-key))))
-
-(defn- create-encodings
-  "Produces a sub->key map of encodings for the nodes in a graph"
-  [graph]
-  (reduce
-    (fn [codings sub]
-      (assoc
-        codings
-        sub
-        (if (= sub :monad)
-          "index"
-          (gen-key 8))))
-    {}
-    (all-nodes graph)))
 
 (defn- create-homes
   "Produces a sub->home map of /essay/flow/home"
@@ -234,7 +211,7 @@
 (defn generate-output
   "Convert a validated graph into the HTML, CSS, and JS files that compose the website"
   [graph]
-  (let [encodings (create-encodings graph),
+  (let [encodings (create-encodings (all-nodes graph)),
         homes (create-homes graph)]
     (clear-directory "output")
     (doseq
