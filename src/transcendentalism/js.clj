@@ -93,7 +93,7 @@
     (js-if (c "!" (chain (jq "'#' + a + '-' + b") "length"))
       [(chain
          (jq (js-str (xml-tag "div" {"class" "ellipsis"} "")))
-         (c "insertAfter" (js-seg-id "a" "footer")))])))
+         (c "insertAfter" (js-seg-id "a")))])))
 
 (defn- center-view-on
   "Moves the window to center the view on the start of a given segment"
@@ -136,14 +136,23 @@
     (log "'Opening ' + encoded_to + ' from ' + encoded_from")
     (js-if (chain (jq (js-seg-id "encoded_to")) "length")
       [(c "centerViewOn" "encoded_to" "title_to" "true")]
-      ; TODO(gierl): Clear all segments beneath encoded_from.
-      [(chain
+      [(chain (jq (js-seg-id "encoded_from")) (c "nextAll") (c "remove"))
+       (chain
          (jq (js-str (xml-tag "div" {"id" "insertion-pt"} "")))
-         (c "insertAfter" (jq (js-seg-id "encoded_from" "footer"))))
+         (c "insertAfter"
+           (chain (jq (js-seg-id "encoded_from" "footer"))
+             ; Go up until it'll be inserted as a sibling to the current segment.
+             (c "parent") (c "parent"))))
        (c "loadWith" (jq "'#insertion-pt'") "encoded_to + '.html'"
          (js-anon-fn []
            (chain (jq (js-seg-id "encoded_to" "above")) (c "remove"))
            (chain (jq (js-seg-id "encoded_from" "buffer")) (c "remove"))
+           ; Remove the first three elements that have been inserted:
+           ; The link to the stylesheet, jQuery, and the javascript. All are
+           ; redundant.
+           (chain (jq (js-seg-id "encoded_from")) (c "next") (c "remove"))
+           (chain (jq (js-seg-id "encoded_from")) (c "next") (c "remove"))
+           (chain (jq (js-seg-id "encoded_from")) (c "next") (c "remove"))
            (c "centerViewOn" "encoded_to" "title_to" "true")))])))
 
 (defn script
