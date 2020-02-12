@@ -17,6 +17,8 @@
     (->Triple :monad-contents "/item/contains" ^{:order 2} [:monad-intro-quote])
     (types :monad-image "/item/image")
     (->Triple :monad-image "/item/image/url" (svg-to-image "monad" 800 800 'svg-monad))
+    (->Triple :monad-image "/item/image/alt_text"
+      "Animation of the star flower, with changes cascading inwards to a central point")
     (types :monad-intro-quote "/item/quote")
     (->Triple :monad-intro-quote "/item/quote/text"
       (clojure.string/join " "

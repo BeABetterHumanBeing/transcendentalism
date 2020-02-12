@@ -141,6 +141,13 @@
     :required true,
     :unique true,
   },
+  "/item/image/alt_text" {
+    :description "Alt text of image",
+    :domain-type "/type/item/image",
+    :range-type :string,
+    :required true,
+    :unique true,
+  },
 })
 
 (defn- type-to-supertypes

@@ -91,10 +91,12 @@
   "Returns the HTML corresponding to a /type/item/image"
   [triples]
   (div {"class" "content"}
-    (let [image-url-triple (first (filter #(= (:pred %) "/item/image/url") triples))]
+    (let [triples-by-pred (collect-triples-by-pred triples),
+          image-url-triple (triples-by-pred "/item/image/url"),
+          image-alt-text-triple (triples-by-pred "/item/image/alt_text")]
       ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
-      ; TODO(gierl): Add alt-text.
-      (img {"src" (:obj image-url-triple)}))))
+      (img {"src" (:obj image-url-triple),
+            "alt" (:obj image-alt-text-triple)}))))
 
 (defn- generate-item
   "Returns the HTML corresponding to a /type/item"
