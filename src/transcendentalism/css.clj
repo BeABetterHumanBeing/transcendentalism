@@ -1,16 +1,20 @@
 (ns transcendentalism.css
   (:require [clojure.string :as str]))
 
-(use 'transcendentalism.xml)
+(use 'transcendentalism.color
+     'transcendentalism.xml)
 
 (defn- css
   [tagname attrs & contents]
   (let [selector
-        (if (contains? attrs "class")
-          (str "." (attrs "class"))
-          (if (contains? attrs "id")
-            (str "#" (attrs "id"))
-            ""))]
+        (str (if (contains? attrs "class")
+               (str "." (attrs "class"))
+               (if (contains? attrs "id")
+                 (str "#" (attrs "id"))
+                 ""))
+             (if (contains? attrs "selector")
+               (str ":" (attrs "selector"))
+               ""))]
     (str/join "\n" [(str tagname selector) " {" (str/join "\n" contents) "}"])))
 
 (defn- style [name content] (str name ": " content ";"))
@@ -22,6 +26,8 @@
 (defn- font-size [contents] (style "font-size" contents))
 
 (defn- color [contents] (style "color" contents))
+
+(defn- text-decoration [contents] (style "text-decoration" contents))
 
 (defn- border [contents] (style "border" contents))
 
@@ -94,17 +100,18 @@
     (css "p" {"class" "author"}
       (text-align "right"))
     (css "div" {"class" "footer"} "")
-    ; TODO(gierl): Stylize buttons with hover attributes.
     (css "button" {"class" "link_segment"}
       (border "none")
       (color "blue")
       (font-size "medium"))
     (css "button" {"class" "up"}
-      (color "red"))
+      (color (to-css-color purple)))
     (css "button" {"class" "down"}
-      (color "yellow"))
+      (color (to-css-color red)))
     (css "button" {"class" "across"}
-      (color "green"))
+      (color (to-css-color yellow)))
+    (css "button" {"selector" "hover"}
+      (text-decoration "underline"))
     (css "div" {"class" "ellipsis"}
       (border-style "none" "dashed" "none" "none")
       (border-width "10px")

@@ -3,7 +3,8 @@
             [java-time :as jt]
             [clojure.math.numeric-tower :as math]))
 
-(use 'transcendentalism.graph
+(use 'transcendentalism.color
+     'transcendentalism.graph
      'transcendentalism.schema
      'transcendentalism.xml)
 
@@ -31,31 +32,6 @@
   [dim k t]
   (let [hours-before-present (hours-ago t)]
     (* (max-r dim) (Math/pow k hours-before-present))))
-
-(defrecord Color [red green blue])
-
-(defn- to-css-color
-  "Converts an RGB color to its hex equivalent"
-  [color]
-  (str "rgb(" (:red color) "," (:green color) "," (:blue color) ")"))
-
-(defn- interpolate
-  "Interpolates between two numbers. Returns a when ratio=0, b when =1."
-  [a b ratio]
-  (+ (* b ratio) (* a (- 1 ratio))))
-
-(defn- avg-and-whiten
-  "Averages together a collection of colors, and slightly whitens the result."
-  [colors]
-  (let [num (count colors),
-        avg-r (/ (apply + (map :red colors)) num),
-        avg-g (/ (apply + (map :green colors)) num),
-        avg-b (/ (apply + (map :blue colors)) num),
-        ratio 0.15,
-        r (int (interpolate avg-r 255 ratio)),
-        g (int (interpolate avg-g 255 ratio)),
-        b (int (interpolate avg-b 255 ratio))]
-    (->Color r g b)))
 
 (defn- get-objs
   "Returns the objects of the triples on the given subjects with the given pred"
@@ -144,10 +120,6 @@
                   result subs)))
             )
           {} ordered-chunks)
-        primary-colors [
-          (->Color 248 18 7), (->Color 244 134 4), (->Color 245 186 5),
-          (->Color 41 219 0), (->Color 7 202 248), (->Color 60 53 254),
-          (->Color 200 83 254)],
         color-values (reduce
           (fn [result subs]
             (let [leads-to-objs (get-objs graph subs "/event/leads_to")]
@@ -157,7 +129,7 @@
                   [result pair] (assoc result (first pair) (second pair)))
                   result (map vector subs primary-colors))
                 (if (and (= (count subs) 1) (= (first subs) :monad))
-                  (assoc result :monad (->Color 255 255 255))
+                  (assoc result :monad white)
                   (reduce (fn
                     [result sub]
                     (assoc result sub
