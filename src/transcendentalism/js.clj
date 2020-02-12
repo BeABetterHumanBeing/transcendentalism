@@ -106,13 +106,14 @@
          (js-str "") "encoded_id + '.html'")])
     "document.title = title"
     "window.history.scrollRestoration = 'manual'"
-    ; Scroll to the newly focused segment.
-    (chain
-      (jq (js-seg-id "encoded_id"))
-      "get(0)"
-      ; TODO(gierl) Bug: When linking in partway with dot-dot-dot, scrolling
-      ; stops just before element comes into view.
-      (c "scrollIntoView" "{behavior: 'smooth', block: 'start'}"))))
+    ; Scroll to the newly focused segment after a tiny delay for the element to
+    ; get fetched.
+    (c "setTimeout"
+      (str "() => " (chain
+        (jq (js-seg-id "encoded_id"))
+        "get(0)"
+        (c "scrollIntoView" "{behavior: 'smooth', block: 'start'}")))
+      "50")))
 
 (defn- segment-loaded-callback
   "Function that is called when a segment's body is loaded"
