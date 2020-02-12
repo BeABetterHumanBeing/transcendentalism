@@ -85,6 +85,12 @@
       (border "none")
       (color "blue")
       (font-size "medium"))
+    (css "button" {"class" "up"}
+      (color "red"))
+    (css "button" {"class" "down"}
+      (color "yellow"))
+    (css "button" {"class" "across"}
+      (color "green"))
     ; TODO(gierl): Find a way s.t. the ellipsis is horizontally centered, even
     ; when the overall element is less than 800px wide.
     (css "div" {"class" "ellipsis"}

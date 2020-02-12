@@ -121,7 +121,7 @@
         (assert false
           (str "ERROR - Type " (:pred (first item-type)) "not supported"))))))
 
-(defrecord Cxn [encoded_obj name])
+(defrecord Cxn [encoded_obj name type])
 
 (defn- build-cxns
   "Determines the connections available from a given sub"
@@ -132,28 +132,33 @@
             encoded_obj (obj encodings),
             title (get-unique graph obj "/essay/title")]
         (case (:pred triple)
-          ; TODO(gierl) Differentiate the types of flows by their types.
-          "/essay/flow/home" (->Cxn encoded_obj title)
-          "/essay/flow/next" (->Cxn encoded_obj title)
-          "/essay/flow/see_also" (->Cxn encoded_obj title)
-          (assert false (str "ERROR - Type" (:pred triple) "not supported")))))
+          "/essay/flow/home" (->Cxn encoded_obj title "up")
+          "/essay/flow/next" (->Cxn encoded_obj title "down")
+          "/essay/flow/see_also" (->Cxn encoded_obj title "across")
+          (assert false (str "ERROR - Type " (:pred triple) " not supported")))))
     (filter #(str/starts-with? (:pred %) "/essay/flow") (all-triples graph sub))))
 
 (defn- generate-link
   "Returns the HTML for a link in the footer"
   [encoded_id, cxn]
-  (let [link-id (str encoded_id "-" (:encoded_obj cxn))]
+  (let [link-id (str encoded_id "-" (:encoded_obj cxn)),
+        name (str (case (:type cxn)
+                    "up" "&#8593 ",
+                    "down" "&#8595 ",
+                    "across" "&#8594 ",
+                    "")
+                  (:name cxn))]
     (if static-html-mode
       (a {"id" link-id,
           "href" (str (:encoded_obj cxn) ".html")}
-        (:name cxn))
+        name)
       (button {"id" link-id,
-               "class" "link_segment",
+               "class" (str "link_segment " (:type cxn)),
                "onclick" (call-js "openSegment"
                            (js-str encoded_id)
                            (js-str (:encoded_obj cxn))
                            (js-str (:name cxn)))}
-              (:name cxn)))))
+              name))))
 
 (defn- generate-essay-segment
   "Returns the HTML corresponding to a /type/essay_segment"
