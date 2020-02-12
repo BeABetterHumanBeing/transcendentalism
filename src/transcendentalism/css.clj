@@ -49,6 +49,8 @@
 
 (defn- background-size [& contents] (style "background-size" (str/join " " contents)))
 
+(defn- transform [contents] (style "transform" contents))
+
 (defn- grid-template-columns
   [& contents]
   (style "grid-template-columns" (str/join " " contents)))
@@ -99,14 +101,13 @@
       (color "yellow"))
     (css "button" {"class" "across"}
       (color "green"))
-    ; TODO(gierl): Find a way s.t. the ellipsis is horizontally centered, even
-    ; when the overall element is less than 800px wide.
     (css "div" {"class" "ellipsis"}
       (border-style "none" "dashed" "none" "none")
       (border-width "10px")
       (border-color "black")
       (height "100px")
-      (margin "100px" "400px"))
+      (margin "100px" "auto" "100px")
+      (transform "translate(-50%, -50%)"))
     (css "div" {"class" "buffer"}
       (height "600px")
       (debug (border-style "dashed"))
