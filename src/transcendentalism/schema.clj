@@ -177,6 +177,7 @@
   (is-type? [schema pred] "Whether the given predicate is a type")
   (pred-required-by-type? [schema pred type]
     "Whether the given predicate is required by the given type")
+  (required-preds [schema type] "Returns the required preds of the given type")
   (is-unique? [schema pred] "Whether the given predicate is unique")
   (get-supertypes [schema type] "Returns the set of supertypes of a given type")
   (get-domain-type [schema pred] "Returns the domain type, or nil")
@@ -192,6 +193,14 @@
         (and (= (:domain-type pred-data) type)
           (contains? pred-data :required)
           (pred-data :required))))
+    (required-preds [schema type]
+      (reduce
+        (fn [result pred]
+          (if (pred-required-by-type? schema pred type)
+            (conj result pred)
+            result))
+        #{}
+        (keys schema-data)))
     (is-unique? [schema pred]
       (let [pred-data (schema-data pred)]
         (and (contains? pred-data :unique)
@@ -215,18 +224,6 @@
         inferred-types (apply set/union (map #(type-to-supertypes %) full-types)),
         all-types (set/union inferred-types full-types)]
     (map #(->Triple sub % nil) all-types)))
-
-; TODO(gierl) Fold this into Schema protocol
-(defn- required-preds
-  "Returns the predicates that are required by a given type"
-  [schema type]
-  (reduce
-    (fn [result pred]
-      (if (pred-required-by-type? schema pred type)
-        (conj result pred)
-        result))
-    #{}
-    (keys schema-data)))
 
 (defn- pred-counts
   "Returns a map associating predicates with the number of times they appear"
@@ -349,38 +346,37 @@
     #{}
     (all-triples graph)))
 
-; TODO(gierl) Refactor to make use of Relation
 (defn- ordered-sets-have-order?
   "Validates that all /item/contains triples have an order"
   [schema graph]
-  (:error-statuses (reduce
-    (fn [result triple]
-      (let [metadata (meta (:obj triple)),
-            return-error (fn [error-msg]
-                           (assoc result
-                             :error-statuses
-                             (conj (:error-statuses result) error-msg)))]
-        (if (not (contains? metadata :order))
-          (return-error (str (print-triple triple) " is missing :order metadata"))
-          (let [ordinal (:order metadata)]
-            (if (not (number? ordinal))
-              (return-error (str (print-triple triple) " has order " ordinal
-                                 ", which is not a number"))
-              (let [sub-to-ordinals (:sub-to-ordinals result),
-                    sub (:sub triple),
-                    ordinals (if (contains? sub-to-ordinals sub)
-                                (sub sub-to-ordinals)
-                                []),
-                    new-ordinals (conj ordinals ordinal)]
-                (if (not (apply distinct? new-ordinals))
-                  (return-error (str (print-triple triple) " has ordinal "
-                                     ordinal ", which is not distinct"))
-                  (assoc result
-                    :sub-to-ordinals
-                    (assoc (:sub-to-ordinals result)
-                      sub new-ordinals)))))))))
-    {:sub-to-ordinals {}, :error-statuses #{}}
-    (all-triples graph "/item/contains"))))
+  (let [relation (get-relation graph "/item/contains")]
+    (reduce
+      (fn [result sub]
+        (let [metadata (map meta (all-objs relation sub)),
+              metadata-errors
+                (reduce
+                  (fn [result m-data]
+                    (if (contains? m-data :order)
+                      result
+                      (conj result (str sub " is missing :order metadata"))))
+                  #{} metadata)]
+          (if (empty? metadata-errors)
+            (let [ordinals (map :order metadata),
+                  ordinal-errors
+                    (reduce
+                      (fn [result ordinal]
+                        (if (number? ordinal)
+                          result
+                          (conj result
+                            (str sub " has ordinal " ordinal ", but it's not a number"))))
+                      #{} ordinals)]
+              (if (empty? ordinal-errors)
+                (if (or (empty? ordinals) (apply distinct? ordinals))
+                  result
+                  (conj result (str sub " has non-distict ordinals: " ordinals)))
+                (set/union result ordinal-errors)))
+            (set/union result metadata-errors))))
+      #{} (participant-nodes relation))))
 
 (defn- events-obey-causality?
   "Validates that events' timestamps are strickly before their leads_to"
