@@ -419,6 +419,19 @@
               (str sub " leads to no event, but does not occur at 'present'"))))
         #{} (get-sinks relation)))))
 
+(defn- home-is-monad-rooted-dag?
+  "Validates that /essay/flow/home results in a monad-rooted DAG"
+  [schema graph]
+  (let [relation (get-relation graph "/essay/flow/home"),
+        sinks (get-sinks relation)]
+    (reduce
+      (fn [result sub]
+        (conj result
+          (if (= sub :monad)
+            nil
+            (str sub "'s /essay/flow/home does not lead to :monad"))))
+      #{} sinks)))
+
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]
@@ -427,10 +440,10 @@
       (fn [result validation-check]
         (set/union result (validation-check schema graph)))
       #{}
-      ; TODO(gierl): Validate that /essay/flow/home is a monad-rooted DAG.
       [preds-all-valid? required-preds-exist? unique-preds-unique?
        required-supertypes-exist? domain-type-exists? range-type-exists?
-       ordered-sets-have-order? events-obey-causality? events-occur-in-past?]),
+       ordered-sets-have-order? events-obey-causality? events-occur-in-past?
+       home-is-monad-rooted-dag?]),
      ; nil ends up in the set, and ought to be weeded out.
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))

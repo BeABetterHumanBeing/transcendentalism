@@ -101,7 +101,12 @@
             (apply disj result (all-objs relation sub)))
           (into #{} subs) subs)))
     (get-sinks [relation]
-      (filter #(empty? (all-objs relation %)) (participant-nodes relation)))))
+      (filter
+        (fn [sub]
+          (let [objs (all-objs relation sub)]
+            (or (empty? objs)
+                (= objs [sub]))))
+        (participant-nodes relation)))))
 
 (defn construct-graph
   "Constructs a graph from a set of triples"
