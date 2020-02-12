@@ -33,6 +33,8 @@
 
 (defn- height [contents] (style "height" contents))
 
+(defn- width [contents] (style "width" contents))
+
 (defn- padding [& contents] (style "padding" (str/join " " contents)))
 
 (defn- margin [& contents] (style "margin" (str/join " " contents)))
@@ -79,6 +81,8 @@
         (grid-template-columns "100px" "auto" "100px")))
     (css "h1" {"class" "header"}
       (text-align "center"))
+    (css "img" {}
+      (width "100%"))
     (debug (css "div" {"class" "content"}
       (border-style "dashed")
       (border-width "1px")))
@@ -107,7 +111,7 @@
       (border-color "black")
       (height "100px")
       (margin "100px" "auto" "100px")
-      (transform "translate(-50%, -50%)"))
+      (transform "translate(-50%, 0%)"))
     (css "div" {"class" "buffer"}
       (height "600px")
       (debug (border-style "dashed"))
