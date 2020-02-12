@@ -77,7 +77,31 @@
   (get-unique [graph sub pred]
     "Returns the obj of the unique triple on sub with pred, or nil if none exists")
   (get-time [graph sub]
-    "Returns the time associated with the given sub, or nil if it has none"))
+    "Returns the time associated with the given sub, or nil if it has none")
+  (get-relation [graph pred] "Returns the sugraph defined by the given pred"))
+
+; A Relation is the subgraph composed of only a single predicate.
+(defprotocol Relation
+  (participant-nodes [relation] "Returns all nodes in the relation")
+  (all-objs [relation sub] "Returns all the objects of a given sub's relationship")
+  (get-sources [relation] "Returns all subs that are not objects in the relation")
+  (get-sinks [relation] "Returns all subs that are not subjects in the relation"))
+
+(defn- construct-relation
+  [relation-map]
+  (reify Relation
+    (participant-nodes [relation]
+      (keys relation-map))
+    (all-objs [relation sub]
+      (relation-map sub))
+    (get-sources [relation]
+      (let [subs (participant-nodes relation)]
+        (reduce
+          (fn [result sub]
+            (apply disj result (all-objs relation sub)))
+          (into #{} subs) subs)))
+    (get-sinks [relation]
+      (filter #(empty? (all-objs relation %)) (participant-nodes relation)))))
 
 (defn construct-graph
   "Constructs a graph from a set of triples"
@@ -105,7 +129,21 @@
           (if (empty? triples) nil (:obj (first triples)))))
       (get-time [graph sub]
         (let [value (get-unique graph sub "/event/time")]
-          (if (nil? value) nil (to-time value)))))))
+          (if (nil? value) nil (to-time value))))
+      (get-relation [graph pred]
+        (construct-relation
+          (reduce
+            (fn [result triple]
+              (let [sub (:sub triple),
+                    obj (:obj triple)]
+                (assoc result
+                  sub (if (contains? result sub)
+                        (conj (result sub) obj)
+                        [obj])
+                  obj (if (contains? result obj)
+                        (result obj)
+                        []))))
+            {} (all-triples graph pred)))))))
 
 ; TODO(gierl): Add chronological orders (i.e. vectors, with tail-append attached
 ; to timestamp).

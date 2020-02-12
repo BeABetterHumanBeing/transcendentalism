@@ -216,6 +216,7 @@
         all-types (set/union inferred-types full-types)]
     (map #(->Triple sub % nil) all-types)))
 
+; TODO(gierl) Fold this into Schema protocol
 (defn- required-preds
   "Returns the predicates that are required by a given type"
   [schema type]
@@ -348,6 +349,7 @@
     #{}
     (all-triples graph)))
 
+; TODO(gierl) Refactor to make use of Relation
 (defn- ordered-sets-have-order?
   "Validates that all /item/contains triples have an order"
   [schema graph]
@@ -390,9 +392,32 @@
         (conj result
           (if (before? sub-time obj-time)
             nil
-            (str :sub " leads_to " :obj ", but doesn't occur before it")))))
+            (str (:sub triple) " leads_to " (:obj triple)
+                 ", but doesn't occur before it")))))
     #{}
     (all-triples graph "/event/leads_to")))
+
+(defn- events-occur-in-past?
+  "Validates that /event/leads_to goes from past to present"
+  [schema graph]
+  (let [relation (get-relation graph "/event/leads_to")]
+    (set/union
+      ; Check that the sources are in the past.
+      (reduce
+        (fn [result sub]
+          (conj result
+            (if (= (at (get-time graph sub)) "past")
+              nil
+              (str sub " has no events leading to it, but does not occur at 'past'"))))
+        #{} (get-sources relation))
+      ; Check that the sinks are in the present.
+      (reduce
+        (fn [result sub]
+          (conj result
+            (if (= (at (get-time graph sub)) "present")
+              nil
+              (str sub " leads to no event, but does not occur at 'present'"))))
+        #{} (get-sinks relation)))))
 
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
@@ -403,10 +428,9 @@
         (set/union result (validation-check schema graph)))
       #{}
       ; TODO(gierl): Validate that /essay/flow/home is a monad-rooted DAG.
-      ; TODO(gierl): Validate that /event/leads_to is single-past, >=1 present.
       [preds-all-valid? required-preds-exist? unique-preds-unique?
        required-supertypes-exist? domain-type-exists? range-type-exists?
-       ordered-sets-have-order? events-obey-causality?]),
+       ordered-sets-have-order? events-obey-causality? events-occur-in-past?]),
      ; nil ends up in the set, and ought to be weeded out.
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))
