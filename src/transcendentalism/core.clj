@@ -41,6 +41,8 @@
     (types :welcome "/essay")
     (->Triple :welcome "/essay/contains" :welcome-contents)
     (->Triple :welcome "/essay/title" "Welcome")
+    (->Triple :welcome "/essay/label" :under-construction)
+    (->Triple :welcome "/essay/flow/see_also" :connections)
     (types :welcome-contents "/item/ordered_set")
     ; TODO(gierl) apologize for shitty website, explain purpose of site
     (->Triple :welcome "/essay/flow/home" :monad)
@@ -50,6 +52,8 @@
     (types :i-am-dan "/essay")
     (->Triple :i-am-dan "/essay/contains" :i-am-dan-contents)
     (->Triple :i-am-dan "/essay/title" "I Am Dan")
+    (->Triple :i-am-dan "/essay/label" :under-construction)
+    (->Triple :i-am-dan "/essay/flow/see_also" :connections)
     (types :i-am-dan-contents "/item/ordered_set")
     ; TODO(gierl) brief history
     (->Triple :i-am-dan "/essay/flow/home" :monad)
@@ -59,6 +63,8 @@
     (types :connections "/essay")
     (->Triple :connections "/essay/contains" :connections-contents)
     (->Triple :connections "/essay/title" "Connections")
+    (->Triple :connections "/essay/label" :under-construction)
+    (->Triple :connections "/essay/flow/see_also" :connections)
     (types :connections-contents "/item/ordered_set")
     ; TODO(gierl) contact information, respective responsibilities
     (->Triple :connections "/essay/flow/home" :monad)
@@ -68,6 +74,8 @@
     (types :apologies "/essay")
     (->Triple :apologies "/essay/contains" :apologies-contents)
     (->Triple :apologies "/essay/title" "Apologies")
+    (->Triple :apologies "/essay/label" :under-construction)
+    (->Triple :apologies "/essay/flow/see_also" :connections)
     (types :apologies-contents "/item/ordered_set")
     ; TODO(gierl) apologize
     (->Triple :apologies "/essay/flow/home" :monad)

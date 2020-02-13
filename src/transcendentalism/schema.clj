@@ -27,7 +27,7 @@
     :domain-type "/type/item",
     :range-type [
       ; Content is tangential to the main flow.
-      :NOTE]
+      :note]
   },
   "/item/footnote" {
     :description "Relation to a piece of footnote content",
@@ -119,11 +119,13 @@
         :description "Symbol label that ascribes a metadata to the essay segment",
         :range-type [
           ; Content is about surrounding content.
-          :META
+          :meta
+          ; Content is under construction.
+          :under-construction
           ; Content is religious.
-          :RELIGION
+          :religion
           ; Content is political.
-          :POLITICS]
+          :politics]
       },
     }))
 

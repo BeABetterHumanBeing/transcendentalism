@@ -8,13 +8,6 @@
      'transcendentalism.js
      'transcendentalism.xml)
 
-(defn- enable-debugging
-  "Adds the 'debug' class to attrs if debugging is enabled"
-  [attrs]
-  (if debugging-mode
-    (assoc attrs "class" (str (attrs "class" "") " debug"))
-    attrs))
-
 (defn- create-homes
   "Produces a sub->home map of /essay/flow/home"
   [graph]
@@ -61,6 +54,8 @@
 (defn- hr [] (str "<hr>"))
 
 (defn- h1 [attrs contents] (xml-tag "h1" attrs contents))
+
+(defn- h2 [attrs contents] (xml-tag "h2" attrs contents))
 
 (defn- img [attrs] (xml-open "img" attrs))
 
@@ -160,6 +155,15 @@
                            (js-str (:name cxn)))}
               name))))
 
+(defn- generate-under-construction-splash
+  "Returns a div that shows that the segment is under construction"
+  []
+  (div {"class" "construction-back"}
+    (div {"class" "construction-front"}
+      (h2 {} "UNDER CONSTRUCTION")
+      (div {"class" "construction-separator"})
+      (p {} "Connect with me if you want me to expedite its work"))))
+
 (defn- generate-essay-segment
   "Returns the HTML corresponding to a /type/essay"
   [graph encodings homes sub]
@@ -189,13 +193,8 @@
           })
         (if (= sub :monad)
           "" ; No segments are inserted above the monad.
-          (div (enable-debugging {"id" (seg-id id "above")})
+          (div {"id" (seg-id id "above")}
             (debug "Insert Top Segments Here")))
-        (debug
-          ; Debugging information appears up top.
-          (div {"class" "debug"}
-            (p {} "Triples")
-            (ul (li (map print-triple (all-triples graph sub))))))
         ; The contents of the segment appear within a single div.
         (div {"class" "segment",
               "id" id}
@@ -204,8 +203,12 @@
             (let [title (get-unique graph sub "/essay/title")]
               (h1 {"class" "header"} title))
             (hr)
-            (let [content-sub (get-unique graph sub "/essay/contains")]
-              (generate-item graph content-sub))
+            (let [labels (into #{}
+                           (map :obj (all-triples graph sub "/essay/label")))]
+              (if (contains? labels :under-construction)
+                (generate-under-construction-splash)
+                (let [content-sub (get-unique graph sub "/essay/contains")]
+                  (generate-item graph content-sub))))
             (hr)
             (div {"id" (seg-id id "footer"),
                   "class" "footer"}

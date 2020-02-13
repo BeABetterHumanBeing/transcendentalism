@@ -19,9 +19,13 @@
 
 (defn- style [name content] (str name ": " content ";"))
 
+; TODO(gierl) Condense the below functions using macros.
+
 (defn- font-family [& contents] (style "font-family" (str/join ", " contents)))
 
 (defn- font-style [contents] (style "font-style" contents))
+
+(defn- font-weight [contents] (style "font-weight" contents))
 
 (defn- font-size [contents] (style "font-size" contents))
 
@@ -41,13 +45,25 @@
 
 (defn- width [contents] (style "width" contents))
 
+(defn- top [contents] (style "top" contents))
+
+(defn- left [contents] (style "left" contents))
+
 (defn- padding [& contents] (style "padding" (str/join " " contents)))
 
 (defn- margin [& contents] (style "margin" (str/join " " contents)))
 
 (defn- display [contents] (style "display" contents))
 
+(defn- position [contents] (style "position" contents))
+
 (defn- text-align [contents] (style "text-align" contents))
+
+(defn- vertical-align [contents] (style "vertical-align" contents))
+
+(defn- background [contents] (style "background" contents))
+
+(defn- background-color [contents] (style "background-color" contents))
 
 (defn- background-image [contents] (style "background-image" contents))
 
@@ -58,6 +74,9 @@
 (defn- background-size [& contents] (style "background-size" (str/join " " contents)))
 
 (defn- transform [contents] (style "transform" contents))
+
+(defn- repeating-linear-gradient [& contents]
+  (str "repeating-linear-gradient(" (str/join ",\n" contents) ");"))
 
 (defn- grid-template-columns
   [& contents]
@@ -112,6 +131,39 @@
       (color (to-css-color yellow)))
     (css "button" {"selector" "hover"}
       (text-decoration "underline"))
+    (css "div" {"class" "construction-back"}
+      (let [yellow (to-css-color yellow),
+            black (to-css-color black),
+            white (to-css-color white)]
+        (background
+          (repeating-linear-gradient
+            "45deg"
+            black (str black " 20px")
+            (str white " 20px") (str white " 25px")
+            (str yellow " 25px") (str yellow " 45px")
+            (str white " 45px") (str white " 50px"))))
+      (width "700px")
+      (height "300px")
+      (margin "50px" "50px")
+      (position "relative"))
+    (css "div" {"class" "construction-separator"}
+      (width "460px")
+      (margin "0" "0" "0" "70px")
+      (border-style "dashed")
+      (border-width "1px")
+      (border-color "gray"))
+    (css "div" {"class" "construction-front"}
+      (background-color (to-css-color white))
+      (width "600px")
+      (height "170px")
+      (position "absolute")
+      (top "50%")
+      (left "50%")
+      (margin "-100px" "0" "0" "-300px")
+      (padding "30px" "0" "0" "0")
+      (font-family "Arial Black" "Gadget" "sans-serif")
+      (font-weight "bold")
+      (text-align "center"))
     (css "div" {"class" "ellipsis"}
       (border-style "none" "dashed" "none" "none")
       (border-width "10px")
