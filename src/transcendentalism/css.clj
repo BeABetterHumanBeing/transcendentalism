@@ -99,11 +99,13 @@
     (media "min-width: 1000px"
       (css "div" {"class" "segment"}
         (display "grid")
-        (grid-template-columns "auto" "800px" "auto")))
+        (grid-template-columns "auto" "800px" "auto")
+        (padding "50px" "0" "0" "0")))
     (media "max-width: 1000px"
       (css "div" {"class" "segment"}
         (display "grid")
-        (grid-template-columns "100px" "auto" "100px")))
+        (grid-template-columns "100px" "auto" "100px")
+        (padding "50px" "0" "0" "0")))
     (css "h1" {"class" "header"}
       (text-align "center"))
     (css "img" {}
@@ -168,8 +170,8 @@
       (border-style "none" "dashed" "none" "none")
       (border-width "10px")
       (border-color "black")
-      (height "100px")
-      (margin "100px" "auto" "100px")
+      (height "150px")
+      (margin "80px" "auto" "30px")
       (transform "translate(-50%, 0%)"))
     (css "div" {"class" "buffer"}
       (height "600px")
