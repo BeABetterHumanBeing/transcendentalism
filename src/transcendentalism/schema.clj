@@ -5,16 +5,7 @@
 
 ; The schema determines what predicates are allowed in the graph, as well as all
 ; constraints that bound the triples to which those predicates belong.
-; TODO(gierl): Pull out the symmetrically-typed relations into their omn
-; 'specializations' under that type. It acts as a 'class' of knowledge for that
-; type, which the main body of schema-data inter-operates with.
-(def schema-data {
-  "/type/event" {
-    :description "An event",
-  },
-  "/type/essay_segment" {
-    :description "Nodes that are externally link-able",
-  },
+(def extra-schema {
   "/type/item" {
     :description "A piece of content",
   },
@@ -22,71 +13,9 @@
     :description "Textual content",
     :super-type "/type/item",
   },
-  "/type/item/quote" {
-    :description "A quote",
-    :super-type "/type/item",
-  },
-  "/type/item/image" {
-    :description "Image content",
-    :super-type "/type/item",
-  },
   "/type/item/ordered_set" {
     :description "An ordered collection of items",
     :super-type "/type/item",
-  },
-  "/event/leads_to" {
-    :description "Relation from one event to its subsequent impacts",
-    :domain-type "/type/event",
-    :range-type "/type/event",
-  },
-  "/event/time" {
-    :description "When an event happened",
-    :domain-type "/type/event",
-    :range-type :time,
-    :required true,
-    :unique true,
-  },
-  "/essay/title" {
-    :description "The text that appears centered at the top of an essay segment",
-    :domain-type "/type/essay_segment",
-    :range-type :string,
-    :required true,
-    :unique true,
-  },
-  "/essay/flow/next" {
-    :description "Relation to the next essay segment",
-    :domain-type "/type/essay_segment",
-    :range-type "/type/essay_segment",
-  },
-  "/essay/flow/home" {
-    :description "Relation to the monad",
-    :domain-type "/type/essay_segment",
-    :range-type "/type/essay_segment",
-    :required true,
-    :unique true,
-  },
-  "/essay/flow/see_also" {
-    :description "Internal link to another essay segment",
-    :domain-type "/type/essay_segment",
-    :range-type "/type/essay_segment",
-  },
-  "/essay/contains" {
-    :description "Relation from an essay segment to the item it contains",
-    :domain-type "/type/essay_segment",
-    :range-type "/type/item",
-    :unique true,
-    :required true,
-  },
-  "/essay/label" {
-    :description "Symbol label that ascribes a metadata to the essay segment",
-    :domain-type "/type/essay_segment",
-    :range-type [
-      ; Content is about surrounding content.
-      :META
-      ; Content is religious.
-      :RELIGION
-      ; Content is political.
-      :POLITICS]
   },
   "/item/contains" {
     :description "Relation to a child node of an ordered set",
@@ -108,7 +37,7 @@
   "/item/internal_link" {
     :description "Relation to another essay segment",
     :domain-type "/type/item",
-    :range-type "/type/essay_segment",
+    :range-type "/type/essay",
   },
   "/item/text/text" {
     :description "The contents of a text item",
@@ -116,39 +45,131 @@
     :range-type :string,
     :required true,
   },
-  "/item/quote/text" {
-    :description "The text contents of the quote",
-    :domain-type "/type/item/quote",
-    :range-type :string,
-    :required true,
-    :unique true,
-  },
-  "/item/quote/author" {
-    :description "To whom the quote is attributed",
-    :domain-type "/type/item/quote",
-    :range-type :string,
-    :unique true,
-  },
   "/item/text/url" {
     :description "External URL to which a piece of text is linked",
     :domain-type "/type/item/text",
     :range-type :string,
   },
-  "/item/image/url" {
-    :description "URL of image",
-    :domain-type "/type/item/image",
-    :range-type :string,
-    :required true,
-    :unique true,
-  },
-  "/item/image/alt_text" {
-    :description "Alt text of image",
-    :domain-type "/type/item/image",
-    :range-type :string,
-    :required true,
-    :unique true,
-  },
 })
+
+(defn- schematize-type
+  "Expands a partial schema of a given type"
+  [type type-schema schema]
+  (let [full-type (str "/type" type)]
+    (assoc
+      (reduce-kv
+        (fn [result k v]
+          (assoc result
+            (str type k)
+            (assoc v
+              :domain-type
+              full-type
+              :range-type
+              (if (contains? v :range-type) (:range-type v) full-type))))
+        {} schema)
+      full-type type-schema)))
+
+(def event-schema
+  (schematize-type "/event"
+    {
+      :description "An event",
+    }
+    {
+      "/leads_to" {
+        :description "Relation from one event to its subsequent impacts",
+      },
+      "/time" {
+        :description "When an event happened",
+        :range-type :time,
+        :required true,
+        :unique true,
+      },
+    }))
+
+(def essay-schema
+  (schematize-type "/essay"
+    {
+      :description "Nodes that are externally link-able",
+    }
+    {
+      "/title" {
+        :description "The text that appears centered at the top of an essay segment",
+        :range-type :string,
+        :required true,
+        :unique true,
+      },
+      "/flow/next" {
+        :description "Relation to the next essay segment",
+      },
+      "/flow/home" {
+        :description "Relation to the monad",
+        :required true,
+        :unique true,
+      },
+      "/flow/see_also" {
+        :description "Internal link to another essay segment",
+      },
+      "/contains" {
+        :description "Relation from an essay segment to the item it contains",
+        :range-type "/type/item",
+        :unique true,
+        :required true,
+      },
+      "/label" {
+        :description "Symbol label that ascribes a metadata to the essay segment",
+        :range-type [
+          ; Content is about surrounding content.
+          :META
+          ; Content is religious.
+          :RELIGION
+          ; Content is political.
+          :POLITICS]
+      },
+    }))
+
+(def image-schema
+  (schematize-type "/item/image"
+    {
+      :description "Image content",
+      :super-type "/type/item",
+    }
+    {
+      "/url" {
+        :description "URL of image",
+        :range-type :string,
+        :required true,
+        :unique true,
+      },
+      "/alt_text" {
+        :description "Alt text of image",
+        :range-type :string,
+        :required true,
+        :unique true,
+      },
+    }))
+
+(def quote-schema
+  (schematize-type "/item/quote"
+    {
+      :description "A quote",
+      :super-type "/type/item",
+    }
+    {
+      "/text" {
+        :description "The text contents of the quote",
+        :range-type :string,
+        :required true,
+        :unique true,
+      },
+      "/author" {
+        :description "To whom the quote is attributed",
+        :range-type :string,
+        :unique true,
+      },
+    }))
+
+(def schema-data
+  (merge extra-schema essay-schema event-schema image-schema quote-schema))
 
 (defn- type-to-supertypes
   "Returns a set of all transitive supertypes of a given type"

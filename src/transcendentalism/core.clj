@@ -9,7 +9,7 @@
 ; This essay_segment serves as the default entry point into the graph.
 (def monad
   (flatten [
-    (types :monad "/essay_segment")
+    (types :monad "/essay")
     (->Triple :monad "/essay/contains" :monad-contents)
     (->Triple :monad "/essay/title" "Transcendental Metaphysics")
     (types :monad-contents "/item/ordered_set")
@@ -38,7 +38,7 @@
 (def about
   (flatten [
     ; Welcome
-    (types :welcome "/essay_segment")
+    (types :welcome "/essay")
     (->Triple :welcome "/essay/contains" :welcome-contents)
     (->Triple :welcome "/essay/title" "Welcome")
     (types :welcome-contents "/item/ordered_set")
@@ -47,7 +47,7 @@
     (->Triple :welcome "/essay/flow/next" :i-am-dan)
 
     ; I Am Dan
-    (types :i-am-dan "/essay_segment")
+    (types :i-am-dan "/essay")
     (->Triple :i-am-dan "/essay/contains" :i-am-dan-contents)
     (->Triple :i-am-dan "/essay/title" "I Am Dan")
     (types :i-am-dan-contents "/item/ordered_set")
@@ -56,7 +56,7 @@
     (->Triple :i-am-dan "/essay/flow/next" :connections)
 
     ; Connections
-    (types :connections "/essay_segment")
+    (types :connections "/essay")
     (->Triple :connections "/essay/contains" :connections-contents)
     (->Triple :connections "/essay/title" "Connections")
     (types :connections-contents "/item/ordered_set")
@@ -65,7 +65,7 @@
     (->Triple :connections "/essay/flow/next" :apologies)
 
     ; Apologies
-    (types :apologies "/essay_segment")
+    (types :apologies "/essay")
     (->Triple :apologies "/essay/contains" :apologies-contents)
     (->Triple :apologies "/essay/title" "Apologies")
     (types :apologies-contents "/item/ordered_set")

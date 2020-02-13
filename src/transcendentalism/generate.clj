@@ -22,7 +22,7 @@
     (fn [result sub]
       (assoc result sub
         (get-unique graph sub "/essay/flow/home")))
-    {} (all-nodes graph "/type/essay_segment")))
+    {} (all-nodes graph "/type/essay")))
 
 (defn- find-transitive-homes
   "Returns the transitive closure of all homes of a sub"
@@ -161,7 +161,7 @@
               name))))
 
 (defn- generate-essay-segment
-  "Returns the HTML corresponding to a /type/essay_segment"
+  "Returns the HTML corresponding to a /type/essay"
   [graph encodings homes sub]
   (html
     (head (str
@@ -221,7 +221,7 @@
         homes (create-homes graph)]
     (clear-directory "output")
     (doseq
-      [sub (all-nodes graph "/type/essay_segment")]
+      [sub (all-nodes graph "/type/essay")]
       (let
         [filename (str "output/" (sub encodings) ".html")]
         (do
