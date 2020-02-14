@@ -29,6 +29,19 @@
         (into [] (map #(->Triple % "/essay/label" :under-construction) subs))
         (into [] (map #(->Triple % "/essay/flow/see_also" :connections) subs))))))
 
+(defn- essay
+  "Adds triples to create an essay"
+  [sub title content-subs]
+  (let [contents-sub (keyword (str (name sub) "-contents"))]
+    [(types sub "/essay")
+     (->Triple sub "/essay/contains" contents-sub)
+     (->Triple sub "/essay/title" title)
+     (types contents-sub "/item/ordered_set")
+     (map #(->Triple contents-sub
+                     "/item/contains"
+                     ^{:order %} [(get content-subs %)])
+          (range (count content-subs)))]))
+
 (defn- essay-series
   "Adds triples connecting a series of essay segments. The first segment will
    be used as the home for the rest of the series."
@@ -44,12 +57,13 @@
 ; This essay_segment serves as the default entry point into the graph.
 (def monad
   (flatten [
-    (types :monad "/essay")
-    (->Triple :monad "/essay/contains" :monad-contents)
-    (->Triple :monad "/essay/title" "Transcendental Metaphysics")
-    (types :monad-contents "/item/ordered_set")
-    (->Triple :monad-contents "/item/contains" ^{:order 1} [:monad-image])
-    (->Triple :monad-contents "/item/contains" ^{:order 2} [:monad-intro-quote])
+    (essay :monad "Transcendental Metaphysics" [:monad-image :monad-intro-quote])
+    ; (types :monad "/essay")
+    ; (->Triple :monad "/essay/contains" :monad-contents)
+    ; (->Triple :monad "/essay/title" "Transcendental Metaphysics")
+    ; (types :monad-contents "/item/ordered_set")
+    ; (->Triple :monad-contents "/item/contains" ^{:order 1} [:monad-image])
+    ; (->Triple :monad-contents "/item/contains" ^{:order 2} [:monad-intro-quote])
     (types :monad-image "/item/image")
     (->Triple :monad-image "/item/image/url" (svg-to-image "monad" 800 800 'svg-monad))
     (->Triple :monad-image "/item/image/alt_text"
@@ -75,31 +89,19 @@
     (directive-under-construction :welcome :i-am-dan :connections :apologies)
 
     ; Welcome
-    (types :welcome "/essay")
-    (->Triple :welcome "/essay/contains" :welcome-contents)
-    (->Triple :welcome "/essay/title" "Welcome")
-    (types :welcome-contents "/item/ordered_set")
+    (essay :welcome "Welcome" [])
     ; TODO(gierl) apologize for shitty website, explain purpose of site
 
     ; I Am Dan
-    (types :i-am-dan "/essay")
-    (->Triple :i-am-dan "/essay/contains" :i-am-dan-contents)
-    (->Triple :i-am-dan "/essay/title" "I Am Dan")
-    (types :i-am-dan-contents "/item/ordered_set")
+    (essay :i-am-dan "I Am Dan" [])
     ; TODO(gierl) brief history
 
     ; Connections
-    (types :connections "/essay")
-    (->Triple :connections "/essay/contains" :connections-contents)
-    (->Triple :connections "/essay/title" "Connections")
-    (types :connections-contents "/item/ordered_set")
+    (essay :connections "Connections" [])
     ; TODO(gierl) contact information, respective responsibilities
 
     ; Apologies
-    (types :apologies "/essay")
-    (->Triple :apologies "/essay/contains" :apologies-contents)
-    (->Triple :apologies "/essay/title" "Apologies")
-    (types :apologies-contents "/item/ordered_set")
+    (essay :apologies "Apologies" [])
     ; TODO(gierl) apologize
   ]))
 
