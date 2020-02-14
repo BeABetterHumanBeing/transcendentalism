@@ -1,9 +1,33 @@
-(ns transcendentalism.core)
+(ns transcendentalism.core
+  (:require [clojure.string :as str]))
+
 (use
   'transcendentalism.generate
   'transcendentalism.graph
   'transcendentalism.schema
   'transcendentalism.svg)
+
+(defn- apply-directives
+  "Processes collections of triples, applying any directives found therein"
+  [& colls]
+  (let [groups (group-by #(instance? transcendentalism.graph.Triple %) (flatten colls)),
+        triples (groups true),
+        directives (groups false)]
+    (reduce
+      (fn [result directive] (directive result))
+      triples directives)))
+
+(defn- directive-under-construction
+  "Returns a directive that labels the given subs as under construction"
+  [& sub]
+  (let [subs (into #{} sub)]
+    (fn [triples]
+      (concat
+        (filter #(or (not (contains? subs (:sub %)))
+                     (not (str/starts-with? (:pred %) "/essay/flow"))
+                     (= (:pred %) "/essay/flow/home")) triples)
+        (into [] (map #(->Triple % "/essay/label" :under-construction) subs))
+        (into [] (map #(->Triple % "/essay/flow/see_also" :connections) subs))))))
 
 (defn- essay-series
   "Adds triples connecting a series of essay segments. The first segment will
@@ -48,13 +72,12 @@
 (def about
   (flatten [
     (essay-series [:monad :welcome :i-am-dan :connections :apologies])
+    (directive-under-construction :welcome :i-am-dan :connections :apologies)
 
     ; Welcome
     (types :welcome "/essay")
     (->Triple :welcome "/essay/contains" :welcome-contents)
     (->Triple :welcome "/essay/title" "Welcome")
-    (->Triple :welcome "/essay/label" :under-construction)
-    (->Triple :welcome "/essay/flow/see_also" :connections)
     (types :welcome-contents "/item/ordered_set")
     ; TODO(gierl) apologize for shitty website, explain purpose of site
 
@@ -62,8 +85,6 @@
     (types :i-am-dan "/essay")
     (->Triple :i-am-dan "/essay/contains" :i-am-dan-contents)
     (->Triple :i-am-dan "/essay/title" "I Am Dan")
-    (->Triple :i-am-dan "/essay/label" :under-construction)
-    (->Triple :i-am-dan "/essay/flow/see_also" :connections)
     (types :i-am-dan-contents "/item/ordered_set")
     ; TODO(gierl) brief history
 
@@ -71,8 +92,6 @@
     (types :connections "/essay")
     (->Triple :connections "/essay/contains" :connections-contents)
     (->Triple :connections "/essay/title" "Connections")
-    (->Triple :connections "/essay/label" :under-construction)
-    (->Triple :connections "/essay/flow/see_also" :connections)
     (types :connections-contents "/item/ordered_set")
     ; TODO(gierl) contact information, respective responsibilities
 
@@ -80,13 +99,11 @@
     (types :apologies "/essay")
     (->Triple :apologies "/essay/contains" :apologies-contents)
     (->Triple :apologies "/essay/title" "Apologies")
-    (->Triple :apologies "/essay/label" :under-construction)
-    (->Triple :apologies "/essay/flow/see_also" :connections)
     (types :apologies-contents "/item/ordered_set")
     ; TODO(gierl) apologize
   ]))
 
-(def graph (construct-graph (concat monad about)))
+(def graph (construct-graph (apply-directives monad about)))
 
 (defn -main
   "Validates the website's graph, and generates its files"
