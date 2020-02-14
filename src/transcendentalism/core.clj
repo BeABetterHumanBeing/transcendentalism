@@ -5,6 +5,17 @@
   'transcendentalism.schema
   'transcendentalism.svg)
 
+(defn- essay-series
+  "Adds triples connecting a series of essay segments. The first segment will
+   be used as the home for the rest of the series."
+  [subs]
+  (let [home (first subs)]
+    (concat
+      (into [] (map #(->Triple % "/essay/flow/home" home) (rest subs)))
+      (into [] (map #(->Triple
+                      (get subs %) "/essay/flow/next" (get subs (inc %)))
+                    (range (dec (count subs))))))))
+
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
 (def monad
@@ -28,7 +39,6 @@
     (->Triple :monad-intro-quote "/item/quote/author" "Daniel Gierl")
     ; The monad is the only segment whose home is reflexive.
     (->Triple :monad "/essay/flow/home" :monad)
-    (->Triple :monad "/essay/flow/next" :welcome)
     ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
    ]))
 
@@ -37,6 +47,8 @@
 ; what I hope to do with it.
 (def about
   (flatten [
+    (essay-series [:monad :welcome :i-am-dan :connections :apologies])
+
     ; Welcome
     (types :welcome "/essay")
     (->Triple :welcome "/essay/contains" :welcome-contents)
@@ -45,8 +57,6 @@
     (->Triple :welcome "/essay/flow/see_also" :connections)
     (types :welcome-contents "/item/ordered_set")
     ; TODO(gierl) apologize for shitty website, explain purpose of site
-    (->Triple :welcome "/essay/flow/home" :monad)
-    (->Triple :welcome "/essay/flow/next" :i-am-dan)
 
     ; I Am Dan
     (types :i-am-dan "/essay")
@@ -56,8 +66,6 @@
     (->Triple :i-am-dan "/essay/flow/see_also" :connections)
     (types :i-am-dan-contents "/item/ordered_set")
     ; TODO(gierl) brief history
-    (->Triple :i-am-dan "/essay/flow/home" :monad)
-    (->Triple :i-am-dan "/essay/flow/next" :connections)
 
     ; Connections
     (types :connections "/essay")
@@ -67,8 +75,6 @@
     (->Triple :connections "/essay/flow/see_also" :connections)
     (types :connections-contents "/item/ordered_set")
     ; TODO(gierl) contact information, respective responsibilities
-    (->Triple :connections "/essay/flow/home" :monad)
-    (->Triple :connections "/essay/flow/next" :apologies)
 
     ; Apologies
     (types :apologies "/essay")
@@ -78,7 +84,6 @@
     (->Triple :apologies "/essay/flow/see_also" :connections)
     (types :apologies-contents "/item/ordered_set")
     ; TODO(gierl) apologize
-    (->Triple :apologies "/essay/flow/home" :monad)
   ]))
 
 (def graph (construct-graph (concat monad about)))
