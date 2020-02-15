@@ -363,7 +363,9 @@
         (conj result
           (if (or (nil? range-type)
                   (and (= range-type :string)
-                       (string? (:obj triple)))
+                       (or (string? (:obj triple))
+                           (and (vector? (:obj triple))
+                                (string? (first (:obj triple))))))
                   (and (= range-type :time)
                        (is-valid-time (:obj triple)))
                   (and (string? range-type)

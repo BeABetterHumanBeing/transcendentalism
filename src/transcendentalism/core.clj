@@ -102,13 +102,22 @@
 
     (types :welcome-2 "/item/text")
     (->Triple :welcome-2 "/item/text/text"
-      (str/join " " [
+      ^{:order 0}
+      [(str/join " " [
         "I apologize in advance for any issues you may encounter with the"
         "unorthodox structure of the site; I've been using it as a playground"
         "for some of the more experimental ideas I've been toying with. I wrote the"
-        "whole thing from scratch [1], and as a backend engineer, this was a"
-        "recipe for, ummm, how shall we say, *curious* frontend design choices."
-      ]))
+        "whole thing"
+      ])])
+    (->Triple :welcome-2 "/item/text/text"
+      ^{:order 1}
+      ["from scratch [1],"])
+    (->Triple :welcome-2 "/item/text/text"
+      ^{:order 2}
+      [(str/join " " [
+        "and as a backend engineer, this was a recipe for, ummm, how shall we"
+        "say, *curious* frontend design choices."
+      ])])
 
     (types :footnote-1 "/item/text")
     (->Triple :footnote-1 "/item/text/text"
@@ -119,14 +128,21 @@
 
     (types :welcome-3 "/item/text")
     (->Triple :welcome-3 "/item/text/text"
-      (str/join " " [
+      ^{:order 0}
+      [(str/join " " [
         "The whole site is structured as a big, tangled graph. What you're"
         "reading here is as close to a proper 'beginning' as it gets, and there"
         "is nothing out there that resembles an 'end'. My intention is that"
         "wandering through these pages will be an experience not unlike wandering"
         "through a garden maze; getting lost is half the fun, and there are all"
-        "kinds of treasure [2] hidden away for you to find."
-      ]))
+        "kinds of"
+      ])])
+    (->Triple :welcome-3 "/item/text/text"
+      ^{:order 1}
+      ["treasure [2]"])
+    (->Triple :welcome-3 "/item/text/text"
+      ^{:order 2}
+      ["hidden away for you to find."])
 
     (types :footnote-2 "/item/text")
     (->Triple :footnote-2 "/item/text/text"

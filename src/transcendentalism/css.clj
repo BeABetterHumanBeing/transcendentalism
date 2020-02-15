@@ -116,7 +116,7 @@
     (css "div" {"class" "text"}
       (padding "10px" "25px"))
     (css "div" {"class" "emoji"}
-      (padding "10px")
+      (padding "5px")
       (font-size "100px")
       (text-align "center"))
     (css "div" {"class" "quote"}

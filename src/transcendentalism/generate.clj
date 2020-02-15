@@ -27,6 +27,13 @@
       all-homes
       (recur (conj all-homes (homes curr)) (homes curr)))))
 
+(defn- filter-and-order
+  "Filters a group of triples by predicate, and orders them by metadata"
+  [triples pred]
+  (sort #(< ((meta (:obj %1)) :order 0)
+            ((meta (:obj %2)) :order 0))
+        (filter #(= (:pred %) pred) triples)))
+
 (defn- clear-directory
   [dirname]
   (doseq [file (.listFiles (io/as-file dirname))]
@@ -41,6 +48,8 @@
 (defn- div [attrs & contents] (xml-tag "div" attrs (apply str contents)))
 
 (defn- p [attrs contents] (xml-tag "p" attrs contents))
+
+(defn- span [attrs contents] (xml-tag "span" attrs contents))
 
 (defn- a [attrs contents] (xml-tag "a" attrs contents))
 
@@ -64,12 +73,15 @@
 (defn- generate-item-text
   "Returns the HTML corresponding to a /type/item/text"
   [triples]
-  (let [text-triples (filter #(= (:pred %) "/item/text/text") triples),
-        text (str/join "\n" (map :obj text-triples))]
+  (let [text-triples (filter-and-order triples "/item/text/text")]
     (div {"class" "content text"}
-      ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
-      ; TODO(gierl): Handle /item/text/url
-      text)))
+      (str/join "\n"
+        (map
+          (fn [triple]
+            (let [obj (:obj triple),
+                  text (if (vector? obj) (first obj) obj)]
+              (span {} text)))
+          text-triples)))))
 
 (defn- generate-item-big-emoji
   [triples]
@@ -106,9 +118,7 @@
   (letfn [(generate-item-ordered-set [triples]
             (div {"class" "content"}
               ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
-              (let [contents (sort #(< (:order (meta (:obj %1)))
-                                       (:order (meta (:obj %2))))
-                                   (filter #(= (:pred %) "/item/contains") triples))]
+              (let [contents (filter-and-order triples "/item/contains")]
                 (apply str (map #(generate-item graph (first (:obj %))) contents)))))]
     (let [triples (all-triples graph sub),
           item-type (filter #(and (str/starts-with? (:pred %) "/type")
