@@ -170,9 +170,8 @@
       "unorthodox structure of the site; I've been using it as a playground"
       "for some of the more experimental ideas I've been toying with. I wrote the"
       "whole thing"
-      ; TODO(gierl) Get the footnotes x-ref'd, with [N].
       (tangent :footnote-1 "from scratch")
-      ", and as a backend engineer, this was a recipe for, ummm, how shall we"
+      "and, as a backend engineer, this was a recipe for, ummm, how shall we"
       "say, *curious* frontend design choices.")
 
     (footnote :welcome :footnote-1

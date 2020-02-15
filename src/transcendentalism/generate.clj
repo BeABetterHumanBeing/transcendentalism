@@ -73,11 +73,19 @@
 (defn- make-footnote-map
   "Returns a sub->encoding map for the footnotes associated with the given sub"
   [graph sub]
-  (reduce
-    (fn [result triple]
-      (assoc result
-        (:obj triple) (gen-key 8)))
-    {} (all-triples graph sub "/item/footnote")))
+  (let [footnote-subs
+          (into #{} (map :obj (all-triples graph sub "/item/footnote"))),
+        content-sub (get-unique graph sub "/essay/contains")
+        content-objs (map :obj (all-triples graph content-sub "/item/contains")),
+        footnote-content-objs
+          (reverse (filter #(contains? footnote-subs (first %)) content-objs))]
+    (reduce
+      (fn [result footnote-sub]
+        (assoc result
+          footnote-sub
+          {:encoded_id (gen-key 8),
+           :i (.indexOf footnote-content-objs [footnote-sub])}))
+      {} footnote-subs)))
 
 (defn- generate-item-text
   "Returns the HTML corresponding to a /type/item/text"
@@ -86,22 +94,26 @@
         text-triples (filter-and-order triples "/item/text/text"),
         attrs (if (contains? footnote-map sub)
                 {"class" "content text footnote",
-                 "id" (footnote-map sub)}
+                 "id" (:encoded_id (footnote-map sub))}
                 {"class" "content text"})]
     (div attrs
-      (str/join "\n"
-        (map
-          (fn [triple]
-            (let [obj (:obj triple),
-                  text (if (vector? obj) (first obj) obj),
-                  footnote (get-property :footnote obj nil)]
-              (if (nil? footnote)
-                (span {} text)
-                (span {"class" "tangent",
-                       "onclick" (call-js "toggleFootnote"
-                                   (js-str (footnote-map footnote)))}
-                      text))))
-          text-triples)))))
+      (str
+        (if (contains? footnote-map sub)
+          (str "[" (:i (footnote-map sub)) "] ")
+          "")
+        (str/join "\n"
+          (map
+            (fn [triple]
+              (let [obj (:obj triple),
+                    text (if (vector? obj) (first obj) obj),
+                    footnote (get-property :footnote obj nil)]
+                (if (nil? footnote)
+                  (span {} text)
+                  (span {"class" "tangent",
+                         "onclick" (call-js "toggleFootnote"
+                                     (js-str (:encoded_id (footnote-map footnote))))}
+                        (str text " [" (:i (footnote-map footnote)) "]")))))
+            text-triples))))))
 
 (defn- generate-item-poem
   [triples]
