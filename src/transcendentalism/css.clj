@@ -33,6 +33,8 @@
 
 (defn- text-decoration [contents] (style "text-decoration" contents))
 
+(defn- cursor [contents] (style "cursor" contents))
+
 (defn- border [contents] (style "border" contents))
 
 (defn- border-style [& contents] (style "border-style" (str/join " " contents)))
@@ -121,7 +123,8 @@
       (border-style "solid")
       (border-color (to-css-color yellow)))
     (css "span" {"class" "tangent"}
-      (color (to-css-color yellow)))
+      (color (to-css-color yellow))
+      (cursor "pointer"))
     (css "div" {"class" "emoji"}
       (padding "5px")
       (font-size "100px")
