@@ -155,6 +155,12 @@
            (chain (jq (js-seg-id "encoded_from")) (c "next") (c "remove"))
            (c "centerViewOn" "encoded_to" "title_to" "true")))])))
 
+(defn- toggleFootnote
+  "Function that toggles a footnote's visibility"
+  []
+  (js-fn "toggleFootnote" ["encoded_id"]
+    (chain (jq (js-seg-id "encoded_id")) (c "toggle" "'slow'" "'swing'"))))
+
 (defn script
   "Return the JavaScript for the website"
   []
@@ -165,6 +171,7 @@
     (center-view-on)
     (segment-loaded-callback)
     (openSegment)
+    (toggleFootnote)
   ]))
 
 (defn call-js

@@ -83,9 +83,12 @@
   "Returns the HTML corresponding to a /type/item/text"
   [triples footnote-map]
   (let [sub (:sub (first triples)),
-        text-triples (filter-and-order triples "/item/text/text")]
-    (div {"class" (str "content text"
-                    (if (contains? footnote-map sub) " footnote" ""))}
+        text-triples (filter-and-order triples "/item/text/text"),
+        attrs (if (contains? footnote-map sub)
+                {"class" "content text footnote",
+                 "id" (footnote-map sub)}
+                {"class" "content text"})]
+    (div attrs
       (str/join "\n"
         (map
           (fn [triple]
@@ -94,7 +97,10 @@
                   footnote (get-property :footnote obj nil)]
               (if (nil? footnote)
                 (span {} text)
-                (span {"class" "tangent"} text))))
+                (span {"class" "tangent",
+                       "onclick" (call-js "toggleFootnote"
+                                   (js-str (footnote-map footnote)))}
+                      text))))
           text-triples)))))
 
 (defn- generate-item-big-emoji

@@ -116,6 +116,7 @@
     (css "div" {"class" "text"}
       (padding "10px" "25px"))
     (css "div" {"class" "footnote"}
+      (display "none")
       (border-width "1px")
       (border-style "solid")
       (border-color (to-css-color yellow)))
