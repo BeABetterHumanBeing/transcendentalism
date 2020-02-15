@@ -67,6 +67,13 @@
     (str/join " " fragments)
     ((first fragments) :content)))
 
+(defn- get-footnote
+  "Returns the footnote to which the fragment is linked, or nil"
+  [fragments]
+  (if (string? (first fragments))
+    nil
+    ((first fragments) :footnote)))
+
 (defn- tangent
   "Decorates a sentence fragment, associating it with a footnote"
   [footnote-sub & fragment]
@@ -74,6 +81,7 @@
     ; Tangents should never have the same decoration as their immediate neighbor.
     :decoration (rand-int 1000000),
     :content (str/join " " fragment),
+    :footnote footnote-sub,
   })
 
 (defn- text
@@ -85,8 +93,14 @@
       (types sub "/item/text")
       (map
         (fn [i]
-          (->Triple sub "/item/text/text"
-            ^{:order i} [(get-fragment (nth texts i))]))
+          (let [piece (nth texts i),
+                footnote (get-footnote piece),
+                metadata (if (nil? footnote)
+                           {:order i}
+                           {:order i,
+                            :footnote footnote})]
+            (->Triple sub "/item/text/text"
+              (with-meta [(get-fragment piece)] metadata))))
         (range (count texts))))))
 
 (defn- footnote
@@ -159,7 +173,7 @@
       "reading here is as close to a proper 'beginning' as it gets, and there"
       "is nothing out there that resembles an 'end'. My intention is that"
       "wandering through these pages will be an experience not unlike wandering"
-      "through a garden maze; getting lost is half the fun, and there are all"
+      "through a garden maze; getting lost is half the fun, and there is all"
       "kinds of"
       (tangent :footnote-2 "treasure")
       "hidden away for you to find.")

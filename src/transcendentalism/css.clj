@@ -119,6 +119,8 @@
       (border-width "1px")
       (border-style "solid")
       (border-color (to-css-color yellow)))
+    (css "span" {"class" "tangent"}
+      (color (to-css-color yellow)))
     (css "div" {"class" "emoji"}
       (padding "5px")
       (font-size "100px")

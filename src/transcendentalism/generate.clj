@@ -90,8 +90,11 @@
         (map
           (fn [triple]
             (let [obj (:obj triple),
-                  text (if (vector? obj) (first obj) obj)]
-              (span {} text)))
+                  text (if (vector? obj) (first obj) obj),
+                  footnote (get-property :footnote obj nil)]
+              (if (nil? footnote)
+                (span {} text)
+                (span {"class" "tangent"} text))))
           text-triples)))))
 
 (defn- generate-item-big-emoji
