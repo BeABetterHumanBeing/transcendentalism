@@ -33,10 +33,10 @@
   "Adds triples to create an essay"
   [sub title content-subs]
   (let [contents-sub (keyword (str (name sub) "-contents"))]
-    [(types sub "/essay")
+    [(types schema sub "/essay")
      (->Triple sub "/essay/contains" contents-sub)
      (->Triple sub "/essay/title" title)
-     (types contents-sub "/item/ordered_set")
+     (types schema contents-sub "/item/ordered_set")
      (map #(->Triple contents-sub
                      "/item/contains"
                      ^{:order %} [(get content-subs %)])
@@ -90,7 +90,7 @@
   [sub & fragments]
   (let [texts (partition-by #(decoration? %) fragments)]
     (concat
-      (types sub "/item/text")
+      (types schema sub "/item/text")
       (map
         (fn [i]
           (let [piece (nth texts i),
@@ -114,7 +114,7 @@
   "Creates an /item/poem"
   [sub & lines]
   (concat
-    (types sub "/item/poem")
+    (types schema sub "/item/poem")
     (map
       (fn [i]
         (let [line (nth lines i)]
@@ -126,11 +126,11 @@
 (def monad
   (flatten [
     (essay :monad "Transcendental Metaphysics" [:monad-image :monad-intro-quote])
-    (types :monad-image "/item/image")
+    (types schema :monad-image "/item/image")
     (->Triple :monad-image "/item/image/url" (svg-to-image "monad" 800 800 'svg-monad))
     (->Triple :monad-image "/item/image/alt_text"
       "Animation of the star flower, with changes cascading inwards to a central point")
-    (types :monad-intro-quote "/item/quote")
+    (types schema :monad-intro-quote "/item/quote")
     (->Triple :monad-intro-quote "/item/quote/text"
       (clojure.string/join " "
         ["The Monad is the symbol of unity."
@@ -154,7 +154,7 @@
     (essay :welcome "Welcome" [
       :wave-emoji :welcome-1 :welcome-2 :footnote-1 :welcome-3 :footnote-2
       :welcome-4 :praying-hands-emoji])
-    (types :wave-emoji "/item/big_emoji")
+    (types schema :wave-emoji "/item/big_emoji")
     (->Triple :wave-emoji "/item/big_emoji/emoji" "&#x1f44b")
     (text :welcome-1
       "Hi there! I'm Daniel Gierl, and I'd like to welcome you to my personal"
@@ -191,7 +191,7 @@
       "May your bridges meet you halfway"
       "May you never lose yourself in darkness"
       "And may the light of God shine brightly on your soul")
-    (types :praying-hands-emoji "/item/big_emoji")
+    (types schema :praying-hands-emoji "/item/big_emoji")
     (->Triple :praying-hands-emoji "/item/big_emoji/emoji" "&#x1f64f")
 
     ; I Am Dan

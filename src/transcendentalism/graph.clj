@@ -117,8 +117,3 @@
                         (result obj)
                         []))))
             {} (all-triples graph pred)))))))
-
-; TODO(gierl): Add chronological orders (i.e. vectors, with tail-append attached
-; to timestamp).
-
-; TODO(gierl): Add graups (i.e. sets, with type specialization[s] attached).
