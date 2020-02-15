@@ -103,6 +103,15 @@
                       text))))
           text-triples)))))
 
+(defn- generate-item-poem
+  [triples]
+  (div {"class" "content poem"}
+    (str/join "\n"
+      (map
+        (fn [line-triple]
+          (p {"class" "line"} (first (:obj line-triple))))
+        (filter-and-order triples "/item/poem/line")))))
+
 (defn- generate-item-big-emoji
   [triples]
   (div {"class" "content emoji"}
@@ -147,6 +156,7 @@
                                   (not (= (:pred %) "/type/item"))) triples)]
       (case (:pred (first item-type))
         "/type/item/text" (generate-item-text triples footnote-map),
+        "/type/item/poem" (generate-item-poem triples),
         "/type/item/big_emoji" (generate-item-big-emoji triples),
         "/type/item/quote" (generate-item-quote triples),
         "/type/item/image" (generate-item-image triples),

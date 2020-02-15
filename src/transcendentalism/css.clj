@@ -126,6 +126,11 @@
       (padding "5px")
       (font-size "100px")
       (text-align "center"))
+    (css "div" {"class" "poem"}
+      (text-align "center")
+      (padding "10px" "0px"))
+    (css "p" {"class" "line"}
+      (margin "5px" "0px"))
     (css "div" {"class" "quote"}
       (padding "0px" "100px")
       (font-size "large")

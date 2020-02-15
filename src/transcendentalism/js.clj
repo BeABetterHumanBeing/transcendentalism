@@ -133,7 +133,7 @@
   "Function that is called when an internal link is clicked"
   []
   (js-fn "openSegment" ["encoded_from" "encoded_to" "title_to"]
-    (log "'Opening ' + encoded_to + ' from ' + encoded_from")
+    (debug (log "'Opening ' + encoded_to + ' from ' + encoded_from"))
     (js-if (chain (jq (js-seg-id "encoded_to")) "length")
       [(c "centerViewOn" "encoded_to" "title_to" "true")]
       [(chain (jq (js-seg-id "encoded_from")) (c "nextAll") (c "remove"))

@@ -13,6 +13,7 @@
     :description "Textual content",
     :super-type "/type/item",
   },
+  ; TODO(gierl) Move big emoji to its own schema.
   "/type/item/big_emoji" {
     :description "A series of big emoji",
     :super-type "/type/item",
@@ -181,8 +182,23 @@
       },
     }))
 
+(def poem-schema
+  (schematize-type "/item/poem"
+    {
+      :description "A poem",
+      :super-type "/type/item",
+    }
+    {
+      "/line" {
+        :description "A line that appears in the poem",
+        :range-type :string,
+        :required true,
+      },
+    }))
+
 (def schema-data
-  (merge extra-schema essay-schema event-schema image-schema quote-schema))
+  (merge extra-schema essay-schema event-schema image-schema quote-schema
+    poem-schema))
 
 (defn- type-to-supertypes
   "Returns a set of all transitive supertypes of a given type"
@@ -466,7 +482,7 @@
        required-supertypes-exist? domain-type-exists? range-type-exists?
        #(order-conforms? %1 %2 "/item/contains") events-occur-in-past?
        #(order-conforms? %1 %2 "/item/text/text") events-obey-causality?
-       home-is-monad-rooted-dag?]),
+       home-is-monad-rooted-dag? #(order-conforms? %1 %2 "/item/poem/line")]),
      ; nil ends up in the set, and ought to be weeded out.
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))

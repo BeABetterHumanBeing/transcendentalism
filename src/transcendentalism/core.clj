@@ -110,6 +110,17 @@
     (apply text footnote-sub fragments)
     (->Triple sub "/item/footnote" footnote-sub)))
 
+(defn- poem
+  "Creates an /item/poem"
+  [sub & lines]
+  (concat
+    (types sub "/item/poem")
+    (map
+      (fn [i]
+        (let [line (nth lines i)]
+          (->Triple sub "/item/poem/line" ^{:order i} [line])))
+      (range (count lines)))))
+
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
 (def monad
@@ -183,14 +194,11 @@
       "can be shared and saved, but I can only guarantee a modicum of stability"
       "in a shifting sea of ideas.")
 
-    (types :welcome-4 "/item/text")
-    (->Triple :welcome-4 "/item/text/text"
-      (str/join "\n" [
-        "May you find that which you search for."
-        "May your bridges meet you halfway."
-        "May you never lose yourself in darkness."
-        "And may the light of God shiny brightly on your soul."
-      ]))
+    (poem :welcome-4
+      "May you find that which you search for"
+      "May your bridges meet you halfway"
+      "May you never lose yourself in darkness"
+      "And may the light of God shine brightly on your soul")
 
     (types :praying-hands-emoji "/item/big_emoji")
     (->Triple :praying-hands-emoji "/item/big_emoji/emoji" "&#x1f64f")
