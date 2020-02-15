@@ -42,7 +42,7 @@
   },
   "/item/footnote" {
     :description "Relation to a piece of footnote content",
-    :domain-type "/type/item",
+    :domain-type "/type/essay",
     :range-type "/type/item",
   },
   "/item/internal_link" {

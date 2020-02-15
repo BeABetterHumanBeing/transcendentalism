@@ -85,10 +85,16 @@
       (types sub "/item/text")
       (map
         (fn [i]
-          (println sub ":" i)
           (->Triple sub "/item/text/text"
             ^{:order i} [(get-fragment (nth texts i))]))
         (range (count texts))))))
+
+(defn- footnote
+  "Creates text along with an accompanying footnote marker"
+  [sub footnote-sub & fragments]
+  (conj
+    (apply text footnote-sub fragments)
+    (->Triple sub "/item/footnote" footnote-sub)))
 
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
@@ -144,7 +150,7 @@
       ", and as a backend engineer, this was a recipe for, ummm, how shall we"
       "say, *curious* frontend design choices.")
 
-    (text :footnote-1
+    (footnote :welcome :footnote-1
       "In clojure, no less. I used it as an opportunity to teach myself"
       "the language. There is no learning quite like doing.")
 
@@ -158,7 +164,7 @@
       (tangent :footnote-2 "treasure")
       "hidden away for you to find.")
 
-    (text :footnote-2
+    (footnote :welcome :footnote-2
       "As an aside, I have tried to make the URLs somewhat stable so that they"
       "can be shared and saved, but I can only guarantee a modicum of stability"
       "in a shifting sea of ideas.")

@@ -70,11 +70,22 @@
 
 (defn- button [attrs contents] (xml-tag "button" attrs contents))
 
+(defn- make-footnote-map
+  "Returns a sub->encoding map for the footnotes associated with the given sub"
+  [graph sub]
+  (reduce
+    (fn [result triple]
+      (assoc result
+        (:obj triple) (gen-key 8)))
+    {} (all-triples graph sub "/item/footnote")))
+
 (defn- generate-item-text
   "Returns the HTML corresponding to a /type/item/text"
-  [triples]
-  (let [text-triples (filter-and-order triples "/item/text/text")]
-    (div {"class" "content text"}
+  [triples footnote-map]
+  (let [sub (:sub (first triples)),
+        text-triples (filter-and-order triples "/item/text/text")]
+    (div {"class" (str "content text"
+                    (if (contains? footnote-map sub) " footnote" ""))}
       (str/join "\n"
         (map
           (fn [triple]
@@ -112,19 +123,21 @@
 
 (defn- generate-item
   "Returns the HTML corresponding to a /type/item"
-  [graph sub]
+  [graph sub footnote-map]
   ; The call for generating ordered set items must be included here so that it
   ; can recursively call its parent function.
   (letfn [(generate-item-ordered-set [triples]
             (div {"class" "content"}
               ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
               (let [contents (filter-and-order triples "/item/contains")]
-                (apply str (map #(generate-item graph (first (:obj %))) contents)))))]
+                (apply str
+                  (map #(generate-item graph (first (:obj %)) footnote-map)
+                       contents)))))]
     (let [triples (all-triples graph sub),
           item-type (filter #(and (str/starts-with? (:pred %) "/type")
                                   (not (= (:pred %) "/type/item"))) triples)]
       (case (:pred (first item-type))
-        "/type/item/text" (generate-item-text triples),
+        "/type/item/text" (generate-item-text triples footnote-map),
         "/type/item/big_emoji" (generate-item-big-emoji triples),
         "/type/item/quote" (generate-item-quote triples),
         "/type/item/image" (generate-item-image triples),
@@ -223,8 +236,9 @@
                            (map :obj (all-triples graph sub "/essay/label")))]
               (if (contains? labels :under-construction)
                 (generate-under-construction-splash)
-                (let [content-sub (get-unique graph sub "/essay/contains")]
-                  (generate-item graph content-sub))))
+                (let [content-sub (get-unique graph sub "/essay/contains"),
+                      footnote-map (make-footnote-map graph sub)]
+                  (generate-item graph content-sub footnote-map))))
             (hr)
             (div {"id" (seg-id id "footer"),
                   "class" "footer"}

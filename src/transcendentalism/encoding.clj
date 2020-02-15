@@ -8,7 +8,7 @@
 ; If true, removes encodings without active keys from encoding map.
 (def prune-unused-encodings true)
 
-(defn- gen-key
+(defn gen-key
   "Generates a random alphanumeric key of given length"
   [len]
   (let [my-key (char-array len)]
