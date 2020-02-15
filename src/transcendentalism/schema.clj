@@ -382,36 +382,26 @@
     #{}
     (all-triples graph)))
 
-(defn- ordered-sets-have-order?
-  "Validates that all /item/contains triples have an order"
-  [schema graph]
-  (let [relation (get-relation graph "/item/contains")]
+(defn- order-conforms?
+  "Validates that all preds that have order are correctly ordered"
+  [schema graph pred]
+  (let [relation (get-relation graph pred)]
     (reduce
       (fn [result sub]
-        (let [metadata (map meta (all-objs relation sub)),
-              metadata-errors
+        (let [ordinals (map #(get-property :order % 0) (all-objs relation sub)),
+              ordinal-errors
                 (reduce
-                  (fn [result m-data]
-                    (if (contains? m-data :order)
+                  (fn [result ordinal]
+                    (if (number? ordinal)
                       result
-                      (conj result (str sub " is missing :order metadata"))))
-                  #{} metadata)]
-          (if (empty? metadata-errors)
-            (let [ordinals (map :order metadata),
-                  ordinal-errors
-                    (reduce
-                      (fn [result ordinal]
-                        (if (number? ordinal)
-                          result
-                          (conj result
-                            (str sub " has ordinal " ordinal ", but it's not a number"))))
-                      #{} ordinals)]
-              (if (empty? ordinal-errors)
-                (if (or (empty? ordinals) (apply distinct? ordinals))
-                  result
-                  (conj result (str sub " has non-distict ordinals: " ordinals)))
-                (set/union result ordinal-errors)))
-            (set/union result metadata-errors))))
+                      (conj result
+                        (str sub " has ordinal " ordinal ", but it's not a number"))))
+                  #{} ordinals)]
+          (if (empty? ordinal-errors)
+            (if (or (empty? ordinals) (apply distinct? ordinals))
+              result
+              (conj result (str sub " has non-distict ordinals: " ordinals)))
+            (set/union result ordinal-errors))))
       #{} (participant-nodes relation))))
 
 (defn- events-obey-causality?
@@ -474,7 +464,8 @@
       #{}
       [preds-all-valid? required-preds-exist? unique-preds-unique?
        required-supertypes-exist? domain-type-exists? range-type-exists?
-       ordered-sets-have-order? events-obey-causality? events-occur-in-past?
+       #(order-conforms? %1 %2 "/item/contains") events-occur-in-past?
+       #(order-conforms? %1 %2 "/item/text/text") events-obey-causality?
        home-is-monad-rooted-dag?]),
      ; nil ends up in the set, and ought to be weeded out.
      errors (set/difference validation-errors #{nil})]

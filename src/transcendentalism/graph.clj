@@ -58,6 +58,14 @@
     (assoc result (:pred triple) triple))
     {} triples))
 
+(defn get-property
+  "Returns the property associated with an obj, or a default value"
+  [property obj default]
+  (let [metadata (meta obj)]
+    (if (nil? metadata)
+      default
+      (metadata property default))))
+
 (defn- graph-data-from-triples
   "Constructs a graph by associating triples by subject"
   [triples]

@@ -30,8 +30,8 @@
 (defn- filter-and-order
   "Filters a group of triples by predicate, and orders them by metadata"
   [triples pred]
-  (sort #(< ((meta (:obj %1)) :order 0)
-            ((meta (:obj %2)) :order 0))
+  (sort #(< (get-property :order (:obj %1) 0)
+            (get-property :order (:obj %2) 0))
         (filter #(= (:pred %) pred) triples)))
 
 (defn- clear-directory
