@@ -53,6 +53,43 @@
                       (get subs %) "/essay/flow/next" (get subs (inc %)))
                     (range (dec (count subs))))))))
 
+(defn- decoration?
+  "Returns the decoration of a sentence fragment"
+  [fragment]
+  (if (string? fragment)
+    :string
+    (fragment :decoration)))
+
+(defn- get-fragment
+  "Returns the sentence fragment itself"
+  [fragments]
+  (if (string? (first fragments))
+    (str/join " " fragments)
+    ((first fragments) :content)))
+
+(defn- tangent
+  "Decorates a sentence fragment, associating it with a footnote"
+  [footnote-sub & fragment]
+  {
+    ; Tangents should never have the same decoration as their immediate neighbor.
+    :decoration (rand-int 1000000),
+    :content (str/join " " fragment),
+  })
+
+(defn- text
+  "Converts a collection of [potentially decorated] sentence fragments into
+   equivalent triples"
+  [sub & fragments]
+  (let [texts (partition-by #(decoration? %) fragments)]
+    (concat
+      (types sub "/item/text")
+      (map
+        (fn [i]
+          (println sub ":" i)
+          (->Triple sub "/item/text/text"
+            ^{:order i} [(get-fragment (nth texts i))]))
+        (range (count texts))))))
+
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
 (def monad
@@ -90,67 +127,41 @@
     (types :wave-emoji "/item/big_emoji")
     (->Triple :wave-emoji "/item/big_emoji/emoji" "&#x1f44b")
 
-    (types :welcome-1 "/item/text")
-    (->Triple :welcome-1 "/item/text/text"
-      (str/join " " [
-        "Hi there! I'm Daniel Gierl, and I'd like to welcome you to my personal"
-        "website, Transcendental Metaphysics! I use this space to explore"
-        "questions of philosophy, religion, politics, you name it. It is my"
-        "sincere hope that you leave feeling enriched by the experience, and"
-        "that the time you spend here is time well spent."
-      ]))
+    (text :welcome-1
+      "Hi there! I'm Daniel Gierl, and I'd like to welcome you to my personal"
+      "website, Transcendental Metaphysics! I use this space to explore"
+      "questions of philosophy, religion, politics, you name it. It is my"
+      "sincere hope that you leave feeling enriched by the experience, and that"
+      "the time you spend here is time well spent.")
 
-    (types :welcome-2 "/item/text")
-    (->Triple :welcome-2 "/item/text/text"
-      ^{:order 0}
-      [(str/join " " [
-        "I apologize in advance for any issues you may encounter with the"
-        "unorthodox structure of the site; I've been using it as a playground"
-        "for some of the more experimental ideas I've been toying with. I wrote the"
-        "whole thing"
-      ])])
-    (->Triple :welcome-2 "/item/text/text"
-      ^{:order 1}
-      ["from scratch [1],"])
-    (->Triple :welcome-2 "/item/text/text"
-      ^{:order 2}
-      [(str/join " " [
-        "and as a backend engineer, this was a recipe for, ummm, how shall we"
-        "say, *curious* frontend design choices."
-      ])])
+    (text :welcome-2
+      "I apologize in advance for any issues you may encounter with the"
+      "unorthodox structure of the site; I've been using it as a playground"
+      "for some of the more experimental ideas I've been toying with. I wrote the"
+      "whole thing"
+      ; TODO(gierl) Get the footnotes x-ref'd, with [N].
+      (tangent :footnote-1 "from scratch")
+      ", and as a backend engineer, this was a recipe for, ummm, how shall we"
+      "say, *curious* frontend design choices.")
 
-    (types :footnote-1 "/item/text")
-    (->Triple :footnote-1 "/item/text/text"
-      (str/join " " [
-        "[1] In clojure, no less. I used it as an opportunity to teach myself"
-        "the language. There is no learning quite like doing."
-      ]))
+    (text :footnote-1
+      "In clojure, no less. I used it as an opportunity to teach myself"
+      "the language. There is no learning quite like doing.")
 
-    (types :welcome-3 "/item/text")
-    (->Triple :welcome-3 "/item/text/text"
-      ^{:order 0}
-      [(str/join " " [
-        "The whole site is structured as a big, tangled graph. What you're"
-        "reading here is as close to a proper 'beginning' as it gets, and there"
-        "is nothing out there that resembles an 'end'. My intention is that"
-        "wandering through these pages will be an experience not unlike wandering"
-        "through a garden maze; getting lost is half the fun, and there are all"
-        "kinds of"
-      ])])
-    (->Triple :welcome-3 "/item/text/text"
-      ^{:order 1}
-      ["treasure [2]"])
-    (->Triple :welcome-3 "/item/text/text"
-      ^{:order 2}
-      ["hidden away for you to find."])
+    (text :welcome-3
+      "The whole site is structured as a big, tangled graph. What you're"
+      "reading here is as close to a proper 'beginning' as it gets, and there"
+      "is nothing out there that resembles an 'end'. My intention is that"
+      "wandering through these pages will be an experience not unlike wandering"
+      "through a garden maze; getting lost is half the fun, and there are all"
+      "kinds of"
+      (tangent :footnote-2 "treasure")
+      "hidden away for you to find.")
 
-    (types :footnote-2 "/item/text")
-    (->Triple :footnote-2 "/item/text/text"
-      (str/join " " [
-        "[2] As an aside, I have tried to make the URLs somewhat stable so that"
-        "they can be shared and saved, but I can only guarantee a modicum of"
-        "stability in a shigfting sea of ideas."
-      ]))
+    (text :footnote-2
+      "As an aside, I have tried to make the URLs somewhat stable so that they"
+      "can be shared and saved, but I can only guarantee a modicum of stability"
+      "in a shifting sea of ideas.")
 
     (types :welcome-4 "/item/text")
     (->Triple :welcome-4 "/item/text/text"
