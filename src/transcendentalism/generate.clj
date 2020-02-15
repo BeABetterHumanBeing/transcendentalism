@@ -66,10 +66,15 @@
   [triples]
   (let [text-triples (filter #(= (:pred %) "/item/text/text") triples),
         text (str/join "\n" (map :obj text-triples))]
-    (div {"class" "content"}
+    (div {"class" "content text"}
       ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
       ; TODO(gierl): Handle /item/text/url
       text)))
+
+(defn- generate-item-big-emoji
+  [triples]
+  (div {"class" "content emoji"}
+    (:obj (first (filter #(= (:pred %) "/item/big_emoji/emoji") triples)))))
 
 (defn- generate-item-quote
   "Returns the HTML corresponding to a /type/item/quote"
@@ -110,6 +115,7 @@
                                   (not (= (:pred %) "/type/item"))) triples)]
       (case (:pred (first item-type))
         "/type/item/text" (generate-item-text triples),
+        "/type/item/big_emoji" (generate-item-big-emoji triples),
         "/type/item/quote" (generate-item-quote triples),
         "/type/item/image" (generate-item-image triples),
         "/type/item/ordered_set" (generate-item-ordered-set triples),

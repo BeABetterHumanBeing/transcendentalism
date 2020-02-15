@@ -13,6 +13,10 @@
     :description "Textual content",
     :super-type "/type/item",
   },
+  "/type/item/big_emoji" {
+    :description "A series of big emoji",
+    :super-type "/type/item",
+  },
   "/type/item/ordered_set" {
     :description "An ordered collection of items",
     :super-type "/type/item",
@@ -21,6 +25,13 @@
     :description "Relation to a child node of an ordered set",
     :domain-type "/type/item/ordered_set",
     :range-type "/type/item",
+  },
+  "/item/big_emoji/emoji" {
+    :description "The sequence of emoji to render",
+    :domain-type "/type/item/big_emoji",
+    :range-type :string,
+    :required true,
+    :unique true,
   },
   "/item/label" {
     :description "Symbol label that ascribes a metadata to the item",
