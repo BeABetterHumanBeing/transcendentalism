@@ -6,6 +6,7 @@
 (use 'transcendentalism.color
      'transcendentalism.graph
      'transcendentalism.schema
+     'transcendentalism.time
      'transcendentalism.xml)
 
 ; Whether to generate SVGs, or assume that they've already been created. Helps

@@ -1,7 +1,9 @@
 (ns transcendentalism.schema
   (:require [clojure.string :as str]
     [clojure.set :as set]))
-(use 'transcendentalism.graph)
+
+(use 'transcendentalism.graph
+     'transcendentalism.time)
 
 ; The schema determines what predicates are allowed in the graph, as well as all
 ; constraints that bound the triples to which those predicates belong.
