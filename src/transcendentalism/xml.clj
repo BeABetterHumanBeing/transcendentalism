@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]))
 
 ; Whether to generate debugging HTML or not.
-(def debugging-mode false)
+(def debugging-mode true)
 
 (defn debug
   "Passes through content if in debugging-mode, otherwise nullifies it"

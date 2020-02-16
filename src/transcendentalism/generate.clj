@@ -174,7 +174,7 @@
         "/type/item/image" (generate-item-image triples),
         "/type/item/ordered_set" (generate-item-ordered-set triples),
         (assert false
-          (str "ERROR - Type " (:pred (first item-type)) "not supported"))))))
+          (str "ERROR - Type " (:pred (first item-type)) " not supported"))))))
 
 (defrecord Cxn [encoded_obj name type])
 
@@ -214,6 +214,35 @@
                            (js-str (:encoded_obj cxn))
                            (js-str (:name cxn)))}
               name))))
+
+(defn- render-item
+  "Renders the HTML for an item"
+  [graph item]
+  (let [triples (all-triples graph item),
+        item-type (filter #(and (str/starts-with? (:pred %) "/type")
+                                (not (= (:pred %) "/type/item"))) triples)]
+    (case (:pred (first item-type))
+      "/type/item/text" (generate-item-text triples {}),
+      "/type/item/poem" (generate-item-poem triples),
+      "/type/item/big_emoji" (generate-item-big-emoji triples),
+      "/type/item/quote" (generate-item-quote triples),
+      "/type/item/image" (generate-item-image triples),
+      (assert false
+        (str "ERROR - Type " (:pred (first item-type)) " not supported")))))
+
+(defn- generate-segments
+  "Returns the HTML for a flow of segments"
+  [graph sub]
+  (loop [result ""        ; HTML output
+         sub-stack [sub]] ; Unprocessed subs
+    (if (empty? sub-stack)
+      result
+      (let [sub (first sub-stack),
+            content (get-unique graph sub "/segment/contains"),
+            footnotes (map :obj (all-triples graph sub "/segment/flow/footnote")),
+            block (map :obj (all-triples graph sub "/segment/flow/block"))]
+        (recur (str result (render-item graph content))
+               (concat (rest sub-stack) footnotes block))))))
 
 (defn- generate-under-construction-splash
   "Returns a div that shows that the segment is under construction"
@@ -267,9 +296,9 @@
                            (map :obj (all-triples graph sub "/essay/label")))]
               (if (contains? labels :under-construction)
                 (generate-under-construction-splash)
-                (let [content-sub (get-unique graph sub "/essay/contains"),
+                (let [segment-sub (get-unique graph sub "/essay/contains"),
                       footnote-map (make-footnote-map graph sub)]
-                  (generate-item graph content-sub footnote-map))))
+                  (generate-segments graph segment-sub))))
             (hr)
             (div {"id" (seg-id id "footer"),
                   "class" "footer"}

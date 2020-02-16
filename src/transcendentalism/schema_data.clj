@@ -61,8 +61,8 @@
         :description "Internal link to another essay",
       },
       "/contains" {
-        :description "Relation from an essay to the item it contains",
-        :range-type "/type/item",
+        :description "Relation from an essay to the segment it contains",
+        :range-type "/type/segment",
         :unique true,
         :required true,
       },
