@@ -115,28 +115,47 @@
           (->Triple sub "/item/poem/line" ^{:order i} [line])))
       (range (count lines)))))
 
+(defn- image-segment
+  [sub url alt-text]
+  (let [item-keyword (keyword (str (name sub) "-i"))]
+    [(types schema sub "/segment")
+     (->Triple sub "/segment/contains" item-keyword)
+     (types schema item-keyword "/item/image")
+     (->Triple item-keyword "/item/image/url" url)
+     (->Triple item-keyword "/item/image/alt_text" alt-text)]))
+
+(defn- quote-segment
+  ([sub quote] (quote-segment sub quote nil))
+  ([sub quote author]
+    (let [item-keyword (keyword (str (name sub) "-i"))]
+      [(types schema sub "/segment")
+       (->Triple sub "/segment/contains" item-keyword)
+       (types schema item-keyword "/item/quote")
+       (->Triple item-keyword "/item/quote/text" quote)
+       (if (nil? author)
+         []
+         (->Triple item-keyword "/item/quote/author" author))])))
+
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
 (def monad
   (flatten [
-    (essay :monad "Transcendental Metaphysics" :monad-image-segment)
-    (types schema :monad-image-segment "/segment")
-    (->Triple :monad-image-segment "/segment/contains" :monad-image)
-    (types schema :monad-image "/item/image")
-    (->Triple :monad-image "/item/image/url" (svg-to-image "monad" 800 800 'svg-monad))
-    (->Triple :monad-image "/item/image/alt_text"
+    (essay :monad "Transcendental Metaphysics" :monad-image)
+
+    (image-segment :monad-image
+      (svg-to-image "monad" 800 800 'svg-monad)
       "Animation of the star flower, with changes cascading inwards to a central point")
-    (->Triple :monad-image-segment "/segment/flow/block" :monad-intro-quote-segment)
-    (types schema :monad-intro-quote-segment "/segment")
-    (->Triple :monad-intro-quote-segment "/segment/contains" :monad-intro-quote)
-    (types schema :monad-intro-quote "/item/quote")
-    (->Triple :monad-intro-quote "/item/quote/text"
+
+    (->Triple :monad-image "/segment/flow/block" :monad-intro-quote)
+
+    (quote-segment :monad-intro-quote
       (clojure.string/join " "
         ["The Monad is the symbol of unity."
         "It is the godhead, the point from which all things originate,"
-        "and the point to which all things return."]))
-    (->Triple :monad-intro-quote "/item/quote/author" "Daniel Gierl")
-    ; ; The monad is the only segment whose home is reflexive.
+        "and the point to which all things return."])
+      "Daniel Gierl")
+
+    ; The monad is the only segment whose home is reflexive.
     (->Triple :monad "/essay/flow/home" :monad)
     ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
    ]))
