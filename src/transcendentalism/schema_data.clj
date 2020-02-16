@@ -2,35 +2,6 @@
 
 ; The schema determines what predicates are allowed in the graph, as well as all
 ; constraints that bound the triples to which those predicates belong.
-(def extra-schema {
-  "/type/item" {
-    :description "A piece of content",
-  },
-  "/type/item/text" {
-    :description "Textual content",
-    :super-type "/type/item",
-  },
-  "/type/item/ordered_set" {
-    :description "An ordered collection of items",
-    :super-type "/type/item",
-  },
-  "/item/contains" {
-    :description "Relation to a child node of an ordered set",
-    :domain-type "/type/item/ordered_set",
-    :range-type "/type/item",
-  },
-  "/item/footnote" {
-    :description "Relation to a piece of footnote content",
-    :domain-type "/type/essay",
-    :range-type "/type/item",
-  },
-  "/item/text/text" {
-    :description "The contents of a text item",
-    :domain-type "/type/item/text",
-    :range-type :string,
-    :required true,
-  },
-})
 
 (defn- schematize-type
   "Expands a partial schema of a given type"
@@ -119,7 +90,7 @@
         :description "Relation to the next block segment",
         :unique true,
       },
-      "/flow/tangent" {
+      "/flow/footnote" {
         :description "Relation to a footnote segment",
       },
       "/contains" {
@@ -148,6 +119,48 @@
         :required true,
       },
     }))
+
+(def item-schema
+ (schematize-type "/item"
+  {
+    :description "A piece of content",
+    :abstract true,
+  }
+  {}))
+
+(def inline-item-schema
+  (schematize-type "/item/inline"
+    {
+      :description "Content that can be inlined",
+      :super-type "/type/item",
+    }
+    {
+      "/text" {
+        :description "The text that appears inline",
+        :range-type :string,
+        :required true,
+        :unique true,
+      },
+      "/tangent" {
+        :description "The item which clicking on this toggles",
+        :range-type "/type/item",
+        :exclusive ["/item/inline/url", "/item/inline/reference"],
+        :unique true,
+      },
+      "/url" {
+        :description "The external URL to which the text is linked",
+        :range-type :string,
+        :exclusive ["/item/inline/tangent", "/item/inline/reference"],
+        :unique true,
+      },
+      "/reference" {
+        :description "Another essay which is relevant",
+        :range-type "/type/essay",
+        :exclusive ["/item/inline/url", "/item/inline/tangent"],
+        :unique true,
+      },
+    },
+  ))
 
 (def image-schema
   (schematize-type "/item/image"
@@ -221,5 +234,6 @@
     }))
 
 (def schema-data
-  (merge extra-schema essay-schema event-schema image-schema quote-schema
-    poem-schema segment-schema inline-segment-schema big-emoji-schema))
+  (merge essay-schema event-schema image-schema quote-schema inline-item-schema
+    poem-schema segment-schema inline-segment-schema big-emoji-schema
+    item-schema))

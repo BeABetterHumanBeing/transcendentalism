@@ -272,6 +272,8 @@
             (str sub "'s /essay/flow/home does not lead to :monad"))))
       #{} sinks)))
 
+; TODO(gierl) Add abstract validation
+; TODO(gierl) Add exclusive validation
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]
