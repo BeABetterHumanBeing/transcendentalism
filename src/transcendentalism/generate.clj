@@ -230,6 +230,41 @@
       (assert false
         (str "ERROR - Type " (:pred (first item-type)) " not supported")))))
 
+(defn- render-block
+  "Renders to HTML the contents of a block"
+  [graph items]
+  (div {"class" "content"}
+    (str/join "\n"
+      (map #(render-item graph %) items))))
+
+(defn- conj-vector-map
+  "Merges a map into a map of vectors, conj-ing the new elements"
+  [my-map my-new-elems]
+  (reduce-kv
+    (fn [result k v]
+      (if (nil? v)
+        result
+        (assoc result k (conj (result k) v))))
+    my-map my-new-elems))
+
+(defn- collect-block-content
+  "Follows a sequence of inline segments, collecting them and their related
+   data"
+  [graph sub]
+  (loop [result {:contents [],
+                 :tangents []},
+         inline-sub sub]
+    (if (nil? inline-sub)
+      result
+      (let [content (get-unique graph inline-sub "/segment/contains")]
+        (recur (conj-vector-map
+                 result {:contents content,
+                         :tangents
+                           (if (nil? content)
+                               nil
+                               (get-unique graph content "/item/inline/tangent"))})
+               (get-unique graph inline-sub "/segment/flow/next"))))))
+
 (defn- generate-segments
   "Returns the HTML for a flow of segments"
   [graph sub]
@@ -238,11 +273,13 @@
     (if (empty? sub-stack)
       result
       (let [sub (first sub-stack),
-            content (get-unique graph sub "/segment/contains"),
-            footnotes (map :obj (all-triples graph sub "/segment/flow/footnote")),
-            block (map :obj (all-triples graph sub "/segment/flow/block"))]
-        (recur (str result (render-item graph content))
-               (concat (rest sub-stack) footnotes block))))))
+            block-content (collect-block-content graph sub),
+            block (get-unique graph sub "/segment/flow/block")]
+        (recur (str result (render-block graph (:contents block-content)))
+               (concat
+                 (rest sub-stack)
+                 (:tangents block-content)
+                 (if (nil? block) [] [block])))))))
 
 (defn- generate-under-construction-splash
   "Returns a div that shows that the segment is under construction"

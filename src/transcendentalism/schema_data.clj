@@ -90,31 +90,14 @@
         :description "Relation to the next block segment",
         :unique true,
       },
-      "/flow/footnote" {
-        :description "Relation to a footnote segment",
+      "/flow/inline" {
+        :description "Relation to the second inline segment",
+        :range-type "/type/segment/inline"
+        :unique true,
       },
       "/contains" {
         :description "Relation from a segment to the item it contains",
         :range-type "/type/item",
-        :unique true,
-        :required true,
-      },
-    }))
-
-(def inline-segment-schema
-  (schematize-type "/segment/inline"
-    {
-      :description "Segments that can be inlined",
-      :super-type "/type/segment",
-    }
-    {
-      "/flow/inline" {
-        :description "Relation to the next inline segment",
-        :unique true,
-      },
-      "/contains" {
-        :description "Relation from a segment to the item it contains",
-        :range-type "/type/item/inline",
         :unique true,
         :required true,
       },
@@ -143,7 +126,7 @@
       },
       "/tangent" {
         :description "The item which clicking on this toggles",
-        :range-type "/type/item",
+        :range-type "/type/segment",
         :exclusive ["/item/inline/url", "/item/inline/reference"],
         :unique true,
       },
@@ -235,5 +218,4 @@
 
 (def schema-data
   (merge essay-schema event-schema image-schema quote-schema inline-item-schema
-    poem-schema segment-schema inline-segment-schema big-emoji-schema
-    item-schema))
+    poem-schema segment-schema big-emoji-schema item-schema))
