@@ -10,11 +10,6 @@
     :description "Textual content",
     :super-type "/type/item",
   },
-  ; TODO(gierl) Move big emoji to its own schema.
-  "/type/item/big_emoji" {
-    :description "A series of big emoji",
-    :super-type "/type/item",
-  },
   "/type/item/ordered_set" {
     :description "An ordered collection of items",
     :super-type "/type/item",
@@ -24,40 +19,16 @@
     :domain-type "/type/item/ordered_set",
     :range-type "/type/item",
   },
-  "/item/big_emoji/emoji" {
-    :description "The sequence of emoji to render",
-    :domain-type "/type/item/big_emoji",
-    :range-type :string,
-    :required true,
-    :unique true,
-  },
-  "/item/label" {
-    :description "Symbol label that ascribes a metadata to the item",
-    :domain-type "/type/item",
-    :range-type [
-      ; Content is tangential to the main flow.
-      :note]
-  },
   "/item/footnote" {
     :description "Relation to a piece of footnote content",
     :domain-type "/type/essay",
     :range-type "/type/item",
-  },
-  "/item/internal_link" {
-    :description "Relation to another essay segment",
-    :domain-type "/type/item",
-    :range-type "/type/essay",
   },
   "/item/text/text" {
     :description "The contents of a text item",
     :domain-type "/type/item/text",
     :range-type :string,
     :required true,
-  },
-  "/item/text/url" {
-    :description "External URL to which a piece of text is linked",
-    :domain-type "/type/item/text",
-    :range-type :string,
   },
 })
 
@@ -102,30 +73,30 @@
     }
     {
       "/title" {
-        :description "The text that appears centered at the top of an essay segment",
+        :description "The text that appears centered at the top of an essay",
         :range-type :string,
         :required true,
         :unique true,
       },
       "/flow/next" {
-        :description "Relation to the next essay segment",
+        :description "Relation to the next essay",
       },
       "/flow/home" {
-        :description "Relation to the monad",
+        :description "Relation to the 'parent' essay",
         :required true,
         :unique true,
       },
       "/flow/see_also" {
-        :description "Internal link to another essay segment",
+        :description "Internal link to another essay",
       },
       "/contains" {
-        :description "Relation from an essay segment to the item it contains",
+        :description "Relation from an essay to the item it contains",
         :range-type "/type/item",
         :unique true,
         :required true,
       },
       "/label" {
-        :description "Symbol label that ascribes a metadata to the essay segment",
+        :description "Symbol label that ascribes a metadata to the essay",
         :range-type [
           ; Content is about surrounding content.
           :meta
@@ -135,6 +106,46 @@
           :religion
           ; Content is political.
           :politics]
+      },
+    }))
+
+(def segment-schema
+  (schematize-type "/segment"
+    {
+      :description "Nodes that are internally linkable",
+    }
+    {
+      "/flow/block" {
+        :description "Relation to the next block segment",
+        :unique true,
+      },
+      "/flow/tangent" {
+        :description "Relation to a footnote segment",
+      },
+      "/contains" {
+        :description "Relation from a segment to the item it contains",
+        :range-type "/type/item",
+        :unique true,
+        :required true,
+      },
+    }))
+
+(def inline-segment-schema
+  (schematize-type "/segment/inline"
+    {
+      :description "Segments that can be inlined",
+      :super-type "/type/segment",
+    }
+    {
+      "/flow/inline" {
+        :description "Relation to the next inline segment",
+        :unique true,
+      },
+      "/contains" {
+        :description "Relation from a segment to the item it contains",
+        :range-type "/type/item/inline",
+        :unique true,
+        :required true,
       },
     }))
 
@@ -193,6 +204,22 @@
       },
     }))
 
+(def big-emoji-schema
+  (schematize-type "/item/big_emoji"
+    {
+      :description "A series of big emoji",
+      :super-type "/type/item",
+    }
+    {
+      "/emoji" {
+        :description "The sequence of emoji to render",
+        :domain-type "/type/item/big_emoji",
+        :range-type :string,
+        :required true,
+        :unique true,
+      },
+    }))
+
 (def schema-data
   (merge extra-schema essay-schema event-schema image-schema quote-schema
-    poem-schema))
+    poem-schema segment-schema inline-segment-schema big-emoji-schema))
