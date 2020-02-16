@@ -92,7 +92,7 @@
       },
       "/flow/inline" {
         :description "Relation to the second inline segment",
-        :range-type "/type/segment/inline"
+        :range-type "/type/segment"
         :unique true,
       },
       "/contains" {

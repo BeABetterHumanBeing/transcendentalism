@@ -215,6 +215,11 @@
                            (js-str (:name cxn)))}
               name))))
 
+(defn- generate-inline-item
+  [triples]
+  (let [text (:obj (first (filter #(= (:pred %) "/item/inline/text") triples)))]
+    (span {} text)))
+
 (defn- render-item
   "Renders the HTML for an item"
   [graph item]
@@ -227,6 +232,7 @@
       "/type/item/big_emoji" (generate-item-big-emoji triples),
       "/type/item/quote" (generate-item-quote triples),
       "/type/item/image" (generate-item-image triples),
+      "/type/item/inline" (generate-inline-item triples),
       (assert false
         (str "ERROR - Type " (:pred (first item-type)) " not supported")))))
 
@@ -263,7 +269,7 @@
                            (if (nil? content)
                                nil
                                (get-unique graph content "/item/inline/tangent"))})
-               (get-unique graph inline-sub "/segment/flow/next"))))))
+               (get-unique graph inline-sub "/segment/flow/inline"))))))
 
 (defn- generate-segments
   "Returns the HTML for a flow of segments"

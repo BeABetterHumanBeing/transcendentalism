@@ -31,9 +31,8 @@
 
 (defn- essay
   "Adds triples to create an essay"
-  [sub title content-sub]
+  [sub title]
   [(types schema sub "/essay")
-   (->Triple sub "/essay/contains" content-sub)
    (->Triple sub "/essay/title" title)])
 
 (defn- essay-series
@@ -144,18 +143,26 @@
      (types schema item-keyword "/item/big_emoji")
      (->Triple item-keyword "/item/big_emoji/emoji" emoji)]))
 
+(defn- text-segment
+  [sub & lines]
+  (let [item-keyword (keyword (str (name sub) "-i"))]
+    [(types schema sub "/segment")
+     (->Triple sub "/segment/contains" item-keyword)
+     (types schema item-keyword "/item/inline")
+     (->Triple item-keyword "/item/inline/text" (str/join " " lines))]))
+
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
 (def monad
   (flatten [
-    (essay :monad "Transcendental Metaphysics" :monad-image)
+    (essay :monad "Transcendental Metaphysics")
 
+    (->Triple :monad "/essay/contains" :monad-image)
     (image-segment :monad-image
       (svg-to-image "monad" 800 800 'svg-monad)
       "Animation of the star flower, with changes cascading inwards to a central point")
 
     (->Triple :monad-image "/segment/flow/block" :monad-intro-quote)
-
     (quote-segment :monad-intro-quote
       (clojure.string/join " "
         ["The Monad is the symbol of unity."
@@ -178,26 +185,31 @@
     ; (directive-under-construction :connections :apologies)
 
     ; Welcome
-    (essay :welcome "Welcome" :wave-emoji)
+    (essay :welcome "Welcome")
+
+    (->Triple :welcome "/essay/contains" :wave-emoji)
     (big-emoji-segment :wave-emoji "&#x1f44b")
 
-    ;:welcome-1 :welcome-2 :footnote-1 :welcome-3 :footnote-2
-      ;:welcome-4 :praying-hands-emoji
+    (->Triple :wave-emoji "/segment/flow/block" :welcome-1)
+    (text-segment :welcome-1
+      "Hi there! I'm Daniel Gierl, and I'd like to welcome you to my personal"
+      "website, Transcendental Metaphysics! I use this space to explore"
+      "questions of philosophy, religion, politics, you name it. It is my"
+      "sincere hope that you leave feeling enriched by the experience, and that"
+      "the time you spend here is time well spent.")
 
-    ; (text-segment :welcome-1
-    ;   "Hi there! I'm Daniel Gierl, and I'd like to welcome you to my personal"
-    ;   "website, Transcendental Metaphysics! I use this space to explore"
-    ;   "questions of philosophy, religion, politics, you name it. It is my"
-    ;   "sincere hope that you leave feeling enriched by the experience, and that"
-    ;   "the time you spend here is time well spent.")
-    ; (text :welcome-2
-    ;   "I apologize in advance for any issues you may encounter with the"
-    ;   "unorthodox structure of the site; I've been using it as a playground"
-    ;   "for some of the more experimental ideas I've been toying with. I wrote the"
-    ;   "whole thing"
-    ;   (tangent :footnote-1 "from scratch")
-    ;   "and, as a backend engineer, this was a recipe for, ummm, how shall we"
-    ;   "say, *curious* frontend design choices.")
+    (->Triple :welcome-1 "/segment/flow/block" :welcome-2)
+    (text-segment :welcome-2
+      "I apologize in advance for any issues you may encounter with the"
+      "unorthodox structure of the site; I've been using it as a playground"
+      "for some of the more experimental ideas I've been toying with. I wrote the"
+      "whole thing")
+    (->Triple :welcome-2 "/segment/flow/inline" :tangent-1)
+    (text-segment :tangent-1 "from scratch") ; tangent to footnote-1
+    (->Triple :tangent-1 "/segment/flow/inline" :welcome-2-1)
+    (text-segment :welcome-2-1
+      "and, as a backend engineer, this was a recipe for, ummm, how shall we"
+      "say, *curious* frontend design choices.")
     ; (footnote :welcome :footnote-1
     ;   "In clojure, no less. I used it as an opportunity to teach myself"
     ;   "the language. There is no learning quite like doing.")
