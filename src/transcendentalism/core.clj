@@ -10,20 +10,25 @@
 
 (defprotocol EssayThread
   (initiate [essay-thread sub] "Adds a sub as the initial segment in an essay thread")
-  (push-block [essay-thread sub] "Adds a new block"))
+  (push-block [essay-thread sub] "Adds a new block")
+  (push-inline [essay-thread sub] "Adds a new inline to the current block"))
 
 (defn- create-essay-thread
   [essay-sub]
   (let [key-gen (create-key-gen essay-sub)]
     (reify EssayThread
       (initiate [essay-thread sub]
-        (let [prev (prev-key key-gen)]
-          (push-key key-gen sub)
+        (let [prev (prev-major-key key-gen)]
+          (push-major-key key-gen sub)
           (->Triple prev "/essay/contains" sub)))
       (push-block [essay-thread sub]
-        (let [prev (prev-key key-gen)]
-          (push-key key-gen sub)
-          (->Triple prev "/segment/flow/block" sub))))))
+        (let [prev (prev-major-key key-gen)]
+          (push-major-key key-gen sub)
+          (->Triple prev "/segment/flow/block" sub)))
+      (push-inline [essay-thread sub]
+        (let [prev (prev-minor-key key-gen)]
+          (push-minor-key key-gen sub)
+          (->Triple prev "/segment/flow/inline" sub))))))
 
 (defn- apply-directives
   "Processes collections of triples, applying any directives found therein"
@@ -221,12 +226,12 @@
       "unorthodox structure of the site; I've been using it as a playground"
       "for some of the more experimental ideas I've been toying with. I wrote the"
       "whole thing")
-    ; (->Triple :welcome-2 "/segment/flow/inline" :tangent-1)
-    ; (text-segment :tangent-1 "from scratch") ; tangent to footnote-1
-    ; (->Triple :tangent-1 "/segment/flow/inline" :welcome-2-1)
-    ; (text-segment :welcome-2-1
-    ;   "and, as a backend engineer, this was a recipe for, ummm, how shall we"
-    ;   "say, *curious* frontend design choices.")
+    (push-inline t :tangent-1)
+    (text-segment :tangent-1 "from scratch") ; tangent to footnote-1
+    (push-inline t :welcome-2-1)
+    (text-segment :welcome-2-1
+      "and, as a backend engineer, this was a recipe for, ummm, how shall we"
+      "say, *curious* frontend design choices.")
 
     ; (footnote :welcome :footnote-1
     ;   "In clojure, no less. I used it as an opportunity to teach myself"
@@ -240,8 +245,11 @@
       "wandering through these pages will be an experience not unlike wandering"
       "through a garden maze; getting lost is half the fun, and there is all"
       "kinds of")
-    ;   (tangent :footnote-2 "treasure")
-    ;   "hidden away for you to find.")
+    (push-inline t :tangent-2)
+    (text-segment :tangent-2 "treasure") ; tangent to footnote-2
+    (push-inline t :welcome-3-1)
+    (text-segment :welcome-3-1 "hidden away for you to find.")
+
     ; (footnote :welcome :footnote-2
     ;   "As an aside, I have tried to make the URLs somewhat stable so that they"
     ;   "can be shared and saved, but I can only guarantee a modicum of stability"

@@ -16,20 +16,33 @@
       (aset my-key n (.charAt "0123456789abcdefghijklmnopqrstuvwxyz" (rand-int 36))))
     (apply str (seq my-key))))
 
-(defprotocol KeyGen
-  (prev-key [threader] "Returns the previous key's name")
-  (push-key [threader name] "Adds a new key, replacing the previous one")
-  (auto-key [threader] "Adds a new random key, replacing the previous one"))
+(defprotocol MajorMinorKeyGen
+  "A key generator that produces major and minor keys (both named and anonymous.
+   Major keys replace both major and minor keys, whereas minor keys replace just
+   minor keys."
+  (prev-major-key [threader] "Returns the previous major key")
+  (prev-minor-key [threader] "Returns the previous minor key")
+  (push-major-key [threader name] [threader]
+    "Adds a new major key, replacing both major and minor keys")
+  (push-minor-key [threader name] [threader]
+    "Adds a new minor key, replacing the previous minor key"))
 
 (defn create-key-gen
   [initial-key]
-  (let [prev (atom initial-key)]
-    (reify KeyGen
-      (prev-key [threader] @prev)
-      (push-key [threader k]
-        (reset! prev k))
-      (auto-key [threader]
-        (reset! prev (keyword (gen-key 8)))))))
+  (let [prev-major (atom initial-key),
+        prev-minor (atom initial-key)]
+    (reify MajorMinorKeyGen
+      (prev-major-key [threader] @prev-major)
+      (prev-minor-key [threader] @prev-minor)
+      (push-major-key [threader k]
+        (reset! prev-major k)
+        (reset! prev-minor k))
+      (push-major-key [threader]
+        (push-major-key threader (keyword (gen-key 8))))
+      (push-minor-key [threader k]
+        (reset! prev-minor k))
+      (push-minor-key [threader]
+        (push-minor-key threader (keyword (gen-key 8)))))))
 
 (defn- extend-encodings
   "Adds new encodings for the keys that don't already have one"
