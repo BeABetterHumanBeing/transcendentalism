@@ -16,6 +16,21 @@
       (aset my-key n (.charAt "0123456789abcdefghijklmnopqrstuvwxyz" (rand-int 36))))
     (apply str (seq my-key))))
 
+(defprotocol KeyGen
+  (prev-key [threader] "Returns the previous key's name")
+  (push-key [threader name] "Adds a new key, replacing the previous one")
+  (auto-key [threader] "Adds a new random key, replacing the previous one"))
+
+(defn create-key-gen
+  [initial-key]
+  (let [prev (atom initial-key)]
+    (reify KeyGen
+      (prev-key [threader] @prev)
+      (push-key [threader k]
+        (reset! prev k))
+      (auto-key [threader]
+        (reset! prev (keyword (gen-key 8)))))))
+
 (defn- extend-encodings
   "Adds new encodings for the keys that don't already have one"
   [encodings keys]

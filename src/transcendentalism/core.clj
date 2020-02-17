@@ -2,10 +2,28 @@
   (:require [clojure.string :as str]))
 
 (use
+  'transcendentalism.encoding
   'transcendentalism.generate
   'transcendentalism.graph
   'transcendentalism.schema
   'transcendentalism.svg)
+
+(defprotocol EssayThread
+  (initiate [essay-thread sub] "Adds a sub as the initial segment in an essay thread")
+  (push-block [essay-thread sub] "Adds a new block"))
+
+(defn- create-essay-thread
+  [essay-sub]
+  (let [key-gen (create-key-gen essay-sub)]
+    (reify EssayThread
+      (initiate [essay-thread sub]
+        (let [prev (prev-key key-gen)]
+          (push-key key-gen sub)
+          (->Triple prev "/essay/contains" sub)))
+      (push-block [essay-thread sub]
+        (let [prev (prev-key key-gen)]
+          (push-key key-gen sub)
+          (->Triple prev "/segment/flow/block" sub))))))
 
 (defn- apply-directives
   "Processes collections of triples, applying any directives found therein"
@@ -30,10 +48,13 @@
         (into [] (map #(->Triple % "/essay/flow/see_also" :connections) subs))))))
 
 (defn- essay
-  "Adds triples to create an essay"
-  [sub title]
-  [(types schema sub "/essay")
-   (->Triple sub "/essay/title" title)])
+  [sub title f]
+  (let [essay-thread (create-essay-thread sub)]
+    (flatten [
+      (types schema sub "/essay")
+      (->Triple sub "/essay/title" title)
+      (f essay-thread)
+    ])))
 
 (defn- essay-series
   "Adds triples connecting a series of essay segments. The first segment will
@@ -151,46 +172,45 @@
      (types schema item-keyword "/item/inline")
      (->Triple item-keyword "/item/inline/text" (str/join " " lines))]))
 
+(def intro-essay-sequence
+  [(essay-series [:monad :welcome ;:i-am-dan :connections :apologies
+     ])
+   ; (directive-under-construction :connections :apologies)
+  ])
+
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
 (def monad
-  (flatten [
-    (essay :monad "Transcendental Metaphysics")
-
-    (->Triple :monad "/essay/contains" :monad-image)
+  (essay :monad "Transcendental Metaphysics" (fn [t] [
+    (initiate t :monad-image)
     (image-segment :monad-image
       (svg-to-image "monad" 800 800 'svg-monad)
       "Animation of the star flower, with changes cascading inwards to a central point")
 
-    (->Triple :monad-image "/segment/flow/block" :monad-intro-quote)
+    (push-block t :monad-intro-quote)
     (quote-segment :monad-intro-quote
       (clojure.string/join " "
         ["The Monad is the symbol of unity."
-        "It is the godhead, the point from which all things originate,"
-        "and the point to which all things return."])
+         "It is the godhead, the point from which all things originate,"
+         "and the point to which all things return."])
       "Daniel Gierl")
 
     ; The monad is the only segment whose home is reflexive.
     (->Triple :monad "/essay/flow/home" :monad)
     ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
-   ]))
+  ])))
 
 ; About
 ; This sequence of essay_segments say a little about myself, this website, and
 ; what I hope to do with it.
-(def about
-  (flatten [
-    (essay-series [:monad :welcome ;:i-am-dan :connections :apologies
-    ])
-    ; (directive-under-construction :connections :apologies)
-
-    ; Welcome
-    (essay :welcome "Welcome")
-
-    (->Triple :welcome "/essay/contains" :wave-emoji)
+(def welcome
+  (essay :welcome "Welcome" (fn [t] [
+    (initiate t :wave-emoji)
+    ; (->Triple :welcome "/essay/contains" :wave-emoji)
     (big-emoji-segment :wave-emoji "&#x1f44b")
 
-    (->Triple :wave-emoji "/segment/flow/block" :welcome-1)
+    (push-block t :welcome-1)
+    ; (->Triple :wave-emoji "/segment/flow/block" :welcome-1)
     (text-segment :welcome-1
       "Hi there! I'm Daniel Gierl, and I'd like to welcome you to my personal"
       "website, Transcendental Metaphysics! I use this space to explore"
@@ -198,18 +218,20 @@
       "sincere hope that you leave feeling enriched by the experience, and that"
       "the time you spend here is time well spent.")
 
-    (->Triple :welcome-1 "/segment/flow/block" :welcome-2)
+    (push-block t :welcome-2)
+    ; (->Triple :welcome-1 "/segment/flow/block" :welcome-2)
     (text-segment :welcome-2
       "I apologize in advance for any issues you may encounter with the"
       "unorthodox structure of the site; I've been using it as a playground"
       "for some of the more experimental ideas I've been toying with. I wrote the"
       "whole thing")
-    (->Triple :welcome-2 "/segment/flow/inline" :tangent-1)
-    (text-segment :tangent-1 "from scratch") ; tangent to footnote-1
-    (->Triple :tangent-1 "/segment/flow/inline" :welcome-2-1)
-    (text-segment :welcome-2-1
-      "and, as a backend engineer, this was a recipe for, ummm, how shall we"
-      "say, *curious* frontend design choices.")
+    ; (->Triple :welcome-2 "/segment/flow/inline" :tangent-1)
+    ; (text-segment :tangent-1 "from scratch") ; tangent to footnote-1
+    ; (->Triple :tangent-1 "/segment/flow/inline" :welcome-2-1)
+    ; (text-segment :welcome-2-1
+    ;   "and, as a backend engineer, this was a recipe for, ummm, how shall we"
+    ;   "say, *curious* frontend design choices.")
+  ])))
     ; (footnote :welcome :footnote-1
     ;   "In clojure, no less. I used it as an opportunity to teach myself"
     ;   "the language. There is no learning quite like doing.")
@@ -271,12 +293,11 @@
     ; Apologies
     ; (essay :apologies "Apologies" [])
     ; TODO(gierl) apologize
-  ]))
 
 (def graph
   (construct-graph
     (apply-directives
-      monad about)))
+      intro-essay-sequence monad welcome)))
 
 (defn -main
   "Validates the website's graph, and generates its files"
