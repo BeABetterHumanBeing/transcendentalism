@@ -68,13 +68,13 @@
         (into [] (map #(->Triple % "/essay/flow/see_also" :connections) subs))))))
 
 (defn essay
-  [sub title f]
+  [sub title & fns]
   (let [t (create-essay-thread sub)]
     (flatten [
       (types schema sub "/essay")
       (->Triple sub "/essay/title" title)
       (initiate t)
-      (f t)
+      (map #(% t) fns)
     ])))
 
 (defn essay-series
@@ -89,69 +89,78 @@
                     (range (dec (count subs))))))))
 
 (defn footnote
-  [sub f]
-  (let [essay-thread (create-essay-thread sub)]
-    (f essay-thread)))
+  [sub & fns]
+  (fn [t]
+    (let [t (create-essay-thread sub)]
+      (map #(% t) fns))))
 
 (defn- item-sub
   [sub]
   (keyword (str (name sub) "-i")))
 
 (defn poem-segment
-  [t & lines]
-  (let [sub (major-key t),
-        item-keyword (item-sub sub)]
-    [(types schema sub "/segment")
-     (->Triple sub "/segment/contains" item-keyword)
-     (types schema item-keyword "/item/poem")
-     (map
-       (fn [i]
-         (let [line (nth lines i)]
-           (->Triple item-keyword "/item/poem/line" ^{:order i} [line])))
-       (range (count lines)))]))
-
-(defn image-segment
-  [t url alt-text]
-  (let [sub (major-key t),
-        item-keyword (item-sub sub)]
-    [(types schema sub "/segment")
-     (->Triple sub "/segment/contains" item-keyword)
-     (types schema item-keyword "/item/image")
-     (->Triple item-keyword "/item/image/url" url)
-     (->Triple item-keyword "/item/image/alt_text" alt-text)]))
-
-(defn quote-segment
-  ([t quote] (quote-segment t quote nil))
-  ([t quote author]
+  [& lines]
+  (fn [t]
     (let [sub (major-key t),
           item-keyword (item-sub sub)]
       [(types schema sub "/segment")
        (->Triple sub "/segment/contains" item-keyword)
-       (types schema item-keyword "/item/quote")
-       (->Triple item-keyword "/item/quote/text" quote)
-       (if (nil? author)
-         []
-         (->Triple item-keyword "/item/quote/author" author))])))
+       (types schema item-keyword "/item/poem")
+       (map
+         (fn [i]
+           (let [line (nth lines i)]
+             (->Triple item-keyword "/item/poem/line" ^{:order i} [line])))
+         (range (count lines)))])))
+
+(defn image-segment
+  [url alt-text]
+  (fn [t]
+    (let [sub (major-key t),
+          item-keyword (item-sub sub)]
+      [(types schema sub "/segment")
+       (->Triple sub "/segment/contains" item-keyword)
+       (types schema item-keyword "/item/image")
+       (->Triple item-keyword "/item/image/url" url)
+       (->Triple item-keyword "/item/image/alt_text" alt-text)])))
+
+(defn quote-segment
+  ([quote] (quote-segment quote nil))
+  ([quote author]
+    (fn [t]
+      (let [sub (major-key t),
+            item-keyword (item-sub sub)]
+        [(types schema sub "/segment")
+         (->Triple sub "/segment/contains" item-keyword)
+         (types schema item-keyword "/item/quote")
+         (->Triple item-keyword "/item/quote/text" quote)
+         (if (nil? author)
+           []
+           (->Triple item-keyword "/item/quote/author" author))]))))
 
 (defn big-emoji-segment
-  [t emoji]
-  (let [sub (major-key t),
-        item-keyword (item-sub sub)]
-    [(types schema sub "/segment")
-     (->Triple sub "/segment/contains" item-keyword)
-     (types schema item-keyword "/item/big_emoji")
-     (->Triple item-keyword "/item/big_emoji/emoji" emoji)]))
+  [emoji]
+  (fn [t]
+    (let [sub (major-key t),
+          item-keyword (item-sub sub)]
+      [(types schema sub "/segment")
+       (->Triple sub "/segment/contains" item-keyword)
+       (types schema item-keyword "/item/big_emoji")
+       (->Triple item-keyword "/item/big_emoji/emoji" emoji)])))
 
 (defn text-segment
-  [sub & lines]
-  (let [item-keyword (item-sub sub)]
-    [(types schema sub "/segment")
-     (->Triple sub "/segment/contains" item-keyword)
-     (types schema item-keyword "/item/inline")
-     (->Triple item-keyword "/item/inline/text" (str/join " " lines))]))
+  [with-key & lines]
+  (fn [t]
+    ; (println with-key)
+    (let [sub (with-key t),
+          item-keyword (item-sub sub)]
+      [(types schema sub "/segment")
+       (->Triple sub "/segment/contains" item-keyword)
+       (types schema item-keyword "/item/inline")
+       (->Triple item-keyword "/item/inline/text" (str/join " " lines))])))
 
 (defn tangent-segment
-  [t footnote-sub & lines]
-  (let [k (minor-key t)]
-    [(apply text-segment k lines)
-     (->Triple (item-sub k) "/item/inline/tangent" footnote-sub)]))
+  [footnote-sub & lines]
+  (fn [t]
+    (let [k (minor-key t)]
+      [((text-segment minor-key lines) t)
+       (->Triple (item-sub k) "/item/inline/tangent" footnote-sub)])))
