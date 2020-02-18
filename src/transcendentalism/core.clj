@@ -15,11 +15,11 @@
 ; This essay_segment serves as the default entry point into the graph.
 (def monad
   (essay :monad "Transcendental Metaphysics"
-    (image-segment
+    (image
       (svg-to-image "monad" 800 800 'svg-monad)
       "Animation of the star flower, with changes cascading inwards to a central point")
 
-    (quote-segment
+    (quote*
       (str/join " "
         ["The Monad is the symbol of unity."
          "It is the godhead, the point from which all things originate,"
@@ -36,9 +36,9 @@
 ; what I hope to do with it.
 (def welcome
   (essay :welcome "Welcome"
-    (big-emoji-segment "&#x1f44b")
+    (big-emoji "&#x1f44b")
 
-    (text-segment
+    (text
       "Hi there! I'm Daniel Gierl, and I'd like to welcome you to my personal"
       "website, Transcendental Metaphysics! I use this space to explore"
       "questions of philosophy, religion, politics, you name it. It is my"
@@ -46,58 +46,58 @@
       "the time you spend here is time well spent.")
 
     (paragraph
-      (text-segment
+      (text
         "I apologize in advance for any issues you may encounter with the"
         "unorthodox structure of the site; I've been using it as a playground"
         "for some of the more experimental ideas I've been toying with. I wrote the"
         "whole thing")
-      (tangent-segment :footnote-1 "from scratch")
-      (text-segment
+      (tangent :footnote-1 "from scratch")
+      (text
         "and, as a backend engineer, this was a recipe for, ummm, how shall we"
         "say, *curious* frontend design choices."))
 
     (footnote :footnote-1
-      (text-segment
+      (text
         "In clojure, no less. I used it as an opportunity to teach myself"
         "the language. There is no learning quite like doing.")
     )
 
     (paragraph
-      (text-segment
+      (text
         "The whole site is structured as a big, tangled graph. What you're"
         "reading here is as close to a proper 'beginning' as it gets, and there"
         "is nothing out there that resembles an 'end'. My intention is that"
         "wandering through these pages will be an experience not unlike wandering"
         "through a garden maze; getting lost is half the fun, and there is all"
         "kinds of")
-      (tangent-segment :footnote-2 "treasure")
-      (text-segment "hidden away for you to find."))
+      (tangent :footnote-2 "treasure")
+      (text "hidden away for you to find."))
 
     (footnote :footnote-2
-      (text-segment
+      (text
         "As an aside, I have tried to make the URLs somewhat stable so that they"
         "can be shared and saved, but I can only guarantee a modicum of stability"
         "in a shifting sea of ideas.")
     )
 
-    (poem-segment
+    (poem
       "May you find that which you search for"
       "May your bridges meet you halfway"
       "May you never lose yourself in darkness"
       "And may the light of God shine brightly on your soul")
 
-    (big-emoji-segment "&#x1f64f")
+    (big-emoji "&#x1f64f")
   ))
 
 (def i-am-dan
   (essay :i-am-dan "I Am Dan"
-    (text-segment
+    (text
       "My name's Daniel Gierl. I was a plump, healthy baby with a full head of"
       "hair, and I went home from the hospital wearing little yellow socks.")
 
     ; TODO yellow socks (preferably a photo)
 
-    (text-segment
+    (text
       "In life, we often overlook the smaller, sentimental details. A person is"
       "readily reduced to their age and occupation, their parentage, their"
       "claim to fame... There's nothing wrong with this; it happens for a"
@@ -111,10 +111,10 @@
       "mundane, a bit too undocumented.")
 
     (paragraph
-      (text-segment
+      (text
         "I do have a diary, but it's not on this website. If you read")
-      (tangent-segment :footnote-3 "enough of this")
-      (text-segment
+      (tangent :footnote-3 "enough of this")
+      (text
         ", you will surely get a great sense of who I am, but it's not"
         "*really* supposed to be about me. Given this opportunity to toot my own"
         "horn, I'd much rather be known as \"the guy who went home from the"
@@ -122,25 +122,25 @@
 
     (footnote :footnote-3
       (paragraph
-        (text-segment
+        (text
           "I tell a lot of stories, so it won't be that hard, if you can put up"
           "with my")
-        (tangent-segment :sub-footnote "rambling")
-        (text-segment "."))
+        (tangent :sub-footnote "rambling")
+        (text "."))
 
       (footnote :sub-footnote
         (paragraph
-          (text-segment
+          (text
             "I'm partial to tangents, and tangents that go on tangents. The deep"
             "end of the pool is")
-          (tangent-segment :sub-sub-footnote "deeper")
-          (text-segment "than you might expect."))
+          (tangent :sub-sub-footnote "deeper")
+          (text "than you might expect."))
 
         (footnote :sub-sub-footnote
-          (tangent-segment :sub-sub-sub-footnote "Hahahaha")
+          (tangent :sub-sub-sub-footnote "Hahahaha")
 
           (footnote :sub-sub-sub-footnote
-            (text-segment
+            (text
               "It's worth noting that my tangents generally have a purpose."
               "This one happens to be for testing purposes, to allow me to"
               "check that deeply-nested tangents render correctly.")
@@ -149,13 +149,13 @@
       )
 
       (paragraph
-        (text-segment
+        (text
           "To reward your patience so far, here's some more about me: back in"
           "2010, I chose three adjectives that I thought described myself, and"
           "were moreover things that I liked about me. They were: interesting,"
           "enthusiastic, and")
-        (tangent-segment :adjectives-footnote "lovable")
-        (text-segment
+        (tangent :adjectives-footnote "lovable")
+        (text
           ". Later on, in 2014, I expanded this list again, adding brave,"
           "compassionate, and just. It has been an excellent exercise in living"
           "a virtuous life, and I'd generally recommend that you try it, if it"
@@ -164,7 +164,7 @@
           "work."))
 
       (footnote :adjectives-footnote
-        (text-segment
+        (text
           "I have since upgraded it to 'loving', to emphasize that it's more"
           "about what you give than what you receive.")
       )
@@ -172,13 +172,13 @@
 
 (def connections
   (essay :connections "Connections"
-    (text-segment "TODO connections")
+    (text "TODO connections")
     ; TODO(gierl) contact information, respective responsibilities
   ))
 
 (def apologies
   (essay :apologies "Apologies"
-    (text-segment "TODO apologies")
+    (text "TODO apologies")
     ; TODO(gierl) apologize
   ))
 

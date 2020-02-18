@@ -110,7 +110,7 @@
   [sub]
   (keyword (str (name sub) "-i")))
 
-(defn poem-segment
+(defn poem
   [& lines]
   (fn [t]
     (let [sub (major-key t),
@@ -124,7 +124,7 @@
              (->Triple item-keyword "/item/poem/line" ^{:order i} [line])))
          (range (count lines)))])))
 
-(defn image-segment
+(defn image
   [url alt-text]
   (fn [t]
     (let [sub (major-key t),
@@ -135,21 +135,21 @@
        (->Triple item-keyword "/item/image/url" url)
        (->Triple item-keyword "/item/image/alt_text" alt-text)])))
 
-(defn quote-segment
-  ([quote] (quote-segment quote nil))
-  ([quote author]
+(defn quote*
+  ([q] (quote* q nil))
+  ([q author]
     (fn [t]
       (let [sub (major-key t),
             item-keyword (item-sub sub)]
         [(types schema sub "/segment")
          (->Triple sub "/segment/contains" item-keyword)
          (types schema item-keyword "/item/quote")
-         (->Triple item-keyword "/item/quote/text" quote)
+         (->Triple item-keyword "/item/quote/text" q)
          (if (nil? author)
            []
            (->Triple item-keyword "/item/quote/author" author))]))))
 
-(defn big-emoji-segment
+(defn big-emoji
   [emoji]
   (fn [t]
     (let [sub (major-key t),
@@ -169,7 +169,7 @@
             (concat result [push-inline f]))
           [(first fns)] (rest fns))))))
 
-(defn text-segment
+(defn text
   [& lines]
   (fn [t]
     (let [sub (minor-key t),
@@ -179,9 +179,9 @@
        (types schema item-keyword "/item/inline")
        (->Triple item-keyword "/item/inline/text" (str/join " " lines))])))
 
-(defn tangent-segment
+(defn tangent
   [footnote-sub & lines]
   (fn [t]
     (let [k (minor-key t)]
-      [((apply text-segment lines) t)
+      [((apply text lines) t)
        (->Triple (item-sub k) "/item/inline/tangent" footnote-sub)])))
