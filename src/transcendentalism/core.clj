@@ -9,26 +9,44 @@
   'transcendentalism.svg)
 
 (defprotocol EssayThread
-  (initiate [essay-thread sub] "Adds a sub as the initial segment in an essay thread")
-  (push-block [essay-thread sub] "Adds a new block")
-  (push-inline [essay-thread sub] "Adds a new inline to the current block"))
+  (initiate [essay-thread] [essay-thread sub]
+    "Adds a sub as the initial segment in an essay thread")
+  (push-block [essay-thread] [essay-thread sub] "Adds a new block")
+  (push-inline [essay-thread] [essay-thread sub]
+    "Adds a new inline to the current block")
+  (major-key [essay-thread] "Returns the current major key")
+  (minor-key [essay-thread] "returns the current minor key"))
 
 (defn- create-essay-thread
   [essay-sub]
   (let [key-gen (create-key-gen essay-sub)]
     (reify EssayThread
+      (initiate [essay-thread]
+        (let [prev (prev-major-key key-gen),
+              sub (push-major-key key-gen)]
+          (->Triple prev "/essay/contains" sub)))
       (initiate [essay-thread sub]
         (let [prev (prev-major-key key-gen)]
           (push-major-key key-gen sub)
           (->Triple prev "/essay/contains" sub)))
+      (push-block [essay-thread]
+        (let [prev (prev-major-key key-gen),
+              sub (push-major-key key-gen)]
+          (->Triple prev "/segment/flow/block" sub)))
       (push-block [essay-thread sub]
         (let [prev (prev-major-key key-gen)]
           (push-major-key key-gen sub)
           (->Triple prev "/segment/flow/block" sub)))
+      (push-inline [essay-thread]
+        (let [prev (prev-minor-key key-gen),
+              sub (push-minor-key key-gen)]
+          (->Triple prev "/segment/flow/inline" sub)))
       (push-inline [essay-thread sub]
         (let [prev (prev-minor-key key-gen)]
           (push-minor-key key-gen sub)
-          (->Triple prev "/segment/flow/inline" sub))))))
+          (->Triple prev "/segment/flow/inline" sub)))
+      (major-key [essay-thread] (prev-major-key key-gen))
+      (minor-key [essay-thread] (prev-minor-key key-gen)))))
 
 (defn- apply-directives
   "Processes collections of triples, applying any directives found therein"
@@ -138,13 +156,13 @@
 ; This essay_segment serves as the default entry point into the graph.
 (def monad
   (essay :monad "Transcendental Metaphysics" (fn [t] [
-    (initiate t :monad-image)
-    (image-segment :monad-image
+    (initiate t)
+    (image-segment (major-key t)
       (svg-to-image "monad" 800 800 'svg-monad)
       "Animation of the star flower, with changes cascading inwards to a central point")
 
-    (push-block t :monad-intro-quote)
-    (quote-segment :monad-intro-quote
+    (push-block t)
+    (quote-segment (major-key t)
       (clojure.string/join " "
         ["The Monad is the symbol of unity."
          "It is the godhead, the point from which all things originate,"
@@ -161,80 +179,80 @@
 ; what I hope to do with it.
 (def welcome
   (essay :welcome "Welcome" (fn [t] [
-    (initiate t :wave-emoji)
-    (big-emoji-segment :wave-emoji "&#x1f44b")
+    (initiate t)
+    (big-emoji-segment (major-key t) "&#x1f44b")
 
-    (push-block t :welcome-1)
-    (text-segment :welcome-1
+    (push-block t)
+    (text-segment (major-key t)
       "Hi there! I'm Daniel Gierl, and I'd like to welcome you to my personal"
       "website, Transcendental Metaphysics! I use this space to explore"
       "questions of philosophy, religion, politics, you name it. It is my"
       "sincere hope that you leave feeling enriched by the experience, and that"
       "the time you spend here is time well spent.")
 
-    (push-block t :welcome-2)
-    (text-segment :welcome-2
+    (push-block t)
+    (text-segment (major-key t)
       "I apologize in advance for any issues you may encounter with the"
       "unorthodox structure of the site; I've been using it as a playground"
       "for some of the more experimental ideas I've been toying with. I wrote the"
       "whole thing")
-    (push-inline t :tangent-1)
-    (text-segment :tangent-1 "from scratch")
-    (->Triple (item-sub :tangent-1) "/item/inline/tangent" :footnote-1)
-    (push-inline t :welcome-2-1)
-    (text-segment :welcome-2-1
+    (push-inline t)
+    (text-segment (minor-key t) "from scratch")
+    (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :footnote-1)
+    (push-inline t)
+    (text-segment (minor-key t)
       "and, as a backend engineer, this was a recipe for, ummm, how shall we"
       "say, *curious* frontend design choices.")
 
     (footnote :footnote-1 (fn [t] [
-      (text-segment :footnote-1
+      (text-segment (major-key t)
         "In clojure, no less. I used it as an opportunity to teach myself"
         "the language. There is no learning quite like doing.")
     ]))
 
-    (push-block t :welcome-3)
-    (text-segment :welcome-3
+    (push-block t)
+    (text-segment (major-key t)
       "The whole site is structured as a big, tangled graph. What you're"
       "reading here is as close to a proper 'beginning' as it gets, and there"
       "is nothing out there that resembles an 'end'. My intention is that"
       "wandering through these pages will be an experience not unlike wandering"
       "through a garden maze; getting lost is half the fun, and there is all"
       "kinds of")
-    (push-inline t :tangent-2)
-    (text-segment :tangent-2 "treasure")
-    (->Triple (item-sub :tangent-2) "/item/inline/tangent" :footnote-2)
-    (push-inline t :welcome-3-1)
-    (text-segment :welcome-3-1 "hidden away for you to find.")
+    (push-inline t)
+    (text-segment (minor-key t) "treasure")
+    (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :footnote-2)
+    (push-inline t)
+    (text-segment (minor-key t) "hidden away for you to find.")
 
     (footnote :footnote-2 (fn [t] [
-      (text-segment :footnote-2
+      (text-segment (major-key t)
         "As an aside, I have tried to make the URLs somewhat stable so that they"
         "can be shared and saved, but I can only guarantee a modicum of stability"
         "in a shifting sea of ideas.")
     ]))
 
-    (push-block t :welcome-4)
-    (poem-segment :welcome-4
+    (push-block t)
+    (poem-segment (major-key t)
       "May you find that which you search for"
       "May your bridges meet you halfway"
       "May you never lose yourself in darkness"
       "And may the light of God shine brightly on your soul")
 
-    (push-block t :praying-hands-emoji)
-    (big-emoji-segment :praying-hands-emoji "&#x1f44b")
+    (push-block t)
+    (big-emoji-segment (major-key t) "&#x1f44b")
   ])))
 
 (def i-am-dan
   (essay :i-am-dan "I Am Dan" (fn [t] [
-    (initiate t :yellow-socks)
-    (text-segment :yellow-socks
+    (initiate t)
+    (text-segment (major-key t)
       "My name's Daniel Gierl. I was a plump, healthy baby with a full head of"
       "hair, and I went home from the hospital wearing little yellow socks.")
 
     ; ; TODO yellow socks (preferably a photo)
 
-    (push-block t :salient-details)
-    (text-segment :salient-details
+    (push-block t)
+    (text-segment (major-key t)
       "In life, we often overlook the smaller, sentimental details. A person is"
       "readily reduced to their age and occupation, their parentage, their"
       "claim to fame... There's nothing wrong with this; it happens for a"
@@ -247,45 +265,45 @@
       "occupied their lives with are forgotten on account of being a bit too"
       "mundane, a bit too undocumented.")
 
-    (push-block t :prefer-socks)
-    (text-segment :prefer-socks
+    (push-block t)
+    (text-segment (major-key t)
       "I do have a diary, but it's not on this website. If you read")
-    (push-inline t :tangent-3)
-    (text-segment :tangent-3 "enough of this")
-    (->Triple (item-sub :tangent-3) "/item/inline/tangent" :footnote-3)
-    (push-inline t :prefer-socks-1)
-    (text-segment :prefer-socks-1", you will surely get a great sense of who I am, but it's not"
+    (push-inline t)
+    (text-segment (minor-key t) "enough of this")
+    (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :footnote-3)
+    (push-inline t)
+    (text-segment (minor-key t)
+      ", you will surely get a great sense of who I am, but it's not"
       "*really* supposed to be about me. Given this opportunity to toot my own"
       "horn, I'd much rather be known as \"the guy who went home from the"
       "hospital in yellow socks\" than anything else.")
 
     (footnote :footnote-3 (fn [t] [
-      (text-segment :footnote-3
+      (text-segment (major-key t)
         "I tell a lot of stories, so it won't be that hard, if you can put up"
         "with my")
-      (push-inline t :sub-tangent)
-      (text-segment :sub-tangent
-        "rambling")
-      (->Triple (item-sub :sub-tangent) "/item/inline/tangent" :sub-footnote)
-      (push-inline t :footnote-3-1)
-      (text-segment :footnote-3-1 ".")
+      (push-inline t)
+      (text-segment (minor-key t) "rambling")
+      (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :sub-footnote)
+      (push-inline t)
+      (text-segment (minor-key t) ".")
 
       (footnote :sub-footnote (fn [t] [
-        (text-segment :sub-footnote
+        (text-segment (major-key t)
           "I'm partial to tangents, and tangents that go on tangents. The deep"
           "end of the pool is")
-        (push-inline t :sub-sub-tangent)
-        (text-segment :sub-sub-tangent "deeper")
-        (->Triple (item-sub :sub-sub-tangent) "/item/inline/tangent" :sub-sub-footnote)
-        (push-inline t :sub-footnote-1)
-        (text-segment :sub-footnote-1 "than you might expect.")
+        (push-inline t)
+        (text-segment (minor-key t) "deeper")
+        (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :sub-sub-footnote)
+        (push-inline t)
+        (text-segment (minor-key t) "than you might expect.")
 
         (footnote :sub-sub-footnote (fn [t] [
-          (text-segment :sub-sub-footnote "Hahahaha")
-          (->Triple (item-sub :sub-sub-footnote) "/item/inline/tangent" :sub-sub-sub-footnote)
+          (text-segment (major-key t) "Hahahaha")
+          (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :sub-sub-sub-footnote)
 
           (footnote :sub-sub-sub-footnote (fn [t] [
-            (text-segment :sub-sub-sub-footnote
+            (text-segment (major-key t)
               "It's worth noting that my tangents generally have a purpose."
               "This one happens to be for testing purposes, to allow me to"
               "check that deeply-nested tangents render correctly.")
@@ -293,17 +311,17 @@
         ]))
       ]))
 
-      (push-block t :adjectives)
-      (text-segment :adjectives
+      (push-block t)
+      (text-segment (major-key t)
         "To reward your patience so far, here's some more about me: back in"
         "2010, I chose three adjectives that I thought described myself, and"
         "were moreover things that I liked about me. They were: interesting,"
         "enthusiastic, and")
-      (push-inline t :adjectives-tangent)
-      (text-segment :adjectives-tangent "lovable")
-      (->Triple (item-sub :adjectives-tangent) "/item/inline/tangent" :adjectives-footnote)
-      (push-inline t :adjectives-1)
-      (text-segment :adjectives-1
+      (push-inline t)
+      (text-segment (minor-key t) "lovable")
+      (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :adjectives-footnote)
+      (push-inline t)
+      (text-segment (minor-key t)
         ". Later on, in 2014, I expanded this list again, adding brave,"
         "compassionate, and just. It has been an excellent exercise in living"
         "a virtuous life, and I'd generally recommend that you try it, if it"
@@ -312,7 +330,7 @@
         "work.")
 
       (footnote :adjectives-footnote (fn [t] [
-        (text-segment :adjectives-footnote
+        (text-segment (major-key t)
           "I have since upgraded it to 'loving', to emphasize that it's more"
           "about what you give than what you receive.")
       ]))
@@ -321,15 +339,15 @@
 
 (def connections
   (essay :connections "Connections" (fn [t] [
-    (initiate t :todo-connections)
-    (text-segment :todo-connections "TODO connections")
+    (initiate t)
+    (text-segment (major-key t) "TODO connections")
     ; TODO(gierl) contact information, respective responsibilities
   ])))
 
 (def apologies
   (essay :apologies "Apologies" (fn [t] [
-    (initiate t :todo-apologies)
-    (text-segment :todo-apologies "TODO apologies")
+    (initiate t)
+    (text-segment (major-key t) "TODO apologies")
     ; TODO(gierl) apologize
   ])))
 
