@@ -57,7 +57,7 @@
 
 (defn- p [attrs contents] (xml-tag "p" attrs contents))
 
-(defn- span [attrs contents] (xml-tag "span" attrs contents))
+(defn- span [attrs & contents] (xml-tag "span" attrs (apply str contents)))
 
 (defn- a [attrs contents] (xml-tag "a" attrs contents))
 
@@ -153,17 +153,23 @@
                            (js-str (:name cxn)))}
               name))))
 
+(defn- render-footnote-idx
+  [ancestry]
+  (if (empty? ancestry)
+    ""
+    (str "[" (str/join "-" ancestry) "]")))
+
 (defn- generate-inline-item
-  [triples]
+  [triples footnote-map]
   (let [text (unique-or-nil triples "/item/inline/text"),
         tangent (unique-or-nil triples "/item/inline/tangent")]
     (if (nil? tangent)
       (span {} text)
-      (span {"class" "tangent"} text))))
+      (span {"class" "tangent"} (str text " " (render-footnote-idx (footnote-map tangent)))))))
 
 (defn- render-item
   "Renders the HTML for an item"
-  [graph item]
+  [graph item footnote-map]
   (let [triples (all-triples graph item),
         item-type (filter #(and (str/starts-with? (:pred %) "/type")
                                 (not (= (:pred %) "/type/item"))) triples)]
@@ -172,7 +178,7 @@
       "/type/item/big_emoji" (generate-item-big-emoji triples),
       "/type/item/quote" (generate-item-quote triples),
       "/type/item/image" (generate-item-image triples),
-      "/type/item/inline" (generate-inline-item triples),
+      "/type/item/inline" (generate-inline-item triples footnote-map),
       (assert false
         (str "ERROR - Type " (:pred (first item-type)) " not supported")))))
 
@@ -204,36 +210,49 @@
                                (get-unique graph content "/item/inline/tangent"))})
                (get-unique graph inline-sub "/segment/flow/inline"))))))
 
-(defn- render-footnote-idx
-  [ancestry]
-  (if (empty? ancestry)
-    ""
-    (span {"class" "footnote-anchor"} (str "[" (str/join "-" ancestry) "] "))))
+(defn- calculate-footnote-map
+  "Returns a sub->ancestry map of all footnotes under a given segment"
+  [graph sub]
+  (letfn
+    [(inner-footnote-map [sub ancestry idx]
+       (let [block-content (collect-block-content graph sub),
+             next-block (get-unique graph sub "/segment/flow/block"),
+             tangents (:tangents block-content),
+             new-tangents (reduce
+               (fn [result i]
+                 (assoc result (get tangents i) (conj ancestry (+ i idx))))
+               {} (range (count tangents)))]
+         (apply merge
+           new-tangents
+           (if (nil? next-block)
+             {}
+             (inner-footnote-map next-block ancestry (+ idx (count tangents))))
+           (map #(inner-footnote-map % (new-tangents %) 1) tangents))))]
+    (inner-footnote-map sub [] 1)))
 
 (defn- generate-essay-contents
   [graph segment]
   (letfn
-    [(generate-block-sequence [sub first-in-seq footnote-ancestry next-footnote-idx]
+    [(generate-block-sequence [sub footnote-map]
        (let [block-content (collect-block-content graph sub),
              next-block (get-unique graph sub "/segment/flow/block")]
          (str/join "\n" [
            (div {"class" "dbg block"}
-             (if first-in-seq (render-footnote-idx footnote-ancestry) "")
+             (if (contains? footnote-map sub)
+               (span {"class" "footnote-anchor"}
+                 (render-footnote-idx (footnote-map sub)) " ")
+               "")
              (apply str
-               (map #(render-item graph %) (:contents block-content)))
+               (map #(render-item graph % footnote-map) (:contents block-content)))
              (str/join "\n"
                (map
-                 (fn [s]
-                   (generate-block-sequence s
-                     true (conj footnote-ancestry next-footnote-idx) 1))
+                 #(generate-block-sequence % footnote-map)
                  (:tangents block-content))))
            (if (nil? next-block)
              ""
-             (generate-block-sequence next-block
-               false footnote-ancestry
-               (+ next-footnote-idx (count (:tangents block-content)))))
+             (generate-block-sequence next-block footnote-map))
          ])))]
-    (generate-block-sequence segment true [] 1)))
+    (generate-block-sequence segment (calculate-footnote-map graph segment))))
 
 (defn- generate-under-construction-splash
   "Returns a div that shows that the segment is under construction"
