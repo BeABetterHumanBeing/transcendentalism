@@ -72,62 +72,9 @@
                       (get subs %) "/essay/flow/next" (get subs (inc %)))
                     (range (dec (count subs))))))))
 
-(defn- decoration?
-  "Returns the decoration of a sentence fragment"
-  [fragment]
-  (if (string? fragment)
-    :string
-    (fragment :decoration)))
-
-(defn- get-fragment
-  "Returns the sentence fragment itself"
-  [fragments]
-  (if (string? (first fragments))
-    (str/join " " fragments)
-    ((first fragments) :content)))
-
-(defn- get-footnote
-  "Returns the footnote to which the fragment is linked, or nil"
-  [fragments]
-  (if (string? (first fragments))
-    nil
-    ((first fragments) :footnote)))
-
-(defn- tangent
-  "Decorates a sentence fragment, associating it with a footnote"
-  [footnote-sub & fragment]
-  {
-    ; Tangents should never have the same decoration as their immediate neighbor.
-    :decoration (rand-int 1000000),
-    :content (str/join " " fragment),
-    :footnote footnote-sub,
-  })
-
-(defn- text
-  "Converts a collection of [potentially decorated] sentence fragments into
-   equivalent triples"
-  [sub & fragments]
-  (let [texts (partition-by #(decoration? %) fragments)]
-    (concat
-      (types schema sub "/item/text")
-      (map
-        (fn [i]
-          (let [piece (nth texts i),
-                footnote (get-footnote piece),
-                metadata (if (nil? footnote)
-                           {:order i}
-                           {:order i,
-                            :footnote footnote})]
-            (->Triple sub "/item/text/text"
-              (with-meta [(get-fragment piece)] metadata))))
-        (range (count texts))))))
-
-(defn- footnote
-  "Creates text along with an accompanying footnote marker"
-  [sub footnote-sub & fragments]
-  (conj
-    (apply text footnote-sub fragments)
-    (->Triple sub "/item/footnote" footnote-sub)))
+(defn- item-sub
+  [sub]
+  (keyword (str (name sub) "-i")))
 
 (defn- poem-segment
   [sub & lines]
@@ -143,7 +90,7 @@
 
 (defn- image-segment
   [sub url alt-text]
-  (let [item-keyword (keyword (str (name sub) "-i"))]
+  (let [item-keyword (item-sub sub)]
     [(types schema sub "/segment")
      (->Triple sub "/segment/contains" item-keyword)
      (types schema item-keyword "/item/image")
@@ -153,7 +100,7 @@
 (defn- quote-segment
   ([sub quote] (quote-segment sub quote nil))
   ([sub quote author]
-    (let [item-keyword (keyword (str (name sub) "-i"))]
+    (let [item-keyword (item-sub sub)]
       [(types schema sub "/segment")
        (->Triple sub "/segment/contains" item-keyword)
        (types schema item-keyword "/item/quote")
@@ -164,7 +111,7 @@
 
 (defn- big-emoji-segment
   [sub emoji]
-  (let [item-keyword (keyword (str (name sub) "-i"))]
+  (let [item-keyword (item-sub sub)]
     [(types schema sub "/segment")
      (->Triple sub "/segment/contains" item-keyword)
      (types schema item-keyword "/item/big_emoji")
@@ -172,7 +119,7 @@
 
 (defn- text-segment
   [sub & lines]
-  (let [item-keyword (keyword (str (name sub) "-i"))]
+  (let [item-keyword (item-sub sub)]
     [(types schema sub "/segment")
      (->Triple sub "/segment/contains" item-keyword)
      (types schema item-keyword "/item/inline")
@@ -227,15 +174,16 @@
       "for some of the more experimental ideas I've been toying with. I wrote the"
       "whole thing")
     (push-inline t :tangent-1)
-    (text-segment :tangent-1 "from scratch") ; tangent to footnote-1
+    (text-segment :tangent-1 "from scratch")
+    (->Triple (item-sub :tangent-1) "/item/inline/tangent" :footnote-1)
     (push-inline t :welcome-2-1)
     (text-segment :welcome-2-1
       "and, as a backend engineer, this was a recipe for, ummm, how shall we"
       "say, *curious* frontend design choices.")
 
-    ; (footnote :welcome :footnote-1
-    ;   "In clojure, no less. I used it as an opportunity to teach myself"
-    ;   "the language. There is no learning quite like doing.")
+    (text-segment :footnote-1
+      "In clojure, no less. I used it as an opportunity to teach myself"
+      "the language. There is no learning quite like doing.")
 
     (push-block t :welcome-3)
     (text-segment :welcome-3
@@ -246,14 +194,15 @@
       "through a garden maze; getting lost is half the fun, and there is all"
       "kinds of")
     (push-inline t :tangent-2)
-    (text-segment :tangent-2 "treasure") ; tangent to footnote-2
+    (text-segment :tangent-2 "treasure")
+    (->Triple (item-sub :tangent-2) "/item/inline/tangent" :footnote-2)
     (push-inline t :welcome-3-1)
     (text-segment :welcome-3-1 "hidden away for you to find.")
 
-    ; (footnote :welcome :footnote-2
-    ;   "As an aside, I have tried to make the URLs somewhat stable so that they"
-    ;   "can be shared and saved, but I can only guarantee a modicum of stability"
-    ;   "in a shifting sea of ideas.")
+    (text-segment :footnote-2
+      "As an aside, I have tried to make the URLs somewhat stable so that they"
+      "can be shared and saved, but I can only guarantee a modicum of stability"
+      "in a shifting sea of ideas.")
 
     (push-block t :welcome-4)
     (poem-segment :welcome-4
