@@ -19,7 +19,6 @@
       (svg-to-image "monad" 800 800 'svg-monad)
       "Animation of the star flower, with changes cascading inwards to a central point")
 
-    push-block
     (quote-segment
       (str/join " "
         ["The Monad is the symbol of unity."
@@ -28,7 +27,7 @@
       "Daniel Gierl")
 
     ; The monad is the only segment whose home is reflexive.
-    (fn [t] (->Triple :monad "/essay/flow/home" :monad))
+    ^{:no-block true} (fn [t] (->Triple :monad "/essay/flow/home" :monad))
     ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
   ))
 
@@ -39,7 +38,6 @@
   (essay :welcome "Welcome"
     (big-emoji-segment "&#x1f44b")
 
-    push-block
     (text-segment
       "Hi there! I'm Daniel Gierl, and I'd like to welcome you to my personal"
       "website, Transcendental Metaphysics! I use this space to explore"
@@ -47,7 +45,6 @@
       "sincere hope that you leave feeling enriched by the experience, and that"
       "the time you spend here is time well spent.")
 
-    push-block
     (paragraph
       (text-segment
         "I apologize in advance for any issues you may encounter with the"
@@ -65,7 +62,6 @@
         "the language. There is no learning quite like doing.")
     )
 
-    push-block
     (paragraph
       (text-segment
         "The whole site is structured as a big, tangled graph. What you're"
@@ -84,14 +80,12 @@
         "in a shifting sea of ideas.")
     )
 
-    push-block
     (poem-segment
       "May you find that which you search for"
       "May your bridges meet you halfway"
       "May you never lose yourself in darkness"
       "And may the light of God shine brightly on your soul")
 
-    push-block
     (big-emoji-segment "&#x1f64f")
   ))
 
@@ -103,7 +97,6 @@
 
     ; TODO yellow socks (preferably a photo)
 
-    push-block
     (text-segment
       "In life, we often overlook the smaller, sentimental details. A person is"
       "readily reduced to their age and occupation, their parentage, their"
@@ -117,7 +110,6 @@
       "occupied their lives with are forgotten on account of being a bit too"
       "mundane, a bit too undocumented.")
 
-    push-block
     (paragraph
       (text-segment
         "I do have a diary, but it's not on this website. If you read")
@@ -156,7 +148,6 @@
         )
       )
 
-      push-block
       (paragraph
         (text-segment
           "To reward your patience so far, here's some more about me: back in"

@@ -74,7 +74,13 @@
       (types schema sub "/essay")
       (->Triple sub "/essay/title" title)
       (initiate t)
-      (map #(% t) fns)
+      (map #(% t)
+        (reduce
+          (fn [result f]
+            (if (contains? (meta f) :no-block)
+              (conj result f)
+              (concat result [push-block f])))
+          [(first fns)] (rest fns)))
     ])))
 
 (defn essay-series
@@ -90,9 +96,15 @@
 
 (defn footnote
   [sub & fns]
-  (fn [t]
+  ^{:no-block true} (fn [t]
     (let [t (create-essay-thread sub)]
-      (map #(% t) fns))))
+      (map #(% t)
+        (reduce
+          (fn [result f]
+            (if (contains? (meta f) :no-block)
+              (conj result f)
+              (concat result [push-block f])))
+          [(first fns)] (rest fns))))))
 
 (defn- item-sub
   [sub]
