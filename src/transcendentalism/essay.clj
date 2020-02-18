@@ -147,6 +147,16 @@
        (types schema item-keyword "/item/big_emoji")
        (->Triple item-keyword "/item/big_emoji/emoji" emoji)])))
 
+(defn paragraph
+  [& fns]
+  (fn [t]
+    (let [t (create-essay-thread (major-key t))]
+      (map #(% t)
+        (reduce
+          (fn [result f]
+            (concat result [push-inline f]))
+          [(first fns)] (rest fns))))))
+
 (defn text-segment
   [with-key & lines]
   (fn [t]
@@ -162,5 +172,5 @@
   [footnote-sub & lines]
   (fn [t]
     (let [k (minor-key t)]
-      [((text-segment minor-key lines) t)
+      [((apply text-segment minor-key lines) t)
        (->Triple (item-sub k) "/item/inline/tangent" footnote-sub)])))
