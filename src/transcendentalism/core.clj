@@ -72,6 +72,11 @@
                       (get subs %) "/essay/flow/next" (get subs (inc %)))
                     (range (dec (count subs))))))))
 
+(defn- footnote
+  [sub f]
+  (let [essay-thread (create-essay-thread sub)]
+    (f essay-thread)))
+
 (defn- item-sub
   [sub]
   (keyword (str (name sub) "-i")))
@@ -181,9 +186,11 @@
       "and, as a backend engineer, this was a recipe for, ummm, how shall we"
       "say, *curious* frontend design choices.")
 
-    (text-segment :footnote-1
-      "In clojure, no less. I used it as an opportunity to teach myself"
-      "the language. There is no learning quite like doing.")
+    (footnote :footnote-1 (fn [t] [
+      (text-segment :footnote-1
+        "In clojure, no less. I used it as an opportunity to teach myself"
+        "the language. There is no learning quite like doing.")
+    ]))
 
     (push-block t :welcome-3)
     (text-segment :welcome-3
@@ -199,10 +206,12 @@
     (push-inline t :welcome-3-1)
     (text-segment :welcome-3-1 "hidden away for you to find.")
 
-    (text-segment :footnote-2
-      "As an aside, I have tried to make the URLs somewhat stable so that they"
-      "can be shared and saved, but I can only guarantee a modicum of stability"
-      "in a shifting sea of ideas.")
+    (footnote :footnote-2 (fn [t] [
+      (text-segment :footnote-2
+        "As an aside, I have tried to make the URLs somewhat stable so that they"
+        "can be shared and saved, but I can only guarantee a modicum of stability"
+        "in a shifting sea of ideas.")
+    ]))
 
     (push-block t :welcome-4)
     (poem-segment :welcome-4
