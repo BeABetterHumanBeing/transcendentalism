@@ -100,8 +100,9 @@
   (keyword (str (name sub) "-i")))
 
 (defn- poem-segment
-  [sub & lines]
-  (let [item-keyword (keyword (str (name sub) "-i"))]
+  [t & lines]
+  (let [sub (major-key t),
+        item-keyword (item-sub sub)]
     [(types schema sub "/segment")
      (->Triple sub "/segment/contains" item-keyword)
      (types schema item-keyword "/item/poem")
@@ -112,8 +113,9 @@
        (range (count lines)))]))
 
 (defn- image-segment
-  [sub url alt-text]
-  (let [item-keyword (item-sub sub)]
+  [t url alt-text]
+  (let [sub (major-key t),
+        item-keyword (item-sub sub)]
     [(types schema sub "/segment")
      (->Triple sub "/segment/contains" item-keyword)
      (types schema item-keyword "/item/image")
@@ -121,9 +123,10 @@
      (->Triple item-keyword "/item/image/alt_text" alt-text)]))
 
 (defn- quote-segment
-  ([sub quote] (quote-segment sub quote nil))
-  ([sub quote author]
-    (let [item-keyword (item-sub sub)]
+  ([t quote] (quote-segment t quote nil))
+  ([t quote author]
+    (let [sub (major-key t),
+          item-keyword (item-sub sub)]
       [(types schema sub "/segment")
        (->Triple sub "/segment/contains" item-keyword)
        (types schema item-keyword "/item/quote")
@@ -133,8 +136,9 @@
          (->Triple item-keyword "/item/quote/author" author))])))
 
 (defn- big-emoji-segment
-  [sub emoji]
-  (let [item-keyword (item-sub sub)]
+  [t emoji]
+  (let [sub (major-key t),
+        item-keyword (item-sub sub)]
     [(types schema sub "/segment")
      (->Triple sub "/segment/contains" item-keyword)
      (types schema item-keyword "/item/big_emoji")
@@ -149,10 +153,10 @@
      (->Triple item-keyword "/item/inline/text" (str/join " " lines))]))
 
 (defn- tangent-segment
-  [t sub & lines]
+  [t footnote-sub & lines]
   (let [k (minor-key t)]
     [(apply text-segment k lines)
-     (->Triple (item-sub k) "/item/inline/tangent" sub)]))
+     (->Triple (item-sub k) "/item/inline/tangent" footnote-sub)]))
 
 (def intro-essay-sequence
   [(essay-series [:monad :welcome :i-am-dan :connections :apologies])
@@ -163,12 +167,12 @@
 (def monad
   (essay :monad "Transcendental Metaphysics" (fn [t] [
     (initiate t)
-    (image-segment (major-key t)
+    (image-segment t
       (svg-to-image "monad" 800 800 'svg-monad)
       "Animation of the star flower, with changes cascading inwards to a central point")
 
     (push-block t)
-    (quote-segment (major-key t)
+    (quote-segment t
       (clojure.string/join " "
         ["The Monad is the symbol of unity."
          "It is the godhead, the point from which all things originate,"
@@ -186,7 +190,7 @@
 (def welcome
   (essay :welcome "Welcome" (fn [t] [
     (initiate t)
-    (big-emoji-segment (major-key t) "&#x1f44b")
+    (big-emoji-segment t "&#x1f44b")
 
     (push-block t)
     (text-segment (major-key t)
@@ -236,14 +240,14 @@
     ]))
 
     (push-block t)
-    (poem-segment (major-key t)
+    (poem-segment t
       "May you find that which you search for"
       "May your bridges meet you halfway"
       "May you never lose yourself in darkness"
       "And may the light of God shine brightly on your soul")
 
     (push-block t)
-    (big-emoji-segment (major-key t) "&#x1f44b")
+    (big-emoji-segment t "&#x1f44b")
   ])))
 
 (def i-am-dan
