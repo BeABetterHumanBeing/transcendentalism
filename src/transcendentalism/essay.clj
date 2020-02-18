@@ -158,10 +158,9 @@
           [(first fns)] (rest fns))))))
 
 (defn text-segment
-  [with-key & lines]
+  [& lines]
   (fn [t]
-    ; (println with-key)
-    (let [sub (with-key t),
+    (let [sub (minor-key t),
           item-keyword (item-sub sub)]
       [(types schema sub "/segment")
        (->Triple sub "/segment/contains" item-keyword)
@@ -172,5 +171,5 @@
   [footnote-sub & lines]
   (fn [t]
     (let [k (minor-key t)]
-      [((apply text-segment minor-key lines) t)
+      [((apply text-segment lines) t)
        (->Triple (item-sub k) "/item/inline/tangent" footnote-sub)])))
