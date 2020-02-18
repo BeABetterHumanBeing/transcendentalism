@@ -283,8 +283,8 @@
             block (get-unique graph sub "/segment/flow/block")]
         (recur (str result (render-block graph (:contents block-content)))
                (concat
-                 (rest sub-stack)
                  (:tangents block-content)
+                 (rest sub-stack)
                  (if (nil? block) [] [block])))))))
 
 (defn- generate-under-construction-splash

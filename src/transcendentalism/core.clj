@@ -249,11 +249,74 @@
 
     (push-block t :prefer-socks)
     (text-segment :prefer-socks
-      "I do have a diary, but it's not on this website. If you read enough of"
-      "this, you will surely get a great sense of who I am, but it's not"
+      "I do have a diary, but it's not on this website. If you read")
+    (push-inline t :tangent-3)
+    (text-segment :tangent-3 "enough of this")
+    (->Triple (item-sub :tangent-3) "/item/inline/tangent" :footnote-3)
+    (push-inline t :prefer-socks-1)
+    (text-segment :prefer-socks-1", you will surely get a great sense of who I am, but it's not"
       "*really* supposed to be about me. Given this opportunity to toot my own"
       "horn, I'd much rather be known as \"the guy who went home from the"
       "hospital in yellow socks\" than anything else.")
+
+    (footnote :footnote-3 (fn [t] [
+      (text-segment :footnote-3
+        "I tell a lot of stories, so it won't be that hard, if you can put up"
+        "with my")
+      (push-inline t :sub-tangent)
+      (text-segment :sub-tangent
+        "rambling")
+      (->Triple (item-sub :sub-tangent) "/item/inline/tangent" :sub-footnote)
+      (push-inline t :footnote-3-1)
+      (text-segment :footnote-3-1 ".")
+
+      (footnote :sub-footnote (fn [t] [
+        (text-segment :sub-footnote
+          "I'm partial to tangents, and tangents that go on tangents. The deep"
+          "end of the pool is")
+        (push-inline t :sub-sub-tangent)
+        (text-segment :sub-sub-tangent "deeper")
+        (->Triple (item-sub :sub-sub-tangent) "/item/inline/tangent" :sub-sub-footnote)
+        (push-inline t :sub-footnote-1)
+        (text-segment :sub-footnote-1 "than you might expect.")
+
+        (footnote :sub-sub-footnote (fn [t] [
+          (text-segment :sub-sub-footnote "Hahahaha")
+          (->Triple (item-sub :sub-sub-footnote) "/item/inline/tangent" :sub-sub-sub-footnote)
+
+          (footnote :sub-sub-sub-footnote (fn [t] [
+            (text-segment :sub-sub-sub-footnote
+              "It's worth noting that my tangents generally have a purpose."
+              "This one happens to be for testing purposes, to allow me to"
+              "check that deeply-nested tangents render correctly.")
+          ]))
+        ]))
+      ]))
+
+      (push-block t :adjectives)
+      (text-segment :adjectives
+        "To reward your patience so far, here's some more about me: back in"
+        "2010, I chose three adjectives that I thought described myself, and"
+        "were moreover things that I liked about me. They were: interesting,"
+        "enthusiastic, and")
+      (push-inline t :adjectives-tangent)
+      (text-segment :adjectives-tangent "lovable")
+      (->Triple (item-sub :adjectives-tangent) "/item/inline/tangent" :adjectives-footnote)
+      (push-inline t :adjectives-1)
+      (text-segment :adjectives-1
+        ". Later on, in 2014, I expanded this list again, adding brave,"
+        "compassionate, and just. It has been an excellent exercise in living"
+        "a virtuous life, and I'd generally recommend that you try it, if it"
+        "seems to be your cup of tea. But be warned: you should always expect"
+        "to be tested over your principles; such badges are not won without"
+        "work.")
+
+      (footnote :adjectives-footnote (fn [t] [
+        (text-segment :adjectives-footnote
+          "I have since upgraded it to 'loving', to emphasize that it's more"
+          "about what you give than what you receive.")
+      ]))
+    ]))
     ])))
 
 (def connections
