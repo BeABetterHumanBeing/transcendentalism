@@ -70,51 +70,6 @@
 
 (defn- button [attrs contents] (xml-tag "button" attrs contents))
 
-(defn- make-footnote-map
-  "Returns a sub->encoding map for the footnotes associated with the given sub"
-  [graph sub]
-  (let [footnote-subs
-          (into #{} (map :obj (all-triples graph sub "/item/footnote"))),
-        content-sub (get-unique graph sub "/essay/contains")
-        content-objs (map :obj (all-triples graph content-sub "/item/contains")),
-        footnote-content-objs
-          (reverse (filter #(contains? footnote-subs (first %)) content-objs))]
-    (reduce
-      (fn [result footnote-sub]
-        (assoc result
-          footnote-sub
-          {:encoded_id (gen-key 8),
-           :i (.indexOf footnote-content-objs [footnote-sub])}))
-      {} footnote-subs)))
-
-(defn- generate-item-text
-  "Returns the HTML corresponding to a /type/item/text"
-  [triples footnote-map]
-  (let [sub (:sub (first triples)),
-        text-triples (filter-and-order triples "/item/text/text"),
-        attrs (if (contains? footnote-map sub)
-                {"class" "content text footnote",
-                 "id" (:encoded_id (footnote-map sub))}
-                {"class" "content text"})]
-    (div attrs
-      (str
-        (if (contains? footnote-map sub)
-          (str "[" (:i (footnote-map sub)) "] ")
-          "")
-        (str/join "\n"
-          (map
-            (fn [triple]
-              (let [obj (:obj triple),
-                    text (if (vector? obj) (first obj) obj),
-                    footnote (get-property :footnote obj nil)]
-                (if (nil? footnote)
-                  (span {} text)
-                  (span {"class" "tangent",
-                         "onclick" (call-js "toggleFootnote"
-                                     (js-str (:encoded_id (footnote-map footnote))))}
-                        (str text " [" (:i (footnote-map footnote)) "]")))))
-            text-triples))))))
-
 (defn- generate-item-poem
   [triples]
   (div {"class" "content poem"}
@@ -147,34 +102,8 @@
     (let [triples-by-pred (collect-triples-by-pred triples),
           image-url-triple (triples-by-pred "/item/image/url"),
           image-alt-text-triple (triples-by-pred "/item/image/alt_text")]
-      ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
       (img {"src" (:obj image-url-triple),
             "alt" (:obj image-alt-text-triple)}))))
-
-(defn- generate-item
-  "Returns the HTML corresponding to a /type/item"
-  [graph sub footnote-map]
-  ; The call for generating ordered set items must be included here so that it
-  ; can recursively call its parent function.
-  (letfn [(generate-item-ordered-set [triples]
-            (div {"class" "content"}
-              ; TODO(gierl): Handle /item/internal_link, /item/footnote, and /item/label
-              (let [contents (filter-and-order triples "/item/contains")]
-                (apply str
-                  (map #(generate-item graph (first (:obj %)) footnote-map)
-                       contents)))))]
-    (let [triples (all-triples graph sub),
-          item-type (filter #(and (str/starts-with? (:pred %) "/type")
-                                  (not (= (:pred %) "/type/item"))) triples)]
-      (case (:pred (first item-type))
-        "/type/item/text" (generate-item-text triples footnote-map),
-        "/type/item/poem" (generate-item-poem triples),
-        "/type/item/big_emoji" (generate-item-big-emoji triples),
-        "/type/item/quote" (generate-item-quote triples),
-        "/type/item/image" (generate-item-image triples),
-        "/type/item/ordered_set" (generate-item-ordered-set triples),
-        (assert false
-          (str "ERROR - Type " (:pred (first item-type)) " not supported"))))))
 
 (defrecord Cxn [encoded_obj name type])
 
@@ -227,7 +156,6 @@
         item-type (filter #(and (str/starts-with? (:pred %) "/type")
                                 (not (= (:pred %) "/type/item"))) triples)]
     (case (:pred (first item-type))
-      "/type/item/text" (generate-item-text triples {}),
       "/type/item/poem" (generate-item-poem triples),
       "/type/item/big_emoji" (generate-item-big-emoji triples),
       "/type/item/quote" (generate-item-quote triples),
@@ -339,12 +267,12 @@
                            (map :obj (all-triples graph sub "/essay/label")))]
               (if (contains? labels :under-construction)
                 (generate-under-construction-splash)
-                (let [segment-sub (get-unique graph sub "/essay/contains"),
-                      footnote-map (make-footnote-map graph sub)]
+                (let [segment-sub (get-unique graph sub "/essay/contains")]
                   (generate-segments graph segment-sub))))
             (hr)
             (div {"id" (seg-id id "footer"),
                   "class" "footer"}
+              ; TODO(gierl) Sort cxns by arrow type (down, across, up)
               (let [cxns (build-cxns graph encodings sub)]
                 (str/join " " (map #(generate-link id %) cxns))))
             (div {"id" (seg-id id "buffer"),
