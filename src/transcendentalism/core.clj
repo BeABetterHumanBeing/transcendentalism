@@ -72,11 +72,12 @@
 
 (defn- essay
   [sub title f]
-  (let [essay-thread (create-essay-thread sub)]
+  (let [t (create-essay-thread sub)]
     (flatten [
       (types schema sub "/essay")
       (->Triple sub "/essay/title" title)
-      (f essay-thread)
+      (initiate t)
+      (f t)
     ])))
 
 (defn- essay-series
@@ -189,7 +190,6 @@
 ; what I hope to do with it.
 (def welcome
   (essay :welcome "Welcome" (fn [t] [
-    (initiate t)
     (big-emoji-segment t "&#x1f44b")
 
     (push-block t)
@@ -252,7 +252,6 @@
 
 (def i-am-dan
   (essay :i-am-dan "I Am Dan" (fn [t] [
-    (initiate t)
     (text-segment (major-key t)
       "My name's Daniel Gierl. I was a plump, healthy baby with a full head of"
       "hair, and I went home from the hospital wearing little yellow socks.")
@@ -342,14 +341,12 @@
 
 (def connections
   (essay :connections "Connections" (fn [t] [
-    (initiate t)
     (text-segment (major-key t) "TODO connections")
     ; TODO(gierl) contact information, respective responsibilities
   ])))
 
 (def apologies
   (essay :apologies "Apologies" (fn [t] [
-    (initiate t)
     (text-segment (major-key t) "TODO apologies")
     ; TODO(gierl) apologize
   ])))
