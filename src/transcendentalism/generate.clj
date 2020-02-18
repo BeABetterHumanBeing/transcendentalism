@@ -204,21 +204,36 @@
                                (get-unique graph content "/item/inline/tangent"))})
                (get-unique graph inline-sub "/segment/flow/inline"))))))
 
+(defn- render-footnote-idx
+  [ancestry]
+  (if (empty? ancestry)
+    ""
+    (span {"class" "footnote-anchor"} (str "[" (str/join "-" ancestry) "] "))))
+
 (defn- generate-essay-contents
   [graph segment]
   (letfn
-    [(generate-block-sequence [sub]
+    [(generate-block-sequence [sub first-in-seq footnote-ancestry next-footnote-idx]
        (let [block-content (collect-block-content graph sub),
              next-block (get-unique graph sub "/segment/flow/block")]
          (str/join "\n" [
            (div {"class" "dbg block"}
+             (if first-in-seq (render-footnote-idx footnote-ancestry) "")
              (apply str
                (map #(render-item graph %) (:contents block-content)))
              (str/join "\n"
-               (map #(generate-block-sequence %) (:tangents block-content))))
-           (if (nil? next-block) "" (generate-block-sequence next-block))
+               (map
+                 (fn [s]
+                   (generate-block-sequence s
+                     true (conj footnote-ancestry next-footnote-idx) 1))
+                 (:tangents block-content))))
+           (if (nil? next-block)
+             ""
+             (generate-block-sequence next-block
+               false footnote-ancestry
+               (+ next-footnote-idx (count (:tangents block-content)))))
          ])))]
-    (generate-block-sequence segment)))
+    (generate-block-sequence segment true [] 1)))
 
 (defn- generate-under-construction-splash
   "Returns a div that shows that the segment is under construction"

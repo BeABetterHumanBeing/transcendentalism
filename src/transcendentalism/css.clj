@@ -125,6 +125,8 @@
     (css "span" {"class" "tangent"}
       (color (to-css-color yellow))
       (cursor "pointer"))
+    (css "span" {"class" "footnote-anchor"}
+      (color (to-css-color yellow)))
     (css "div" {"class" "emoji"}
       (font-size "100px")
       (text-align "center"))
