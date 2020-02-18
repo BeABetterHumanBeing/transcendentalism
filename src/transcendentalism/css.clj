@@ -112,39 +112,35 @@
       (text-align "center"))
     (css "img" {}
       (width "100%"))
-    (debug (css "div" {"class" "content"}
+    (debug (css "div" {"class" "dbg"}
       (border-style "dashed")
       (border-width "1px")))
-    (css "div" {"class" "text"}
-      (padding "10px" "25px"))
     (css "div" {"class" "footnote"}
       (display "none")
       (border-width "1px")
       (border-style "solid")
       (border-color (to-css-color yellow)))
+    (css "div" {"class" "block"}
+      (padding "10px" "25px"))
     (css "span" {"class" "tangent"}
       (color (to-css-color yellow))
       (cursor "pointer"))
     (css "div" {"class" "emoji"}
-      (padding "5px")
       (font-size "100px")
       (text-align "center"))
     (css "div" {"class" "poem"}
-      (text-align "center")
-      (padding "10px" "0px"))
-    (css "p" {"class" "line"}
+      (text-align "center"))
+    (css "p" {"class" "poem-line"}
       (margin "5px" "0px"))
     (css "div" {"class" "quote"}
-      (padding "0px" "100px")
+      (padding "0px" "75px")
       (font-size "large")
       (font-family "Times" "serif")
       (font-style "italic"))
     (css "p" {"class" "author"}
       (text-align "right"))
-    (css "div" {"class" "footer"} "")
     (css "button" {"class" "link_segment"}
       (border "none")
-      (color "blue")
       (font-size "medium"))
     (css "button" {"class" "up"}
       (color (to-css-color purple)))

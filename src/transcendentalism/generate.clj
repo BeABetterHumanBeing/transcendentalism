@@ -34,6 +34,14 @@
             (get-property :order (:obj %2) 0))
         (filter #(= (:pred %) pred) triples)))
 
+(defn- unique-or-nil
+  "Returns the unique object of the given pred, or nil"
+  [triples pred]
+  (let [selected (filter #(= (:pred %) pred) triples)]
+    (if (empty? selected)
+      nil
+      (:obj (first selected)))))
+
 (defn- clear-directory
   [dirname]
   (doseq [file (.listFiles (io/as-file dirname))]
@@ -72,17 +80,17 @@
 
 (defn- generate-item-poem
   [triples]
-  (div {"class" "content poem"}
+  (div {"class" "dbg poem"}
     (str/join "\n"
       (map
         (fn [line-triple]
-          (p {"class" "line"} (first (:obj line-triple))))
+          (p {"class" "poem-line"} (first (:obj line-triple))))
         (filter-and-order triples "/item/poem/line")))))
 
 (defn- generate-item-big-emoji
   [triples]
-  (div {"class" "content emoji"}
-    (:obj (first (filter #(= (:pred %) "/item/big_emoji/emoji") triples)))))
+  (div {"class" "dbg emoji"}
+    (unique-or-nil triples "/item/big_emoji/emoji")))
 
 (defn- generate-item-quote
   "Returns the HTML corresponding to a /type/item/quote"
@@ -91,14 +99,14 @@
         quote-text (:obj (pred-triples "/item/quote/text")),
         author (:obj (pred-triples "/item/quote/author"
                                    [(->Triple nil nil "Anonymous")]))]
-    (div {"class" "content quote"}
+    (div {"class" "dbg quote"}
       (p {} (str "\"" quote-text "\""))
       (p {"class" "author"} (str "-" author)))))
 
 (defn- generate-item-image
   "Returns the HTML corresponding to a /type/item/image"
   [triples]
-  (div {"class" "content"}
+  (div {"class" "dbg"}
     (let [triples-by-pred (collect-triples-by-pred triples),
           image-url-triple (triples-by-pred "/item/image/url"),
           image-alt-text-triple (triples-by-pred "/item/image/alt_text")]
@@ -146,8 +154,11 @@
 
 (defn- generate-inline-item
   [triples]
-  (let [text (:obj (first (filter #(= (:pred %) "/item/inline/text") triples)))]
-    (span {} text)))
+  (let [text (unique-or-nil triples "/item/inline/text"),
+        tangent (unique-or-nil triples "/item/inline/tangent")]
+    (if (nil? tangent)
+      (span {} text)
+      (span {"class" "tangent"} text))))
 
 (defn- render-item
   "Renders the HTML for an item"
@@ -167,8 +178,8 @@
 (defn- render-block
   "Renders to HTML the contents of a block"
   [graph items]
-  (div {"class" "content"}
-    (str/join "\n"
+  (div {"class" "dbg block"}
+    (apply str
       (map #(render-item graph %) items))))
 
 (defn- conj-vector-map
@@ -270,8 +281,7 @@
                 (let [segment-sub (get-unique graph sub "/essay/contains")]
                   (generate-segments graph segment-sub))))
             (hr)
-            (div {"id" (seg-id id "footer"),
-                  "class" "footer"}
+            (div {"id" (seg-id id "footer")}
               ; TODO(gierl) Sort cxns by arrow type (down, across, up)
               (let [cxns (build-cxns graph encodings sub)]
                 (str/join " " (map #(generate-link id %) cxns))))

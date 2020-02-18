@@ -50,10 +50,10 @@
         "I apologize in advance for any issues you may encounter with the"
         "unorthodox structure of the site; I've been using it as a playground"
         "for some of the more experimental ideas I've been toying with. I wrote the"
-        "whole thing")
+        "whole thing ")
       (tangent :footnote-1 "from scratch")
       (text
-        "and, as a backend engineer, this was a recipe for, ummm, how shall we"
+        " and, as a backend engineer, this was a recipe for, ummm, how shall we"
         "say, *curious* frontend design choices."))
 
     (footnote :footnote-1
@@ -69,9 +69,9 @@
         "is nothing out there that resembles an 'end'. My intention is that"
         "wandering through these pages will be an experience not unlike wandering"
         "through a garden maze; getting lost is half the fun, and there is all"
-        "kinds of")
+        "kinds of ")
       (tangent :footnote-2 "treasure")
-      (text "hidden away for you to find."))
+      (text " hidden away for you to find."))
 
     (footnote :footnote-2
       (text
@@ -112,7 +112,7 @@
 
     (paragraph
       (text
-        "I do have a diary, but it's not on this website. If you read")
+        "I do have a diary, but it's not on this website. If you read ")
       (tangent :footnote-3 "enough of this")
       (text
         ", you will surely get a great sense of who I am, but it's not"
@@ -124,7 +124,7 @@
       (paragraph
         (text
           "I tell a lot of stories, so it won't be that hard, if you can put up"
-          "with my")
+          "with my ")
         (tangent :sub-footnote "rambling")
         (text "."))
 
@@ -132,9 +132,9 @@
         (paragraph
           (text
             "I'm partial to tangents, and tangents that go on tangents. The deep"
-            "end of the pool is")
+            "end of the pool is ")
           (tangent :sub-sub-footnote "deeper")
-          (text "than you might expect."))
+          (text " than you might expect."))
 
         (footnote :sub-sub-footnote
           (tangent :sub-sub-sub-footnote "Hahahaha")
@@ -153,7 +153,7 @@
           "To reward your patience so far, here's some more about me: back in"
           "2010, I chose three adjectives that I thought described myself, and"
           "were moreover things that I liked about me. They were: interesting,"
-          "enthusiastic, and")
+          "enthusiastic, and ")
         (tangent :adjectives-footnote "lovable")
         (text
           ". Later on, in 2014, I expanded this list again, adding brave,"
