@@ -80,6 +80,7 @@
 
 (defn- generate-item-poem
   [triples]
+  ; TODO(gierl) Make it so that dbg class is only asserted when debug mode is on
   (div {"class" "dbg poem"}
     (str/join "\n"
       (map
@@ -175,13 +176,6 @@
       (assert false
         (str "ERROR - Type " (:pred (first item-type)) " not supported")))))
 
-(defn- render-block
-  "Renders to HTML the contents of a block"
-  [graph items]
-  (div {"class" "dbg block"}
-    (apply str
-      (map #(render-item graph %) items))))
-
 (defn- conj-vector-map
   "Merges a map into a map of vectors, conj-ing the new elements"
   [my-map my-new-elems]
@@ -210,21 +204,21 @@
                                (get-unique graph content "/item/inline/tangent"))})
                (get-unique graph inline-sub "/segment/flow/inline"))))))
 
-(defn- generate-segments
-  "Returns the HTML for a flow of segments"
-  [graph sub]
-  (loop [result ""        ; HTML output
-         sub-stack [sub]] ; Unprocessed subs
-    (if (empty? sub-stack)
-      result
-      (let [sub (first sub-stack),
-            block-content (collect-block-content graph sub),
-            block (get-unique graph sub "/segment/flow/block")]
-        (recur (str result (render-block graph (:contents block-content)))
-               (concat
-                 (:tangents block-content)
-                 (rest sub-stack)
-                 (if (nil? block) [] [block])))))))
+(defn- generate-essay-contents
+  [graph segment]
+  (letfn
+    [(generate-block-sequence [sub]
+       (let [block-content (collect-block-content graph sub),
+             next-block (get-unique graph sub "/segment/flow/block")]
+         (str/join "\n" [
+           (div {"class" "dbg block"}
+             (apply str
+               (map #(render-item graph %) (:contents block-content)))
+             (str/join "\n"
+               (map #(generate-block-sequence %) (:tangents block-content))))
+           (if (nil? next-block) "" (generate-block-sequence next-block))
+         ])))]
+    (generate-block-sequence segment)))
 
 (defn- generate-under-construction-splash
   "Returns a div that shows that the segment is under construction"
@@ -235,7 +229,7 @@
       (div {"class" "construction-separator"})
       (p {} "Connect with me if you want me to expedite its work"))))
 
-(defn- generate-essay-segment
+(defn- generate-essay
   "Returns the HTML corresponding to a /type/essay"
   [graph encodings homes sub]
   (html
@@ -279,7 +273,7 @@
               (if (contains? labels :under-construction)
                 (generate-under-construction-splash)
                 (let [segment-sub (get-unique graph sub "/essay/contains")]
-                  (generate-segments graph segment-sub))))
+                  (generate-essay-contents graph segment-sub))))
             (hr)
             (div {"id" (seg-id id "footer")}
               ; TODO(gierl) Sort cxns by arrow type (down, across, up)
@@ -299,7 +293,7 @@
       (let
         [filename (str "output/" (sub encodings) ".html")]
         (do
-          (spit filename (generate-essay-segment graph encodings homes sub))
+          (spit filename (generate-essay graph encodings homes sub))
           (println "Generated" filename))))
     (spit "output/styles.css" (stylesheet))
     (if static-html-mode nil (spit "output/script.js" (script)))))
