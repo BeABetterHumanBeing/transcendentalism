@@ -148,6 +148,12 @@
      (types schema item-keyword "/item/inline")
      (->Triple item-keyword "/item/inline/text" (str/join " " lines))]))
 
+(defn- tangent-segment
+  [t sub & lines]
+  (let [k (minor-key t)]
+    [(apply text-segment k lines)
+     (->Triple (item-sub k) "/item/inline/tangent" sub)]))
+
 (def intro-essay-sequence
   [(essay-series [:monad :welcome :i-am-dan :connections :apologies])
    (directive-under-construction :connections :apologies)])
@@ -197,8 +203,7 @@
       "for some of the more experimental ideas I've been toying with. I wrote the"
       "whole thing")
     (push-inline t)
-    (text-segment (minor-key t) "from scratch")
-    (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :footnote-1)
+    (tangent-segment t :footnote-1 "from scratch")
     (push-inline t)
     (text-segment (minor-key t)
       "and, as a backend engineer, this was a recipe for, ummm, how shall we"
@@ -219,8 +224,7 @@
       "through a garden maze; getting lost is half the fun, and there is all"
       "kinds of")
     (push-inline t)
-    (text-segment (minor-key t) "treasure")
-    (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :footnote-2)
+    (tangent-segment t :footnote-2 "treasure")
     (push-inline t)
     (text-segment (minor-key t) "hidden away for you to find.")
 
@@ -269,8 +273,7 @@
     (text-segment (major-key t)
       "I do have a diary, but it's not on this website. If you read")
     (push-inline t)
-    (text-segment (minor-key t) "enough of this")
-    (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :footnote-3)
+    (tangent-segment t :footnote-3 "enough of this")
     (push-inline t)
     (text-segment (minor-key t)
       ", you will surely get a great sense of who I am, but it's not"
@@ -283,8 +286,7 @@
         "I tell a lot of stories, so it won't be that hard, if you can put up"
         "with my")
       (push-inline t)
-      (text-segment (minor-key t) "rambling")
-      (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :sub-footnote)
+      (tangent-segment t :sub-footnote "rambling")
       (push-inline t)
       (text-segment (minor-key t) ".")
 
@@ -293,14 +295,12 @@
           "I'm partial to tangents, and tangents that go on tangents. The deep"
           "end of the pool is")
         (push-inline t)
-        (text-segment (minor-key t) "deeper")
-        (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :sub-sub-footnote)
+        (tangent-segment t :sub-sub-footnote "deeper")
         (push-inline t)
         (text-segment (minor-key t) "than you might expect.")
 
         (footnote :sub-sub-footnote (fn [t] [
-          (text-segment (major-key t) "Hahahaha")
-          (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :sub-sub-sub-footnote)
+          (tangent-segment t :sub-sub-sub-footnote "Hahahaha")
 
           (footnote :sub-sub-sub-footnote (fn [t] [
             (text-segment (major-key t)
@@ -318,8 +318,7 @@
         "were moreover things that I liked about me. They were: interesting,"
         "enthusiastic, and")
       (push-inline t)
-      (text-segment (minor-key t) "lovable")
-      (->Triple (item-sub (minor-key t)) "/item/inline/tangent" :adjectives-footnote)
+      (tangent-segment t :adjectives-footnote "lovable")
       (push-inline t)
       (text-segment (minor-key t)
         ". Later on, in 2014, I expanded this list again, adding brave,"
