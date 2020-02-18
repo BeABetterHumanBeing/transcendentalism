@@ -165,7 +165,10 @@
         tangent (unique-or-nil triples "/item/inline/tangent")]
     (if (nil? tangent)
       (span {} text)
-      (span {"class" "tangent"} (str text " " (render-footnote-idx (footnote-map tangent)))))))
+      (span {"class" "tangent",
+             "onclick" (call-js "toggleFootnote"
+                         (js-str (:id (footnote-map tangent))))}
+        (str text " " (render-footnote-idx (:ancestry (footnote-map tangent))))))))
 
 (defn- render-item
   "Renders the HTML for an item"
@@ -211,7 +214,7 @@
                (get-unique graph inline-sub "/segment/flow/inline"))))))
 
 (defn- calculate-footnote-map
-  "Returns a sub->ancestry map of all footnotes under a given segment"
+  "Returns a sub->{:ancestry :id} map of all footnotes under a given segment"
   [graph sub]
   (letfn
     [(inner-footnote-map [sub ancestry idx]
@@ -220,14 +223,18 @@
              tangents (:tangents block-content),
              new-tangents (reduce
                (fn [result i]
-                 (assoc result (get tangents i) (conj ancestry (+ i idx))))
+                 (assoc result
+                   (get tangents i)
+                   {:ancestry (conj ancestry (+ i idx)),
+                    :id (gen-key 8)}))
                {} (range (count tangents)))]
          (apply merge
            new-tangents
            (if (nil? next-block)
              {}
              (inner-footnote-map next-block ancestry (+ idx (count tangents))))
-           (map #(inner-footnote-map % (new-tangents %) 1) tangents))))]
+           (map #(inner-footnote-map % (:ancestry (new-tangents %)) 1)
+                tangents))))]
     (inner-footnote-map sub [] 1)))
 
 (defn- generate-essay-contents
@@ -237,20 +244,23 @@
        (let [block-content (collect-block-content graph sub),
              next-block (get-unique graph sub "/segment/flow/block")]
          (str/join "\n" [
-           (div {"class" "dbg block"}
+           (div (if (contains? footnote-map sub)
+                    {"class" "dbg block footnote",
+                     "id" (:id (footnote-map sub))}
+                    {"class" "dbg block"})
              (if (contains? footnote-map sub)
                (span {"class" "footnote-anchor"}
-                 (render-footnote-idx (footnote-map sub)) " ")
+                 (render-footnote-idx (:ancestry (footnote-map sub))) " ")
                "")
              (apply str
                (map #(render-item graph % footnote-map) (:contents block-content)))
              (str/join "\n"
                (map
                  #(generate-block-sequence % footnote-map)
-                 (:tangents block-content))))
-           (if (nil? next-block)
-             ""
-             (generate-block-sequence next-block footnote-map))
+                 (:tangents block-content)))
+             (if (nil? next-block)
+               ""
+               (generate-block-sequence next-block footnote-map)))
          ])))]
     (generate-block-sequence segment (calculate-footnote-map graph segment))))
 

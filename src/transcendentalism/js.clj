@@ -159,7 +159,7 @@
   "Function that toggles a footnote's visibility"
   []
   (js-fn "toggleFootnote" ["encoded_id"]
-    (chain (jq (js-seg-id "encoded_id")) (c "toggle" "'slow'" "'swing'"))))
+    (chain (jq (js-seg-id "encoded_id")) (c "toggle" "250" "'swing'"))))
 
 (defn script
   "Return the JavaScript for the website"
