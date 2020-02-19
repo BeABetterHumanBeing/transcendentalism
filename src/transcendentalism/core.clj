@@ -142,8 +142,9 @@
           (footnote :sub-sub-sub-footnote
             (text
               "It's worth noting that my tangents generally have a purpose."
-              "This one happens to be for testing purposes, to allow me to"
-              "check that deeply-nested tangents render correctly.")
+              "This one happens to be for testing, to allow me to check that"
+              "deeply-nested tangents render correctly. I've decided to leave"
+              "it, for sentimental archaeological reasons.")
           )
         )
       )

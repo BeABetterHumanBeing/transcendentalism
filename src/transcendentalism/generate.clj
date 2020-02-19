@@ -78,10 +78,16 @@
 
 (defn- button [attrs contents] (xml-tag "button" attrs contents))
 
+(defn- dbg-able
+  "Adds the dbg class, if in debugging mode"
+  [classes]
+  (if debugging-mode
+    (str "dbg " classes)
+    classes))
+
 (defn- generate-item-poem
   [triples]
-  ; TODO(gierl) Make it so that dbg class is only asserted when debug mode is on
-  (div {"class" "dbg poem"}
+  (div {"class" (dbg-able "poem")}
     (str/join "\n"
       (map
         (fn [line-triple]
@@ -90,7 +96,7 @@
 
 (defn- generate-item-big-emoji
   [triples]
-  (div {"class" "dbg emoji"}
+  (div {"class" (dbg-able "emoji")}
     (unique-or-nil triples "/item/big_emoji/emoji")))
 
 (defn- generate-item-quote
@@ -100,14 +106,14 @@
         quote-text (:obj (pred-triples "/item/quote/text")),
         author (:obj (pred-triples "/item/quote/author"
                                    [(->Triple nil nil "Anonymous")]))]
-    (div {"class" "dbg quote"}
+    (div {"class" (dbg-able "quote")}
       (p {} (str "\"" quote-text "\""))
       (p {"class" "author"} (str "-" author)))))
 
 (defn- generate-item-image
   "Returns the HTML corresponding to a /type/item/image"
   [triples]
-  (div {"class" "dbg"}
+  (div {"class" (dbg-able "")}
     (let [triples-by-pred (collect-triples-by-pred triples),
           image-url-triple (triples-by-pred "/item/image/url"),
           image-alt-text-triple (triples-by-pred "/item/image/alt_text")]
@@ -130,6 +136,14 @@
           "/essay/flow/see_also" (->Cxn encoded_obj title "across")
           (assert false (str "ERROR - Type " (:pred triple) " not supported")))))
     (filter #(str/starts-with? (:pred %) "/essay/flow") (all-triples graph sub))))
+
+(defn- sort-by-cxn-type
+  "Sorts a group of cxns so that they go down, across, then up"
+  [cxns]
+  (let [cxns-by-type (group-by :type cxns)]
+    (concat (cxns-by-type "down" [])
+            (cxns-by-type "across" [])
+            (cxns-by-type "up" []))))
 
 (defn- generate-link
   "Returns the HTML for a link in the footer"
@@ -237,31 +251,44 @@
                 tangents))))]
     (inner-footnote-map sub [] 1)))
 
+(defn- maybe-wrap-footnote
+  "If the given sub is a footnote, wraps the provided content"
+  [footnote-map sub content]
+  (if (contains? footnote-map sub)
+    (div {"class" "footnote",
+          "id" (:id (footnote-map sub))}
+      content)
+    content))
+
+(defn- maybe-add-footnote-anchor
+  "If the given sub is a footnote, adds the anchor (e.g. [1-2-1])"
+  [footnote-map sub]
+  (if (contains? footnote-map sub)
+      (span {"class" "footnote-anchor"}
+        (render-footnote-idx (:ancestry (footnote-map sub))) " ")
+      ""))
+
 (defn- generate-essay-contents
   [graph segment]
   (letfn
     [(generate-block-sequence [sub footnote-map]
        (let [block-content (collect-block-content graph sub),
              next-block (get-unique graph sub "/segment/flow/block")]
-         (str/join "\n" [
-           (div (if (contains? footnote-map sub)
-                    {"class" "dbg block footnote",
-                     "id" (:id (footnote-map sub))}
-                    {"class" "dbg block"})
-             (if (contains? footnote-map sub)
-               (span {"class" "footnote-anchor"}
-                 (render-footnote-idx (:ancestry (footnote-map sub))) " ")
-               "")
-             (apply str
-               (map #(render-item graph % footnote-map) (:contents block-content)))
-             (str/join "\n"
-               (map
-                 #(generate-block-sequence % footnote-map)
-                 (:tangents block-content)))
+         (maybe-wrap-footnote footnote-map sub
+           (str/join "\n" [
+             (div {"class" (dbg-able "block")}
+               (maybe-add-footnote-anchor footnote-map sub)
+               (apply str
+                 (map #(render-item graph % footnote-map)
+                      (:contents block-content)))
+               (str/join "\n"
+                 (map
+                   #(generate-block-sequence % footnote-map)
+                   (:tangents block-content))))
              (if (nil? next-block)
                ""
-               (generate-block-sequence next-block footnote-map)))
-         ])))]
+               (generate-block-sequence next-block footnote-map))]))
+         ))]
     (generate-block-sequence segment (calculate-footnote-map graph segment))))
 
 (defn- generate-under-construction-splash
@@ -320,8 +347,7 @@
                   (generate-essay-contents graph segment-sub))))
             (hr)
             (div {"id" (seg-id id "footer")}
-              ; TODO(gierl) Sort cxns by arrow type (down, across, up)
-              (let [cxns (build-cxns graph encodings sub)]
+              (let [cxns (sort-by-cxn-type (build-cxns graph encodings sub))]
                 (str/join " " (map #(generate-link id %) cxns))))
             (div {"id" (seg-id id "buffer"),
                   "class" "buffer"})))))))

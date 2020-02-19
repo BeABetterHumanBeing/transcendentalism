@@ -119,7 +119,8 @@
       (display "none")
       (border-width "1px")
       (border-style "solid")
-      (border-color (to-css-color yellow)))
+      (border-color (to-css-color yellow))
+      (margin "10px" "-15px" "0px"))
     (css "div" {"class" "block"}
       (padding "10px" "25px"))
     (css "span" {"class" "tangent"}
