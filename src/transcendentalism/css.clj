@@ -33,13 +33,15 @@
 
 (defn- text-decoration [contents] (style "text-decoration" contents))
 
+(defn- direction [contents] (style "direction" contents))
+
 (defn- cursor [contents] (style "cursor" contents))
 
 (defn- border [contents] (style "border" contents))
 
 (defn- border-style [& contents] (style "border-style" (str/join " " contents)))
 
-(defn- border-width [contents] (style "border-width" contents))
+(defn- border-width [& contents] (style "border-width" (str/join " " contents)))
 
 (defn- border-color [contents] (style "border-color" contents))
 
@@ -50,6 +52,8 @@
 (defn- top [contents] (style "top" contents))
 
 (defn- left [contents] (style "left" contents))
+
+(defn- right [contents] (style "right" contents))
 
 (defn- padding [& contents] (style "padding" (str/join " " contents)))
 
@@ -121,13 +125,31 @@
       (border-style "solid")
       (border-color (to-css-color yellow))
       (margin "10px" "-15px" "0px"))
+    (css "div" {"class" "topmost-footnote"}
+      (display "none")
+      (border-width "1px")
+      (border-style "solid")
+      (border-color (to-css-color yellow))
+      (margin "10px" "-15px" "0px")
+      (position "relative"))
     (css "div" {"class" "block"}
       (padding "10px" "25px"))
     (css "span" {"class" "tangent"}
       (color (to-css-color yellow))
       (cursor "pointer"))
     (css "span" {"class" "footnote-anchor"}
+      (position "absolute")
+      (width "100px")
+      (left "-110px")
+      (direction "rtl")
       (color (to-css-color yellow)))
+    (css "span" {"class" "footnote-chain"}
+      (border-style "dashed")
+      (border-color (to-css-color yellow))
+      (border-width "1px" "0px" "0px" "0px")
+      (position "absolute")
+      (left "98px")
+      (top "9px"))
     (css "div" {"class" "emoji"}
       (font-size "100px")
       (text-align "center"))

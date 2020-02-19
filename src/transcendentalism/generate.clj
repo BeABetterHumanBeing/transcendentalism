@@ -255,7 +255,10 @@
   "If the given sub is a footnote, wraps the provided content"
   [footnote-map sub content]
   (if (contains? footnote-map sub)
-    (div {"class" "footnote",
+    (div {"class" (if (= (count (:ancestry (footnote-map sub)))
+                         1)
+                      "topmost-footnote"
+                      "footnote"),
           "id" (:id (footnote-map sub))}
       content)
     content))
@@ -265,7 +268,11 @@
   [footnote-map sub]
   (if (contains? footnote-map sub)
       (span {"class" "footnote-anchor"}
-        (render-footnote-idx (:ancestry (footnote-map sub))) " ")
+        (span {"class" "footnote-chain",
+               "style" (str "width:" (+ (* (count (:ancestry (footnote-map sub)))
+                                           11)
+                                        5) "px")})
+        (render-footnote-idx (:ancestry (footnote-map sub))))
       ""))
 
 (defn- generate-essay-contents
