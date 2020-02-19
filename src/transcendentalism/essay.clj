@@ -193,3 +193,13 @@
      (push-block t)
      ((paragraph (text "<b>A:</b> ") a) t)]))
 
+(defn bullet-list
+  [& items]
+  (fn [t]
+    (map
+      #(% t)
+      (reduce
+        (fn [result f]
+          (concat result [push-block f]))
+        [(first items)] (rest items)))))
+

@@ -181,7 +181,7 @@
         "journey, and therefore cannot tailor the content to suit your present"
         "needs, to tell you what you might find interesting and useful, and to"
         "spare you the things you might rather put off until later. Additionally,"
-        "I regret that I cannot learn anything from *you*; this is decidedly ")
+        "I regret that I cannot learn anything from <i>you</i>; this is decidedly ")
       (tangent :comments-section-footnote "a one-way road")
       (text "."))
 
@@ -204,30 +204,42 @@
             "human and sometimes things fall through the cracks."))
 
     ; TODO a non-editable field with daniel.erik.gierl@gmail.com and two buttons:
+    (text "daniel.erik.gierl@gmail.com")
     ; 1) mailto:daniel.erik.gierl@gmail.com?Subject=Title%20Of%20Page%20That%20Referred%20Them%20Here
     ; 2) Copies the email address to clipboard
     ; TODO get daniel@transcendentalmetaphysics.com, and use that instead.
-    ;
-    ; Feel free to reach out to me for any of the following reasons:
-    ; * Striking up a conversation about something that piqued your interest
-    ; * Asking a question, or wanting elaboration on any topic
-    ; * Providing feedback on spelling, grammar, layout, accessibility
-    ; * Reporting a bug or error
-    ; * Requests to work faster on something that's under construction
-    ; * Offering [personal contributions][3] that you think would enrich the site
-    ; * Throwing a dog a [bone][4]
-    ; * [etc...][2]
-    ;
-    ; [3] I'm open to including things other people have written, with permission
-    ; and (if desired) attribution. Think "if the site had comments and this was
-    ; the editor's pick", not "guest writer".
-    ; [4] Tell me how something you read changed your view of the world. That's
-    ; the highest compliment I could receive, and the greatest gift I have to
-    ; offer.
-    ; [2] Do *not* feel free to reach out to me for any of the following reasons:
-    ; * Commercial solicitation
-    ; * Requesting that I plug your blog, pet cause, or activism
-    ; * [Anger or hate in general][see_also Apologies]
+
+    (text "Feel free to reach out to me for any of the following reasons:")
+    (bullet-list
+      (text "Striking up a conversation about something that piqued your interest")
+      (text "Asking a question, or wanting elaboration on any topic")
+      (text "Providing feedback on spelling, grammar, layout, accessibility"),
+      (text "Reporting a bug or error")
+      (text "Requests to work faster on something that's under construction")
+      (paragraph
+        (text "Offering ")
+        (tangent :reader-contributions "personal contributions")
+        (text " that you think would enrich the site"))
+      (paragraph
+        (text "Throw a dog a ") (tangent :dog-bone "bone"))
+      (tangent :do-not-reach-out "etc..."))
+
+    (footnote :reader-contributions
+      (text "I'm open to including things other people have written, with"
+            "permission and (if desired) attribution. Think \"if the site had"
+            "comments and this was the editor's pick, not \"guest writer\"."))
+    (footnote :dog-bone
+      (text "Tell me how something you read changed your view of the world."
+            "That's the highest compliment I could receive, and the greatest"
+            "gift I have to give."))
+    (footnote :do-not-reach-out
+      (text "Do <i>not</i> feel free to reach out to me for any of the"
+            "following reasons:")
+      (bullet-list
+        (text "Commercial solicitation")
+        (text "Requesting that I plug your blog, pet cause, or activism")
+        ; TODO-see-also Apologies "Anger or hate in general"
+        ))
   ))
 
 (def apologies
