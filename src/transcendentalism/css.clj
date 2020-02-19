@@ -196,8 +196,7 @@
     (css "div" {"class" "buffer"}
       (height "600px")
       (debug (border-style "dashed"))
-      ; TODO(gierl): Swap out crown image for the official one.
-      (background-image "url(\"../resources/crown_tmp.png\")")
+      (background-image "url(\"../resources/crown.jpeg\")")
       (background-position "center")
       (background-repeat "no-repeat")
-      (background-size "300px" "200px"))]))
+      (background-size "150px" "150px"))]))
