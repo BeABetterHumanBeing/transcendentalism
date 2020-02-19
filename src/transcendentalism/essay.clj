@@ -185,3 +185,11 @@
     (let [k (minor-key t)]
       [((apply text lines) t)
        (->Triple (item-sub k) "/item/inline/tangent" footnote-sub)])))
+
+(defn q-and-a
+  [q a]
+  (fn [t]
+    [((paragraph (text "<b>Q:</b> ") q) t)
+     (push-block t)
+     ((paragraph (text "<b>A:</b> ") a) t)]))
+

@@ -54,7 +54,7 @@
       (tangent :footnote-1 "from scratch")
       (text
         " and, as a backend engineer, this was a recipe for, ummm, how shall we"
-        "say, *curious* frontend design choices."))
+        "say, <i>curious</i> frontend design choices."))
 
     (footnote :footnote-1
       (text
@@ -117,9 +117,9 @@
       (tangent :footnote-3 "enough of this")
       (text
         ", you will surely get a great sense of who I am, but it's not"
-        "*really* supposed to be about me. Given this opportunity to toot my own"
-        "horn, I'd much rather be known as \"the guy who went home from the"
-        "hospital in yellow socks\" than anything else."))
+        "<i>really</i> supposed to be about me. Given this opportunity to toot"
+        "my own horn, I'd much rather be known as \"the guy who went home from"
+        "the hospital in yellow socks\" than anything else."))
 
     (footnote :footnote-3
       (paragraph
@@ -174,24 +174,35 @@
 
 (def connections
   (essay :connections "Connections"
-    ; The sad thing about a website is that it is no substitution for a proper
-    ; conversation. In particular, I cannot see where you are at in your own
-    ; journey, and therefore cannot tailor the content to suit your present
-    ; needs, to tell you what you might find interesting and useful, and to
-    ; spare you the things you might rather put off until later. Additionally,
-    ; I regret that I cannot learn anything from *you*; this is decidedly [a
-    ; one-way road][1].
-    ;
-    ; [1] Q: What about a comments section?
-    ; A: Sadly, there is no plan for commenting. I'm made this site from scratch,
-    ; and comments are extremely non-trivial. Free speech is expensive.
-    ;
-    ; Nevertheless, if you would like to get in touch, you are more than
-    ; welcome to; you can [reach me][5] at:
-    ;
-    ; [5] Note that I have a best-effort SLA in responding, but that I am human
-    ; and sometimes things fall through the cracks.
-    ;
+    (paragraph
+      (text
+        "The sad thing about a website is that it is no substitution for a proper"
+        "conversation. In particular, I cannot see where you are at in your own"
+        "journey, and therefore cannot tailor the content to suit your present"
+        "needs, to tell you what you might find interesting and useful, and to"
+        "spare you the things you might rather put off until later. Additionally,"
+        "I regret that I cannot learn anything from *you*; this is decidedly ")
+      (tangent :comments-section-footnote "a one-way road")
+      (text "."))
+
+    (footnote :comments-section-footnote
+      (q-and-a
+        (text "What about a comments section?")
+        (text "Sadly, there is no plan for commenting. I made this site from"
+              "scratch, and comments are extremely non-trivial. Free speech is"
+              "expensive.")))
+    
+    (paragraph
+      (text
+        "Nevertheless, if you would like to get in touch, you are more than"
+        "welcome to; you can ")
+      (tangent :best-effort-sla "reach me")
+      (text " at:"))
+
+    (footnote :best-effort-sla
+      (text "Note that I have a best-effort SLA in responding, but that I am"
+            "human and sometimes things fall through the cracks."))
+
     ; TODO a non-editable field with daniel.erik.gierl@gmail.com and two buttons:
     ; 1) mailto:daniel.erik.gierl@gmail.com?Subject=Title%20Of%20Page%20That%20Referred%20Them%20Here
     ; 2) Copies the email address to clipboard

@@ -209,7 +209,6 @@
     {
       "/emoji" {
         :description "The sequence of emoji to render",
-        :domain-type "/type/item/big_emoji",
         :range-type :string,
         :required true,
         :unique true,
