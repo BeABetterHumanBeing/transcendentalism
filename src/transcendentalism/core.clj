@@ -9,7 +9,7 @@
 
 (def intro-essay-sequence
   [(essay-series [:monad :welcome :i-am-dan :connections :apologies])
-   (directive-under-construction :connections :apologies)])
+   (directive-under-construction :apologies)])
 
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
@@ -60,6 +60,7 @@
       (text
         "In clojure, no less. I used it as an opportunity to teach myself"
         "the language. There is no learning quite like doing.")
+      ; TODO(gierl) You can find the code on Github at TODO-link
     )
 
     (paragraph
@@ -173,8 +174,49 @@
 
 (def connections
   (essay :connections "Connections"
-    (text "TODO connections")
-    ; TODO(gierl) contact information, respective responsibilities
+    ; The sad thing about a website is that it is no substitution for a proper
+    ; conversation. In particular, I cannot see where you are at in your own
+    ; journey, and therefore cannot tailor the content to suit your present
+    ; needs, to tell you what you might find interesting and useful, and to
+    ; spare you the things you might rather put off until later. Additionally,
+    ; I regret that I cannot learn anything from *you*; this is decidedly [a
+    ; one-way road][1].
+    ;
+    ; [1] Q: What about a comments section?
+    ; A: Sadly, there is no plan for commenting. I'm made this site from scratch,
+    ; and comments are extremely non-trivial. Free speech is expensive.
+    ;
+    ; Nevertheless, if you would like to get in touch, you are more than
+    ; welcome to; you can [reach me][5] at:
+    ;
+    ; [5] Note that I have a best-effort SLA in responding, but that I am human
+    ; and sometimes things fall through the cracks.
+    ;
+    ; TODO a non-editable field with daniel.erik.gierl@gmail.com and two buttons:
+    ; 1) mailto:daniel.erik.gierl@gmail.com?Subject=Title%20Of%20Page%20That%20Referred%20Them%20Here
+    ; 2) Copies the email address to clipboard
+    ; TODO get daniel@transcendentalmetaphysics.com, and use that instead.
+    ;
+    ; Feel free to reach out to me for any of the following reasons:
+    ; * Striking up a conversation about something that piqued your interest
+    ; * Asking a question, or wanting elaboration on any topic
+    ; * Providing feedback on spelling, grammar, layout, accessibility
+    ; * Reporting a bug or error
+    ; * Requests to work faster on something that's under construction
+    ; * Offering [personal contributions][3] that you think would enrich the site
+    ; * Throwing a dog a [bone][4]
+    ; * [etc...][2]
+    ;
+    ; [3] I'm open to including things other people have written, with permission
+    ; and (if desired) attribution. Think "if the site had comments and this was
+    ; the editor's pick", not "guest writer".
+    ; [4] Tell me how something you read changed your view of the world. That's
+    ; the highest compliment I could receive, and the greatest gift I have to
+    ; offer.
+    ; [2] Do *not* feel free to reach out to me for any of the following reasons:
+    ; * Commercial solicitation
+    ; * Requesting that I plug your blog, pet cause, or activism
+    ; * [Anger or hate in general][see_also Apologies]
   ))
 
 (def apologies
