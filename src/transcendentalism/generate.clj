@@ -120,6 +120,19 @@
       (img {"src" (:obj image-url-triple),
             "alt" (:obj image-alt-text-triple)}))))
 
+(defn- generate-q-and-a
+  "Returns the HTML for a /type/item/q_and_a"
+  [triples renderer graph footnote-map]
+  (let [q-block (unique-or-nil triples "/item/q_and_a/question"),
+        a-block (unique-or-nil triples "/item/q_and_a/answer"),
+        q (get-unique graph q-block "/segment/contains"),
+        a (get-unique graph a-block "/segment/contains")]
+    (div {"class" "q_and_a"}
+      (div {"class" "q_and_a_header"} "Q:")
+      (str "<i>" (renderer graph q footnote-map) "</i>")
+      (div {"class" "q_and_a_header"} "A:")
+      (renderer graph a footnote-map))))
+
 (defrecord Cxn [encoded_obj name type])
 
 (defn- build-cxns
@@ -186,18 +199,24 @@
 
 (defn- render-item
   "Renders the HTML for an item"
+  ; TODO(gierl) Create Renderer protocol, reified over graph and footnote-map
   [graph item footnote-map]
-  (let [triples (all-triples graph item),
-        item-type (filter #(and (str/starts-with? (:pred %) "/type")
-                                (not (= (:pred %) "/type/item"))) triples)]
-    (case (:pred (first item-type))
-      "/type/item/poem" (generate-item-poem triples),
-      "/type/item/big_emoji" (generate-item-big-emoji triples),
-      "/type/item/quote" (generate-item-quote triples),
-      "/type/item/image" (generate-item-image triples),
-      "/type/item/inline" (generate-inline-item triples footnote-map),
-      (assert false
-        (str "ERROR - Type " (:pred (first item-type)) " not supported")))))
+  (letfn
+    [(inner-render-item
+       [graph item footnote-map]
+       (let [triples (all-triples graph item),
+             item-type (filter #(and (str/starts-with? (:pred %) "/type")
+                                     (not (= (:pred %) "/type/item"))) triples)]
+         (case (:pred (first item-type))
+           "/type/item/poem" (generate-item-poem triples),
+           "/type/item/big_emoji" (generate-item-big-emoji triples),
+           "/type/item/quote" (generate-item-quote triples),
+           "/type/item/image" (generate-item-image triples),
+           "/type/item/q_and_a" (generate-q-and-a triples inner-render-item graph footnote-map),
+           "/type/item/inline" (generate-inline-item triples footnote-map),
+           (assert false
+             (str "ERROR - Type " (:pred (first item-type)) " not supported")))))]
+    (inner-render-item graph item footnote-map)))
 
 (defn- conj-vector-map
   "Merges a map into a map of vectors, conj-ing the new elements"

@@ -106,9 +106,11 @@
               (concat result [push-block f])))
           [(first fns)] (rest fns))))))
 
-(defn- item-sub
-  [sub]
-  (keyword (str (name sub) "-i")))
+(defn- sub-suffix
+  [sub suffix]
+  (keyword (str (name sub) "-" suffix)))
+
+(defn- item-sub [sub] (sub-suffix sub "i"))
 
 (defn poem
   [& lines]
@@ -189,9 +191,19 @@
 (defn q-and-a
   [q a]
   (fn [t]
-    [((paragraph (text "<b>Q:</b> ") q) t)
-     (push-block t)
-     ((paragraph (text "<b>A:</b> ") a) t)]))
+    (let [sub (major-key t),
+          item-keyword (item-sub sub),
+          q-sub (sub-suffix sub "q"),
+          a-sub (sub-suffix sub "a"),
+          q-t (create-essay-thread q-sub),
+          a-t (create-essay-thread a-sub)]
+      [(q q-t)
+       (a a-t)
+       (types schema sub "/segment")
+       (->Triple sub "/segment/contains" item-keyword)
+       (types schema item-keyword "/item/q_and_a")
+       (->Triple item-keyword "/item/q_and_a/question" q-sub)
+       (->Triple item-keyword "/item/q_and_a/answer" a-sub)])))
 
 (defn bullet-list
   [& items]

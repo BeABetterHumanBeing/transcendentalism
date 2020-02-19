@@ -215,6 +215,27 @@
       },
     }))
 
+(def q-and-a-schema
+  (schematize-type "/item/q_and_a"
+    {
+      :description "A question and answer",
+      :super-type "/type/item",
+    }
+    {
+      "/question" {
+        :description "The question being asked",
+        :range-type "/type/segment",
+        :required true,
+        :unique true,
+      },
+      "/answer" {
+        :description "The answer being given",
+        :range-type "/type/segment",
+        :required true,
+        :unique true,
+      },
+    }))
+
 (def schema-data
   (merge essay-schema event-schema image-schema quote-schema inline-item-schema
-    poem-schema segment-schema big-emoji-schema item-schema))
+    poem-schema segment-schema big-emoji-schema item-schema q-and-a-schema))

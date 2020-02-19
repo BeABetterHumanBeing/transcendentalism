@@ -88,6 +88,8 @@
   [& contents]
   (style "grid-template-columns" (str/join " " contents)))
 
+(defn- grid-row-gap [contents] (style "grid-row-gap" contents))
+
 (defn- media
   [condition & contents]
   (str/join "\n"
@@ -164,6 +166,12 @@
       (font-style "italic"))
     (css "p" {"class" "author"}
       (text-align "right"))
+    (css "div" {"class" "q_and_a"}
+      (display "grid")
+      (grid-template-columns "30px" "[qa_separator]" "auto")
+      (grid-row-gap "8px"))
+    (css "div" {"class" "q_and_a_header"}
+      (font-weight "bold"))
     (css "button" {"class" "link_segment"}
       (border "none")
       (font-size "medium"))
