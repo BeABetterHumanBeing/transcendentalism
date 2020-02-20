@@ -209,8 +209,8 @@
     ; 2) Copies the email address to clipboard
     ; TODO get daniel@transcendentalmetaphysics.com, and use that instead.
 
-    (text "Feel free to reach out to me for any of the following reasons:")
     (bullet-list
+      (text "Feel free to reach out to me for any of the following reasons:")
       (text "Striking up a conversation about something that piqued your interest")
       (text "Asking a question, or wanting elaboration on any topic")
       (text "Providing feedback on spelling, grammar, layout, accessibility"),
@@ -233,9 +233,9 @@
             "That's the highest compliment I could receive, and the greatest"
             "gift I have to give."))
     (footnote :do-not-reach-out
-      (text "Do <i>not</i> feel free to reach out to me for any of the"
-            "following reasons:")
       (bullet-list
+        (text "Do <i>not</i> feel free to reach out to me for any of the"
+              "following reasons:")
         (text "Commercial solicitation")
         (text "Requesting that I plug your blog, pet cause, or activism")
         ; TODO-see-also Apologies "Anger or hate in general"

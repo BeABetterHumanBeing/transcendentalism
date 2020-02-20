@@ -194,11 +194,9 @@
     (let [sub (major-key t),
           item-keyword (item-sub sub),
           q-sub (sub-suffix sub "q"),
-          a-sub (sub-suffix sub "a"),
-          q-t (create-essay-thread q-sub),
-          a-t (create-essay-thread a-sub)]
-      [(q q-t)
-       (a a-t)
+          a-sub (sub-suffix sub "a")]
+      [(q (create-essay-thread q-sub))
+       (a (create-essay-thread a-sub))
        (types schema sub "/segment")
        (->Triple sub "/segment/contains" item-keyword)
        (types schema item-keyword "/item/q_and_a")
@@ -206,12 +204,25 @@
        (->Triple item-keyword "/item/q_and_a/answer" a-sub)])))
 
 (defn bullet-list
-  [& items]
+  [header-or-nil & items]
   (fn [t]
-    (map
-      #(% t)
-      (reduce
-        (fn [result f]
-          (concat result [push-block f]))
-        [(first items)] (rest items)))))
+    (let [sub (major-key t),
+          item-keyword (item-sub sub),
+          item-subs (map #(sub-suffix sub (str "i" %))
+                         (range (count items))),
+          header-sub (sub-suffix sub "h")]
+      (concat
+        (types schema sub "/segment")
+        [(->Triple sub "/segment/contains" item-keyword)]
+        (types schema item-keyword "/item/bullet_list")
+        (if (nil? header-or-nil)
+          []
+          [(header-or-nil (create-essay-thread header-sub))
+           (->Triple item-keyword "/item/bullet_list/header" header-sub)])
+        (map #((first %) (create-essay-thread (second %)))
+             (map vector items item-subs))
+        (map #(->Triple item-keyword
+                        "/item/bullet_list/point"
+                        ^{:order (second %)} [(first %)])
+             (map vector item-subs (range (count item-subs))))))))
 

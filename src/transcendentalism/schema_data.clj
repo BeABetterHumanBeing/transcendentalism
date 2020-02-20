@@ -194,7 +194,8 @@
     }
     {
       "/line" {
-        :description "A line that appears in the poem",
+        :description
+          "A line that appears in the poem, uses :order property to sort",
         :range-type :string,
         :required true,
       },
@@ -236,6 +237,26 @@
       },
     }))
 
+(def bullet-list-schema
+  (schematize-type "/item/bullet_list"
+    {
+      :description "A list with bullet points",
+      :super-type "/type/item",
+    }
+    {
+      "/header" {
+        :description "What appears above the list to introduce it",
+        :range-type "/type/segment",
+        :unique true,
+      },
+      "/point" {
+        :description "A bullet-pointed item. Uses :order property to sort",
+        :range-type "/type/segment",
+        :required true,
+      },
+    }))
+
 (def schema-data
   (merge essay-schema event-schema image-schema quote-schema inline-item-schema
-    poem-schema segment-schema big-emoji-schema item-schema q-and-a-schema))
+    poem-schema segment-schema big-emoji-schema item-schema q-and-a-schema
+    bullet-list-schema))

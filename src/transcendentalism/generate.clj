@@ -61,12 +61,9 @@
 
 (defn- a [attrs contents] (xml-tag "a" attrs contents))
 
-(defn- ul [contents] (xml-tag "ul" {} contents))
+(defn- ul [attrs & contents] (xml-tag "ul" attrs (apply str contents)))
 
-(defn- li
-  [contents]
-  (apply str
-    (map #(xml-tag "li" {} %) contents)))
+(defn- li [attrs contents] (xml-tag "li" attrs contents))
 
 (defn- hr [] (str "<hr>"))
 
@@ -132,6 +129,22 @@
       (str "<i>" (renderer graph q footnote-map) "</i>")
       (div {"class" "q_and_a_header"} "A:")
       (renderer graph a footnote-map))))
+
+(defn- generate-bullet-list
+  "Returns the HTML for a /type/item/bullet_list"
+  [triples renderer graph footnote-map]
+  (let [header-block-or-nil (unique-or-nil triples "/item/bullet_list/header"),
+        point-subs (map #(get-unique graph (first (:obj %)) "/segment/contains")
+                        (filter-and-order triples "/item/bullet_list/point"))]
+    (div {}
+      (if (nil? header-block-or-nil)
+          ""
+          (div {}
+            (renderer graph
+                      (get-unique graph header-block-or-nil "/segment/contains")
+                      footnote-map)))
+      (apply ul {}
+        (into [] (map #(li {} (renderer graph % footnote-map)) point-subs))))))
 
 (defrecord Cxn [encoded_obj name type])
 
@@ -213,6 +226,7 @@
            "/type/item/quote" (generate-item-quote triples),
            "/type/item/image" (generate-item-image triples),
            "/type/item/q_and_a" (generate-q-and-a triples inner-render-item graph footnote-map),
+           "/type/item/bullet_list" (generate-bullet-list triples inner-render-item graph footnote-map),
            "/type/item/inline" (generate-inline-item triples footnote-map),
            (assert false
              (str "ERROR - Type " (:pred (first item-type)) " not supported")))))]
