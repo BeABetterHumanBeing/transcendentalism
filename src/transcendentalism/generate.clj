@@ -67,64 +67,6 @@
     (str "dbg " classes)
     classes))
 
-(defn- generate-item-poem
-  [node]
-  (div {"class" (dbg-able "poem")}
-    (str/join "\n"
-      (map #(p {"class" "poem-line"} %)
-           (get-ordered-objs node "/item/poem/line")))))
-
-(defn- generate-item-big-emoji
-  [node]
-  (div {"class" (dbg-able "emoji")}
-    (unique-or-nil node "/item/big_emoji/emoji")))
-
-(defn- generate-item-quote
-  "Returns the HTML corresponding to a /type/item/quote"
-  [node]
-  (let [quote-text (unique-or-nil node "/item/quote/text"),
-        author-or-nil (unique-or-nil node "/item/quote/author"),
-        author (if (nil? author-or-nil) "Anonymous" author-or-nil)]
-    (div {"class" (dbg-able "quote")}
-      (p {} (str "\"" quote-text "\""))
-      (p {"class" "author"} (str "-" author)))))
-
-(defn- generate-item-image
-  "Returns the HTML corresponding to a /type/item/image"
-  [node]
-  (div {"class" (dbg-able "")}
-    (let [image-url-triple (unique-or-nil node "/item/image/url"),
-          image-alt-text-triple (unique-or-nil node "/item/image/alt_text")]
-      (img {"src" image-url-triple,
-            "alt" image-alt-text-triple}))))
-
-(defn- generate-q-and-a
-  "Returns the HTML for a /type/item/q_and_a"
-  [node renderer graph footnote-map]
-  (let [q-block (unique-or-nil node "/item/q_and_a/question"),
-        a-block (unique-or-nil node "/item/q_and_a/answer")]
-    (div {"class" "q_and_a"}
-      (div {"class" "q_and_a_header"} "Q:")
-      (str "<i>" (renderer graph q-block footnote-map) "</i>")
-      (div {"class" "q_and_a_header"} "A:")
-      (renderer graph a-block footnote-map))))
-
-(defn- generate-bullet-list
-  "Returns the HTML for a /type/item/bullet_list"
-  [node item-renderer block-renderer graph footnote-map]
-  (let [header-block-or-nil (unique-or-nil node "/item/bullet_list/header"),
-        point-blocks (get-ordered-objs node "/item/bullet_list/point")]
-    (println "bullet-list" point-blocks)
-    (div {}
-      (if (nil? header-block-or-nil)
-          ""
-          (div {}
-            (item-renderer graph
-                           (get-unique graph header-block-or-nil "/segment/contains")
-                           footnote-map)))
-      (apply ul {}
-        (into [] (map #(li {} (block-renderer graph % footnote-map)) point-blocks))))))
-
 (defrecord Cxn [encoded_obj name type])
 
 (defn- build-cxns
@@ -178,45 +120,90 @@
     ""
     (str "[" (str/join "-" ancestry) "]")))
 
-(defn- generate-inline-item
-  [node footnote-map]
-  (let [text (unique-or-nil node "/item/inline/text"),
-        tangent (unique-or-nil node "/item/inline/tangent")]
-    (if (nil? tangent)
-      (span {} text)
-      (span {"class" "tangent",
-             "onclick" (call-js "toggleFootnote"
-                         (js-str (:id (footnote-map tangent))))}
-        (str text " " (render-footnote-idx (:ancestry (footnote-map tangent))))))))
+(defprotocol Renderer
+  (render-block [renderer block-sub] "Renders a /type/segment")
+  (render-item [renderer node] "Renders a /type/item")
+  (render-poem [renderer node] "Renders a /type/item/poem")
+  (render-big-emoji [renderer node] "Renders a /type/item/big_emoji")
+  (render-quote [renderer node] "Renders a /type/item/quote")
+  (render-image [renderer node] "Renders a /type/item/image")
+  (render-q-and-a [renderer node] "Renders a /type/item/q_and_a")
+  (render-bullet-list [renderer node] "Renders a /type/item/bullet_list")
+  (render-inline-item [renderer node] "Renders a /type/item/inline"))
 
-(defn- render-block
-  "Renders the HTML for a block"
-  ; TODO(gierl) Create Renderer protocol, reified over graph and footnote-map
-  [graph block footnote-map]
-  (letfn
-    [(render-item
-       [graph item footnote-map]
-       (let [node (get-node graph item),
-             item-type (filter #(not (= % "/type/item")) (get-types node))]
-         (case (first item-type)
-           "/type/item/poem" (generate-item-poem node),
-           "/type/item/big_emoji" (generate-item-big-emoji node),
-           "/type/item/quote" (generate-item-quote node),
-           "/type/item/image" (generate-item-image node),
-           "/type/item/q_and_a" (generate-q-and-a node inner-render-block graph footnote-map),
-           "/type/item/bullet_list" (generate-bullet-list node render-item inner-render-block graph footnote-map),
-           "/type/item/inline" (generate-inline-item node footnote-map),
-           (assert false
-             (str "ERROR - Type " (first item-type) " not supported")))))
-     (inner-render-block
-       [graph block footnote-map]
-       (println "rendering block" block)
-       (apply str
-         (map #(render-item graph
-                            (get-unique graph % "/segment/contains")
-                            footnote-map)
-              (transitive-closure graph block "/segment/flow/inline"))))]
-    (inner-render-block graph block footnote-map)))
+(defn- create-renderer
+  [graph footnote-map]
+  (reify Renderer
+    (render-block [renderer block-sub]
+      (apply str
+        (map #(render-item renderer
+                           (get-node graph (get-unique graph % "/segment/contains")))
+             (transitive-closure graph block-sub "/segment/flow/inline"))))
+    (render-item [renderer node]
+      (let [item-type (filter #(not (= % "/type/item")) (get-types node))]
+        (case (first item-type)
+          "/type/item/poem" (render-poem renderer node),
+          "/type/item/big_emoji" (render-big-emoji renderer node),
+          "/type/item/quote" (render-quote renderer node),
+          "/type/item/image" (render-image renderer node),
+          "/type/item/q_and_a" (render-q-and-a renderer node),
+          "/type/item/bullet_list" (render-bullet-list renderer node),
+          "/type/item/inline" (render-inline-item renderer node),
+          (assert false
+            (str "ERROR - Type " (first item-type) " not supported")))))
+    (render-poem [renderer node]
+      (div {"class" (dbg-able "poem")}
+        (str/join "\n"
+          (map #(p {"class" "poem-line"} %)
+               (get-ordered-objs node "/item/poem/line")))))
+    (render-big-emoji [renderer node]
+      (div {"class" (dbg-able "emoji")}
+        (unique-or-nil node "/item/big_emoji/emoji")))
+    (render-quote [renderer node]
+      (let [quote-text (unique-or-nil node "/item/quote/text"),
+            author-or-nil (unique-or-nil node "/item/quote/author"),
+            author (if (nil? author-or-nil) "Anonymous" author-or-nil)]
+        (div {"class" (dbg-able "quote")}
+          (p {} (str "\"" quote-text "\""))
+          (p {"class" "author"} (str "-" author)))))
+    (render-image [renderer node]
+      (div {"class" (dbg-able "")}
+        (let [image-url-triple (unique-or-nil node "/item/image/url"),
+              image-alt-text-triple (unique-or-nil node "/item/image/alt_text")]
+          (img {"src" image-url-triple,
+                "alt" image-alt-text-triple}))))
+    (render-q-and-a [renderer node]
+      (let [q-block (unique-or-nil node "/item/q_and_a/question"),
+            a-block (unique-or-nil node "/item/q_and_a/answer")]
+        (div {"class" "q_and_a"}
+          (div {"class" "q_and_a_header"} "Q:")
+          (str "<i>" (render-block renderer q-block) "</i>")
+          (div {"class" "q_and_a_header"} "A:")
+          (render-block renderer a-block))))
+    (render-bullet-list [renderer node]
+      (let [header-block-or-nil (unique-or-nil node "/item/bullet_list/header"),
+            point-blocks (get-ordered-objs node "/item/bullet_list/point")]
+        (div {}
+          (if (nil? header-block-or-nil)
+              ""
+              (div {}
+                (render-item
+                  renderer
+                  (get-node
+                    graph
+                    (get-unique graph header-block-or-nil "/segment/contains")))))
+          (apply ul {}
+            (into [] (map #(li {} (render-block renderer %)) point-blocks))))))
+    (render-inline-item [renderer node]
+      (let [text (unique-or-nil node "/item/inline/text"),
+            tangent (unique-or-nil node "/item/inline/tangent")]
+        (if (nil? tangent)
+          (span {} text)
+          (span {"class" "tangent",
+                 "onclick" (call-js "toggleFootnote"
+                             (js-str (:id (footnote-map tangent))))}
+            (str text " "
+              (render-footnote-idx (:ancestry (footnote-map tangent))))))))))
 
 (defn- collect-block-tangents
   "Follows a sequence of inline segments, collecting their tangents"
@@ -283,12 +270,13 @@
   [graph segment]
   (letfn
     [(generate-block-sequence [sub footnote-map]
-       (let [next-block (get-unique graph sub "/segment/flow/block")]
+       (let [renderer (create-renderer graph footnote-map),
+             next-block (get-unique graph sub "/segment/flow/block")]
          (maybe-wrap-footnote footnote-map sub
            (str/join "\n" [
              (div {"class" (dbg-able "block")}
                (maybe-add-footnote-anchor footnote-map sub)
-               (render-block graph sub footnote-map)
+               (render-block renderer sub)
                (str/join "\n"
                  (map #(generate-block-sequence % footnote-map)
                       (collect-block-tangents graph sub))))
