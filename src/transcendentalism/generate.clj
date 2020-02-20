@@ -223,21 +223,28 @@
     my-map my-new-elems))
 
 (defn- collect-block-content
-  "Follows a sequence of inline segments, collecting them and their related
-   data"
+  "Follows a sequence of inline segments, collecting their items"
   [graph sub]
-  (loop [result {:contents [],
-                 :tangents []},
+  (loop [result [],
          inline-sub sub]
     (if (nil? inline-sub)
       result
       (let [content (get-unique graph inline-sub "/segment/contains")]
-        (recur (conj-vector-map
-                 result {:contents content,
-                         :tangents
-                           (if (nil? content)
-                               nil
-                               (get-unique graph content "/item/inline/tangent"))})
+        (recur (conj result content)
+               (get-unique graph inline-sub "/segment/flow/inline"))))))
+
+(defn- collect-block-tangents
+  "Follows a sequence of inline segments, collecting their tangents"
+  [graph sub]
+  (loop [result [],
+         inline-sub sub]
+    (if (nil? inline-sub)
+      result
+      (let [content (get-unique graph inline-sub "/segment/contains"),
+            tangent (get-unique graph content "/item/inline/tangent")]
+        (recur (if (nil? tangent)
+                   result
+                   (conj result tangent))
                (get-unique graph inline-sub "/segment/flow/inline"))))))
 
 (defn- calculate-footnote-map
@@ -245,9 +252,8 @@
   [graph sub]
   (letfn
     [(inner-footnote-map [sub ancestry idx]
-       (let [block-content (collect-block-content graph sub),
+       (let [tangents (collect-block-tangents graph sub),
              next-block (get-unique graph sub "/segment/flow/block"),
-             tangents (:tangents block-content),
              new-tangents (reduce
                (fn [result i]
                  (assoc result
@@ -293,6 +299,7 @@
   (letfn
     [(generate-block-sequence [sub footnote-map]
        (let [block-content (collect-block-content graph sub),
+             block-tangents (collect-block-tangents graph sub),
              next-block (get-unique graph sub "/segment/flow/block")]
          (maybe-wrap-footnote footnote-map sub
            (str/join "\n" [
@@ -300,11 +307,10 @@
                (maybe-add-footnote-anchor footnote-map sub)
                (apply str
                  (map #(render-item graph % footnote-map)
-                      (:contents block-content)))
+                      block-content))
                (str/join "\n"
-                 (map
-                   #(generate-block-sequence % footnote-map)
-                   (:tangents block-content))))
+                 (map #(generate-block-sequence % footnote-map)
+                      block-tangents)))
              (if (nil? next-block)
                ""
                (generate-block-sequence next-block footnote-map))]))
@@ -363,8 +369,8 @@
                            (map :obj (all-triples graph sub "/essay/label")))]
               (if (contains? labels :under-construction)
                 (generate-under-construction-splash)
-                (let [segment-sub (get-unique graph sub "/essay/contains")]
-                  (generate-essay-contents graph segment-sub))))
+                (generate-essay-contents
+                  graph (get-unique graph sub "/essay/contains"))))
             (hr)
             (div {"id" (seg-id id "footer")}
               (let [cxns (sort-by-cxn-type (build-cxns graph encodings sub))]
