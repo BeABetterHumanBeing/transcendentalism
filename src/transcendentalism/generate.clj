@@ -102,30 +102,28 @@
   "Returns the HTML for a /type/item/q_and_a"
   [node renderer graph footnote-map]
   (let [q-block (unique-or-nil node "/item/q_and_a/question"),
-        a-block (unique-or-nil node "/item/q_and_a/answer"),
-        q (get-unique graph q-block "/segment/contains"),
-        a (get-unique graph a-block "/segment/contains")]
+        a-block (unique-or-nil node "/item/q_and_a/answer")]
     (div {"class" "q_and_a"}
       (div {"class" "q_and_a_header"} "Q:")
-      (str "<i>" (renderer graph q footnote-map) "</i>")
+      (str "<i>" (renderer graph q-block footnote-map) "</i>")
       (div {"class" "q_and_a_header"} "A:")
-      (renderer graph a footnote-map))))
+      (renderer graph a-block footnote-map))))
 
 (defn- generate-bullet-list
   "Returns the HTML for a /type/item/bullet_list"
-  [node renderer graph footnote-map]
+  [node item-renderer block-renderer graph footnote-map]
   (let [header-block-or-nil (unique-or-nil node "/item/bullet_list/header"),
-        point-subs (map #(get-unique graph % "/segment/contains")
-                        (get-ordered-objs node "/item/bullet_list/point"))]
+        point-blocks (get-ordered-objs node "/item/bullet_list/point")]
+    (println "bullet-list" point-blocks)
     (div {}
       (if (nil? header-block-or-nil)
           ""
           (div {}
-            (renderer graph
-                      (get-unique graph header-block-or-nil "/segment/contains")
-                      footnote-map)))
+            (item-renderer graph
+                           (get-unique graph header-block-or-nil "/segment/contains")
+                           footnote-map)))
       (apply ul {}
-        (into [] (map #(li {} (renderer graph % footnote-map)) point-subs))))))
+        (into [] (map #(li {} (block-renderer graph % footnote-map)) point-blocks))))))
 
 (defrecord Cxn [encoded_obj name type])
 
@@ -205,34 +203,20 @@
            "/type/item/big_emoji" (generate-item-big-emoji node),
            "/type/item/quote" (generate-item-quote node),
            "/type/item/image" (generate-item-image node),
-           "/type/item/q_and_a" (generate-q-and-a node render-item graph footnote-map),
-           "/type/item/bullet_list" (generate-bullet-list node render-item graph footnote-map),
+           "/type/item/q_and_a" (generate-q-and-a node inner-render-block graph footnote-map),
+           "/type/item/bullet_list" (generate-bullet-list node render-item inner-render-block graph footnote-map),
            "/type/item/inline" (generate-inline-item node footnote-map),
            (assert false
-             (str "ERROR - Type " (first item-type) " not supported")))))]
-    (render-item graph
-                       (get-unique graph block "/segment/contains")
-                       footnote-map)))
-
-(defn- conj-vector-map
-  "Merges a map into a map of vectors, conj-ing the new elements"
-  [my-map my-new-elems]
-  (reduce-kv
-    (fn [result k v]
-      (if (nil? v)
-        result
-        (assoc result k (conj (result k) v))))
-    my-map my-new-elems))
-
-(defn- collect-block-content
-  "Follows a sequence of inline segments, collecting them"
-  [graph sub]
-  (loop [result [],
-         inline-sub sub]
-    (if (nil? inline-sub)
-      result
-      (recur (conj result inline-sub)
-             (get-unique graph inline-sub "/segment/flow/inline")))))
+             (str "ERROR - Type " (first item-type) " not supported")))))
+     (inner-render-block
+       [graph block footnote-map]
+       (println "rendering block" block)
+       (apply str
+         (map #(render-item graph
+                            (get-unique graph % "/segment/contains")
+                            footnote-map)
+              (transitive-closure graph block "/segment/flow/inline"))))]
+    (inner-render-block graph block footnote-map)))
 
 (defn- collect-block-tangents
   "Follows a sequence of inline segments, collecting their tangents"
@@ -304,9 +288,7 @@
            (str/join "\n" [
              (div {"class" (dbg-able "block")}
                (maybe-add-footnote-anchor footnote-map sub)
-               (apply str
-                 (map #(render-block graph % footnote-map)
-                      (collect-block-content graph sub)))
+               (render-block graph sub footnote-map)
                (str/join "\n"
                  (map #(generate-block-sequence % footnote-map)
                       (collect-block-tangents graph sub))))
@@ -356,7 +338,6 @@
           "" ; No segments are inserted above the monad.
           (div {"id" (seg-id id "above")}
             (debug "Insert Top Segments Here")))
-        ; The contents of the segment appear within a single div.
         (div {"class" "segment",
               "id" id}
           (div "") ; Empty divs occupy first and last cells in grid.

@@ -35,6 +35,9 @@
     "Returns a collection of all the triples in the graph [for a given [sub and pred]]")
   (all-nodes [graph] [graph type]
     "Returns a collection of all nodes in the graph [with a given type]")
+  (transitive-closure [graph sub pred]
+    "Returns the sub, and all other subs that can be transitively reached by
+     following pred")
   (has-type? [graph sub type] "Returns whether the given sub has the given type.")
   (get-unique [graph sub pred]
     "Returns the obj of the unique triple on sub with pred, or nil if none exists")
@@ -120,6 +123,16 @@
         (keys graph-data))
       (all-nodes [graph type]
         (filter #(has-type? graph % type) (all-nodes graph)))
+      (transitive-closure [graph sub pred]
+        (loop [results [],
+               subs-to-process [sub]]
+          (if (empty? subs-to-process)
+            results
+            (recur (conj results (first subs-to-process))
+                   (concat (rest subs-to-process)
+                           (map :obj (all-triples graph
+                                                  (first subs-to-process)
+                                                  pred)))))))
       (has-type? [graph sub type]
         (if (contains? graph-data sub)
           (not (nil? (some #(= (:pred %) type) (sub graph-data))))
