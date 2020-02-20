@@ -1,4 +1,5 @@
-(ns transcendentalism.graph)
+(ns transcendentalism.graph
+  (:require [clojure.string :as str]))
 
 (use 'transcendentalism.time)
 
@@ -10,13 +11,6 @@
   "Pretty-prints a triple"
   [triple]
   (str (:sub triple) "--" (:pred triple) "->" (:obj triple)))
-
-(defn collect-triples-by-pred
-  "Collects triples into a hash-map by their predicates"
-  [triples]
-  (reduce (fn [result triple]
-    (assoc result (:pred triple) triple))
-    {} triples))
 
 (defn get-property
   "Returns the property associated with an obj, or a default value"
@@ -46,7 +40,8 @@
     "Returns the obj of the unique triple on sub with pred, or nil if none exists")
   (get-time [graph sub]
     "Returns the time associated with the given sub, or nil if it has none")
-  (get-relation [graph pred] "Returns the sugraph defined by the given pred"))
+  (get-relation [graph pred] "Returns the subgraph defined by the given pred")
+  (get-node [graph sub] "Returns the subgraph defined by the given sub"))
 
 ; A Relation is the subgraph composed of only a single predicate.
 (defprotocol Relation
@@ -54,6 +49,38 @@
   (all-objs [relation sub] "Returns all the objects of a given sub's relationship")
   (get-sources [relation] "Returns all subs that are not objects in the relation")
   (get-sinks [relation] "Returns all subs that are not subjects in the relation"))
+
+; A Node is the subgraph that shares a common sub.
+(defprotocol Node
+  (get-types [node] "Returns all types asserted on the node")
+  (get-ordered-objs [node pred]
+    "Returns all objects with the given pred, in order")
+  (unique-or-nil [node pred]
+    "Returns the unique object of the given pred, or nil"))
+
+(defn- construct-node
+  [triples]
+  (let [pred-to-triples
+        (reduce
+          (fn [result triple]
+            (let [pred (:pred triple)]
+              (if (contains? result pred)
+                (assoc result pred (conj (result pred) triple))
+                (assoc result pred [triple]))))
+          {} triples)]
+    (reify Node
+      (get-types [node]
+        (map :pred (filter #(str/starts-with? (:pred %) "/type") triples)))
+      (get-ordered-objs [node pred]
+        (map #(first (:obj %))
+          (sort #(< (get-property :order (:obj %1) 0)
+                    (get-property :order (:obj %2) 0))
+                (pred-to-triples pred []))))
+      (unique-or-nil [node pred]
+        (let [selected (pred-to-triples pred [])]
+          (if (empty? selected)
+            nil
+            (:obj (first selected))))))))
 
 (defn- construct-relation
   [relation-map]
@@ -116,4 +143,6 @@
                   obj (if (contains? result obj)
                         (result obj)
                         []))))
-            {} (all-triples graph pred)))))))
+            {} (all-triples graph pred))))
+      (get-node [graph sub]
+        (construct-node (sub graph-data))))))

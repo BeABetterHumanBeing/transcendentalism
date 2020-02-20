@@ -27,21 +27,6 @@
       all-homes
       (recur (conj all-homes (homes curr)) (homes curr)))))
 
-(defn- filter-and-order
-  "Filters a group of triples by predicate, and orders them by metadata"
-  [triples pred]
-  (sort #(< (get-property :order (:obj %1) 0)
-            (get-property :order (:obj %2) 0))
-        (filter #(= (:pred %) pred) triples)))
-
-(defn- unique-or-nil
-  "Returns the unique object of the given pred, or nil"
-  [triples pred]
-  (let [selected (filter #(= (:pred %) pred) triples)]
-    (if (empty? selected)
-      nil
-      (:obj (first selected)))))
-
 (defn- clear-directory
   [dirname]
   (doseq [file (.listFiles (io/as-file dirname))]
@@ -83,45 +68,41 @@
     classes))
 
 (defn- generate-item-poem
-  [triples]
+  [node]
   (div {"class" (dbg-able "poem")}
     (str/join "\n"
-      (map
-        (fn [line-triple]
-          (p {"class" "poem-line"} (first (:obj line-triple))))
-        (filter-and-order triples "/item/poem/line")))))
+      (map #(p {"class" "poem-line"} %)
+           (get-ordered-objs node "/item/poem/line")))))
 
 (defn- generate-item-big-emoji
-  [triples]
+  [node]
   (div {"class" (dbg-able "emoji")}
-    (unique-or-nil triples "/item/big_emoji/emoji")))
+    (unique-or-nil node "/item/big_emoji/emoji")))
 
 (defn- generate-item-quote
   "Returns the HTML corresponding to a /type/item/quote"
-  [triples]
-  (let [pred-triples (collect-triples-by-pred triples),
-        quote-text (:obj (pred-triples "/item/quote/text")),
-        author (:obj (pred-triples "/item/quote/author"
-                                   [(->Triple nil nil "Anonymous")]))]
+  [node]
+  (let [quote-text (unique-or-nil node "/item/quote/text"),
+        author-or-nil (unique-or-nil node "/item/quote/author"),
+        author (if (nil? author-or-nil) "Anonymous" author-or-nil)]
     (div {"class" (dbg-able "quote")}
       (p {} (str "\"" quote-text "\""))
       (p {"class" "author"} (str "-" author)))))
 
 (defn- generate-item-image
   "Returns the HTML corresponding to a /type/item/image"
-  [triples]
+  [node]
   (div {"class" (dbg-able "")}
-    (let [triples-by-pred (collect-triples-by-pred triples),
-          image-url-triple (triples-by-pred "/item/image/url"),
-          image-alt-text-triple (triples-by-pred "/item/image/alt_text")]
-      (img {"src" (:obj image-url-triple),
-            "alt" (:obj image-alt-text-triple)}))))
+    (let [image-url-triple (unique-or-nil node "/item/image/url"),
+          image-alt-text-triple (unique-or-nil node "/item/image/alt_text")]
+      (img {"src" image-url-triple,
+            "alt" image-alt-text-triple}))))
 
 (defn- generate-q-and-a
   "Returns the HTML for a /type/item/q_and_a"
-  [triples renderer graph footnote-map]
-  (let [q-block (unique-or-nil triples "/item/q_and_a/question"),
-        a-block (unique-or-nil triples "/item/q_and_a/answer"),
+  [node renderer graph footnote-map]
+  (let [q-block (unique-or-nil node "/item/q_and_a/question"),
+        a-block (unique-or-nil node "/item/q_and_a/answer"),
         q (get-unique graph q-block "/segment/contains"),
         a (get-unique graph a-block "/segment/contains")]
     (div {"class" "q_and_a"}
@@ -132,10 +113,10 @@
 
 (defn- generate-bullet-list
   "Returns the HTML for a /type/item/bullet_list"
-  [triples renderer graph footnote-map]
-  (let [header-block-or-nil (unique-or-nil triples "/item/bullet_list/header"),
-        point-subs (map #(get-unique graph (first (:obj %)) "/segment/contains")
-                        (filter-and-order triples "/item/bullet_list/point"))]
+  [node renderer graph footnote-map]
+  (let [header-block-or-nil (unique-or-nil node "/item/bullet_list/header"),
+        point-subs (map #(get-unique graph % "/segment/contains")
+                        (get-ordered-objs node "/item/bullet_list/point"))]
     (div {}
       (if (nil? header-block-or-nil)
           ""
@@ -200,9 +181,9 @@
     (str "[" (str/join "-" ancestry) "]")))
 
 (defn- generate-inline-item
-  [triples footnote-map]
-  (let [text (unique-or-nil triples "/item/inline/text"),
-        tangent (unique-or-nil triples "/item/inline/tangent")]
+  [node footnote-map]
+  (let [text (unique-or-nil node "/item/inline/text"),
+        tangent (unique-or-nil node "/item/inline/tangent")]
     (if (nil? tangent)
       (span {} text)
       (span {"class" "tangent",
@@ -217,19 +198,18 @@
   (letfn
     [(inner-render-item
        [graph item footnote-map]
-       (let [triples (all-triples graph item),
-             item-type (filter #(and (str/starts-with? (:pred %) "/type")
-                                     (not (= (:pred %) "/type/item"))) triples)]
-         (case (:pred (first item-type))
-           "/type/item/poem" (generate-item-poem triples),
-           "/type/item/big_emoji" (generate-item-big-emoji triples),
-           "/type/item/quote" (generate-item-quote triples),
-           "/type/item/image" (generate-item-image triples),
-           "/type/item/q_and_a" (generate-q-and-a triples inner-render-item graph footnote-map),
-           "/type/item/bullet_list" (generate-bullet-list triples inner-render-item graph footnote-map),
-           "/type/item/inline" (generate-inline-item triples footnote-map),
+       (let [node (get-node graph item),
+             item-type (filter #(not (= % "/type/item")) (get-types node))]
+         (case (first item-type)
+           "/type/item/poem" (generate-item-poem node),
+           "/type/item/big_emoji" (generate-item-big-emoji node),
+           "/type/item/quote" (generate-item-quote node),
+           "/type/item/image" (generate-item-image node),
+           "/type/item/q_and_a" (generate-q-and-a node inner-render-item graph footnote-map),
+           "/type/item/bullet_list" (generate-bullet-list node inner-render-item graph footnote-map),
+           "/type/item/inline" (generate-inline-item node footnote-map),
            (assert false
-             (str "ERROR - Type " (:pred (first item-type)) " not supported")))))]
+             (str "ERROR - Type " (first item-type) " not supported")))))]
     (inner-render-item graph item footnote-map)))
 
 (defn- conj-vector-map
