@@ -1,5 +1,7 @@
 (ns transcendentalism.graph
-  (:require [clojure.string :as str]))
+  (:require
+    [clojure.set :as set]
+    [clojure.string :as str]))
 
 (use 'transcendentalism.time)
 
@@ -159,3 +161,49 @@
             {} (all-triples graph pred))))
       (get-node [graph sub]
         (construct-node (sub graph-data))))))
+
+; Graph Queries provide regex support for graph traversals. Call your query
+; using gq.
+
+(defn q-pred
+  "Query that expands the path along a given pred"
+  [pred]
+  (fn [graph subs]
+    (if (empty? subs)
+      #{} ; Early return optimization.
+      (apply set/union
+        (map
+          (fn [sub]
+            (let [triples (all-triples graph sub pred)]
+              (into #{}
+                (map
+                  (fn [triple]
+                    (let [obj (:obj triple)]
+                      (if (vector? obj)
+                        (first obj)
+                        obj)))
+                  triples))))
+          subs)))))
+
+(defn q-chain
+  "Query that chains together some number of other queries in sequence"
+  [& queries]
+  (fn [graph subs]
+    (if (empty? subs)
+      #{} ; Early return optimization.
+      (reduce
+        (fn [result query]
+          (query graph result))
+        subs queries))))
+
+(defn q-kleene
+  "Query that applies the kleene-star to another query"
+  [query]
+  (fn [graph subs]
+    (loop [result subs,
+           unprocessed subs]
+      (if (empty? unprocessed)
+        result
+        (let [next-batch (query graph unprocessed)]
+          (recur (set/union result next-batch)
+                 (set/difference next-batch result)))))))
