@@ -191,12 +191,12 @@
                          (js-str (:id (footnote-map tangent))))}
         (str text " " (render-footnote-idx (:ancestry (footnote-map tangent))))))))
 
-(defn- render-item
-  "Renders the HTML for an item"
+(defn- render-block
+  "Renders the HTML for a block"
   ; TODO(gierl) Create Renderer protocol, reified over graph and footnote-map
-  [graph item footnote-map]
+  [graph block footnote-map]
   (letfn
-    [(inner-render-item
+    [(render-item
        [graph item footnote-map]
        (let [node (get-node graph item),
              item-type (filter #(not (= % "/type/item")) (get-types node))]
@@ -205,12 +205,14 @@
            "/type/item/big_emoji" (generate-item-big-emoji node),
            "/type/item/quote" (generate-item-quote node),
            "/type/item/image" (generate-item-image node),
-           "/type/item/q_and_a" (generate-q-and-a node inner-render-item graph footnote-map),
-           "/type/item/bullet_list" (generate-bullet-list node inner-render-item graph footnote-map),
+           "/type/item/q_and_a" (generate-q-and-a node render-item graph footnote-map),
+           "/type/item/bullet_list" (generate-bullet-list node render-item graph footnote-map),
            "/type/item/inline" (generate-inline-item node footnote-map),
            (assert false
              (str "ERROR - Type " (first item-type) " not supported")))))]
-    (inner-render-item graph item footnote-map)))
+    (render-item graph
+                       (get-unique graph block "/segment/contains")
+                       footnote-map)))
 
 (defn- conj-vector-map
   "Merges a map into a map of vectors, conj-ing the new elements"
@@ -223,15 +225,14 @@
     my-map my-new-elems))
 
 (defn- collect-block-content
-  "Follows a sequence of inline segments, collecting their items"
+  "Follows a sequence of inline segments, collecting them"
   [graph sub]
   (loop [result [],
          inline-sub sub]
     (if (nil? inline-sub)
       result
-      (let [content (get-unique graph inline-sub "/segment/contains")]
-        (recur (conj result content)
-               (get-unique graph inline-sub "/segment/flow/inline"))))))
+      (recur (conj result inline-sub)
+             (get-unique graph inline-sub "/segment/flow/inline")))))
 
 (defn- collect-block-tangents
   "Follows a sequence of inline segments, collecting their tangents"
@@ -298,19 +299,17 @@
   [graph segment]
   (letfn
     [(generate-block-sequence [sub footnote-map]
-       (let [block-content (collect-block-content graph sub),
-             block-tangents (collect-block-tangents graph sub),
-             next-block (get-unique graph sub "/segment/flow/block")]
+       (let [next-block (get-unique graph sub "/segment/flow/block")]
          (maybe-wrap-footnote footnote-map sub
            (str/join "\n" [
              (div {"class" (dbg-able "block")}
                (maybe-add-footnote-anchor footnote-map sub)
                (apply str
-                 (map #(render-item graph % footnote-map)
-                      block-content))
+                 (map #(render-block graph % footnote-map)
+                      (collect-block-content graph sub)))
                (str/join "\n"
                  (map #(generate-block-sequence % footnote-map)
-                      block-tangents)))
+                      (collect-block-tangents graph sub))))
              (if (nil? next-block)
                ""
                (generate-block-sequence next-block footnote-map))]))
