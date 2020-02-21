@@ -59,6 +59,10 @@
 
 (defn- margin [& contents] (style "margin" (str/join " " contents)))
 
+(defn- margin-block-start [contents] (style "margin-block-start" contents))
+
+(defn- margin-block-end [contents] (style "margin-block-end" contents))
+
 (defn- display [contents] (style "display" contents))
 
 (defn- position [contents] (style "position" contents))
@@ -172,6 +176,9 @@
       (grid-row-gap "8px"))
     (css "div" {"class" "q_and_a_header"}
       (font-weight "bold"))
+    (css "ul" {"class" "bullet_list"}
+      (margin-block-start "5px")
+      (margin-block-end "5px"))
     (css "button" {"class" "link_segment"}
       (border "none")
       (font-size "medium"))

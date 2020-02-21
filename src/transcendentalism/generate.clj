@@ -192,7 +192,7 @@
                   (get-node
                     graph
                     (get-unique graph header-block-or-nil "/segment/contains")))))
-          (apply ul {}
+          (apply ul {"class" "bullet_list"}
             (into [] (map #(li {} (render-block renderer %)) point-blocks))))))
     (render-inline-item [renderer node]
       (let [text (unique-or-nil node "/item/inline/text"),
@@ -244,7 +244,6 @@
         sorted-gq-result
         (sort (compare-meta-by-priority :inline :in-item :order :in-item-inline)
           (into [] gq-result))]
-    (println (into [] (map (fn [sub] [(first sub) (meta sub)]) gq-result)))
     (into [] (map first sorted-gq-result))))
 
 (defn- calculate-footnote-map
