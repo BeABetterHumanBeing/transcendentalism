@@ -205,11 +205,23 @@
             (str text " "
               (render-footnote-idx (:ancestry (footnote-map tangent))))))))))
 
+(defn- compare-meta-by-priority
+  "Returns a comparator that examines metadata in a given order of priorities.
+   Missing metadata is assumed to be 0."
+  [& priorities]
+  (fn [a b]
+    (let [a-meta (meta a),
+          b-meta (meta b)]
+      (loop [k (first priorities),
+             etc (rest priorities)]
+        (let [a-val (k a-meta 0),
+              b-val (k b-meta 0)]
+          (if (and (= a-val b-val) (not (empty? etc)))
+            (recur (first etc) (rest etc))
+            (< a-val b-val)))))))
+
 (defn- collect-block-tangents
   "Follows a sequence of inline segments, collecting their tangents"
-  ; TODO(gierl) upgrade the query so that it'll search 'minor' blocks:
-  ; those that appear within other ones.
-  ; . [/segment/flow/inline]* /segment/contains [(/item/q_and_a/question | /item/q_and_a/answer | /item/bullet_list/point) [(/segment/flow/inline | /segment/flow/block)]* /segment/contains]* /item/inline/tangent
   [graph sub]
   (let [gq-result
         (gq
@@ -218,12 +230,21 @@
            (meta-q-kleene :inline
              (meta-q-pred "/segment/flow/inline"))
            (meta-q-pred "/segment/contains")
+           (meta-q-kleene :in-item
+             (q-chain
+               (q-or (meta-q-pred "/item/q_and_a/question")
+                     (meta-q-pred "/item/q_and_a/answer")
+                     (meta-q-pred :order "/item/bullet_list/point"))
+               (meta-q-kleene :in-item-inline
+                 ; Assumes questions, answers, and points are single-blocked.
+                 (meta-q-pred "/segment/flow/inline"))
+               (meta-q-pred "/segment/contains")))
            (meta-q-pred "/item/inline/tangent"))
          sub),
         sorted-gq-result
-        (sort #(< (:inline (meta %1))
-                  (:inline (meta %2)))
+        (sort (compare-meta-by-priority :inline :in-item :order :in-item-inline)
           (into [] gq-result))]
+    (println (into [] (map (fn [sub] [(first sub) (meta sub)]) gq-result)))
     (into [] (map first sorted-gq-result))))
 
 (defn- calculate-footnote-map

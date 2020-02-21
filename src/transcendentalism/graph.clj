@@ -188,25 +188,29 @@
 
 (defn meta-q-pred
   "Like q-pred, but expects elements in subs to be vectors of size 1 with
-   metadata. Moves metadata from input to output sub."
-  [pred]
-  (fn [graph subs]
-    (if (empty? subs)
-      #{} ; Early return optimization.
-      (apply set/union
-        (map
-          (fn [sub]
-            (let [metadata (meta sub),
-                  triples (all-triples graph (first sub) pred)]
-              (into #{}
-                (map
-                  (fn [triple]
-                    (let [obj (:obj triple)]
-                      (if (vector? obj)
-                        (with-meta (first obj) metadata)
-                        (with-meta [obj] metadata))))
-                  triples))))
-          subs)))))
+   metadata. Moves metadata from input to output sub, attaching existing
+   metadata with key k, if k is non-nil."
+  ([pred] (meta-q-pred nil pred))
+  ([k pred]
+   (fn [graph subs]
+     (if (empty? subs)
+       #{} ; Early return optimization.
+       (apply set/union
+         (map
+           (fn [sub]
+             (let [metadata (meta sub),
+                   triples (all-triples graph (first sub) pred)]
+               (into #{}
+                 (map
+                   (fn [triple]
+                     (let [obj (:obj triple)]
+                       (if (vector? obj)
+                         (if (nil? k)
+                           (with-meta obj metadata)
+                           (with-meta obj (assoc metadata k (k (meta obj) 0))))
+                         (with-meta [obj] metadata))))
+                   triples))))
+           subs))))))
 
 (defn q-chain
   "Query that chains together some number of other queries in sequence"
@@ -221,6 +225,17 @@
 
 ; q-chain is meta-invariant, so an alias is provided.
 (def meta-q-chain q-chain)
+
+(defn q-or
+  "Query that ORs together other queries, so that any path can be taken"
+  [& queries]
+  (fn [graph subs]
+    (if (empty? subs)
+      #{} ; Early return optimization
+      (apply set/union (map #(% graph subs) queries)))))
+
+; q-or is meta-invariant, so an alias is provided.
+(def meta-q-or q-or)
 
 (defn q-kleene
   "Query that applies the kleene-star to another query"
@@ -237,11 +252,11 @@
 (defn meta-q-kleene
   "Like q-kleene, but adds metadata to the results indicating which iteration
    of the process the sub first matched at."
-  [counting-key query]
+  [k query]
   (let [add-iter-metadata
         (fn [subs iteration]
           (into #{}
-                (map #(vary-meta % assoc counting-key iteration)
+                (map #(vary-meta % assoc k iteration)
                      subs)))]
     (fn [graph subs]
       (loop [result (add-iter-metadata subs 0),
