@@ -159,13 +159,19 @@
   "Function that moves to the given segment if it's already open somewhere, or
    moves and highlights the connecting link"
   []
-  (js-fn "seeAlsoSegment" ["encoded_to" "title_to"]
-    (log "'Seeing also ' + encoded_to")
+  (js-fn "seeAlsoSegment" ["encoded_from" "encoded_to" "title_to"]
     (js-if (chain (jq (js-seg-id "encoded_to")) "length")
       [(c "centerViewOn" "encoded_to" "title_to" "true")]
       [
-        ; TODO(gierl): Otherwise scroll the see_also button into view and 'ping'
-        ; it so that the user sees what button they would want to press.
+        ; TODO - make js-assign a thing
+        (str "var elem = " (jq (str "'#' + encoded_from + '-' + encoded_to")))
+        (chain "elem"
+               "get(0)"
+               (c "scrollIntoView" "{behavior: 'smooth', block: 'nearest'}"))
+        (chain "elem" (c "addClass" (js-str "shake")))
+        (c "setTimeout"
+          (js-anon-fn [] (chain "elem" (c "removeClass" (js-str "shake"))))
+          "1500")
       ])))
 
 (defn- toggleFootnote

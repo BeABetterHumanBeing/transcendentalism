@@ -85,6 +85,10 @@
 
 (defn- transform [contents] (style "transform" contents))
 
+(defn- animation-name [contents] (style "animation-name" contents))
+
+(defn- animation-duration [contents] (style "animation-duration" contents))
+
 (defn- repeating-linear-gradient [& contents]
   (str "repeating-linear-gradient(" (str/join ",\n" contents) ");"))
 
@@ -98,6 +102,18 @@
   [condition & contents]
   (str/join "\n"
     [(str "@media (" condition ") {") (str/join "\n" contents) "}"]))
+
+(defn- keyframes
+  [name & contents]
+  (str/join "\n"
+    [(str "@keyframes " name " {" (str/join "\n" contents) "}")]))
+
+(defn- keyframe-points
+  [pts & contents]
+  (str/join "\n" [
+    (str (str/join ", " pts) " {")
+    (str/join "\n" contents)
+    "}"]))
 
 (defn stylesheet
   []
@@ -159,6 +175,16 @@
     (css "span" {"class" "see-also"}
       (color (to-css-color yellow))
       (cursor "pointer"))
+    (keyframes "shake"
+      (keyframe-points ["from" "to"]
+        (transform "translate3d(0, 0, 0)"))
+      (keyframe-points ["10%", "30%", "50%", "70%", "90%"]
+        (transform "translate3d(-10px, 0, 0)"))
+      (keyframe-points ["20%", "40%", "60%", "80%"]
+        (transform "translate3d(10px, 0, 0)")))
+    (css "" {"class" "shake"}
+      (animation-name "shake")
+      (animation-duration "1.5s"))
     (css "div" {"class" "emoji"}
       (font-size "100px")
       (text-align "center"))

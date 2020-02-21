@@ -132,7 +132,7 @@
   (render-inline-item [renderer node] "Renders a /type/item/inline"))
 
 (defn- create-renderer
-  [graph encodings footnote-map]
+  [graph encoded_id encodings footnote-map]
   (reify Renderer
     (render-block [renderer block-sub]
       (apply str
@@ -203,6 +203,7 @@
             (span {} text)
             (span {"class" "see-also",
                    "onclick" (call-js "seeAlsoSegment"
+                               (js-str encoded_id)
                                (js-str (see-also encodings))
                                (js-str (get-unique graph see-also "/essay/title")))}
               (str text " &#8594")))
@@ -301,10 +302,10 @@
       ""))
 
 (defn- generate-essay-contents
-  [graph encodings segment]
+  [graph encoded_id encodings segment]
   (letfn
     [(generate-block-sequence [sub footnote-map]
-       (let [renderer (create-renderer graph encodings footnote-map),
+       (let [renderer (create-renderer graph encoded_id encodings footnote-map),
              next-block (get-unique graph sub "/segment/flow/block")]
          (maybe-wrap-footnote footnote-map sub
            (str/join "\n" [
@@ -313,6 +314,9 @@
                (render-block renderer sub)
                (str/join "\n"
                  (map #(generate-block-sequence % footnote-map)
+                      ; TODO - De-dup the collect-block-tangents call below so
+                      ; that it's read from the footnote-map rather than being
+                      ; recalculated.
                       (collect-block-tangents graph sub))))
              (if (nil? next-block)
                ""
@@ -372,7 +376,7 @@
               (if (contains? labels :under-construction)
                 (generate-under-construction-splash)
                 (generate-essay-contents
-                  graph encodings (get-unique graph sub "/essay/contains"))))
+                  graph id encodings (get-unique graph sub "/essay/contains"))))
             (hr)
             (div {"id" (seg-id id "footer")}
               (let [cxns (sort-by-cxn-type (build-cxns graph encodings sub))]
