@@ -207,30 +207,24 @@
 
 (defn- collect-block-tangents
   "Follows a sequence of inline segments, collecting their tangents"
-  ; TODO(gierl) Replace the following code with a graph query representing:
-  ; . [/segment/flow/inline]* /segment/contains /item/inline/tangent
-  ; TODO(gierl) THEN, upgrade the query so that it'll search 'minor' blocks:
+  ; TODO(gierl) upgrade the query so that it'll search 'minor' blocks:
   ; those that appear within other ones.
   ; . [/segment/flow/inline]* /segment/contains [(/item/q_and_a/question | /item/q_and_a/answer | /item/bullet_list/point) [(/segment/flow/inline | /segment/flow/block)]* /segment/contains]* /item/inline/tangent
   [graph sub]
   (let [gq-result
-        ((q-chain
-           (q-kleene
-             (q-pred "/segment/flow/inline"))
-           (q-pred "/segment/contains")
-           (q-pred "/item/inline/tangent"))
-         graph #{sub})]
-    (println gq-result))
-  (loop [result [],
-         inline-sub sub]
-    (if (nil? inline-sub)
-      result
-      (let [content (get-unique graph inline-sub "/segment/contains"),
-            tangent (get-unique graph content "/item/inline/tangent")]
-        (recur (if (nil? tangent)
-                   result
-                   (conj result tangent))
-               (get-unique graph inline-sub "/segment/flow/inline"))))))
+        (gq
+         graph
+         (q-chain
+           (meta-q-kleene :inline
+             (meta-q-pred "/segment/flow/inline"))
+           (meta-q-pred "/segment/contains")
+           (meta-q-pred "/item/inline/tangent"))
+         sub),
+        sorted-gq-result
+        (sort #(< (:inline (meta %1))
+                  (:inline (meta %2)))
+          (into [] gq-result))]
+    (into [] (map first sorted-gq-result))))
 
 (defn- calculate-footnote-map
   "Returns a sub->{:ancestry :id} map of all footnotes under a given segment"

@@ -163,7 +163,8 @@
         (construct-node (sub graph-data))))))
 
 ; Graph Queries provide regex support for graph traversals. Call your query
-; using gq.
+; using gq and using the meta-* versions of the queries if you want your call
+; to be metadata-aware.
 
 (defn q-pred
   "Query that expands the path along a given pred"
@@ -185,6 +186,28 @@
                   triples))))
           subs)))))
 
+(defn meta-q-pred
+  "Like q-pred, but expects elements in subs to be vectors of size 1 with
+   metadata. Moves metadata from input to output sub."
+  [pred]
+  (fn [graph subs]
+    (if (empty? subs)
+      #{} ; Early return optimization.
+      (apply set/union
+        (map
+          (fn [sub]
+            (let [metadata (meta sub),
+                  triples (all-triples graph (first sub) pred)]
+              (into #{}
+                (map
+                  (fn [triple]
+                    (let [obj (:obj triple)]
+                      (if (vector? obj)
+                        (with-meta (first obj) metadata)
+                        (with-meta [obj] metadata))))
+                  triples))))
+          subs)))))
+
 (defn q-chain
   "Query that chains together some number of other queries in sequence"
   [& queries]
@@ -195,6 +218,9 @@
         (fn [result query]
           (query graph result))
         subs queries))))
+
+; q-chain is meta-invariant, so an alias is provided.
+(def meta-q-chain q-chain)
 
 (defn q-kleene
   "Query that applies the kleene-star to another query"
@@ -207,3 +233,28 @@
         (let [next-batch (query graph unprocessed)]
           (recur (set/union result next-batch)
                  (set/difference next-batch result)))))))
+
+(defn meta-q-kleene
+  "Like q-kleene, but adds metadata to the results indicating which iteration
+   of the process the sub first matched at."
+  [counting-key query]
+  (let [add-iter-metadata
+        (fn [subs iteration]
+          (into #{}
+                (map #(vary-meta % assoc counting-key iteration)
+                     subs)))]
+    (fn [graph subs]
+      (loop [result (add-iter-metadata subs 0),
+             unprocessed subs,
+             iteration 1]
+        (if (empty? unprocessed)
+          result
+          (let [next-batch (add-iter-metadata (query graph unprocessed) iteration)]
+            (recur (set/union result next-batch)
+                   (set/difference next-batch result)
+                   (inc iteration))))))))
+
+(defn gq
+  "Executes a metadata-sensitive graph query"
+  [graph query sub]
+  (query graph #{[sub]}))
