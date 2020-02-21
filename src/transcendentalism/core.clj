@@ -9,7 +9,9 @@
 
 (def intro-essay-sequence
   [(essay-series [:monad :welcome :i-am-dan :connections :apologies])
-   (directive-under-construction :apologies)])
+   (directive-under-construction :apologies)
+   directive-see-also
+   directive-dedup-cxns])
 
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
@@ -29,6 +31,11 @@
     ; The monad is the only segment whose home is reflexive.
     ^{:no-block true} (fn [t] (->Triple :monad "/essay/flow/home" :monad))
     ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
+    ; TODO - Add /essay/flow/random that goes to a random essay.
+    ; TODO - Add on-hover text to the random link which reads "Go to a random
+    ; essay. Note that some essays can only be reached by clicking Random."
+    ; TODO - Ensure that the encoded ids of all essays are not accessible via
+    ; inspection of the random element.
   ))
 
 ; About
@@ -36,7 +43,7 @@
 ; what I hope to do with it.
 (def welcome
   (essay :welcome "Welcome"
-    (big-emoji "&#x1f44b")
+    (big-emoji "&#x1f44b") ; Waving hand emoji
 
     (text
       "Hi there! I'm Daniel Gierl, and I'd like to welcome you to my personal"
@@ -87,7 +94,7 @@
       "May you never lose yourself in darkness"
       "And may the light of God shine brightly on your soul")
 
-    (big-emoji "&#x1f64f")
+    (big-emoji "&#x1f64f") ; Praying hands emoji
   ))
 
 (def i-am-dan

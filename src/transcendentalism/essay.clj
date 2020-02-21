@@ -1,5 +1,7 @@
 (ns transcendentalism.essay
-  (:require [clojure.string :as str]))
+  (:require
+    [clojure.set :as set]
+    [clojure.string :as str]))
 
 (use 'transcendentalism.encoding
      'transcendentalism.graph
@@ -66,6 +68,86 @@
                      (= (:pred %) "/essay/flow/home")) triples)
         (into [] (map #(->Triple % "/essay/label" :under-construction) subs))
         (into [] (map #(->Triple % "/essay/flow/see_also" :connections) subs))))))
+
+(defn directive-see-also
+  "For every /item/inline/see_also, adds an equivalent /essay/flow/see_also"
+  [triples]
+  (let [graph (construct-graph triples),
+        essay-subs (map :sub (filter #(= (:pred %) "/type/essay") triples))]
+    (reduce
+      (fn [result essay-sub]
+        (let [see_alsos
+              ((q-chain
+                 (q-pred "/essay/contains")
+                 (q-kleene
+                   (q-or (q-pred "/segment/flow/inline")
+                         (q-pred "/segment/flow/block")))
+                 (q-pred "/segment/contains")
+                 (q-kleene
+                   (q-chain
+                     ; TODO - Move common query-parts to schema (and ideally
+                     ; generate them from the schema itself)
+                     (q-or (q-pred "/item/q_and_a/question")
+                           (q-pred "/item/q_and_a/answer")
+                           (q-pred "/item/bullet_list/point"))
+                     (q-kleene
+                       ; Assumes questions, answers, and points are single-blocked.
+                       (q-pred "/segment/flow/inline"))
+                     (q-pred "/segment/contains")))
+                 ; Because the see_also link may be buried in a tangent...
+                 (q-kleene
+                   (q-chain
+                     (q-pred "/item/inline/tangent")
+                     (q-kleene
+                       (q-or (q-pred "/segment/flow/inline")
+                             (q-pred "/segment/flow/block")))
+                     (q-pred "/segment/contains")
+                     (q-kleene
+                       (q-chain
+                         (q-or (q-pred "/item/q_and_a/question")
+                               (q-pred "/item/q_and_a/answer")
+                               (q-pred "/item/bullet_list/point"))
+                         (q-kleene
+                           ; Assumes questions, answers, and points are single-blocked.
+                           (q-pred "/segment/flow/inline"))
+                         (q-pred "/segment/contains")))))
+                 (q-pred "/item/inline/see_also")
+                 )
+               graph #{essay-sub})]
+          (concat result
+            (into []
+              (map #(->Triple essay-sub "/essay/flow/see_also" %)
+                   see_alsos)))))
+      triples essay-subs)))
+
+(defn directive-dedup-cxns
+  "De-dupes /essay/flow triples that have the same sub and obj"
+  [triples]
+  (let [cxns (filter #(str/starts-with? (:pred %) "/essay/flow") triples),
+        sub-to-cxns (index-by-sub cxns),
+        dupes
+        (into #{}
+          (reduce-kv
+            (fn [result sub cxns]
+              (let [obj-to-cxns (index-by-obj cxns)]
+                (set/union
+                  result
+                  (reduce-kv
+                    (fn [result obj cxns]
+                      (if (> (count cxns) 1)
+                        (let [cxn-preds (vec (map :pred cxns)),
+                              highest-priority-pred
+                              (if (contains? cxn-preds "/essay/flow/home")
+                                "/essay/flow/home"
+                                "/essay/flow/next")]
+                          (set/union
+                            result
+                            (filter #(not (= (:pred %) highest-priority-pred))
+                                    cxns)))
+                        result))
+                    #{} obj-to-cxns))))
+            #{} sub-to-cxns))]
+    (filter #(not (contains? dupes %)) triples)))
 
 (defn essay
   [sub title & fns]

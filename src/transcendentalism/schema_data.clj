@@ -107,6 +107,7 @@
  (schematize-type "/item"
   {
     :description "A piece of content",
+    ; TODO(gierl) Add abstract validation check.
     :abstract true,
   }
   {}))
@@ -127,6 +128,7 @@
       "/tangent" {
         :description "The item which clicking on this toggles",
         :range-type "/type/segment",
+        ; TODO(gierl) Add exclusive validation check.
         :exclusive ["/item/inline/url", "/item/inline/see_also"],
         :unique true,
       },

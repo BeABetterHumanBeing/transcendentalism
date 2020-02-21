@@ -22,14 +22,21 @@
       default
       (metadata property default))))
 
-(defn- graph-data-from-triples
-  "Constructs a graph by associating triples by subject"
+(defn index-by-sub
+  "Indexes a collection of triples by their subjects"
   [triples]
   (reduce
-    (fn [graph triple]
-      (assoc graph (:sub triple) (conj (graph (:sub triple)) triple)))
-    {}
-    triples))
+    (fn [result triple]
+      (assoc result (:sub triple) (conj (result (:sub triple)) triple)))
+    {} triples))
+
+(defn index-by-obj
+  "Indexes a collection of triples by their objects"
+  [triples]
+  (reduce
+    (fn [result triple]
+      (assoc result (:obj triple) (conj (result (:obj triple)) triple)))
+    {} triples))
 
 ; The Graph protocol is the interface through which a graph is accessed.
 (defprotocol Graph
@@ -111,7 +118,7 @@
 (defn construct-graph
   "Constructs a graph from a set of triples"
   [triples]
-  (let [graph-data (graph-data-from-triples triples)]
+  (let [graph-data (index-by-sub triples)]
     (reify Graph
       (all-triples [graph]
         (flatten (map second (seq graph-data))))

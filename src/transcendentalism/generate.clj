@@ -204,7 +204,7 @@
             (span {"class" "see-also",
                    "onclick" (call-js "seeAlsoSegment"
                                (js-str (see-also encodings))
-                               (get-unique graph see-also "/essay/title"))}
+                               (js-str (get-unique graph see-also "/essay/title")))}
               (str text " &#8594")))
           (span {"class" "tangent",
                  "onclick" (call-js "toggleFootnote"
