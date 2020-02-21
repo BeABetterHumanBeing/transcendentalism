@@ -238,9 +238,7 @@
               "following reasons:")
         (text "Commercial solicitation")
         (text "Requesting that I plug your blog, pet cause, or activism")
-        ; TODO-see-also Apologies "Anger or hate in general"
-        ))
-  ))
+        (see-also :apologies "Expressing anger or hate")))))
 
 (def apologies
   (essay :apologies "Apologies"

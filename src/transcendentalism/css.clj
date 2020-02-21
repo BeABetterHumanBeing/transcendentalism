@@ -156,6 +156,9 @@
       (position "absolute")
       (left "98px")
       (top "9px"))
+    (css "span" {"class" "see-also"}
+      (color (to-css-color yellow))
+      (cursor "pointer"))
     (css "div" {"class" "emoji"}
       (font-size "100px")
       (text-align "center"))

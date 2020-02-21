@@ -132,7 +132,7 @@
   (render-inline-item [renderer node] "Renders a /type/item/inline"))
 
 (defn- create-renderer
-  [graph footnote-map]
+  [graph encodings footnote-map]
   (reify Renderer
     (render-block [renderer block-sub]
       (apply str
@@ -196,9 +196,16 @@
             (into [] (map #(li {} (render-block renderer %)) point-blocks))))))
     (render-inline-item [renderer node]
       (let [text (unique-or-nil node "/item/inline/text"),
-            tangent (unique-or-nil node "/item/inline/tangent")]
+            tangent (unique-or-nil node "/item/inline/tangent"),
+            see-also (unique-or-nil node "/item/inline/see_also")]
         (if (nil? tangent)
-          (span {} text)
+          (if (nil? see-also)
+            (span {} text)
+            (span {"class" "see-also",
+                   "onclick" (call-js "seeAlsoSegment"
+                               (js-str (see-also encodings))
+                               (get-unique graph see-also "/essay/title"))}
+              (str text " &#8594")))
           (span {"class" "tangent",
                  "onclick" (call-js "toggleFootnote"
                              (js-str (:id (footnote-map tangent))))}
@@ -294,10 +301,10 @@
       ""))
 
 (defn- generate-essay-contents
-  [graph segment]
+  [graph encodings segment]
   (letfn
     [(generate-block-sequence [sub footnote-map]
-       (let [renderer (create-renderer graph footnote-map),
+       (let [renderer (create-renderer graph encodings footnote-map),
              next-block (get-unique graph sub "/segment/flow/block")]
          (maybe-wrap-footnote footnote-map sub
            (str/join "\n" [
@@ -365,7 +372,7 @@
               (if (contains? labels :under-construction)
                 (generate-under-construction-splash)
                 (generate-essay-contents
-                  graph (get-unique graph sub "/essay/contains"))))
+                  graph encodings (get-unique graph sub "/essay/contains"))))
             (hr)
             (div {"id" (seg-id id "footer")}
               (let [cxns (sort-by-cxn-type (build-cxns graph encodings sub))]

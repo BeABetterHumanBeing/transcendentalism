@@ -155,6 +155,19 @@
            (chain (jq (js-seg-id "encoded_from")) (c "next") (c "remove"))
            (c "centerViewOn" "encoded_to" "title_to" "true")))])))
 
+(defn- seeAlsoSegment
+  "Function that moves to the given segment if it's already open somewhere, or
+   moves and highlights the connecting link"
+  []
+  (js-fn "seeAlsoSegment" ["encoded_to" "title_to"]
+    (log "'Seeing also ' + encoded_to")
+    (js-if (chain (jq (js-seg-id "encoded_to")) "length")
+      [(c "centerViewOn" "encoded_to" "title_to" "true")]
+      [
+        ; TODO(gierl): Otherwise scroll the see_also button into view and 'ping'
+        ; it so that the user sees what button they would want to press.
+      ])))
+
 (defn- toggleFootnote
   "Function that toggles a footnote's visibility"
   []
@@ -171,6 +184,7 @@
     (center-view-on)
     (segment-loaded-callback)
     (openSegment)
+    (seeAlsoSegment)
     (toggleFootnote)
   ]))
 

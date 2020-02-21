@@ -127,16 +127,16 @@
       "/tangent" {
         :description "The item which clicking on this toggles",
         :range-type "/type/segment",
-        :exclusive ["/item/inline/url", "/item/inline/reference"],
+        :exclusive ["/item/inline/url", "/item/inline/see_also"],
         :unique true,
       },
       "/url" {
         :description "The external URL to which the text is linked",
         :range-type :string,
-        :exclusive ["/item/inline/tangent", "/item/inline/reference"],
+        :exclusive ["/item/inline/tangent", "/item/inline/see_also"],
         :unique true,
       },
-      "/reference" {
+      "/see_also" {
         :description "Another essay which is relevant",
         :range-type "/type/essay",
         :exclusive ["/item/inline/url", "/item/inline/tangent"],

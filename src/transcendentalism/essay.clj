@@ -188,6 +188,13 @@
       [((apply text lines) t)
        (->Triple (item-sub k) "/item/inline/tangent" footnote-sub)])))
 
+(defn see-also
+  [essay-sub & lines]
+  (fn [t]
+    (let [k (minor-key t)]
+      [((apply text lines) t)
+       (->Triple (item-sub k) "/item/inline/see_also" essay-sub)])))
+
 (defn q-and-a
   [q a]
   (fn [t]
