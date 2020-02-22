@@ -137,7 +137,8 @@
     (css "h1" {"class" "header"}
       (text-align "center"))
     (css "img" {}
-      (width "100%"))
+      (margin "0" "auto")
+      (display "block"))
     (debug (css "div" {"class" "dbg"}
       (border-style "dashed")
       (border-width "1px")))

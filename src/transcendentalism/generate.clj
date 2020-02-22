@@ -172,11 +172,10 @@
           (p {} (str "\"" quote-text "\""))
           (p {"class" "author"} (str "-" author)))))
     (render-image [renderer node]
-      (div {"class" (dbg-able "")}
-        (let [image-url-triple (unique-or-nil node "/item/image/url"),
-              image-alt-text-triple (unique-or-nil node "/item/image/alt_text")]
-          (img {"src" image-url-triple,
-                "alt" image-alt-text-triple}))))
+      (let [image-url-triple (unique-or-nil node "/item/image/url"),
+            image-alt-text-triple (unique-or-nil node "/item/image/alt_text")]
+        (img {"src" image-url-triple,
+              "alt" image-alt-text-triple})))
     (render-q-and-a [renderer node]
       (let [q-block (unique-or-nil node "/item/q_and_a/question"),
             a-block (unique-or-nil node "/item/q_and_a/answer")]

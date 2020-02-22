@@ -103,7 +103,9 @@
       "My name's Daniel Gierl. I was a plump, healthy baby with a full head of"
       "hair, and I went home from the hospital wearing little yellow socks.")
 
-    ; TODO yellow socks (preferably a photo)
+    (image
+      "../resources/yellow_socks.png"
+      "Drawing of yellow socks")
 
     (text
       "In life, we often overlook the smaller, sentimental details. A person is"
@@ -210,10 +212,7 @@
       (text "Note that I have a best-effort SLA in responding, but that I am"
             "human and sometimes things fall through the cracks."))
 
-    ; TODO a non-editable field with daniel.erik.gierl@gmail.com and two buttons:
     (contact-email "daniel.erik.gierl@gmail.com")
-    ; 1) mailto:daniel.erik.gierl@gmail.com?Subject=Title%20Of%20Page%20That%20Referred%20Them%20Here
-    ; 2) Copies the email address to clipboard
     ; TODO get daniel@transcendentalmetaphysics.com, and use that instead.
 
     (bullet-list
