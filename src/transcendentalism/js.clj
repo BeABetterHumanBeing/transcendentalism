@@ -61,6 +61,11 @@
        (map js-stmt else-contents)
        ["}"]))))
 
+(defn- js-assign
+  "Assigns a JS variable"
+  [varname value]
+  (str varname " = " value))
+
 (defn- jq
  [content]
  (str "$(" content ")"))
@@ -80,10 +85,9 @@
 (defn- on-pop-state
   "Handles history changes"
   []
-  (str
-    "window.onpopstate = "
+  (js-assign
+    "window.onpopstate"
     (js-anon-fn ["event"]
-      (log "'OnPopState was Called: encoded_id: ' + event.state.encoded_id + ' title: ' + event.state.title")
       (c "centerViewOn" "event.state.encoded_id" "event.state.title" "false"))))
 
 (defn- maybe-insert-divider
@@ -104,8 +108,8 @@
       [(c "window.history.pushState"
          "{'encoded_id':encoded_id, 'title':title}"
          (js-str "") "encoded_id + '.html'")])
-    "document.title = title"
-    "window.history.scrollRestoration = 'manual'"
+    (js-assign "document.title" "title")
+    (js-assign "window.history.scrollRestoration" (js-str "manual"))
     ; Scroll to the newly focused segment after a tiny delay for the element to
     ; get fetched.
     (c "setTimeout"
@@ -163,8 +167,7 @@
     (js-if (chain (jq (js-seg-id "encoded_to")) "length")
       [(c "centerViewOn" "encoded_to" "title_to" "true")]
       [
-        ; TODO - make js-assign a thing
-        (str "var elem = " (jq (str "'#' + encoded_from + '-' + encoded_to")))
+        (js-assign "var elem" (jq (str "'#' + encoded_from + '-' + encoded_to")))
         (chain "elem"
                "get(0)"
                (c "scrollIntoView" "{behavior: 'smooth', block: 'nearest'}"))
@@ -184,7 +187,7 @@
   "Function that copies some text to the clipboard"
   []
   (js-fn "copyToClipboard" ["elem_id"]
-    (str "var copyText = " (chain "document" (c "getElementById" "elem_id")))
+    (js-assign "var copyText" (chain "document" (c "getElementById" "elem_id")))
     (chain "copyText" (c "select"))
     (chain "copyText" (c "setSelectionRange" 0 99999))
     (chain "document" (c "execCommand" (js-str "copy")))

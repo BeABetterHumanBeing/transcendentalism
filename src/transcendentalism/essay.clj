@@ -79,38 +79,14 @@
         (let [see_alsos
               ((q-chain
                  (q-pred "/essay/contains")
-                 (q-kleene
-                   (q-or (q-pred "/segment/flow/inline")
-                         (q-pred "/segment/flow/block")))
-                 (q-pred "/segment/contains")
-                 (q-kleene
-                   (q-chain
-                     ; TODO - Move common query-parts to schema (and ideally
-                     ; generate them from the schema itself)
-                     (q-or (q-pred "/item/q_and_a/question")
-                           (q-pred "/item/q_and_a/answer")
-                           (q-pred "/item/bullet_list/point"))
-                     (q-kleene
-                       ; Assumes questions, answers, and points are single-blocked.
-                       (q-pred "/segment/flow/inline"))
-                     (q-pred "/segment/contains")))
+                 gq-segment-to-item
+                 gq-item-to-item
                  ; Because the see_also link may be buried in a tangent...
                  (q-kleene
                    (q-chain
                      (q-pred "/item/inline/tangent")
-                     (q-kleene
-                       (q-or (q-pred "/segment/flow/inline")
-                             (q-pred "/segment/flow/block")))
-                     (q-pred "/segment/contains")
-                     (q-kleene
-                       (q-chain
-                         (q-or (q-pred "/item/q_and_a/question")
-                               (q-pred "/item/q_and_a/answer")
-                               (q-pred "/item/bullet_list/point"))
-                         (q-kleene
-                           ; Assumes questions, answers, and points are single-blocked.
-                           (q-pred "/segment/flow/inline"))
-                         (q-pred "/segment/contains")))))
+                     gq-segment-to-item
+                     gq-item-to-item))
                  (q-pred "/item/inline/see_also")
                  )
                graph #{essay-sub})]

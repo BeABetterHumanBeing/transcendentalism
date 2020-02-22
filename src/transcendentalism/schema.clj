@@ -77,6 +77,28 @@
         all-types (set/union inferred-types full-types)]
     (map #(->Triple sub % nil) all-types)))
 
+(def gq-segment-to-item
+  "Returns a graph query that expands from /type/segment to all /type/item that
+   it directly contains through its flows"
+   (q-chain
+     (q-kleene
+       (q-or (q-pred "/segment/flow/inline")
+             (q-pred "/segment/flow/block")))
+     (q-pred "/segment/contains")))
+
+(def gq-item-to-item
+  "Returns a graph query that expands from /type/item to other /type/items that
+   are nested within them"
+  (q-kleene
+     (q-chain
+       (q-or (q-pred "/item/q_and_a/question")
+             (q-pred "/item/q_and_a/answer")
+             (q-pred "/item/bullet_list/point"))
+       (q-kleene
+         ; Assumes questions, answers, and points are single-blocked.
+         (q-pred "/segment/flow/inline"))
+       (q-pred "/segment/contains"))))
+
 (defn- pred-counts
   "Returns a map associating predicates with the number of times they appear"
   [preds]
