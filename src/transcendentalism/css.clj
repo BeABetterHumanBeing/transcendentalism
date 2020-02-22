@@ -19,84 +19,48 @@
 
 (defn- style [name content] (str name ": " content ";"))
 
-; TODO(gierl) Condense the below functions using macros.
+(defmacro contents-1
+  "Creates a CSS style for a name that only accepts a single content arg"
+  ([] true)
+  ([name]
+   `(def ~name
+     (fn [contents#]
+       (style (str/replace (second (re-find #"\$(.*)@" (str ~name))) #"_" "-")
+              contents#))))
+  ([name & names]
+   `(do
+      (def ~name
+        (fn [contents#]
+          (style (str/replace (second (re-find #"\$(.*)@" (str ~name))) #"_" "-")
+                 contents#)))
+     (contents-1 ~@names))))
 
-(defn- font-family [& contents] (style "font-family" (str/join ", " contents)))
+(defmacro contents-N
+  "Creates a CSS style for a name that accepts variadic args"
+  ([] true)
+  ([delimiter name]
+   `(def ~name
+      (fn [& contents#]
+        (style (str/replace (second (re-find #"\$(.*)@" (str ~name))) #"_" "-")
+               (str/join ~delimiter contents#)))))
+  ([delimiter name & names]
+   `(do
+      (def ~name
+        (fn [& contents#]
+          (style (str/replace (second (re-find #"\$(.*)@" (str ~name))) #"_" "-")
+                 (str/join ~delimiter contents#))))
+      (contents-N ~delimiter ~@names))))
 
-(defn- font-style [contents] (style "font-style" contents))
-
-(defn- font-weight [contents] (style "font-weight" contents))
-
-(defn- font-size [contents] (style "font-size" contents))
-
-(defn- color [contents] (style "color" contents))
-
-(defn- text-decoration [contents] (style "text-decoration" contents))
-
-(defn- direction [contents] (style "direction" contents))
-
-(defn- cursor [contents] (style "cursor" contents))
-
-(defn- border [contents] (style "border" contents))
-
-(defn- border-style [& contents] (style "border-style" (str/join " " contents)))
-
-(defn- border-width [& contents] (style "border-width" (str/join " " contents)))
-
-(defn- border-color [contents] (style "border-color" contents))
-
-(defn- height [contents] (style "height" contents))
-
-(defn- width [contents] (style "width" contents))
-
-(defn- top [contents] (style "top" contents))
-
-(defn- left [contents] (style "left" contents))
-
-(defn- right [contents] (style "right" contents))
-
-(defn- padding [& contents] (style "padding" (str/join " " contents)))
-
-(defn- margin [& contents] (style "margin" (str/join " " contents)))
-
-(defn- margin-block-start [contents] (style "margin-block-start" contents))
-
-(defn- margin-block-end [contents] (style "margin-block-end" contents))
-
-(defn- display [contents] (style "display" contents))
-
-(defn- position [contents] (style "position" contents))
-
-(defn- text-align [contents] (style "text-align" contents))
-
-(defn- vertical-align [contents] (style "vertical-align" contents))
-
-(defn- background [contents] (style "background" contents))
-
-(defn- background-color [contents] (style "background-color" contents))
-
-(defn- background-image [contents] (style "background-image" contents))
-
-(defn- background-position [contents] (style "background-position" contents))
-
-(defn- background-repeat [contents] (style "background-repeat" contents))
-
-(defn- background-size [& contents] (style "background-size" (str/join " " contents)))
-
-(defn- transform [contents] (style "transform" contents))
-
-(defn- animation-name [contents] (style "animation-name" contents))
-
-(defn- animation-duration [contents] (style "animation-duration" contents))
-
-(defn- repeating-linear-gradient [& contents]
-  (str "repeating-linear-gradient(" (str/join ",\n" contents) ");"))
-
-(defn- grid-template-columns
-  [& contents]
-  (style "grid-template-columns" (str/join " " contents)))
-
-(defn- grid-row-gap [contents] (style "grid-row-gap" contents))
+(contents-1
+  font-style font-weight font-size color text-decoration direction cursor border
+  border-color height width top left right margin-block-start margin-block-end
+  display position text-align vertical-align background background-color
+  background-image background-position background-repeat transform animation-name
+  animation-duration grid-row-gap)
+(contents-N ", " font-family)
+(contents-N " "
+  border-style border-width padding margin background-size grid-template-columns)
+(contents-N ",\n" repeating-linear-gradient)
 
 (defn- media
   [condition & contents]

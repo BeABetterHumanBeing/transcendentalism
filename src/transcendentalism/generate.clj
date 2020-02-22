@@ -32,7 +32,6 @@
   (doseq [file (.listFiles (io/as-file dirname))]
     (io/delete-file file)))
 
-; TODO - Compress these with a macro
 (defn- html [& contents] (xml-tag "html" {} (apply str contents)))
 
 (defn- head [contents] (xml-tag "head" {} contents))
