@@ -252,6 +252,13 @@
       [((apply text lines) t)
        (->Triple (item-sub k) "/item/inline/see_also" essay-sub)])))
 
+(defn link
+  [url & lines]
+  (fn [t]
+    (let [k (minor-key t)]
+      [((apply text lines) t)
+       (->Triple (item-sub k) "/item/inline/url" url)])))
+
 (defn q-and-a
   [q a]
   (block-item

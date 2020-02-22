@@ -64,11 +64,14 @@
         "say, <i>curious</i> frontend design choices."))
 
     (footnote :footnote-1
-      (text
-        "In clojure, no less. I used it as an opportunity to teach myself"
-        "the language. There is no learning quite like doing.")
-      ; TODO(gierl) You can find the code on Github at TODO-link
-    )
+      (paragraph
+        (text
+          "In clojure, no less. I used it as an opportunity to teach myself"
+          "the language. There is no learning quite like doing. If you want to"
+          "see the code, you can find it on ")
+        (link "https://github.com/BeABetterHumanBeing/transcendentalism"
+              "Github &#8594 BeABetterHumanBeing &#8594 transcendentalism")
+        (text ".")))
 
     (paragraph
       (text

@@ -218,10 +218,15 @@
     (render-inline-item [renderer node]
       (let [text (unique-or-nil node "/item/inline/text"),
             tangent (unique-or-nil node "/item/inline/tangent"),
-            see-also (unique-or-nil node "/item/inline/see_also")]
+            see-also (unique-or-nil node "/item/inline/see_also"),
+            link (unique-or-nil node "/item/inline/url")]
         (if (nil? tangent)
           (if (nil? see-also)
-            (span {} text)
+            (if (nil? link)
+              (span {} text)
+              (a {"href" link,
+                  "target" "_blank"}
+                (str text " &#11016")))
             (span {"class" "see-also",
                    "onclick" (call-js "seeAlsoSegment"
                                (js-str encoded_id)
