@@ -60,6 +60,11 @@
       "/flow/see_also" {
         :description "Internal link to another essay",
       },
+      "/flow/random" {
+        :description "Relation to a random essay",
+        ; TODO - range ought to be a set of essays
+        :range-type nil,
+      },
       "/contains" {
         :description "Relation from an essay to the segment it contains",
         :range-type "/type/segment",

@@ -31,11 +31,14 @@
     ; The monad is the only segment whose home is reflexive.
     ^{:no-block true} (fn [t] (->Triple :monad "/essay/flow/home" :monad))
     ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
-    ; TODO - Add /essay/flow/random that goes to a random essay.
-    ; TODO - Add on-hover text to the random link which reads "Go to a random
-    ; essay. Note that some essays can only be reached by clicking Random."
-    ; TODO - Ensure that the encoded ids of all essays are not accessible via
-    ; inspection of the random element.
+    ^{:no-block true} (fn [t]
+      (fn [triples]
+        (let [all-essays (into #{} (map :sub
+                                        (filter #(= (:pred %)
+                                                    "/type/essay")
+                                                triples)))]
+          (conj triples
+            (->Triple :monad "/essay/flow/random" all-essays)))))
   ))
 
 ; About
@@ -86,10 +89,12 @@
 
     (footnote :footnote-2
       (text
+        "Note that there are some essays which can only be reached by clicking"
+        "'Random' on the home page.")
+      (text
         "As an aside, I have tried to make the URLs somewhat stable so that they"
         "can be shared and saved, but I can only guarantee a modicum of stability"
-        "in a shifting sea of ideas.")
-    )
+        "in a shifting sea of ideas."))
 
     (poem
       "May you find that which you search for"

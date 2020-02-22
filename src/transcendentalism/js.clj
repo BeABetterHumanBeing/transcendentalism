@@ -159,6 +159,14 @@
            (chain (jq (js-seg-id "encoded_from")) (c "next") (c "remove"))
            (c "centerViewOn" "encoded_to" "title_to" "true")))])))
 
+(defn- openRandomSegment
+  "Function that is called when 'Random' is selected"
+  []
+  (js-fn "openRandomSegment" ["encoded_from" "possible_encoded_tos"]
+    (js-assign "var idx" (c "Math.floor"
+                            "Math.random() * possible_encoded_tos.length"))
+    (c "openSegment" "encoded_from" "possible_encoded_tos[idx]" (js-str "Random"))))
+
 (defn- seeAlsoSegment
   "Function that moves to the given segment if it's already open somewhere, or
    moves and highlights the connecting link"
@@ -203,6 +211,7 @@
     (center-view-on)
     (segment-loaded-callback)
     (openSegment)
+    (openRandomSegment)
     (seeAlsoSegment)
     (toggleFootnote)
     (copyToClipboard)

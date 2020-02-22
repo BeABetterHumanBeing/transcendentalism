@@ -76,14 +76,17 @@
   [graph encodings sub]
   (map
     (fn [triple]
-      (let [obj (:obj triple),
-            encoded_obj (obj encodings),
-            title (get-unique graph obj "/essay/title")]
-        (case (:pred triple)
-          "/essay/flow/home" (->Cxn encoded_obj title "up")
-          "/essay/flow/next" (->Cxn encoded_obj title "down")
-          "/essay/flow/see_also" (->Cxn encoded_obj title "across")
-          (assert false (str "ERROR - Type " (:pred triple) " not supported")))))
+      (let [pred (:pred triple)]
+        (if (= pred "/essay/flow/random")
+          (->Cxn (into #{} (map #(% encodings) (:obj triple))) "Random" "random")
+          (let [obj (:obj triple),
+                encoded_obj (obj encodings),
+                title (get-unique graph obj "/essay/title")]
+            (case (:pred triple)
+              "/essay/flow/home" (->Cxn encoded_obj title "up")
+              "/essay/flow/next" (->Cxn encoded_obj title "down")
+              "/essay/flow/see_also" (->Cxn encoded_obj title "across")
+              (assert false (str "ERROR - Type " (:pred triple) " not supported")))))))
     (filter #(str/starts-with? (:pred %) "/essay/flow") (all-triples graph sub))))
 
 (defn- sort-by-cxn-type
@@ -92,29 +95,38 @@
   (let [cxns-by-type (group-by :type cxns)]
     (concat (cxns-by-type "down" [])
             (cxns-by-type "across" [])
-            (cxns-by-type "up" []))))
+            (cxns-by-type "up" [])
+            (cxns-by-type "random" []))))
 
 (defn- generate-link
   "Returns the HTML for a link in the footer"
   [encoded_id, cxn]
-  (let [link-id (str encoded_id "-" (:encoded_obj cxn)),
-        name (str (case (:type cxn)
-                    "up" "&#8593 ",
-                    "down" "&#8595 ",
-                    "across" "&#8594 ",
-                    "")
-                  (:name cxn))]
+  (if (= (:type cxn) "random")
     (if static-html-mode
-      (a {"id" link-id,
-          "href" (str (:encoded_obj cxn) ".html")}
-        name)
-      (button {"id" link-id,
-               "class" (str "link_segment " (:type cxn)),
-               "onclick" (call-js "openSegment"
+      "" ; Can't choose at random without JS.
+      (button {"class" (str "link_segment " (:type cxn)),
+               "onclick" (call-js "openRandomSegment"
                            (js-str encoded_id)
-                           (js-str (:encoded_obj cxn))
-                           (js-str (:name cxn)))}
-              name))))
+                           (js-array (map js-str (:encoded_obj cxn))))}
+              "? Random"))
+    (let [link-id (str encoded_id "-" (:encoded_obj cxn)),
+          name (str (case (:type cxn)
+                      "up" "&#8593 ",
+                      "down" "&#8595 ",
+                      "across" "&#8594 ",
+                      "")
+                    (:name cxn))]
+      (if static-html-mode
+        (a {"id" link-id,
+            "href" (str (:encoded_obj cxn) ".html")}
+          name)
+        (button {"id" link-id,
+                 "class" (str "link_segment " (:type cxn)),
+                 "onclick" (call-js "openSegment"
+                             (js-str encoded_id)
+                             (js-str (:encoded_obj cxn))
+                             (js-str (:name cxn)))}
+                name)))))
 
 (defn- render-footnote-idx
   [ancestry]
