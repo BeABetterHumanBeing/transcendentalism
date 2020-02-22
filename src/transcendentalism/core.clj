@@ -211,7 +211,7 @@
             "human and sometimes things fall through the cracks."))
 
     ; TODO a non-editable field with daniel.erik.gierl@gmail.com and two buttons:
-    (text "daniel.erik.gierl@gmail.com")
+    (contact-email "daniel.erik.gierl@gmail.com")
     ; 1) mailto:daniel.erik.gierl@gmail.com?Subject=Title%20Of%20Page%20That%20Referred%20Them%20Here
     ; 2) Copies the email address to clipboard
     ; TODO get daniel@transcendentalmetaphysics.com, and use that instead.

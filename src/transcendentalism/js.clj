@@ -180,6 +180,16 @@
   (js-fn "toggleFootnote" ["encoded_id"]
     (chain (jq (js-seg-id "encoded_id")) (c "toggle" "250" "'swing'"))))
 
+(defn- copyToClipboard
+  "Function that copies some text to the clipboard"
+  []
+  (js-fn "copyToClipboard" ["elem_id"]
+    (str "var copyText = " (chain "document" (c "getElementById" "elem_id")))
+    (chain "copyText" (c "select"))
+    (chain "copyText" (c "setSelectionRange" 0 99999))
+    (chain "document" (c "execCommand" (js-str "copy")))
+    (chain "window" (c "alert" (js-str "Copied!")))))
+
 (defn script
   "Return the JavaScript for the website"
   []
@@ -192,6 +202,7 @@
     (openSegment)
     (seeAlsoSegment)
     (toggleFootnote)
+    (copyToClipboard)
   ]))
 
 (defn call-js

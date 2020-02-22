@@ -258,7 +258,22 @@
       },
     }))
 
+(def contact-schema
+  (schematize-type "/item/contact"
+    {
+      :description "Provides contact information",
+      :super-type "/type/item",
+    }
+    {
+      "/email" {
+        :description "An email address that can be mailed to",
+        :range-type :string,
+        :unique true,
+        :required true,
+      },
+    }))
+
 (def schema-data
   (merge essay-schema event-schema image-schema quote-schema inline-item-schema
     poem-schema segment-schema big-emoji-schema item-schema q-and-a-schema
-    bullet-list-schema))
+    bullet-list-schema contact-schema))

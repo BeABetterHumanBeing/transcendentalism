@@ -7,6 +7,7 @@
 
 ; The graph is composed of triples. Each triple relates a subject to an object
 ; by means of a predicate.
+; TODO - Expand to property graph
 (defrecord Triple [sub pred obj])
 
 (defn print-triple

@@ -32,6 +32,7 @@
   (doseq [file (.listFiles (io/as-file dirname))]
     (io/delete-file file)))
 
+; TODO - Compress these with a macro
 (defn- html [& contents] (xml-tag "html" {} (apply str contents)))
 
 (defn- head [contents] (xml-tag "head" {} contents))
@@ -59,6 +60,8 @@
 (defn- img [attrs] (xml-open "img" attrs))
 
 (defn- button [attrs contents] (xml-tag "button" attrs contents))
+
+(defn- input [attrs] (xml-open "input" attrs))
 
 (defn- dbg-able
   "Adds the dbg class, if in debugging mode"
@@ -129,6 +132,7 @@
   (render-image [renderer node] "Renders a /type/item/image")
   (render-q-and-a [renderer node] "Renders a /type/item/q_and_a")
   (render-bullet-list [renderer node] "Renders a /type/item/bullet_list")
+  (render-contact [renderer node] "Renders a /type/item/contact")
   (render-inline-item [renderer node] "Renders a /type/item/inline"))
 
 (defn- create-renderer
@@ -148,6 +152,7 @@
           "/type/item/image" (render-image renderer node),
           "/type/item/q_and_a" (render-q-and-a renderer node),
           "/type/item/bullet_list" (render-bullet-list renderer node),
+          "/type/item/contact" (render-contact renderer node),
           "/type/item/inline" (render-inline-item renderer node),
           (assert false
             (str "ERROR - Type " (first item-type) " not supported")))))
@@ -194,6 +199,24 @@
                     (get-unique graph header-block-or-nil "/segment/contains")))))
           (apply ul {"class" "bullet_list"}
             (into [] (map #(li {} (render-block renderer %)) point-blocks))))))
+    (render-contact [renderer node]
+      (let [email-address (unique-or-nil node "/item/contact/email"),
+            elem_id (gen-key 8)]
+        (div {"class" "contact-container"}
+          (div {"class" "contact-centered"}
+            (input {"class" "contact",
+                    "id" elem_id,
+                    "type" "text",
+                    "value" email-address,
+                    "readonly" "readonly"})
+            (div {"class" "contact-dash"})
+            (div {"class" "contact-buttons"}
+              (a {"href" "javascript:void(0);",
+                  "onclick" (call-js "copyToClipboard" (js-str elem_id))}
+                 "Copy")
+              "/"
+              (a {"href" (str "mailto:" email-address),
+                  "target" "_top"} "Mail"))))))
     (render-inline-item [renderer node]
       (let [text (unique-or-nil node "/item/inline/text"),
             tangent (unique-or-nil node "/item/inline/tangent"),

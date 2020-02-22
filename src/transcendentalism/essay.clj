@@ -194,54 +194,53 @@
 
 (defn- item-sub [sub] (sub-suffix sub "i"))
 
+(defn- block-item
+  "Given a function that takes a sub and produces triples, adds the necessary
+   triples to make it a block item"
+  [f]
+  (fn [t]
+    (let [block-sub (major-key t),
+          item-sub (item-sub block-sub)]
+      (concat [(types schema block-sub "/segment"),
+               (->Triple block-sub "/segment/contains" item-sub)]
+              (f item-sub)))))
+
 (defn poem
   [& lines]
-  (fn [t]
-    (let [sub (major-key t),
-          item-keyword (item-sub sub)]
-      [(types schema sub "/segment")
-       (->Triple sub "/segment/contains" item-keyword)
-       (types schema item-keyword "/item/poem")
+  (block-item
+    (fn [sub]
+      [(types schema sub "/item/poem")
        (map
          (fn [i]
            (let [line (nth lines i)]
-             (->Triple item-keyword "/item/poem/line" ^{:order i} [line])))
+             (->Triple sub "/item/poem/line" ^{:order i} [line])))
          (range (count lines)))])))
 
 (defn image
   [url alt-text]
-  (fn [t]
-    (let [sub (major-key t),
-          item-keyword (item-sub sub)]
-      [(types schema sub "/segment")
-       (->Triple sub "/segment/contains" item-keyword)
-       (types schema item-keyword "/item/image")
-       (->Triple item-keyword "/item/image/url" url)
-       (->Triple item-keyword "/item/image/alt_text" alt-text)])))
+  (block-item
+    (fn [sub]
+      [(types schema sub "/item/image")
+       (->Triple sub "/item/image/url" url)
+       (->Triple sub "/item/image/alt_text" alt-text)])))
 
 (defn quote*
   ([q] (quote* q nil))
   ([q author]
-    (fn [t]
-      (let [sub (major-key t),
-            item-keyword (item-sub sub)]
-        [(types schema sub "/segment")
-         (->Triple sub "/segment/contains" item-keyword)
-         (types schema item-keyword "/item/quote")
-         (->Triple item-keyword "/item/quote/text" q)
+    (block-item
+      (fn [sub]
+        [(types schema sub "/item/quote")
+         (->Triple sub "/item/quote/text" q)
          (if (nil? author)
            []
-           (->Triple item-keyword "/item/quote/author" author))]))))
+           (->Triple sub "/item/quote/author" author))]))))
 
 (defn big-emoji
   [emoji]
-  (fn [t]
-    (let [sub (major-key t),
-          item-keyword (item-sub sub)]
-      [(types schema sub "/segment")
-       (->Triple sub "/segment/contains" item-keyword)
-       (types schema item-keyword "/item/big_emoji")
-       (->Triple item-keyword "/item/big_emoji/emoji" emoji)])))
+  (block-item
+    (fn [sub]
+      [(types schema sub "/item/big_emoji")
+       (->Triple sub "/item/big_emoji/emoji" emoji)])))
 
 (defn paragraph
   [& fns]
@@ -279,39 +278,39 @@
 
 (defn q-and-a
   [q a]
-  (fn [t]
-    (let [sub (major-key t),
-          item-keyword (item-sub sub),
-          q-sub (sub-suffix sub "q"),
-          a-sub (sub-suffix sub "a")]
-      [(q (create-essay-thread q-sub))
-       (a (create-essay-thread a-sub))
-       (types schema sub "/segment")
-       (->Triple sub "/segment/contains" item-keyword)
-       (types schema item-keyword "/item/q_and_a")
-       (->Triple item-keyword "/item/q_and_a/question" q-sub)
-       (->Triple item-keyword "/item/q_and_a/answer" a-sub)])))
+  (block-item
+    (fn [sub]
+      (let [q-sub (sub-suffix sub "q"),
+            a-sub (sub-suffix sub "a")]
+        [(q (create-essay-thread q-sub))
+         (a (create-essay-thread a-sub))
+         (types schema sub "/item/q_and_a")
+         (->Triple sub "/item/q_and_a/question" q-sub)
+         (->Triple sub "/item/q_and_a/answer" a-sub)]))))
 
 (defn bullet-list
   [header-or-nil & items]
-  (fn [t]
-    (let [sub (major-key t),
-          item-keyword (item-sub sub),
-          item-subs (map #(sub-suffix sub (str "i" %))
-                         (range (count items))),
-          header-sub (sub-suffix sub "h")]
-      (concat
-        (types schema sub "/segment")
-        [(->Triple sub "/segment/contains" item-keyword)]
-        (types schema item-keyword "/item/bullet_list")
-        (if (nil? header-or-nil)
-          []
-          [(header-or-nil (create-essay-thread header-sub))
-           (->Triple item-keyword "/item/bullet_list/header" header-sub)])
-        (map #((first %) (create-essay-thread (second %)))
-             (map vector items item-subs))
-        (map #(->Triple item-keyword
-                        "/item/bullet_list/point"
-                        ^{:order (second %)} [(first %)])
-             (map vector item-subs (range (count item-subs))))))))
+  (block-item
+    (fn [sub]
+      (let [item-subs (map #(sub-suffix sub (str "i" %))
+                           (range (count items))),
+            header-sub (sub-suffix sub "h")]
+        (concat
+          (types schema sub "/item/bullet_list")
+          (if (nil? header-or-nil)
+            []
+            [(header-or-nil (create-essay-thread header-sub))
+             (->Triple sub "/item/bullet_list/header" header-sub)])
+          (map #((first %) (create-essay-thread (second %)))
+               (map vector items item-subs))
+          (map #(->Triple sub
+                          "/item/bullet_list/point"
+                          ^{:order (second %)} [(first %)])
+               (map vector item-subs (range (count item-subs)))))))))
 
+(defn contact-email
+  [email-address]
+  (block-item
+    (fn [sub]
+      [(types schema sub "/item/contact"),
+       (->Triple sub "/item/contact/email" email-address)])))
