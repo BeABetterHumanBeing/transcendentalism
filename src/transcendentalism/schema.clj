@@ -15,6 +15,8 @@
   (pred-required-by-type? [schema pred type]
     "Whether the given predicate is required by the given type")
   (required-preds [schema type] "Returns the required preds of the given type")
+  (exclusive-preds [schema pred]
+    "Returns the preds that are excluded by the existence of the given pred")
   (is-unique? [schema pred] "Whether the given predicate is unique")
   (get-supertypes [schema type] "Returns the set of supertypes of a given type")
   (get-domain-type [schema pred] "Returns the domain type, or nil")
@@ -39,6 +41,7 @@
             result))
         #{}
         (keys schema-data)))
+    (exclusive-preds [schema pred] (schema-data pred) :exclusive #{})
     (is-unique? [schema pred]
       (let [pred-data (schema-data pred)]
         (and (contains? pred-data :unique)
@@ -314,7 +317,22 @@
           result abstract-types)))
     #{} (all-nodes graph)))
 
-; TODO(gierl) Add exclusive validation
+(defn no-exclusive-violations?
+  "Validates that predicates which have exclusivity requirements are met"
+  [schema graph]
+  (reduce
+    (fn [result triple]
+      (reduce
+        (fn [result exclusive-pred]
+          (let [excluded (all-triples graph (:sub triple) exclusive-pred)]
+            (if (empty? excluded)
+              result
+              (conj result
+                    (str (:pred triple) " excludes " excluded " on "
+                         (:sub triple))))))
+        result (exclusive-preds schema (:pred triple))))
+    #{} (all-triples graph)))
+
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]
@@ -328,7 +346,7 @@
        #(order-conforms? %1 %2 "/item/contains") events-occur-in-past?
        #(order-conforms? %1 %2 "/item/text/text") events-obey-causality?
        home-is-monad-rooted-dag? #(order-conforms? %1 %2 "/item/poem/line")
-       no-abstract-subs?]),
+       no-abstract-subs? no-exclusive-violations?]),
      ; nil ends up in the set, and ought to be weeded out.
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))
