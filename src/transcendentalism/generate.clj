@@ -440,6 +440,10 @@
         [filename (str "output/" (sub encodings) ".html")]
         (do
           (spit filename (generate-essay graph encodings homes sub))
-          (println "Generated" filename))))
+          (println
+            "Generated"
+            sub
+            (str "\"" (unique-or-nil (get-node graph sub) "/essay/title") "\"")
+            filename))))
     (spit "output/styles.css" (stylesheet))
     (if static-html-mode nil (spit "output/script.js" (script)))))
