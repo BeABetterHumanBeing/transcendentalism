@@ -11,6 +11,7 @@
 (defprotocol Schema
   (exists? [schema pred] "Whether the given predicate exists")
   (is-type? [schema pred] "Whether the given predicate is a type")
+  (is-abstract? [schema type] "Whether the given type is abstract")
   (pred-required-by-type? [schema pred type]
     "Whether the given predicate is required by the given type")
   (required-preds [schema type] "Returns the required preds of the given type")
@@ -24,6 +25,7 @@
   (reify Schema
     (exists? [schema pred] (contains? schema-data pred))
     (is-type? [schema pred] (str/starts-with? pred "/type"))
+    (is-abstract? [schema type] ((schema-data type) :abstract false))
     (pred-required-by-type? [schema pred type]
       (let [pred-data (schema-data pred)]
         (and (= (:domain-type pred-data) type)
@@ -294,7 +296,24 @@
             (str sub "'s /essay/flow/home does not lead to :monad"))))
       #{} sinks)))
 
-; TODO(gierl) Add abstract validation
+(defn- no-abstract-subs?
+  "Validates that subs with abstract types have a non-abstract sub-type"
+  [schema graph]
+  (reduce
+    (fn [result sub]
+      (let [types (get-types (get-node graph sub)),
+            abstract-types (filter #(is-abstract? schema %) types)]
+        (reduce
+          (fn [result abstract-type]
+            (if (nil? (some #(contains? (get-supertypes schema %) abstract-type)
+                            types))
+              (conj result
+                (str sub " has abstract type " abstract-type
+                     " but no concrete sub-type"))
+              result))
+          result abstract-types)))
+    #{} (all-nodes graph)))
+
 ; TODO(gierl) Add exclusive validation
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
@@ -308,7 +327,8 @@
        required-supertypes-exist? domain-type-exists? range-type-exists?
        #(order-conforms? %1 %2 "/item/contains") events-occur-in-past?
        #(order-conforms? %1 %2 "/item/text/text") events-obey-causality?
-       home-is-monad-rooted-dag? #(order-conforms? %1 %2 "/item/poem/line")]),
+       home-is-monad-rooted-dag? #(order-conforms? %1 %2 "/item/poem/line")
+       no-abstract-subs?]),
      ; nil ends up in the set, and ought to be weeded out.
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))

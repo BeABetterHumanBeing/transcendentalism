@@ -112,7 +112,6 @@
  (schematize-type "/item"
   {
     :description "A piece of content",
-    ; TODO(gierl) Add abstract validation check.
     :abstract true,
   }
   {}))
