@@ -260,20 +260,20 @@
         rootname (subname "root" sub (succ 1)),
         inner (fn [lvl n] (subname "inner" lvl (succ (dec n)) (succ n)))]
     [(types (inner 1 1) "/event")
-     (->Triple (inner 1 1) "/event/time" (get-hours-ago 2))
-     (->Triple (inner 1 1) "/event/leads_to" (subname "subject" sub))
-     (->Triple (inner 1 1) "/event/leads_to" (subname "subject" (succ 1)))
+     (->Triple (inner 1 1) "/event/time" (get-hours-ago 2) {})
+     (->Triple (inner 1 1) "/event/leads_to" (subname "subject" sub) {})
+     (->Triple (inner 1 1) "/event/leads_to" (subname "subject" (succ 1)) {})
      (map
       (fn [n]
         [(types (inner n 1) "/event")
-         (->Triple (inner n 1) "/event/time" (get-hours-ago (* 2 n)))
-         (->Triple (inner n 1) "/event/leads_to" (inner (dec n) 1))
-         (->Triple (inner n 1) "/event/leads_to" (inner (dec n) 2))])
+         (->Triple (inner n 1) "/event/time" (get-hours-ago (* 2 n)) {})
+         (->Triple (inner n 1) "/event/leads_to" (inner (dec n) 1) {})
+         (->Triple (inner n 1) "/event/leads_to" (inner (dec n) 2) {})])
       (range 2 6))
      (types rootname "/event")
-     (->Triple rootname "/event/time" (get-hours-ago 12))
-     (->Triple rootname "/event/leads_to" (inner 5 1))
-     (->Triple rootname "/event/leads_to" (inner 5 2))
+     (->Triple rootname "/event/time" (get-hours-ago 12) {})
+     (->Triple rootname "/event/leads_to" (inner 5 1) {})
+     (->Triple rootname "/event/leads_to" (inner 5 2) {})
      ]))
 
 ; Courtesy Michal Marczyk

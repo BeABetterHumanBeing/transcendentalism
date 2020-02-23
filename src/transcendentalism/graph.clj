@@ -7,21 +7,11 @@
 
 ; The graph is composed of triples. Each triple relates a subject to an object
 ; by means of a predicate.
-; TODO - Expand to property graph
-(defrecord Triple [sub pred obj])
+(defrecord Triple [sub pred obj p-vs])
 
-(defn print-triple
-  "Pretty-prints a triple"
-  [triple]
-  (str (:sub triple) "--" (:pred triple) "->" (:obj triple)))
-
-(defn get-property
-  "Returns the property associated with an obj, or a default value"
-  [property obj default]
-  (let [metadata (meta obj)]
-    (if (nil? metadata)
-      default
-      (metadata property default))))
+(defn property
+  [triple pred default]
+  ((:p-vs triple) pred default))
 
 (defn index-by-sub
   "Indexes a collection of triples by their subjects"
@@ -85,9 +75,9 @@
       (get-types [node]
         (map :pred (filter #(str/starts-with? (:pred %) "/type") triples)))
       (get-ordered-objs [node pred]
-        (map #(first (:obj %))
-          (sort #(< (get-property :order (:obj %1) 0)
-                    (get-property :order (:obj %2) 0))
+        (map :obj
+          (sort #(< (property %1 "/order" 0)
+                    (property %2 "/order" 0))
                 (pred-to-triples pred []))))
       (unique-or-nil [node pred]
         (let [selected (pred-to-triples pred [])]
@@ -190,10 +180,8 @@
                (reduce
                  (fn [result triple]
                    (let [obj (:obj triple),
-                         new-data (f obj prev-data)]
-                     (if (vector? obj)
-                       (assoc result (first obj) new-data)
-                       (assoc result obj new-data))))
+                         new-data (f triple prev-data)]
+                     (assoc result obj new-data)))
                  {}
                  triples)))
            (keys tablet)))))))

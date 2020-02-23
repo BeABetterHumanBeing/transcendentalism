@@ -23,27 +23,27 @@
       (initiate [essay-thread]
         (let [prev (prev-major-key key-gen),
               sub (push-major-key key-gen)]
-          (->Triple prev "/essay/contains" sub)))
+          (->Triple prev "/essay/contains" sub {})))
       (initiate [essay-thread sub]
         (let [prev (prev-major-key key-gen)]
           (push-major-key key-gen sub)
-          (->Triple prev "/essay/contains" sub)))
+          (->Triple prev "/essay/contains" sub {})))
       (push-block [essay-thread]
         (let [prev (prev-major-key key-gen),
               sub (push-major-key key-gen)]
-          (->Triple prev "/segment/flow/block" sub)))
+          (->Triple prev "/segment/flow/block" sub {})))
       (push-block [essay-thread sub]
         (let [prev (prev-major-key key-gen)]
           (push-major-key key-gen sub)
-          (->Triple prev "/segment/flow/block" sub)))
+          (->Triple prev "/segment/flow/block" sub {})))
       (push-inline [essay-thread]
         (let [prev (prev-minor-key key-gen),
               sub (push-minor-key key-gen)]
-          (->Triple prev "/segment/flow/inline" sub)))
+          (->Triple prev "/segment/flow/inline" sub {})))
       (push-inline [essay-thread sub]
         (let [prev (prev-minor-key key-gen)]
           (push-minor-key key-gen sub)
-          (->Triple prev "/segment/flow/inline" sub)))
+          (->Triple prev "/segment/flow/inline" sub {})))
       (major-key [essay-thread] (prev-major-key key-gen))
       (minor-key [essay-thread] (prev-minor-key key-gen)))))
 
@@ -66,8 +66,8 @@
         (filter #(or (not (contains? subs (:sub %)))
                      (not (str/starts-with? (:pred %) "/essay/flow"))
                      (= (:pred %) "/essay/flow/home")) triples)
-        (into [] (map #(->Triple % "/essay/label" :under-construction) subs))
-        (into [] (map #(->Triple % "/essay/flow/see_also" :connections) subs))))))
+        (into [] (map #(->Triple % "/essay/label" :under-construction {}) subs))
+        (into [] (map #(->Triple % "/essay/flow/see_also" :connections {}) subs))))))
 
 (defn directive-see-also
   "For every /item/inline/see_also, adds an equivalent /essay/flow/see_also"
@@ -93,7 +93,7 @@
                essay-sub))]
           (concat result
             (into []
-              (map #(->Triple essay-sub "/essay/flow/see_also" %)
+              (map #(->Triple essay-sub "/essay/flow/see_also" % {})
                    see_alsos)))))
       triples essay-subs)))
 
@@ -131,7 +131,7 @@
   (let [t (create-essay-thread sub)]
     (flatten [
       (types schema sub "/essay")
-      (->Triple sub "/essay/title" title)
+      (->Triple sub "/essay/title" title {})
       (initiate t)
       (map #(% t)
         (reduce
@@ -148,9 +148,9 @@
   [subs]
   (let [home (first subs)]
     (concat
-      (into [] (map #(->Triple % "/essay/flow/home" home) (rest subs)))
+      (into [] (map #(->Triple % "/essay/flow/home" home {}) (rest subs)))
       (into [] (map #(->Triple
-                      (get subs %) "/essay/flow/next" (get subs (inc %)))
+                      (get subs %) "/essay/flow/next" (get subs (inc %)) {})
                     (range (dec (count subs))))))))
 
 (defn footnote
@@ -179,7 +179,7 @@
     (let [block-sub (major-key t),
           item-sub (item-sub block-sub)]
       (concat [(types schema block-sub "/segment"),
-               (->Triple block-sub "/segment/contains" item-sub)]
+               (->Triple block-sub "/segment/contains" item-sub {})]
               (f item-sub)))))
 
 (defn poem
@@ -190,7 +190,7 @@
        (map
          (fn [i]
            (let [line (nth lines i)]
-             (->Triple sub "/item/poem/line" ^{:order i} [line])))
+             (->Triple sub "/item/poem/line" line {"/order" i})))
          (range (count lines)))])))
 
 (defn image
@@ -198,8 +198,8 @@
   (block-item
     (fn [sub]
       [(types schema sub "/item/image")
-       (->Triple sub "/item/image/url" url)
-       (->Triple sub "/item/image/alt_text" alt-text)])))
+       (->Triple sub "/item/image/url" url {})
+       (->Triple sub "/item/image/alt_text" alt-text {})])))
 
 (defn quote*
   ([q] (quote* q nil))
@@ -207,17 +207,17 @@
     (block-item
       (fn [sub]
         [(types schema sub "/item/quote")
-         (->Triple sub "/item/quote/text" q)
+         (->Triple sub "/item/quote/text" q {})
          (if (nil? author)
            []
-           (->Triple sub "/item/quote/author" author))]))))
+           (->Triple sub "/item/quote/author" author {}))]))))
 
 (defn big-emoji
   [emoji]
   (block-item
     (fn [sub]
       [(types schema sub "/item/big_emoji")
-       (->Triple sub "/item/big_emoji/emoji" emoji)])))
+       (->Triple sub "/item/big_emoji/emoji" emoji {})])))
 
 (defn paragraph
   [& fns]
@@ -235,30 +235,30 @@
     (let [sub (minor-key t),
           item-keyword (item-sub sub)]
       [(types schema sub "/segment")
-       (->Triple sub "/segment/contains" item-keyword)
+       (->Triple sub "/segment/contains" item-keyword {})
        (types schema item-keyword "/item/inline")
-       (->Triple item-keyword "/item/inline/text" (str/join " " lines))])))
+       (->Triple item-keyword "/item/inline/text" (str/join " " lines) {})])))
 
 (defn tangent
   [footnote-sub & lines]
   (fn [t]
     (let [k (minor-key t)]
       [((apply text lines) t)
-       (->Triple (item-sub k) "/item/inline/tangent" footnote-sub)])))
+       (->Triple (item-sub k) "/item/inline/tangent" footnote-sub {})])))
 
 (defn see-also
   [essay-sub & lines]
   (fn [t]
     (let [k (minor-key t)]
       [((apply text lines) t)
-       (->Triple (item-sub k) "/item/inline/see_also" essay-sub)])))
+       (->Triple (item-sub k) "/item/inline/see_also" essay-sub {})])))
 
 (defn link
   [url & lines]
   (fn [t]
     (let [k (minor-key t)]
       [((apply text lines) t)
-       (->Triple (item-sub k) "/item/inline/url" url)])))
+       (->Triple (item-sub k) "/item/inline/url" url {})])))
 
 (defn q-and-a
   [q a]
@@ -269,8 +269,8 @@
         [(q (create-essay-thread q-sub))
          (a (create-essay-thread a-sub))
          (types schema sub "/item/q_and_a")
-         (->Triple sub "/item/q_and_a/question" q-sub)
-         (->Triple sub "/item/q_and_a/answer" a-sub)]))))
+         (->Triple sub "/item/q_and_a/question" q-sub {})
+         (->Triple sub "/item/q_and_a/answer" a-sub {})]))))
 
 (defn bullet-list
   [header-or-nil & items]
@@ -284,12 +284,11 @@
           (if (nil? header-or-nil)
             []
             [(header-or-nil (create-essay-thread header-sub))
-             (->Triple sub "/item/bullet_list/header" header-sub)])
+             (->Triple sub "/item/bullet_list/header" header-sub {})])
           (map #((first %) (create-essay-thread (second %)))
                (map vector items item-subs))
-          (map #(->Triple sub
-                          "/item/bullet_list/point"
-                          ^{:order (second %)} [(first %)])
+          (map #(->Triple sub "/item/bullet_list/point" (first %)
+                          {"/order" (second %)})
                (map vector item-subs (range (count item-subs)))))))))
 
 (defn contact-email
@@ -297,4 +296,4 @@
   (block-item
     (fn [sub]
       [(types schema sub "/item/contact"),
-       (->Triple sub "/item/contact/email" email-address)])))
+       (->Triple sub "/item/contact/email" email-address {})])))

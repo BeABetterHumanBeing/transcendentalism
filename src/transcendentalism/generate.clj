@@ -279,8 +279,10 @@
            (q-kleene (fn [sub data i] (assoc data :in-item i))
              (q-chain
                (q-or (q-pred "/item/q_and_a/question")
-                            (q-pred "/item/q_and_a/answer")
-                            (q-pred (fn [sub data] (assoc data :order (:order (meta sub)))) "/item/bullet_list/point"))
+                     (q-pred "/item/q_and_a/answer")
+                     (q-pred (fn [triple data]
+                               (assoc data :order (property triple "/order" 0)))
+                             "/item/bullet_list/point"))
                (q-kleene (fn [sub data i] (assoc data :in-item-inline i))
                  ; Assumes questions, answers, and points are single-blocked.
                  (q-pred "/segment/flow/inline"))
@@ -288,7 +290,8 @@
            (q-pred "/item/inline/tangent"))
          sub),
         sorted-gq-result
-        (sort (compare-by-priority gq-result :inline :in-item :order :in-item-inline)
+        (sort (compare-by-priority gq-result
+                :inline :in-item :order :in-item-inline)
               (keys gq-result))]
     (into [] sorted-gq-result)))
 

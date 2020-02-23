@@ -29,7 +29,7 @@
       "Daniel Gierl")
 
     ; The monad is the only segment whose home is reflexive.
-    ^{:no-block true} (fn [t] (->Triple :monad "/essay/flow/home" :monad))
+    ^{:no-block true} (fn [t] (->Triple :monad "/essay/flow/home" :monad {}))
     ; TODO - Add /essay/flow/see_also to the top-level menu of metaphysics essays.
     ^{:no-block true} (fn [t]
       (fn [triples]
@@ -38,7 +38,7 @@
                                                     "/type/essay")
                                                 triples)))]
           (conj triples
-            (->Triple :monad "/essay/flow/random" all-essays)))))
+            (->Triple :monad "/essay/flow/random" all-essays {})))))
   ))
 
 ; About

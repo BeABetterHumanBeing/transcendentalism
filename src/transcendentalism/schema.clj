@@ -75,7 +75,7 @@
   (let [full-types (map #(str "/type" %) type-suffixes),
         inferred-types (apply set/union (map #(get-supertypes schema %) full-types)),
         all-types (set/union inferred-types full-types)]
-    (map #(->Triple sub % nil) all-types)))
+    (map #(->Triple sub % nil {}) all-types)))
 
 (def gq-segment-to-item
   "Returns a graph query that expands from /type/segment to all /type/item that
@@ -228,7 +228,7 @@
   (let [relation (get-relation graph pred)]
     (reduce
       (fn [result sub]
-        (let [ordinals (map #(get-property :order % 0) (all-objs relation sub)),
+        (let [ordinals (map #(property % "/order" 0) (all-triples graph sub pred)),
               ordinal-errors
                 (reduce
                   (fn [result ordinal]
