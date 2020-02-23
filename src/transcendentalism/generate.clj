@@ -307,7 +307,8 @@
                  (assoc result
                    (get tangents i)
                    {:ancestry (conj ancestry (+ i idx)),
-                    :id (gen-key 8)}))
+                    :id (gen-key 8),
+                    :root sub}))
                {} (range (count tangents)))]
          (apply merge
            new-tangents
@@ -355,10 +356,12 @@
                (render-block renderer sub)
                (str/join "\n"
                  (map #(generate-block-sequence % footnote-map)
-                      ; TODO - De-dup the collect-block-tangents call below so
-                      ; that it's read from the footnote-map rather than being
-                      ; recalculated.
-                      (collect-block-tangents graph sub))))
+                      (reduce-kv
+                        (fn [result k v]
+                          (if (= (:root v) sub)
+                            (conj result k)
+                            result))
+                        [] footnote-map))))
              (if (nil? next-block)
                ""
                (generate-block-sequence next-block footnote-map))]))
