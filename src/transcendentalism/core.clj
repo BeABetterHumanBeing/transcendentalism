@@ -1,8 +1,13 @@
 (ns transcendentalism.core)
 
 (use 'transcendentalism.essay
+     'transcendentalism.essays.epistemology
      'transcendentalism.essays.intro
+     'transcendentalism.essays.morality
+     'transcendentalism.essays.ontology
      'transcendentalism.essays.physics
+     'transcendentalism.essays.politics
+     'transcendentalism.essays.religion
      'transcendentalism.generate
      'transcendentalism.graph
      'transcendentalism.schema)
@@ -15,7 +20,8 @@
 (def graph
   (construct-graph
     (apply-directives
-      meta-directives intro-essays physics-essays)))
+      meta-directives intro-essays physics-essays ontology-essays
+      epistemology-essays morality-essays religion-essays politics-essays)))
 
 (defn -main
   "Validates the website's graph, and generates its files"

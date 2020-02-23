@@ -15,4 +15,5 @@
 
 (def physics-essays
   [(essay-series [:materialism])
+   (directive-under-construction :materialism)
    materialism])
