@@ -9,7 +9,7 @@
 
 (def intro-essay-sequence
   [(essay-series [:monad :welcome :i-am-dan :connections :apologies])
-   (directive-under-construction :apologies)
+   (directive-under-construction)
    directive-see-also
    directive-dedup-cxns])
 
@@ -256,8 +256,30 @@
 
 (def apologies
   (essay :apologies "Apologies"
-    (text "TODO apologies")
-    ; TODO(gierl) apologize
+    (text
+      "Sometimes it's necessary to apologize for what I've written. And I mean"
+      "this in both senses of the word: sometimes what I've written is truly"
+      "abhorrent and dangerous, and sometimes it's in need of a sturdy defense.")
+    
+    (text
+      "I've put a lot of conscientious effort into choosing the words that"
+      "appear on this site, but by the time they're rendered in your browser"
+      "window, it's out of my hands. I hope that you put a similar degree of"
+      "conscientious effort into reading them.")
+
+    (paragraph
+      (text
+        "If I get enough negative feedback over something I've written, I'll"
+        "issue an apology for it in the space reserved below. At this time, it"
+        "is (fortunately) ")
+      (tangent :far-corner "empty")
+      (text ", and I hope to keep it that way."))
+
+    (footnote :far-corner
+      (text
+        "Not because I'm really that great at not offending people, but rather"
+        "because not enough people have seen what I'm brewing in this far corner"
+        "of the internet to care."))
   ))
 
 (def graph
