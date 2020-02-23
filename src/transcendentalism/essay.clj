@@ -69,7 +69,7 @@
         (into [] (map #(->Triple % "/essay/label" :under-construction {}) subs))
         (into [] (map #(->Triple % "/essay/flow/see_also" :connections {}) subs))))))
 
-(defn directive-see-also
+(defn directive-see-also-inline-to-flow
   "For every /item/inline/see_also, adds an equivalent /essay/flow/see_also"
   [triples]
   (let [graph (construct-graph triples),
@@ -125,6 +125,19 @@
                     #{} obj-to-cxns))))
             #{} sub-to-cxns))]
     (filter #(not (contains? dupes %)) triples)))
+
+(defn root-menu
+  "Marks a given essay as the root of some label"
+  [essay-sub label title]
+  ^{:no-block true}
+  (fn [t]
+    (->Triple essay-sub "/essay/flow/menu" label {"/title" title})))
+
+(defn file-under
+  "Files the given essay under some label"
+  [essay-sub label]
+  ^{:no-block true}
+  (fn [t] (->Triple essay-sub "/essay/flow/home" label {"/label" :menu})))
 
 (defn essay
   [sub title & fns]
@@ -297,3 +310,29 @@
     (fn [sub]
       [(types schema sub "/item/contact"),
        (->Triple sub "/item/contact/email" email-address {})])))
+
+(defn directive-label-menus
+  "Generates menu essays for labels"
+  [triples]
+  (let [menu-triples (filter #(= (:pred %) "/essay/flow/menu") triples),
+        menu-item-triples (group-by :obj
+                                    (filter #(= (property % "/label" nil)
+                                                :menu)
+                                            triples))]
+    (apply concat
+      triples
+      (map
+        (fn [menu-triple]
+          (let [sub (:obj menu-triple)]
+            (essay sub (str "[" (property menu-triple "/title" (str sub)) "]")
+              (apply paragraph
+                (text "blah")
+                (map #(see-also % "") (map :sub (menu-item-triples sub))))
+
+              ; Menus' homes are the root of the menu.
+              ^{:no-block true} (fn [t]
+                [(->Triple sub "/essay/flow/home" (:sub menu-triple) {})
+                 (->Triple sub "/essay/label" :invisible {})])
+              )))
+        menu-triples))))
+

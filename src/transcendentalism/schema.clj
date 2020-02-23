@@ -333,6 +333,8 @@
         result (exclusive-preds schema (:pred triple))))
     #{} (all-triples graph)))
 
+; TODO - Add triple property validation
+
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]

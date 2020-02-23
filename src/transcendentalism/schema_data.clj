@@ -20,6 +20,8 @@
         {} schema)
       full-type type-schema)))
 
+; TODO - Augment schema to have triple properties.
+
 (def event-schema
   (schematize-type "/event"
     {
@@ -60,6 +62,9 @@
       "/flow/see_also" {
         :description "Internal link to another essay",
       },
+      "/flow/menu" {
+        :description "Internal link to an essay menu",
+      },
       "/flow/random" {
         :description "Relation to a random essay",
         ; TODO - range ought to be a set of essays
@@ -74,8 +79,8 @@
       "/label" {
         :description "Symbol label that ascribes a metadata to the essay",
         :range-type [
-          ; Content is about surrounding content.
-          :meta
+          ; Content is not rendered.
+          :invisible
           ; Content is under construction.
           :under-construction
           ; Content is religious.

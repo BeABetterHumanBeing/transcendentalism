@@ -211,6 +211,8 @@
       (color (to-css-color red)))
     (css "button" {"class" "across"}
       (color (to-css-color yellow)))
+    (css "button" {"class" "menu"}
+      (color "gray"))
     (css "button" {"selector" "hover"}
       (text-decoration "underline"))
     (css "div" {"class" "construction-back"}

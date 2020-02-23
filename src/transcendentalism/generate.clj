@@ -86,6 +86,7 @@
               "/essay/flow/home" (->Cxn encoded_obj title "up")
               "/essay/flow/next" (->Cxn encoded_obj title "down")
               "/essay/flow/see_also" (->Cxn encoded_obj title "across")
+              "/essay/flow/menu" (->Cxn encoded_obj (str title " Menu") "menu")
               (assert false (str "ERROR - Type " (:pred triple) " not supported")))))))
     (filter #(str/starts-with? (:pred %) "/essay/flow") (all-triples graph sub))))
 
@@ -94,6 +95,7 @@
   [cxns]
   (let [cxns-by-type (group-by :type cxns)]
     (concat (cxns-by-type "down" [])
+            (cxns-by-type "menu" [])
             (cxns-by-type "across" [])
             (cxns-by-type "up" [])
             (cxns-by-type "random" []))))
@@ -417,11 +419,14 @@
             (hr)
             (let [labels (into #{}
                            (map :obj (all-triples graph sub "/essay/label")))]
-              (if (contains? labels :under-construction)
-                (generate-under-construction-splash)
-                (generate-essay-contents
-                  graph id encodings (get-unique graph sub "/essay/contains"))))
-            (hr)
+              (if (contains? labels :invisible)
+                ""
+                (str/join "\n" [
+                  (if (contains? labels :under-construction)
+                    (generate-under-construction-splash)
+                    (generate-essay-contents
+                      graph id encodings (get-unique graph sub "/essay/contains")))
+                  (hr)])))
             (div {"id" (seg-id id "footer")}
               (let [cxns (sort-by-cxn-type (build-cxns graph encodings sub))]
                 (str/join " " (map #(generate-link id %) cxns))))

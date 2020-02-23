@@ -2,18 +2,20 @@
 
 (use 'transcendentalism.essay
      'transcendentalism.essays.intro
+     'transcendentalism.essays.physics
      'transcendentalism.generate
      'transcendentalism.graph
      'transcendentalism.schema)
 
 (def meta-directives
-  [directive-see-also
+  [directive-label-menus
+   directive-see-also-inline-to-flow
    directive-dedup-cxns])
 
 (def graph
   (construct-graph
     (apply-directives
-      meta-directives intro-essays)))
+      meta-directives intro-essays physics-essays)))
 
 (defn -main
   "Validates the website's graph, and generates its files"
