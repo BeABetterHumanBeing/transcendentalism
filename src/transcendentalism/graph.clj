@@ -175,109 +175,74 @@
 ; to be metadata-aware.
 
 (defn q-pred
-  "Query that expands the path along a given pred"
-  [pred]
-  (fn [graph subs]
-    (if (empty? subs)
-      #{} ; Early return optimization.
-      (apply set/union
-        (map
-          (fn [sub]
-            (let [triples (all-triples graph sub pred)]
-              (into #{}
-                (map
-                  (fn [triple]
-                    (let [obj (:obj triple)]
-                      (if (vector? obj)
-                        (first obj)
-                        obj)))
-                  triples))))
-          subs)))))
-
-(defn meta-q-pred
-  "Like q-pred, but expects elements in subs to be vectors of size 1 with
-   metadata. Moves metadata from input to output sub, attaching existing
-   metadata with key k, if k is non-nil."
-  ([pred] (meta-q-pred nil pred))
-  ([k pred]
-   (fn [graph subs]
-     (if (empty? subs)
-       #{} ; Early return optimization.
-       (apply set/union
+  "Query that expands the path along a given pred. Moves tablet data from input
+   sub to output sub, optionally calling a provided fn to update the data."
+  ([pred] (q-pred (fn [sub data] data) pred))
+  ([f pred]
+   (fn [graph tablet]
+     (if (empty? tablet)
+       {} ; Early return optimization
+       (apply merge
          (map
            (fn [sub]
-             (let [metadata (meta sub),
-                   triples (all-triples graph (first sub) pred)]
-               (into #{}
-                 (map
-                   (fn [triple]
-                     (let [obj (:obj triple)]
-                       (if (vector? obj)
-                         (if (nil? k)
-                           (with-meta obj metadata)
-                           (with-meta obj (assoc metadata k (k (meta obj) 0))))
-                         (with-meta [obj] metadata))))
-                   triples))))
-           subs))))))
+             (let [prev-data (sub tablet),
+                   triples (all-triples graph sub pred)]
+               (reduce
+                 (fn [result triple]
+                   (let [obj (:obj triple),
+                         new-data (f obj prev-data)]
+                     (if (vector? obj)
+                       (assoc result (first obj) new-data)
+                       (assoc result obj new-data))))
+                 {}
+                 triples)))
+           (keys tablet)))))))
 
 (defn q-chain
   "Query that chains together some number of other queries in sequence"
   [& queries]
-  (fn [graph subs]
-    (if (empty? subs)
-      #{} ; Early return optimization.
+  (fn [graph tablet]
+    (if (empty? tablet)
+      {} ; Early return optimization
       (reduce
         (fn [result query]
           (query graph result))
-        subs queries))))
-
-; q-chain is meta-invariant, so an alias is provided.
-(def meta-q-chain q-chain)
+        tablet queries))))
 
 (defn q-or
   "Query that ORs together other queries, so that any path can be taken"
   [& queries]
-  (fn [graph subs]
-    (if (empty? subs)
-      #{} ; Early return optimization
-      (apply set/union (map #(% graph subs) queries)))))
-
-; q-or is meta-invariant, so an alias is provided.
-(def meta-q-or q-or)
+  (fn [graph tablet]
+    (if (empty? tablet)
+      {} ; Early return optimization
+      (apply merge (map #(% graph tablet) queries)))))
 
 (defn q-kleene
   "Query that applies the kleene-star to another query"
-  [query]
-  (fn [graph subs]
-    (loop [result subs,
-           unprocessed subs]
-      (if (empty? unprocessed)
-        result
-        (let [next-batch (query graph unprocessed)]
-          (recur (set/union result next-batch)
-                 (set/difference next-batch result)))))))
-
-(defn meta-q-kleene
-  "Like q-kleene, but adds metadata to the results indicating which iteration
-   of the process the sub first matched at."
-  [k query]
-  (let [add-iter-metadata
-        (fn [subs iteration]
-          (into #{}
-                (map #(vary-meta % assoc k iteration)
-                     subs)))]
-    (fn [graph subs]
-      (loop [result (add-iter-metadata subs 0),
-             unprocessed subs,
-             iteration 1]
-        (if (empty? unprocessed)
-          result
-          (let [next-batch (add-iter-metadata (query graph unprocessed) iteration)]
-            (recur (set/union result next-batch)
-                   (set/difference next-batch result)
-                   (inc iteration))))))))
+  ([query] (q-kleene (fn [sub data i] data) query))
+  ([f query]
+    (fn [graph tablet]
+      (let [process (fn [data i]
+                      (reduce-kv
+                        (fn [result k v]
+                          (assoc result k (f k v i)))
+                       {} data))]
+        (loop [result (process tablet 0),
+               unprocessed result,
+               iteration 1]
+          (if (empty? unprocessed)
+            result
+            (let [next-tablet (process (query graph unprocessed) iteration)]
+              (recur (merge result next-tablet)
+                     (reduce-kv
+                       (fn [result k v]
+                         (if (contains? result k)
+                           result
+                           (assoc result k v)))
+                       {} next-tablet)
+                     (inc iteration)))))))))
 
 (defn gq
   "Executes a metadata-sensitive graph query"
   [graph query sub]
-  (query graph #{[sub]}))
+  (query graph {sub {}}))

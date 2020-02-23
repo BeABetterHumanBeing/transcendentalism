@@ -76,20 +76,21 @@
         essay-subs (map :sub (filter #(= (:pred %) "/type/essay") triples))]
     (reduce
       (fn [result essay-sub]
-        (let [see_alsos
-              ((q-chain
-                 (q-pred "/essay/contains")
-                 gq-segment-to-item
-                 gq-item-to-item
-                 ; Because the see_also link may be buried in a tangent...
-                 (q-kleene
-                   (q-chain
-                     (q-pred "/item/inline/tangent")
-                     gq-segment-to-item
-                     gq-item-to-item))
-                 (q-pred "/item/inline/see_also")
-                 )
-               graph #{essay-sub})]
+        (let [see_alsos (keys
+              (gq
+                graph
+                (q-chain
+                  (q-pred "/essay/contains")
+                  gq-segment-to-item
+                  gq-item-to-item
+                  ; Because the see_also link may be buried in a tangent...
+                  (q-kleene
+                    (q-chain
+                      (q-pred "/item/inline/tangent")
+                      gq-segment-to-item
+                      gq-item-to-item))
+                  (q-pred "/item/inline/see_also"))
+               essay-sub))]
           (concat result
             (into []
               (map #(->Triple essay-sub "/essay/flow/see_also" %)

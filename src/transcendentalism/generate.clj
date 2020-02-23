@@ -251,17 +251,17 @@
             (str text " "
               (render-footnote-idx (:ancestry (footnote-map tangent))))))))))
 
-(defn- compare-meta-by-priority
-  "Returns a comparator that examines metadata in a given order of priorities.
-   Missing metadata is assumed to be 0."
-  [& priorities]
+(defn- compare-by-priority
+  "Returns a comparator that examines data in a tablet in a given order of
+   priorities. Missing data is assumed to be 0."
+  [tablet & priorities]
   (fn [a b]
-    (let [a-meta (meta a),
-          b-meta (meta b)]
+    (let [a-data (tablet a),
+          b-data (tablet b)]
       (loop [k (first priorities),
              etc (rest priorities)]
-        (let [a-val (k a-meta 0),
-              b-val (k b-meta 0)]
+        (let [a-val (k a-data 0),
+              b-val (k b-data 0)]
           (if (and (= a-val b-val) (not (empty? etc)))
             (recur (first etc) (rest etc))
             (< a-val b-val)))))))
@@ -273,24 +273,24 @@
         (gq
          graph
          (q-chain
-           (meta-q-kleene :inline
-             (meta-q-pred "/segment/flow/inline"))
-           (meta-q-pred "/segment/contains")
-           (meta-q-kleene :in-item
+           (q-kleene (fn [sub data i] (assoc data :inline i))
+             (q-pred "/segment/flow/inline"))
+           (q-pred "/segment/contains")
+           (q-kleene (fn [sub data i] (assoc data :in-item i))
              (q-chain
-               (q-or (meta-q-pred "/item/q_and_a/question")
-                     (meta-q-pred "/item/q_and_a/answer")
-                     (meta-q-pred :order "/item/bullet_list/point"))
-               (meta-q-kleene :in-item-inline
+               (q-or (q-pred "/item/q_and_a/question")
+                            (q-pred "/item/q_and_a/answer")
+                            (q-pred (fn [sub data] (assoc data :order (:order (meta sub)))) "/item/bullet_list/point"))
+               (q-kleene (fn [sub data i] (assoc data :in-item-inline i))
                  ; Assumes questions, answers, and points are single-blocked.
-                 (meta-q-pred "/segment/flow/inline"))
-               (meta-q-pred "/segment/contains")))
-           (meta-q-pred "/item/inline/tangent"))
+                 (q-pred "/segment/flow/inline"))
+               (q-pred "/segment/contains")))
+           (q-pred "/item/inline/tangent"))
          sub),
         sorted-gq-result
-        (sort (compare-meta-by-priority :inline :in-item :order :in-item-inline)
-          (into [] gq-result))]
-    (into [] (map first sorted-gq-result))))
+        (sort (compare-by-priority gq-result :inline :in-item :order :in-item-inline)
+              (keys gq-result))]
+    (into [] sorted-gq-result)))
 
 (defn- calculate-footnote-map
   "Returns a sub->{:ancestry :id} map of all footnotes under a given segment"
