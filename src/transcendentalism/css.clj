@@ -202,6 +202,11 @@
       (position "absolute")
       (left "230px")
       (width "100px"))
+    (css "div" {"class" "definition"}
+      (border-color (to-css-color red))
+      (border-width "1px")
+      (border-style "solid")
+      (padding "10px" "10px" "5px" "10px"))
     (css "button" {"class" "link_segment"}
       (border "none")
       (font-size "medium"))

@@ -281,7 +281,33 @@
       },
     }))
 
+(def definition-schema
+  (schematize-type "/item/definition"
+    {
+      :description "Provides a definition for a word",
+      :super-type "/type/item",
+    }
+    {
+      "/word" {
+        :description "The word",
+        :range-type :string,
+        :unique true,
+        :required true,
+      },
+      "/part_of_speech" {
+        :description "The part of speech the word belongs to",
+        :range-type [:noun],
+        :unique true,
+        :required true,
+      },
+      "/definition" {
+        :description "A definition of the word",
+        :range-type :string,
+        :required true,
+      },
+    }))
+
 (def schema-data
   (merge essay-schema event-schema image-schema quote-schema inline-item-schema
     poem-schema segment-schema big-emoji-schema item-schema q-and-a-schema
-    bullet-list-schema contact-schema))
+    bullet-list-schema contact-schema definition-schema))

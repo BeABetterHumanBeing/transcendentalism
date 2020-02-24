@@ -112,11 +112,13 @@
                   (reduce-kv
                     (fn [result obj cxns]
                       (if (> (count cxns) 1)
-                        (let [cxn-preds (vec (map :pred cxns)),
+                        (let [cxn-preds (set (map :pred cxns)),
                               highest-priority-pred
                               (if (contains? cxn-preds "/essay/flow/home")
                                 "/essay/flow/home"
-                                "/essay/flow/next")]
+                                (if (contains? cxn-preds "/essay/flow/menu")
+                                  "/essay/flow/menu"
+                                  "/essay/flow/next"))]
                           (set/union
                             result
                             (filter #(not (= (:pred %) highest-priority-pred))
@@ -311,6 +313,19 @@
       [(types schema sub "/item/contact"),
        (->Triple sub "/item/contact/email" email-address {})])))
 
+(defn definition
+  [word part-of-speech & definitions]
+  (block-item
+    (fn [sub]
+      [(types schema sub "/item/definition"),
+       (->Triple sub "/item/definition/word" word {}),
+       (->Triple sub "/item/definition/part_of_speech" part-of-speech {}),
+       (map
+        (fn [i]
+          (->Triple sub "/item/definition/definition" (nth definitions i)
+                    {"/order" i}))
+        (range (count definitions)))])))
+
 (defn directive-label-menus
   "Generates menu essays for labels"
   [triples]
@@ -324,7 +339,7 @@
       (map
         (fn [menu-triple]
           (let [sub (:obj menu-triple)]
-            (essay sub (str "[" (property menu-triple "/title" (str sub)) "]")
+            (essay sub (property menu-triple "/title" (str sub))
               (apply paragraph
                 (text "blah")
                 (map #(see-also % "") (map :sub (menu-item-triples sub))))

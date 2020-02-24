@@ -86,7 +86,7 @@
               "/essay/flow/home" (->Cxn encoded_obj title "up")
               "/essay/flow/next" (->Cxn encoded_obj title "down")
               "/essay/flow/see_also" (->Cxn encoded_obj title "across")
-              "/essay/flow/menu" (->Cxn encoded_obj (str title " Menu") "menu")
+              "/essay/flow/menu" (->Cxn encoded_obj (str "[" title " Menu]") "menu")
               (assert false (str "ERROR - Type " (:pred triple) " not supported")))))))
     (filter #(str/starts-with? (:pred %) "/essay/flow") (all-triples graph sub))))
 
@@ -146,6 +146,7 @@
   (render-q-and-a [renderer node] "Renders a /type/item/q_and_a")
   (render-bullet-list [renderer node] "Renders a /type/item/bullet_list")
   (render-contact [renderer node] "Renders a /type/item/contact")
+  (render-definition [renderer node] "Renders a /type/item/definition")
   (render-inline-item [renderer node] "Renders a /type/item/inline"))
 
 (defn- create-renderer
@@ -166,6 +167,7 @@
           "/type/item/q_and_a" (render-q-and-a renderer node),
           "/type/item/bullet_list" (render-bullet-list renderer node),
           "/type/item/contact" (render-contact renderer node),
+          "/type/item/definition" (render-definition renderer node),
           "/type/item/inline" (render-inline-item renderer node),
           (assert false
             (str "ERROR - Type " (first item-type) " not supported")))))
@@ -229,6 +231,19 @@
               "/"
               (a {"href" (str "mailto:" email-address),
                   "target" "_top"} "Mail"))))))
+    (render-definition [renderer node]
+      (let [word (unique-or-nil node "/item/definition/word"),
+            part-of-speech ({
+              :noun "noun",
+              } (unique-or-nil node "/item/definition/part_of_speech")
+              "unk"),
+            definitions (get-ordered-objs node "/item/definition/definition")]
+        (div {"class" "definition"}
+          (span {} (str "<b>Definition</b> " word " ")
+          (span {} (str "<i>(" part-of-speech ")</i>:"))
+          (apply ul {"class" "bullet_list"}
+            (str/join "\n"
+              (map #(li {"class" "word-definition"} %) definitions)))))))
     (render-inline-item [renderer node]
       (let [text (unique-or-nil node "/item/inline/text"),
             tangent (unique-or-nil node "/item/inline/tangent"),
@@ -414,19 +429,23 @@
               "id" id}
           (div "") ; Empty divs occupy first and last cells in grid.
           (div {}
-            (let [title (get-unique graph sub "/essay/title")]
-              (h1 {"class" "header"} title))
-            (hr)
             (let [labels (into #{}
-                           (map :obj (all-triples graph sub "/essay/label")))]
-              (if (contains? labels :invisible)
-                ""
-                (str/join "\n" [
-                  (if (contains? labels :under-construction)
-                    (generate-under-construction-splash)
-                    (generate-essay-contents
-                      graph id encodings (get-unique graph sub "/essay/contains")))
-                  (hr)])))
+                           (map :obj (all-triples graph sub "/essay/label"))),
+                  title (get-unique graph sub "/essay/title")]
+              (str/join "\n" [
+                (h1 {"class" "header"}
+                  (if (contains? labels :invisible)
+                      (str "[" title "]")
+                      title))
+                (hr)
+                (if (contains? labels :invisible)
+                  ""
+                  (str/join "\n" [
+                    (if (contains? labels :under-construction)
+                      (generate-under-construction-splash)
+                      (generate-essay-contents
+                        graph id encodings (get-unique graph sub "/essay/contains")))
+                    (hr)]))]))
             (div {"id" (seg-id id "footer")}
               (let [cxns (sort-by-cxn-type (build-cxns graph encodings sub))]
                 (str/join " " (map #(generate-link id %) cxns))))
