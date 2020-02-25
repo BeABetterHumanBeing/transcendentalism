@@ -19,6 +19,7 @@
 (defn- create-essay-thread
   [essay-sub]
   (let [key-gen (create-key-gen essay-sub)]
+    ; TODO let the essay thread also extend a footnote-name generating protocol.
     (reify EssayThread
       (initiate [essay-thread]
         (let [prev (prev-major-key key-gen),
