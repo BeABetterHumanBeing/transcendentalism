@@ -174,6 +174,16 @@
         :required true,
         :unique true,
       },
+      "/width" {
+        :description "The width to render the image",
+        :range-type :number,
+        :unique true,
+      },
+      "/height" {
+        :description "The height to render the image",
+        :range-type :number,
+        :unique true,
+      },
     }))
 
 (def quote-schema

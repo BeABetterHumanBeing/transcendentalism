@@ -223,12 +223,19 @@
          (range (count lines)))])))
 
 (defn image
-  [url alt-text]
-  (block-item
-    (fn [sub]
-      [(types schema sub "/item/image")
-       (->Triple sub "/item/image/url" url {})
-       (->Triple sub "/item/image/alt_text" alt-text {})])))
+  ([url alt-text] (image url alt-text nil nil))
+  ([url alt-text width height]
+   (block-item
+     (fn [sub]
+       [(types schema sub "/item/image")
+        (->Triple sub "/item/image/url" url {})
+        (->Triple sub "/item/image/alt_text" alt-text {})
+        (if (nil? width)
+          []
+          (->Triple sub "/item/image/width" width {}))
+        (if (nil? height)
+          []
+          (->Triple sub "/item/image/height" height {}))]))))
 
 (defn quote*
   ([q] (quote* q nil))

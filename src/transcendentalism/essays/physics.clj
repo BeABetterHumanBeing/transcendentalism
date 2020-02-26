@@ -205,11 +205,12 @@
         "this time."))
 
     (image
-      "http://en.wikipedia.org/wiki/2019_redefinition_of_the_SI_base_units#/media/File:Unit_relations_in_the_new_SI.svg"
+      "https://upload.wikimedia.org/wikipedia/commons/a/ab/Unit_relations_in_the_new_SI.svg"
       (str/join " " [
         "An image of the order of dependency in the construction of the SI base"
         "units after their 2019 redefinition. The root of the graph is 's', the"
-        "second"]))
+        "second"])
+      250 250)
 
     (paragraph
       (text

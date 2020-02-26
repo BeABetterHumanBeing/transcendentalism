@@ -188,9 +188,14 @@
           (p {"class" "author"} (str "-" author)))))
     (render-image [renderer node]
       (let [image-url-triple (unique-or-nil node "/item/image/url"),
-            image-alt-text-triple (unique-or-nil node "/item/image/alt_text")]
+            image-alt-text-triple (unique-or-nil node "/item/image/alt_text"),
+            image-width (unique-or-nil node "/item/image/width"),
+            image-height (unique-or-nil node "/item/image/height")]
         (img {"src" image-url-triple,
-              "alt" image-alt-text-triple})))
+              "alt" image-alt-text-triple,
+              "style" (str (if (nil? image-width) "" (str "width:" image-width "px"))
+                           ";"
+                           (if (nil? image-height) "" (str "height:" image-height "px")))})))
     (render-q-and-a [renderer node]
       (let [q-block (unique-or-nil node "/item/q_and_a/question"),
             a-block (unique-or-nil node "/item/q_and_a/answer")]
