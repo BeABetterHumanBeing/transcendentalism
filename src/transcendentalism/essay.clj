@@ -48,6 +48,23 @@
       (major-key [essay-thread] (prev-major-key key-gen))
       (minor-key [essay-thread] (prev-minor-key key-gen)))))
 
+(defn- sub-suffix
+  [sub suffix]
+  (keyword (str (name sub) "-" suffix)))
+
+(defprotocol Footnoter
+  (get-footnote-name [footnoter number-or-sub] "Returns a footnote sub name"))
+
+(defn footnoter
+  [root-sub]
+  (let [f (reify Footnoter
+            (get-footnote-name [footnoter number-or-sub]
+              (if (number? number-or-sub)
+                (sub-suffix root-sub (str "f" number-or-sub))
+                number-or-sub)))]
+    (fn [number-or-sub]
+      (get-footnote-name f number-or-sub))))
+
 (defn apply-directives
   "Processes collections of triples, applying any directives found therein"
   [& colls]
@@ -180,10 +197,6 @@
               (conj result f)
               (concat result [push-block f])))
           [(first fns)] (rest fns))))))
-
-(defn- sub-suffix
-  [sub suffix]
-  (keyword (str (name sub) "-" suffix)))
 
 (defn- item-sub [sub] (sub-suffix sub "i"))
 

@@ -182,6 +182,7 @@
     )))
 
 (def connections
+  (let [f (footnoter :connections)]
   (essay :connections "Connections"
     (paragraph
       (text
@@ -191,10 +192,10 @@
         "needs, to tell you what you might find interesting and useful, and to"
         "spare you the things you might rather put off until later. Additionally,"
         "I regret that I cannot learn anything from <i>you</i>; this is decidedly ")
-      (tangent :comments-section-footnote "a one-way road")
+      (tangent (f 1) "a one-way road")
       (text "."))
 
-    (footnote :comments-section-footnote
+    (footnote (f 1)
       (q-and-a
         (text "What about a comments section?")
         (text "Sadly, there is no plan for commenting. I made this site from"
@@ -205,10 +206,10 @@
       (text
         "Nevertheless, if you would like to get in touch, you are more than"
         "welcome to; you can ")
-      (tangent :best-effort-sla "reach me")
+      (tangent (f 2) "reach me")
       (text " at:"))
 
-    (footnote :best-effort-sla
+    (footnote (f 2)
       (text "Note that I have a best-effort SLA in responding, but that I am"
             "human and sometimes things fall through the cracks."))
 
@@ -224,27 +225,27 @@
       (text "Requests to work faster on something that's under construction")
       (paragraph
         (text "Offering ")
-        (tangent :reader-contributions "personal contributions")
+        (tangent (f 3) "personal contributions")
         (text " that you think would enrich the site"))
       (paragraph
-        (text "Throw a dog a ") (tangent :dog-bone "bone"))
-      (tangent :do-not-reach-out "etc..."))
+        (text "Throw a dog a ") (tangent (f 5) "bone"))
+      (tangent (f 4) "etc..."))
 
-    (footnote :reader-contributions
+    (footnote (f 3)
       (text "I'm open to including things other people have written, with"
             "permission and (if desired) attribution. Think \"if the site had"
             "comments and this was the editor's pick, not \"guest writer\"."))
-    (footnote :dog-bone
+    (footnote (f 5)
       (text "Tell me how something you read changed your view of the world."
             "That's the highest compliment I could receive, and the greatest"
             "gift I have to give."))
-    (footnote :do-not-reach-out
+    (footnote (f 4)
       (bullet-list
         (text "Do <i>not</i> feel free to reach out to me for any of the"
               "following reasons:")
         (text "Commercial solicitation")
         (text "Requesting that I plug your blog, pet cause, or activism")
-        (see-also :apologies "Expressing anger or hate")))))
+        (see-also :apologies "Expressing anger or hate"))))))
 
 (def apologies
   (essay :apologies "Apologies"

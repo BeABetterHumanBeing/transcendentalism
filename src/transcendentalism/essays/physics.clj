@@ -116,7 +116,7 @@
   (essay :universal-model "Universal Modeling"
     (text "TODO")
 
-    (file-under :universal-model :physics)))
+    ))
 
 ; Universal Modeling
 
@@ -418,4 +418,4 @@
 (def physics-essays
   [(essay-series [:materialism :universal-model])
    (directive-under-construction)
-   materialism])
+   materialism universal-model])
