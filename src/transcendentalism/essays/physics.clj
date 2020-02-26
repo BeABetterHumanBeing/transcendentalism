@@ -7,6 +7,7 @@
 ; This essay serves as the entry point to all physics- and material-world-
 ; related essays.
 (def materialism
+  (let [f (footnoter :materialism)]
   (essay :materialism "Materialism"
     (definition "Material" :noun
       (str/join " " [
@@ -39,12 +40,10 @@
         "is a scientific discipline that studies them. What starts off on the"
         "desk of the physicist slowly makes its way to the chemist, then the"
         "biologist, and so on, until it ends of in the hands of ")
-      (tangent :art-critic "the astronomer")
+      (tangent (f 1) "the astronomer")
       (text "."))
 
-    ; TODO - make a footnote factory, that auto-generates unique names from
-    ; numbers, within the scope of an essay.
-    (footnote :art-critic
+    (footnote (f 1)
       (text "Or the art critic, if you want to make it a joke."))
 
     (paragraph
@@ -52,44 +51,44 @@
       (see-also :physics "[Physics]")
       (text
         " are materialistic in the sense that they explicitly limit themselves to ")
-      (tangent :go-to-holy-mountain "a material understanding of reality")
+      (tangent (f 2) "a material understanding of reality")
       (text ". They are not works of science, per se; that I have left to ")
-      (tangent :serious-scientists "the serious scientists")
+      (tangent (f 3) "the serious scientists")
       (text ". They conform to no ")
-      (tangent :academic-standard "academic standard")
+      (tangent (f 4) "academic standard")
       (text
         " more rigorous than what I feel won't embarrass me, and I hope"
         "(embarrassing or not) you find them delightful."))
 
-    (footnote :go-to-holy-mountain
+    (footnote (f 2)
       (paragraph
         (text "If you want the antithesis, go walk up ")
         (see-also :holy-mountain "the holy mountain")
         (text ".")))
 
-    (footnote :serious-scientists
+    (footnote (f 3)
       (text
         "And art critics. Though to be honest, I wouldn't take any serious art"
         "critic seriously; those who can, do, and those who can't make light of"
         "it. I hope you never catch me with an over-inflated sense of"
         "self-importance."))
 
-    (footnote :academic-standard
+    (footnote (f 4)
       (paragraph
         (text
           "In a previous career, I considered pursuing academic research. I got"
           "just close enough to get a lively distaste for the academia's ")
-        (tangent :academic-bullshit "bullshit")
+        (tangent (f 5) "bullshit")
         (text
           ", and when I found myself fantasizing about re-doing empiricism from"
           "scratch, I figured this was ")
-        (tangent :real-money "not for me")
+        (tangent (f 6) "not for me")
         (text ".")))
 
-    (footnote :academic-bullshit
+    (footnote (f 5)
       (paragraph
         (text "Quick story: I published ")
-        (tangent :erdos "a paper")
+        (tangent (f 7) "a paper")
         (text
           ", and when I took the finished draft to the grad student I worked"
           "under, it had six citations. Why? Because I only read and found"
@@ -99,108 +98,169 @@
           "'prior work'. As they say, when you make a metric a goal, it ceases"
           "to be a useful metric.")))
 
-    (footnote :erdos
+    (footnote (f 7)
       (text "Which got me an Erd&#246;s number of 4, an achievement I am"
             "disproportionately proud of."))
 
-    (footnote :real-money
+    (footnote (f 6)
       (text
         "I also got a job that paid real money, and found that I could do things"
         "with real money. And besides, it turns out that the cutting edge of"
         "science is not inside the ivory tower."))
 
     (root-menu :materialism :physics "Physics")
-    (file-under :materialism :metaphysics)))
+    (file-under :materialism :metaphysics))))
 
 (def universal-model
+  (let [f (footnoter :universal-model)]
   (essay :universal-model "Universal Modeling"
-    (text "TODO")
+    (text
+      "Our understanding of the structure of the physical universe starts from"
+      "the model that we settle upon to describe it. The universe has a form,"
+      "and models are what we might call 'formalizations': a way of specifying"
+      "a form that is clear and unambiguous.")
 
-    ))
+    (paragraph
+      (text
+        "There are, of course, a multitude of possible models that we could"
+        "choose from, and not all of them are equivalent for any given purpose."
+        "The central axis across which the models can be broken down is the ")
+      ; TODO - make a see_also
+      (text "fundamental modeling tradeoff")
+      (text
+        ", namely that models strike a balance between complexity and accuracy."
+        "The most accurate model, i.e. the perfect one, is the one with the"
+        "same amount of complexity as the real thing. Which, since we're"
+        "talking about the physical universe here, is to say that it"
+        "<i>itself</i> is its own perfect model."))
 
-; Universal Modeling
+    (paragraph
+      (text
+        "This is an unattainable degree of complexity, if for no other reason"
+        "than because we, the modelers, are encompassed within it, and so ")
+      (tangent (f 1)
+        "its total complexity is at least the sum of the model itself")
+      (text "."))
 
-; Our understanding of the structure of the physical universe starts from the
-; model that we settle upon to describe it. The universe has a form, and models
-; are what we might call 'formalizations': a way of specifying a form that is
-; clear and unambiguous.
+    (footnote (f 1)
+      (paragraph
+        (text
+          "I'll note that this is generally true for models of any system. The"
+          "only exception that comes to mind are ")
+        (link "https://en.wikipedia.org/wiki/Quine_(computing)" "quines")
+        (text
+          ", computer programs that output their own source code. This is"
+          "something of a degenerate case though; it works because the entire"
+          "system exists for the sole purpose of modeling itself, and has no"
+          "other capability. I'm generally not inclined to think that the"
+          "physical universe is a quine, though.")))
 
-; There are, of course, a multitude of possible models that we could choose
-; from, and not all of them are equivalent for any given purpose. The central
-; axis across which the models can be broken down is the (see also fundamental
-; modeling tradeoff), namely that models strike a balance between complexity
-; and accuracy. The most accurate model, i.e. the perfect one, is the one with
-; the same amount of complexity as the real thing. Which, since we're talking
-; about the physical universe here, is to say that it *itself* is its own
-; perfect model.
+    (paragraph
+      (text
+        "Any sufficiently ambitious model of the universe will eventually run"
+        "up against this hard limitation, and most do so very quickly. You see,"
+        "the universe is <i>big</i>, to put it lightly, and there's a lot going"
+        "on ")
+      (tangent (f 2) "out there")
+      (text
+        ". Fortunately, I don't actually want to create a model; my purpose is"
+        "understanding, not simulation. I'm not here to predict the future"
+        "states of the universe, nor to ")
+      (tangent (f 3) "reconstruct its past")
+      (text ", rather just to consider <i>how</i> one might seek to model it."))
 
-; This is an unattainable degree of complexity, if for no other reason, than
-; because we, the modelers, are encompassed within it, and so its total
-; complexity is at least the sum of the model itself [1].
+    (footnote (f 2)
+      (paragraph
+        (text
+          "Usually when someone wants to model the universe, they simplify it to"
+          "make it tractable in one of two ways: either by the elimination of"
+          "details they don't care about (like the motions of individual"
+          "fundamental particles, replacing them with macroscopic objects with"
+          "the same stochastic properties), or by making their quantum of time ")
+        (tangent (f 4) "coarser")
+        (text ", so that they model the world second-by-second, or day-by-day,"
+              "rather than at the Planck scale."))
 
-; [1] I'll note that this is generally true for models of any system. The only
-; exception that comes to mind are [quines](https://en.wikipedia.org/wiki/Quine_(computing)),
-; computer programs that output their own source code. This is something of a
-; degenerate case though; it works because the entire system exists for the
-; sole purpose of modeling itself, and has no other capability. I'm generally
-; not inclined to think that the physical universe is a quine, though.
+      (footnote (f 4)
+        (text
+          "Almost all physical models I've encountered formalize the universe as"
+          "time-slices, and processes to iterate from one time slice to the next"
+          "(video games are the most obvious such models to do this)."))
+      
+      (text
+        "Even if such time-slicing could be extended to that scale, I doubt that"
+        "this time-slice model could be used for a perfect model of the universe."
+        "Specifically, since distance is the time it takes a photon to travel"
+        "between two points, if you were comparing the distance between points"
+        "at a fixed point in time, their distance would only be defined if the"
+        "points were the same, or if the points were entangled (in both cases,"
+        "yielding a distance of zero). Otherwise, since a photon cannot travel"
+        "some distance in no time at all, distance must be physically"
+        "undefined in any time-slice; not exactly the result you were expecting!"))
 
-; Any sufficiently ambitious model of the universe will eventually run up
-; against this hard limitation, but most do so very quickly. You see, the
-; universe is *big*, to put it lightly, and there's a lot going on out there [K].
-; Fortunately, I don't actually want to create a model; my purpose is
-; understanding, not simulation. I'm not here to predict the future states of
-; the universe, nor to reconstruct its past [2], rather just to consider *how*
-; one might seek to model it.
+    (footnote (f 3)
+      (text
+        "Eventually, we may want to take a crack at the beginning and ends of"
+        "the universe, but that's still aways-aways out, and not on my radar at"
+        "this time."))
 
-; [2] Eventually, we may want to take a crack at the beginning and ends of the
-; universe, but that's still aways-aways out, and not on my radar at this time.
+    (image
+      "http://en.wikipedia.org/wiki/2019_redefinition_of_the_SI_base_units#/media/File:Unit_relations_in_the_new_SI.svg"
+      (str/join " " [
+        "An image of the order of dependency in the construction of the SI base"
+        "units after their 2019 redefinition. The root of the graph is 's', the"
+        "second"]))
 
-; [K] Usually when someone wants to model the universe, they simply it to make
-; it tractable in one of two ways: either by the elimination of details they
-; don't care about (like the motions of individual fundamental particles),
-; replacing them with macroscopic objects with the same stochastic properties,
-; or by making their quantum of time coarser [K1], so that they model the world
-; second-by-second, or day-by-day, rather than at the Planck scale.
-;
-; [K1] Almost all physical models I've encountered formalize the universe as time-
-; slices, and processes to iterate from one time slice to the next (video games
-; are the most obvious such models to do this).
-;
-; Even if such time-slicing could be extended to that scale, I doubt that this
-; time-slice model could be used for a perfect model of the universe. Specifically,
-; since distance is the time it takes a photon to travel between two points, if
-; you were comparing the distance between points at a fixed point in time, their
-; distance would only be defined if the points were the same, or if the points
-; were entangle (in both cases, yielding a distance of zero). Otherwise, since
-; a photon cannot travel some distance in no time at all, distance must be
-; physically undefined in any time-slice; not exactly the result you were
-; expecting!
+    (paragraph
+      (text
+        "To assemble our perfect model of the universe, first lets figure out"
+        "the terms in which we'll measure the model. Back in 2019 the SI base"
+        "units were ")
+      (link
+        "https://en.wikipedia.org/wiki/2019_redefinition_of_the_SI_base_units"
+        "redefined")
+      (text
+        " so that (paraphrasing extensively), there is only one base unit of"
+        "measure, the second (of time), and all other units are constructed as"
+        "constant factors of relationships between ")
+      (tangent (f 7) "other units")
+      (text
+        ". This is especially interesting to us as universal modelers, because"
+        "it means that our model only needs ")
+      (tangent (f 5) "one unit")
+      (text ": time. The rest is all just ")
+      (tangent (f 6) "constant factors")
+      (text "."))
 
-; Image of SI units from Le Wik
+    (footnote (f 7)
+      (bullet-list
+        (text "Namely,")
+        (text
+          "a second (time) is defined by the number of oscillations of a"
+          "caesium-133 atom in its ground state.")
+        (text
+          "a meter (distance) is the a second times the speed of light in a vacuum.")
+        (text
+          "a kilogram (mass) is a second over meter-squared times the Planck constant.")
+        (text
+          "an ampere (current) is the elementary change of an electron times a second.")
+        (text
+          "(other units elided as being not particular to this discussion, but"
+          "the general pattern of definition in terms of previously-defined"
+          "units holds)")))
 
-; To assemble our perfect model of the universe, first lets figure out the terms
-; in which we'll measure the model. Back in 2019 the SI base units were
-; [redefined](https://en.wikipedia.org/wiki/2019_redefinition_of_the_SI_base_units)
-; so that (paraphrasing extensively), there is only one base unit of measure,
-; the second (of time), and all other units are constructed as constant factors
-; of relationships between other units [3]. This is especially interesting to
-; us as a universal modeler, because it means that our model only needs one
-; unit [4]: time. The rest is all just constant factors [5].
+    (footnote (f 5)
+      (text "Another curious corollary to this observation is that time can"
+            "expand or contract without us being capable of noticing."))
 
-; [3] Namely
-; * a second (time) is defined by the number of oscillations of a caesium-133 atom in its ground state.
-; * a meter (distance) is the a second times the speed of light in a vacuum.
-; * a kilogram (mass) is a second over meter-squared times the Planck constant.
-; * an ampere (current) is the elementary change of an electron times a second.
-; * (other units elided as being not particular to this discussion, but the
-;    general pattern of definition in terms of previously-defined constants holds)
-
-; [4] Another curious corollary to this observation is that time can expand or
-; contract without us being capable of noticing.
-
-; [5] Which we could normalize, if we wanted to. Some physicists do so,
-; resulting in what are called [natural units](https://en.wikipedia.org/wiki/Natural_units).
+    (footnote (f 6)
+      (paragraph
+        (text "Which we could normalize, if we wanted to. Some physicists do so,"
+              "resulting in what are called ")
+        (link "https://en.wikipedia.org/wiki/Natural_units"
+              "natural units")
+        (text ".")))
+    )))
 
 ; Universal Order
 
