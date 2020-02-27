@@ -260,111 +260,171 @@
               "resulting in what are called ")
         (link "https://en.wikipedia.org/wiki/Natural_units"
               "natural units")
-        (text ".")))
+        (text "."))))))
+
+(def universal-order
+  (let [f (footnoter :universal-order)]
+  (essay :universal-order "Universal Order"
+    (quote* "Time is what clocks measure")
+
+    (text
+      "If the only unit we need to care about when measuring the universe is"
+      "time, then in a certin sense, our model is nothing other than a very"
+      "sophisticated clock.")
+
+    (text
+      "Clocks can be used to provide the invaluable service of describing order."
+      "In a literal, physical sense, what this means for our model of the"
+      "universe is that we have a notion of before and after, and causality to"
+      "link the two together.")
+
+    (bullet-list
+      (text
+        "There are however, several kinds of order. We might draw our eyes towards:")
+      (text "Strong order, in which before/after relationships are defined for"
+            "all pairs of events, and")
+      (paragraph
+        (text "Weak order, in which before/after relationships are defined for ")
+        (tangent (f 1) "only some")
+        (text " pairs of events.")))
+
+    (footnote (f 1)
+      (text
+        "Note that ordering obeys transitivity. If A comes before B, and B comes"
+        "before C, that implies that A comes before C, for all A, B, and C."))
+
+    (paragraph
+      (text
+        "In our day-to-day lives, we generally assume, and act as though the"
+        "universe were strongly-ordered. The main reason we can get away with"
+        "this is because our day-to-day lives are roughly ")
+      (tangent (f 2) "within 1/15th of a second")
+      (text ", so discrepancies in ordering usually manifest themselves as a"
+            "barely-perceptible amount of lag."))
+
+    (footnote (f 2)
+      (q-and-a
+        (text "Where'd this number come from?")
+        (text "Your day-to-day life is probably constrained to Earth. Light"
+              "takes 130ms to go half-way around the planet, meaning that the"
+              "far side of the Earth is 1/15th of a second away from you"
+              "(remember: distance is just time)."))
+      (q-and-a
+        (text "How does this manifest itself as lag?")
+        (paragraph
+          (text
+            "Because strong ordering is extremely useful, most world-wide"
+            "computer networks are built to support it. This involves extremely"
+            "sophisticated systems for ")
+          (tangent (f 3) "synchronizing clocks across the globe")
+          (text
+            ", as well as message-passing back and forth to double-check strong"
+            "ordering in electronic transactions.")))
+
+      (footnote (f 3)
+        (text "Some of them use atomic clocks too, since time is defined w.r.t."
+              "a physical atomic process.")))
+
+    (paragraph
+      (text
+        "However, the underlying physical reality is not strongly ordered, but"
+        "weakly. At the cost of an amount of time proportional to the distance"
+        "over which strong ordering is imposed, ")
+      (tangent (f 4) "strong order can be simulated on top of weak ordering")
+      (text "."))
+
+    (footnote (f 4)
+      (text "Note that weak ordering can be trivially simulated on top of strong"
+            "ordering. It's not called 'strong' for nothing."))
+
+    (text
+      "To see how the physical universe is weakly ordered, consider four events"
+      "A, B, C, and B, pictured below. We're going to be using quantum"
+      "electrodynamics (QED), so the events pictured here are electrons either"
+      "emitting or absorbing photons.")
+
+    (image "../resources/light_rhombus.png"
+      (str/join " " [
+        "Four points, A, B, C, and D, with rays of light connecting A and B,"
+        "A and C, B and D, and C and D."
+      ]))
+
+    (paragraph
+      (text
+        "A photon's journey between two events represents a before-after"
+        "relationship in time. This means that time is ordered w.r.t. A-B, A-C,"
+        "B-D, and C-D, at the minimum. The question is: is B-C also defined?"
+        "Since there's no photon traveling between these events, that value is"
+        "not defined in our perfect universal model, and so time ")
+      (tangent (f 5) "must be weak")
+      (text "."))
+
+    (footnote (f 5)
+      (text
+        "You may not find this to be a satisfactory proof. As mentioned before,"
+        "we simulate strong ordering on top of weak ordering. In the context of"
+        "our example, this means that we calculate a time between B and C that"
+        "matches our intuition. For example, you might subtract A-B from A-C,"
+        "or subtract C-D from B-D.")
+
+      (text
+        "The problem this approach encounters is that time A-C - A-B may not"
+        "be equal the time B-D - C-D, which means our calculation may not be"
+        "deterministic. Why not? While the speed of light is a constant, photons"
+        "can travel faster or slower than that speed. QED is wild like that."))
+
+    (text
+      "But how weak? A careful reader may have noticed that because B-C was"
+      "undefined since there was no photon connecting them, time is defined"
+      "solely between events that share a connection. Most events at a subatomic"
+      "scale only have a few connections, and there are a <i>lot</i> of subatomic"
+      "particles in our universe. This means that our perfect universal model's"
+      "order is weak to the point of almost non-existence.")
+
+    (paragraph
+      (text "Maybe a better word would be 'sparse'. We can formalize our model"
+            "as an N-dimensional ")
+      (tangent (f 7) "square")
+      (text " matrix, where every row or column represents a particle, and the"
+            "value in a cell is the time ")
+      (tangent (f 6) "the photon")
+      (text " took to connect them."))
+
+    (footnote (f 7)
+      (text
+        "Note that the matrix is symmetric, because photons don't have a"
+        "direction anyways. Though they may measure time between other events,"
+        "they are massless, and therefore do not experience time themselves."
+        "You'll notice I drew the diagram without arrows on the photons."))
+
+    (footnote (f 6)
+      (q-and-a
+        (text "What about the other elementary particles?")
+        (text "Truly, I am not enough of a particle physicist to tell you. The"
+              "general idea, of modeling the universe as the sum of its"
+              "interactions (between fermions and bosons), remains. The main"
+              "wrench would be the question of gravity, which has so far"
+              "refused to be folded into the standard model."))
+
+      (image
+        "https://upload.wikimedia.org/wikipedia/commons/0/00/Standard_Model_of_Elementary_Particles.svg"
+        (str/join " " [
+          "A table showing all the particles in the standard model. They are"
+          "separated into fermions (matter), and bosons (force carriers)."
+        ])
+        400 400)
+
+      (text
+        "To exand this model to all particles, the 'edges' in the sparse matrix"
+        "would be bosons, and the nodes, their interactions with fermions."))
+
+    (text "TODO - matrix example of diagram. pyplot? table? drawing?")
+
+    (text
+      "The matrix that represents our prefect universal model (and therefore,"
+      "our universe) would be almost entirely undefined. Which, from a"
+      "computational perspective, makes it a ripe target for compression.")
     )))
-
-; Universal Order
-
-; Quote: Time is what clocks measure - Anonymous
-
-; If the only unit we need to care about when measuring the universe is time,
-; then in a certin sense, our model is nothing other than a very sophisticated
-; clock.
-
-; Clocks can be used to provide the invaluable service of describing order. In
-; a literal, physical sense, what this means for our model of the universe is
-; that we have a notion of before and after, and causality to link the two
-; together.
-
-; There are however, several kinds of order. We might draw our eyes towards:
-; * Strong order, in which before/after relationships are defined for all pairs
-;   of events, and
-; * Weak order, in which before/after relationships are defined for only some [6]
-;   pairs of events.
-
-; [6] Note that ordering obeys transitivity. If A comes before B, and B comes
-; before C, that implies that A comes before C, for all A, B, and C.
-
-; In our day-to-day lives, we generally assume, and act as though the universe
-; were strongly-ordered. The main reason we can get away with this is because
-; our day-to-day lives are roughly within 1/15th of a second [7], so discrepancies
-; in ordering usually manifest themselves as a barely-perceptible amount of lag.
-
-; [7] Q: Where'd this number come from?
-; A: Your day-to-day life is probably constrained to Earth. Light takes 130ms to
-; go around the planet, meaning the far side of the Earth is 1/15th of a second
-; away from you (remember: distance is just time).
-; Q: How does this manifest itself as lag?
-; A: Because strong ordering is extremely useful, most world-wide computer
-; systems are built to support it. This involves extremely sophisticated systems
-; for synchronizing clocks across the globe [8], as well as message-passing
-; back and forth to double-check strong ordering in electronic transactions.
-
-; [8] Some of them use atomic clocks too, since time is defined w.r.t. a
-; physical atomic process.
-
-; However, the underlying physical reality is not strongly ordered, but weakly.
-; At the cost of an amount of time proportional to the distance over which
-; strong ordering is imposed, strong ordering can be simulated on top of weak
-; ordering [9].
-
-; [9] Note that weak ordering can be trivially simulated on top of strong
-; ordering. It's not called 'strong' for nothing.
-
-; To see how the physical universe is weakly ordered, consider four events A, B,
-; C, and D, pictured below. We're going to be using quantum electrodynamics (QED), so
-; the events pictured here are electrons either emitting or absorbing photons.
-
-; TODO - picture of events
-
-; A photon's journey between two events represents a before-after relationship
-; in time. This means that time is ordered w.r.t. A-B, A-C, B-D, and C-D, at the
-; minimum. The question is: is B-C also defined? Since there's no photon
-; traveling between these events, that value is not defined in our perfect
-; universal model, and so time must be weak [10].
-
-; [10] You may not find this to be a satisfactory proof. As mentioned in [7],
-; we simulate strong ordering on top of weak ordering. In the context of our
-; example, this means that we calculate a time between B and C that matches our
-; intuition. For example, you might subtract A-B from A-C, or subtract C-D from
-; B-D.
-;
-; The problem this approach encounters is that time A-C - A-B may not equal the
-; time B-D - C-D, which means our
-; calculation may not be deterministic. Why not? While the speed of light is a
-; constant, photons can travel faster or slower than that speed. QED is wild.
-
-; But how weak? A careful reader may have inferred that because
-; B-C was undefined because there was no photon connecting them, time is defined
-; solely between events that share a connection. Most events at a subatomic
-; scale only have a few connections, and there are a *lot* of subatomic particles
-; in our universe. This means that our perfect universal model's order is weak
-; to the point of almost non-existence.
-
-; Maybe a better word would be 'sparse'. We can formalize our model as an
-; N-dimensional square [11] matrix, where every row or column represents a particle,
-; and the value in a cell is the time the photon [13] took to connect them.
-
-; [11] Note that the matrix is symmetric, because photons don't have a direction
-; anyways. Though they may measure time between other events, they
-; are massless, and therefore do not experience time themselves. You'll notice I drew the
-; diagram without arrows on the photons.
-
-; [13] Q: What about the other elementary particles?
-; A: Truly, I am not enough of a particle physicist to tell you. The general
-; idea, of modeling the universe as the sum of its interactions (between
-; fermions and bosons), remains.
-;
-; TODO - Include picture of the particle zoo from Le Wik
-;
-; The main wrench would be the question of gravity, which has so far refused to
-; be folded into the standard model.
-
-; TODO - matrix example for diagram.
-
-; The matrix that represents our prefect universal model (and therefore, our
-; universe) would be almost entirely undefined. Which, from a computational
-; perspective, makes it a ripe target for compression.
 
 ; The Shape of the Universe
 
@@ -477,6 +537,6 @@
 ; contents of the matrix.
 
 (def physics-essays
-  [(essay-series [:materialism :universal-model])
+  [(essay-series [:materialism :universal-model :universal-order])
    (directive-under-construction)
-   materialism universal-model])
+   materialism universal-model universal-order])

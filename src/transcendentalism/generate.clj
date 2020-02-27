@@ -203,7 +203,7 @@
           (div {"class" "q_and_a_header"} "Q:")
           (str "<i>" (render-block renderer q-block) "</i>")
           (div {"class" "q_and_a_header"} "A:")
-          (render-block renderer a-block))))
+          (div {} (render-block renderer a-block)))))
     (render-bullet-list [renderer node]
       (let [header-block-or-nil (unique-or-nil node "/item/bullet_list/header"),
             point-blocks (get-ordered-objs node "/item/bullet_list/point")]
