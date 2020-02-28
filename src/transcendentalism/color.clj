@@ -27,6 +27,8 @@
 
 (def white (->Color 255 255 255))
 (def black (->Color 0 0 0))
+(def gray (->Color 127 127 127))
+(def light-gray (->Color 191 191 191))
 (def red (->Color 248 18 7))
 (def orange (->Color 244 134 4))
 (def yellow (->Color 245 186 5))

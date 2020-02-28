@@ -56,7 +56,7 @@
   border-color height width top left right margin-block-start margin-block-end
   display position text-align vertical-align background background-color
   background-image background-position background-repeat transform animation-name
-  animation-duration grid-row-gap)
+  animation-duration grid-row-gap border-collapse)
 (contents-N ", " font-family)
 (contents-N " "
   border-style border-width padding margin background-size grid-template-columns)
@@ -207,6 +207,18 @@
       (border-width "1px")
       (border-style "solid")
       (padding "10px" "10px" "5px" "10px"))
+    (css "table" {"class" "t"}
+      (border-collapse "collapse")
+      (margin "0px" "auto"))
+    (css "td" {"class" "label"}
+      (font-style "italic")
+      (text-align "center")
+      (padding "5px"))
+    (css "td" {"class" "cell"}
+      (border-style "solid")
+      (border-width "1px")
+      (border-color (to-css-color light-gray))
+      (padding "5px"))
     (css "button" {"class" "link_segment"}
       (border "none")
       (font-size "medium"))

@@ -317,7 +317,27 @@
       },
     }))
 
+(def table-schema
+  (schematize-type "/item/table"
+    {
+      :description "A 2D table of items",
+      :super-type "/type/item",
+    }
+    {
+      "/cell" {
+        :description "A cell in the table",
+        :range-type "/type/segment",
+        :required true,
+        ; TODO - Add required /column and /row properties.
+      },
+      "/label" {
+        :description "A label for a column or row",
+        :range-type "/type/segment"
+        ; TODO - Add required /column or /row property.
+      },
+    }))
+
 (def schema-data
   (merge essay-schema event-schema image-schema quote-schema inline-item-schema
     poem-schema segment-schema big-emoji-schema item-schema q-and-a-schema
-    bullet-list-schema contact-schema definition-schema))
+    bullet-list-schema contact-schema definition-schema table-schema))

@@ -347,6 +347,52 @@
                     {"/order" i}))
         (range (count definitions)))])))
 
+(defn table
+  [rows columns contents]
+  (block-item
+    (fn [sub]
+      (let [index-1d (fn [items]
+                       (reduce
+                         (fn [result i]
+                           (conj result {:val (nth items i),
+                                         :i i}))
+                        [] (range (count items)))),
+            index-2d (fn [item-lists]
+                       (reduce
+                         (fn [result i]
+                           (reduce
+                             (fn [result j]
+                               (conj result {:val (nth (nth item-lists i) j),
+                                             :i i,
+                                             :j j}))
+                            result (range (count (nth item-lists i)))))
+                        [] (range (count item-lists)))),
+            item (fn [val gen-triple]
+                   (if (nil? val)
+                     []
+                     (let [t (create-essay-thread (sub-suffix sub (gen-key 4)))]
+                       (conj (if (string? val)
+                                 ((text val) t)
+                                 (val t))
+                             (gen-triple (minor-key t)))))),
+            rows* (filter #(not (nil? (:val %))) (index-1d rows)),
+            columns* (filter #(not (nil? (:val %))) (index-1d columns)),
+            contents* (filter #(not (nil? (:val %))) (index-2d contents))]
+        [(types schema sub "/item/table"),
+         (map #(item (:val %)
+                     (fn [obj]
+                       (->Triple sub "/item/table/label" obj {"/row" (:i %)})))
+              rows*),
+         (map #(item (:val %)
+                     (fn [obj]
+                       (->Triple sub "/item/table/label" obj {"/column" (:i %)})))
+              columns*),
+         (map #(item (:val %)
+                     (fn [obj]
+                       (->Triple sub "/item/table/cell" obj {"/row" (:i %),
+                                                             "/column" (:j %)})))
+              contents*)]))))
+
 (defn directive-label-menus
   "Generates menu essays for labels"
   [triples]

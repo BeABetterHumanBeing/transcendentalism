@@ -62,6 +62,12 @@
 
 (defn- input [attrs] (xml-open "input" attrs))
 
+(defn- table [attrs contents] (xml-tag "table" attrs contents))
+
+(defn- tr [attrs contents] (xml-tag "tr" attrs contents))
+
+(defn- td [attrs contents] (xml-tag "td" attrs contents))
+
 (defn- dbg-able
   "Adds the dbg class, if in debugging mode"
   [classes]
@@ -147,6 +153,7 @@
   (render-bullet-list [renderer node] "Renders a /type/item/bullet_list")
   (render-contact [renderer node] "Renders a /type/item/contact")
   (render-definition [renderer node] "Renders a /type/item/definition")
+  (render-table [renderer node] "Renders a /type/item/table")
   (render-inline-item [renderer node] "Renders a /type/item/inline"))
 
 (defn- create-renderer
@@ -168,6 +175,7 @@
           "/type/item/bullet_list" (render-bullet-list renderer node),
           "/type/item/contact" (render-contact renderer node),
           "/type/item/definition" (render-definition renderer node),
+          "/type/item/table" (render-table renderer node),
           "/type/item/inline" (render-inline-item renderer node),
           (assert false
             (str "ERROR - Type " (first item-type) " not supported")))))
@@ -249,6 +257,33 @@
           (apply ul {"class" "bullet_list"}
             (str/join "\n"
               (map #(li {"class" "word-definition"} %) definitions)))))))
+    (render-table [renderer node]
+      (let [labels-n-cells
+              (filter #(contains? #{"/item/table/label",
+                                    "/item/table/cell"} (:pred %))
+                      (get-triples node))
+            row-max (apply max (map #(property % "/row" -1) labels-n-cells)),
+            col-max (apply max (map #(property % "/column" -1) labels-n-cells)),
+            triples-by-row (group-by #(property % "/row" -1) labels-n-cells)]
+        (table {"class" "t"}
+          (str/join "\n"
+            (map (fn [row]
+                   (let [triples-by-column (group-by #(property % "/column" -1)
+                                                     (triples-by-row row []))]
+                     (tr {}
+                       (str/join "\n"
+                         (map (fn [col]
+                                (let [val (triples-by-column col nil),
+                                      class (if (or (= col -1) (= row -1))
+                                                "label"
+                                                "cell")]
+                                  (td {"class" class}
+                                      (if (nil? val)
+                                          ""
+                                          (render-block renderer
+                                                        (:obj (first val)))))))
+                              (range -1 (inc col-max)))))))
+                 (range -1 (inc row-max)))))))
     (render-inline-item [renderer node]
       (let [text (unique-or-nil node "/item/inline/text"),
             tangent (unique-or-nil node "/item/inline/tangent"),

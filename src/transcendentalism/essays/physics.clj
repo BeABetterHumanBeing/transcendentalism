@@ -418,7 +418,13 @@
         "To exand this model to all particles, the 'edges' in the sparse matrix"
         "would be bosons, and the nodes, their interactions with fermions."))
 
-    (text "TODO - matrix example of diagram. pyplot? table? drawing?")
+    (let [dims ["A" "B" "C" "D"]]
+      (table
+        dims dims
+        [[nil "A-B" "A-C" nil]
+         ["A-B" nil nil "B-D"]
+         ["A-C" nil nil (text "C-D")] ; Checking that tables support both.
+         [nil "B-D" "C-D" nil]]))
 
     (text
       "The matrix that represents our prefect universal model (and therefore,"

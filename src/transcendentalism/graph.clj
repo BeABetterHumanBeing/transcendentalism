@@ -59,7 +59,8 @@
   (get-ordered-objs [node pred]
     "Returns all objects with the given pred, in order")
   (unique-or-nil [node pred]
-    "Returns the unique object of the given pred, or nil"))
+    "Returns the unique object of the given pred, or nil")
+  (get-triples [node] "Returns all triples asserted on the node"))
 
 (defn- construct-node
   [triples]
@@ -83,7 +84,8 @@
         (let [selected (pred-to-triples pred [])]
           (if (empty? selected)
             nil
-            (:obj (first selected))))))))
+            (:obj (first selected)))))
+      (get-triples [node] triples))))
 
 (defn- construct-relation
   [relation-map]
