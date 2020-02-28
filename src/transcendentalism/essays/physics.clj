@@ -19,20 +19,21 @@
         "The deeply-rooted philosophy or world-view that reality is solely"
         "composed of material."]))
 
-    (text
-      "In a certain sense, materialism is the natural conclusion of several"
-      "hundred years of"
-      ; TODO - add see_also to "the three sciences"
-      "empirical science."
-      "It serves as a sort of lower-bound for what is known about reality,"
-      "and by no means should be mistaken for an upper-bound of what can be"
-      ; TODO - pull out TM to a class that auto-formats it.
-      "known. Generally on <i>Transcendental Metaphysics</i>, materialism is"
-      "treated as an elaborate and compelling"
-      ; TODO - add see_also to where it appears under "traps"
-      "mental trap,"
-      "but that doesn't make it wrong, in the sense that it is still extremely"
-      "useful for modeling the physical universe.")
+    (paragraph
+      (text
+        "In a certain sense, materialism is the natural conclusion of several"
+        "hundred years of ")
+      (see-also :empirical-science "empirical science")
+      (text
+        ". It serves as a sort of lower-bound for what is known about reality,"
+        "and by no means should be mistaken for an upper-bound of what can be"
+        ; TODO - pull out TM to a class that auto-formats it.
+        "known. Generally on <i>Transcendental Metaphysics</i>, materialism is"
+        "treated as an elaborate and compelling ")
+      (see-also :mental-traps "mental trap")
+      (text
+        ", but that doesn't make it wrong, in the sense that it is still extremely"
+        "useful for modeling the physical universe."))
 
     (paragraph
       (text
@@ -125,8 +126,7 @@
         "There are, of course, a multitude of possible models that we could"
         "choose from, and not all of them are equivalent for any given purpose."
         "The central axis across which the models can be broken down is the ")
-      ; TODO - make a see_also
-      (text "fundamental modeling tradeoff")
+      (see-also :modeling "fundamental modeling tradeoff")
       (text
         ", namely that models strike a balance between complexity and accuracy."
         "The most accurate model, i.e. the perfect one, is the one with the"
@@ -542,7 +542,45 @@
 ; through a vaccuum, the media through which it travels being encoded in the
 ; contents of the matrix.
 
+(def modeling
+  (let [f (footnoter :modeling)]
+  (essay :modeling "Modeling"
+    (text "TODO")
+    (file-under :modeling :physics)
+  )))
+
+(def three-sciences
+  (let [f (footnoter :three-science)]
+  (essay :three-sciences "Science"
+    (text "TODO")
+    (file-under :three-sciences :physics)
+  )))
+
+(def analytical-science
+  (let [f (footnoter :analytical-science)]
+  (essay :analytical-science "Analysis"
+    (text "TODO")
+  )))
+
+(def empirical-science
+  (let [f (footnoter :empirical-science)]
+  (essay :empirical-science "Empiricism"
+    (text "TODO")
+  )))
+
+(def phenomenological-science
+  (let [f (footnoter :phenomenological-science)]
+  (essay :phenomenological-science "Phenomenology"
+    (text "TODO")
+  )))
+
 (def physics-essays
   [(essay-series [:materialism :universal-model :universal-order])
-   (directive-under-construction)
-   materialism universal-model universal-order])
+   (essay-series [:three-sciences :analytical-science])
+   (essay-series [:three-sciences :empirical-science])
+   (essay-series [:three-sciences :phenomenological-science])
+   (directive-under-construction
+     :three-sciences :analytical-science :empirical-science
+     :phenomenological-science :modeling)
+   materialism universal-model universal-order three-sciences analytical-science
+   empirical-science phenomenological-science modeling])

@@ -1,6 +1,7 @@
 (ns transcendentalism.core)
 
 (use 'transcendentalism.essay
+     'transcendentalism.essays.consciousness
      'transcendentalism.essays.epistemology
      'transcendentalism.essays.intro
      'transcendentalism.essays.morality
@@ -21,7 +22,8 @@
   (construct-graph
     (apply-directives
       meta-directives intro-essays physics-essays ontology-essays
-      epistemology-essays morality-essays religion-essays politics-essays)))
+      epistemology-essays morality-essays religion-essays politics-essays
+      consciousness-essays)))
 
 (defn -main
   "Validates the website's graph, and generates its files"

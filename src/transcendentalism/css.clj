@@ -221,7 +221,8 @@
       (padding "5px"))
     (css "button" {"class" "link_segment"}
       (border "none")
-      (font-size "medium"))
+      (font-size "medium")
+      (margin "3px"))
     (css "button" {"class" "up"}
       (color (to-css-color purple)))
     (css "button" {"class" "down"}
