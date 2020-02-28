@@ -262,6 +262,13 @@
               "natural units")
         (text "."))))))
 
+(def light-rhombus
+  (image "../resources/light_rhombus.png"
+    (str/join " " [
+      "Four points, A, B, C, and D, with rays of light connecting A and B,"
+      "A and C, B and D, and C and D."
+    ])))
+
 (def universal-order
   (let [f (footnoter :universal-order)]
   (essay :universal-order "Universal Order"
@@ -343,11 +350,7 @@
       "electrodynamics (QED), so the events pictured here are electrons either"
       "emitting or absorbing photons.")
 
-    (image "../resources/light_rhombus.png"
-      (str/join " " [
-        "Four points, A, B, C, and D, with rays of light connecting A and B,"
-        "A and C, B and D, and C and D."
-      ]))
+    light-rhombus
 
     (paragraph
       (text
@@ -432,65 +435,92 @@
       "computational perspective, makes it a ripe target for compression.")
     )))
 
-; The Shape of the Universe
+(def universal-shape
+  (let [f (footnoter :universal-shape)]
+  (essay :universal-shape "The Shape of the Universe"
+    (text
+      "Once we've gotten comfortable with the idea of representing the universe"
+      "as a sparse matrix of particle interactions, we can discard the idea"
+      "that it's inherently three-dimensional. The matrix itself has an arbitrarily"
+      "high number of dimensions, and it just so happens that three is a useful"
+      "answer to the compression puzzle.")
 
-; Once we've gotten comfortable with the idea of representing the universe as
-; a sparse matrix of particle interactions, we can discard the idea that it's
-; inherently three-dimensional. The matrix itself has an arbitrarily high number of
-; dimensions, and it just so happens that three is a useful answer to the
-; compression puzzle.
+    (text
+      "What compression puzzle? If we wanted to go back to treating the universe"
+      "as though it had spatial coordinates, one way would be to treat each cell"
+      "in the matrix as a constraint (of the form \"X and Y are T seconds away"
+      "from each other\"), and the 'shape' of the universe is any mapping of"
+      "particles onto a lower-numbered field of spatial dimensions that meets"
+      "all the constraints.")
 
-;  What compression puzzle? If we wanted to go back to treating the universe as
-; though it had spacial coordinates, one way would be to treat each cell in the
-; matrix as a constraint (of the form "X and Y are T seconds away from each other"),
-; and the 'shape' of the universe is any configuration of particles onto a
-; lower-numbered field of spacial dimensions that meets the constraints.
+    (text
+      "The <i>appearance</i> of the physical universe having three dimensions is"
+      "the product of the observation that <i>assuming</i> three dimensions allows"
+      "for the most cohesive solution to the problem. It's not perfect, though."
+      "Recognizing that space is non-Euclidean, that space-time (as the"
+      "field-like solution to this problem is ordinarily called) is <i>curved</i>,"
+      "is an acknowledgement that our assumption is observed to be false at"
+      "large distances and high momenta.")
 
-; The *appearance* of the physical universe having three dimensions is the product
-; of the observation that *assuming* three dimensions allows for the most cohesive
-; solution to the problem. It's not perfect, though. Recognizing that space is non-Euclidean, that
-; space-time (as the field-like solution to this problem is ordinarily called) is
-; *curved*, is an acknowledgement that our assumption is observed to be false at
-; large distances and high momenta.
+    (text
+      "The next best approximation (or refinement, if you will), includes"
+      "<i>inflation</i>. Inflation is observed in that the universe is slightly"
+      "<i>hyperbolic</i>, that it exhibits a <i>negative curvature</i>, or that"
+      "parallel lines tend to get further apart from each other as they move"
+      "away from the singularity that marks the universe's beginning.")
 
-; The next best approximation (or refinement, if you will), includes *inflation*.
-; Inflation is observed in that the universe is slightly
-; *hyperbolic*, that it exhibits *negative curvature*, or that parallel lines tend
-; to get further apart from each other as they move away from the singularity
-; that marks the universe's beginning.
+    (paragraph
+      (text
+        "In a time-based perspective, this is equivalent to saying that for"
+        "three particles X, Y, and Z (all located at great times from each"
+        "other), ")
+      (tangent (f 1)
+        "the time from X to Z may exceed the time from X to Y plus from Y to Z")
+      (text "."))
 
-; In a time-based perspective, this is equivalent to saying that for three
-; particles X, Y, and Z (all located at great times from each other), the time
-; from X to Z may exceed the time from X to Y plus from Y to Z [14].
+    (footnote (f 1)
+      (text
+        "To revisit the example we used for (see also universal order), this"
+        "proves that A-B plus B-D may not equal A-C plus C-D.")
+      light-rhombus)
 
-; [14] To revisit the example we used for (see also universal order), this
-; prooves that A-B plus B-D may not equal A-C plus C-D.
-;
-; TODO insert picture of ABCD
+    (text
+      "For a physical example of this, consider events X, Y, and Z where X and Y"
+      "occur very close to the Big Bang before inflation, and Z occurs roughly"
+      "where you are reading this. The time from X to Y is very small (because"
+      "the universe is very small before inflation), however the time from X to"
+      "Z and Y to Z may differ by a large margin, because inflation pushed X"
+      "and Y a universe apart from each other.")
 
-; For a physical example of this, consider events X, Y, and Z where X and Y occur
-; very close to the Big Bang before inflation, and Z occurs roughly where you are
-; reading this. The time from X to Y is very small (because the universe is very
-; small before inflation), however the time from X to Z and Y to Z may differ by a
-; large margin, because inflation pushed X and Y a universe apart from each other.
+    (paragraph
+      (text
+        "Another interesting observation that falls out of treating the universe"
+        "as a sparse matrix is the possibility of ")
+      (tangent (f 2) "pocket dimensions")
+      (text "."))
 
-; Another interesting observation that falls out of treating the universe as a
-; sparse matrix is the possibility of *pocket dimensions*.
+    (footnote (f 2)
+      (paragraph
+        (text
+          "A <b>pocket dimension</b> is a subgraph of the sparse matrix whose"
+          "intersection with the larger matrix is limited to only a (comparatively)"
+          "small 'pocket' of interactions. If the intersection is small enough,"
+          "it won't meaningfully distort the space-time 'solution' of the larger"
+          "matrix, meaning that the 'solution' of the contents of the pocket can"
+          "take a different shape. For example you could have a 5D pocket"
+          "attached to some corner of the 3D universe. Similarly, the size"
+          "of a pocket may have no relationship with the size of the sub-matrix"
+          "it connects through; the pocket could be tiny, or ")
+        (tangent (f 3) "vast")
+        (text ".")))
 
-; A **pocket dimension** is a subgraph of the sparse matrix whose intersection
-; with the larger matrix are limited to only a (comparatively) small "pocket" of
-; interactions. If the intersection is small enough, it won't meaningfully distort
-; the space-time "solution" of the larger matrix, meaning that the "solution" of
-; the contents of the pocket can take a different shape. For example you could
-; have a 5D pocket attached to some corner of the 3D universe. Similarly, the size
-; of a pocket may have no relationship with the size of the sub-matrix it connects
-; to; the pocket could be tiny, or vast [15].
-
-; [15] Q: How would you detect such a pocket dimension?
-; A: Pretty much by definition,
-; you con only detect the pockets that you "reach into", where the interactions
-; you are aware of bridge the intersection between the two universes by traveling
-; through its pocket.
+    (footnote (f 3)
+      (q-and-a
+        (text "How would you detect such a pocket dimension?")
+        (text "Pretty much by definition, you con only detect the pockets that"
+              "you \"reach into\", where the interactions that you are aware of"
+              "bridge the pocket connecting the two universes.")))
+  )))
 
 ; Physical Speed Limits
 
@@ -575,12 +605,12 @@
   )))
 
 (def physics-essays
-  [(essay-series [:materialism :universal-model :universal-order])
+  [(essay-series [:materialism :universal-model :universal-order :universal-shape])
    (essay-series [:three-sciences :analytical-science])
    (essay-series [:three-sciences :empirical-science])
    (essay-series [:three-sciences :phenomenological-science])
    (directive-under-construction
      :three-sciences :analytical-science :empirical-science
      :phenomenological-science :modeling)
-   materialism universal-model universal-order three-sciences analytical-science
-   empirical-science phenomenological-science modeling])
+   materialism universal-model universal-order universal-shape three-sciences
+   analytical-science empirical-science phenomenological-science modeling])
