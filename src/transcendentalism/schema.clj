@@ -98,6 +98,7 @@
      (q-chain
        (q-or (q-pred "/item/q_and_a/question")
              (q-pred "/item/q_and_a/answer")
+             (q-pred "/item/bullet_list/header")
              (q-pred "/item/bullet_list/point"))
        (q-kleene
          ; Assumes questions, answers, and points are single-blocked.

@@ -522,55 +522,85 @@
               "bridge the pocket connecting the two universes.")))
   )))
 
-; Physical Speed Limits
+(def speed-limits
+  (let [f (footnoter :speed-limits)]
+  (essay :speed-limits "Physical Speed Limits"
+    (text
+      "The speed limit of matter is the speed of light, a speed that can be"
+      "approached, but not met nor exceeded. What does this speed limit look"
+      "like in our time-based sparse matrix? Since we've abandoned both the idea"
+      "of position as well as velocity, it may seem an absurd statement to"
+      "reason about, however remember that we've simply substituted the idea of"
+      "objective location for <i>events</i> and the relationships between them.")
 
-; The speed limit of matter is the speed of light, a speed that can be approached,
-; but not met nor exceeded. What does this speed limit look like in our time-based
-; sparse matrix? Since we've abandoned both the idea of position as well as
-; velocity, it may seem an absurd statement to reason about, however remember that
-; we've simply substituted the idea of objective location for *events* and the
-; relationships between them.
+    (bullet-list
+      (paragraph
+        (text "Consider some particle moving at ")
+        (tangent (f 1) "some speed")
+        (text
+          ". A photon leaves the particle (one event X), and at a later point"
+          "is absorbed by the same particle (another event Y)."))
+      (text
+        "If the particle's speed is less than the speed of light, it means that"
+        "the photon could have gone off from X, had another interaction, Z,"
+        "elsewhere and returned to Y.")
+      (text
+        "If the particle's speed is the speed of light, it means that the photon"
+        "couldn't have had any other interactions, since there's only enough"
+        "time to go from X to Y.")
+      (paragraph
+        (text
+          "If the particle's speed is greater than the speed of light, it means"
+          "that the photon leaving X ")
+        (tangent (f 2) "could never arrive at Y")
+        (text ". That cell in the matrix must be empty.")))
 
-; Consider some particle moving at some speed [17]. A photon leaves the
-; particle (one event X), and at a later point in time is absorbed by the same particle
-; (another event Y).
+    (footnote (f 1)
+      (text
+        "\"Speed\" is an artificial fiction, from the point of view of the"
+        "sparse event-matrix. It's the result of looking at sequences of"
+        "interactions in the matrix for a given particle and, after mapping"
+        "these interactions onto 3D space, estimating the <i>average</i> speed"
+        "over segments between interactions."))
 
-; *   If the particle's speed is less than the speed of light, it means that the
-;     photon could have gone off from X, had another interaction, Z, elsewhere and
-;     returned to Y.
-; *   If the particle's speed is the speed of light, it means that the photon
-;     couldn't have had any other interactions, since there's only enough time to
-;     go from X to Y.
-; *   If the particle's speed is greater than the speed of light, it means that
-;     the photon leaving X could never arrive at Y [16]. That cell in the matrix is
-;     marked NaN.
+    (footnote (f 2)
+      (paragraph
+        (text "Photons can travel ")
+        (tangent (f 3) "faster than the speed of light")
+        (text ", so this proscription is statistical, not absolute.")))
 
-; [16] Photons can travel faster than the speed of light [18], so this proscription
-; is statistical, not absolute.
+    (footnote (f 3)
+      (paragraph
+        (link "https://en.wikipedia.org/wiki/Cherenkov_radiation"
+              "Cherenkov Radiation")
+        (text
+          " is caused by particles moving through water faster than the speed"
+          "of light. How is this possible? It's because the speed of light"
+          "through water is slower than the speed of light through a vaccuum"
+          "(as light bounces from one water molecule to the next). Our"
+          "sparse-matrix representation treats all light as traveling through"
+          "a vaccuum, the media through which it travels can be encoded in the"
+          "contents of the matrix.")))
 
-; TODO - insert diagram with the three possibilities
+    (image "../resources/speed_of_light.png"
+      (str/join " " [
+        "Three examples of a particle traveling from X to Y, with light making"
+        "the same journey. In the first, there is enough time for light to have"
+        "another interaction Z. In the second, it cannot. And in the third, it"
+        "cannot even make it to the interaction Y."
+      ]))
 
-; [17] IMPORTANT: "Speed" is an artificial fiction, from the point of view of the
-; sparse event-matrix. It's the result of looking at sequences of interactions in
-; the matrix for a given particle and, after mapping these interactions onto 3D
-; space, estimating the *average* speed over segments between interactions.
+    (text
+      "The third case shows why the speed of light cannot be exceeded: the"
+      "events left by a faster-than-light particle in our matrix must necessarily"
+      "be undefined, meaning that our faster-than-light particle doesn't exist.")
 
-; The third case shows why the speed of light cannot be exceeded: the events left
-; by a faster-than-light particle in our matrix must necessarily be undefined,
-; meaning that our faster-than-light particle doesn't exist.
-
-; The second case shows (obliquely) why the speed of light cannot be met:
-; particles traveling at the speed of light cannot participate in outside events,
-; meaning that our matrix cannot hold any evidence of its existence (since the
-; matrix only holds interactions).
-
-; [18]: [Cherenkov Radiation](https://en.wikipedia.org/wiki/Cherenkov_radiation)
-; is caused by particles moving through water faster than the speed of light. How
-; is this possible? It's because the speed of light through water is slower than
-; the speed of light through a vaccuum (as light bounces from one water molecule
-; to the next). Our sparse-matrix representation treats all light as traveling
-; through a vaccuum, the media through which it travels being encoded in the
-; contents of the matrix.
+    (text
+      "The second case shows (obliquely) why the speed of light cannot be met:"
+      "particles traveling at the speed of light cannot participate in outside"
+      "events, meaning that our matrix cannot hold any evidence of its existence"
+      "(since the matrix only holds interactions).")
+  )))
 
 (def modeling
   (let [f (footnoter :modeling)]
@@ -605,12 +635,13 @@
   )))
 
 (def physics-essays
-  [(essay-series [:materialism :universal-model :universal-order :universal-shape])
+  [(essay-series [:materialism :universal-model :universal-order :universal-shape :speed-limits])
    (essay-series [:three-sciences :analytical-science])
    (essay-series [:three-sciences :empirical-science])
    (essay-series [:three-sciences :phenomenological-science])
    (directive-under-construction
      :three-sciences :analytical-science :empirical-science
      :phenomenological-science :modeling)
-   materialism universal-model universal-order universal-shape three-sciences
-   analytical-science empirical-science phenomenological-science modeling])
+   materialism universal-model universal-order universal-shape speed-limits
+   three-sciences analytical-science empirical-science phenomenological-science
+   modeling])

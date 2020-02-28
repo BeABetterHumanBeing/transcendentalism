@@ -219,11 +219,9 @@
           (if (nil? header-block-or-nil)
               ""
               (div {}
-                (render-item
+                (render-block
                   renderer
-                  (get-node
-                    graph
-                    (get-unique graph header-block-or-nil "/segment/contains")))))
+                  header-block-or-nil)))
           (apply ul {"class" "bullet_list"}
             (into [] (map #(li {} (render-block renderer %)) point-blocks))))))
     (render-contact [renderer node]
@@ -337,6 +335,7 @@
              (q-chain
                (q-or (q-pred "/item/q_and_a/question")
                      (q-pred "/item/q_and_a/answer")
+                     (q-pred "/item/bullet_list/header")
                      (q-pred (fn [triple data]
                                (assoc data :order (property triple "/order" 0)))
                              "/item/bullet_list/point"))
