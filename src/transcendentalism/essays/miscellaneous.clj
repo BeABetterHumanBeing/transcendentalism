@@ -102,6 +102,137 @@
       (->Triple :if-houses-were-built-like-software "/essay/flow/home" :monad {}))
   )))
 
+(def singularity
+  (let [f (footnoter :singularity)]
+  (essay :singularity "The Singularity"
+
+  (text
+    "The <b>singularity</b> is almost upon us! While its realization has been"
+    "patiently waiting in the wings, brooding and gestating, the idea of it has"
+    "been percolating somewhat freely through the future-minded circles I often"
+    "find myself in.")
+
+  (paragraph
+    (text
+      "What is it? The singularity is a hypothetical moment of seemingly"
+      "instantaneous transformation. After the Big Bang, it is probably the most"
+      "momentous such transformation to hit this corner of the universe. Whereas"
+      "describing the 'near' side of the transformation is easy (just talk about"
+      "the world around you), it's the 'far' side that's got everybody talking."
+      "Nobody really knows what'll come to pass, and depending on who you talk to,"
+      "they are ")
+    (tangent (f 1) "either excited, afraid, or a combination of the two."))
+
+  (footnote (f 1)
+    (text
+      "A lot of this just has to do with whether you are inclined towards"
+      "utopia or dystopia as your fantasy future of choice. I've generally"
+      "found this inclination to be contra-indicated by the times: people eat"
+      "up utopian visions when times are rough and dour, and can stop snacking"
+      "on apocalypses when times are stable and good."))
+
+  (paragraph
+    (text
+      "The pace of advancement of technology has never been particularly"
+      "continuous, but when you \"zoom out\" far enough, the overall trend is"
+      "clear: ")
+    (tangent (f 2) "technology grows at an exponential rate")
+    (text "."))
+
+  (footnote (f 2)
+    (text
+      "The reasoning is obvious enough, once you see it: new technologies are"
+      "created by combining old ones, and each new one then joins the old ones"
+      "from which still more new ones can be made. The number and variety of"
+      "new technologies is a function of the number of existing ones, and so as"
+      "the total number of existing technologies grows, the number of new"
+      "technologies grows proportionately to that, resulting in exponential"
+      "feedback."))
+
+  (text
+    "For the longest time, the relative pace of technological advancement seemed"
+    "to be desultory, or even static. This is because the normal fluctuations"
+    "in technological advancement were roughly on order of magnitude with the"
+    "rate of advancement, thereby masking the larger curve in a sea of noise."
+    "About the 1600s, with the advent of the industrial revolution in England,"
+    "the growth of new technology finally outstripped the noise that was covering"
+    "it, and the world has never looked back. Wave after wave of new technology"
+    "unleashed manners and styles of living no previous generation of human"
+    "beings had ever conceived of, and the greater sense took hold of advanced"
+    "industrial society that it was beginning to witness the advent of a new"
+    "phenomenon: the <b>future</b>.")
+
+  (paragraph
+    (text
+      "Whereas before one might have lived one's whole life with a sense of the"
+      "endless circle of time, this 'circle' was exposed to be something of a"
+      "spiral, and ")
+    (tangent (f 3) "yes this spiral was going somewhere, and somewhere fast")
+    (text
+      ". Whereas before the future was something that you plodded towards with"
+      "definite goals in mind, your relationship with the future almost became"
+      "reversed: the future came to you without your having to do anything, and"
+      "it brought nothing but ")
+    (tangent (f 4) "surprise after surprise")
+    (text "."))
+
+  (footnote (f 3)
+    ; TODO - see-also to the progress fallacy / progressivism.
+    (text
+      "Compare with Hegelian dialectics, a faddish German philosophy from the"
+      "1800s in which the notion of \"progress\", or even better, \"inevitable"
+      "progress\" became a thing. Now it's the dominant ideology."))
+
+  (footnote (f 4)
+    (text
+      "Just pause and think about any particular piece of technology that we now"
+      "take for granted. It's difficult, almost impossible, to imagine just what"
+      "changes something like \"refridgeration\" brought to the world. Suddenly"
+      "you can  have fresh, exotic fruit <i>any time of the year</i>! Truly a"
+      "miracle! It's inventions like this that might lead you to think that"
+      "humanity has conquered nature."))
+
+  (text
+    "All this takes the form of the characteristic \"hockey stick\" graph of"
+    "exponential growth. This graph is characterized by having an \"elbow\"."
+    "The portion of the graph that precedes its elbow appears to be almost flat,"
+    "or linear in its growth. Then the elbow comes along, and after that its"
+    "growth is by leaps and bounds. In many (non-logistic) graph representations,"
+    "the portion after this elbow becomes seemingly verticle.")
+
+  ; TODO - image of a typical hockey-stick graph.
+
+  (paragraph
+    (text "Unfortunately, life in the vertical world ")
+    (tangent (f 5) "isn't all it's cooked up to be")
+    (text "."))
+
+  (footnote (f 5)
+    (text "No, I'm not predicting the singularity will be dystopian. Rather the"
+          "singularity doesn't exactly exist at all, or at least that in so far"
+          "as it does, it's quite mundane.")
+
+    (text
+      "First off, logistic growth is often mis-interpreted as exponential growth."
+      "Almost every single 'exponential' trend (like population growth, or"
+      "Moore's law) ends up simply being the first half of logistic growth.")
+
+    ; TODO - image of logistic growth
+
+    (text
+      "Moreover, if the singularity is the elbow in the hockey stick, then it's"
+      "safe to conclude that we're already living in the singularity, and have"
+      "been for centuries. While people tend to think of the singularity as a"
+      "single \"ah ha!\" moment, the defining property of exponential growth is"
+      "that the graph is scale-invariant, which is to say that it's <i>all</i>"
+      "elbow, and nothing but elbow.")
+
+    (text "How's your singularity going? Can't complain about mine."))
+
+    ^{:no-block true} (fn [t]
+        (->Triple :singularity "/essay/flow/home" :monad {}))
+  )))
+
 (def miscellaneous-essays
   [(directive-under-construction)
-   if-houses-were-built-like-software])
+   if-houses-were-built-like-software singularity])
