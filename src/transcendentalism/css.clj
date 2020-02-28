@@ -53,10 +53,10 @@
 
 (contents-1
   font-style font-weight font-size color text-decoration direction cursor border
-  border-color height width top left right margin-block-start margin-block-end
-  display position text-align vertical-align background background-color
-  background-image background-position background-repeat transform animation-name
-  animation-duration grid-row-gap border-collapse)
+  border-color height width top left right bottom margin-block-start
+  margin-block-end display position text-align vertical-align background
+  background-color background-image background-position background-repeat
+  transform animation-name animation-duration grid-row-gap border-collapse)
 (contents-N ", " font-family)
 (contents-N " "
   border-style border-width padding margin background-size grid-template-columns)
@@ -142,6 +142,22 @@
     (css "span" {"class" "see-also"}
       (color (to-css-color yellow))
       (cursor "pointer"))
+    (css "div" {"class" "authors-parent"}
+      (position "relative"))
+    (css "div" {"class" "authors-chain"}
+      (position "relative")
+      (width "30px")
+      (border-style "dashed")
+      (border-color (to-css-color red))
+      (border-width "1px" "0" "0" "0")
+      (right "35px")
+      (bottom "-10px"))
+    (css "div" {"class" "authors"}
+      (position "absolute")
+      (width "100px")
+      (right "-130px")
+      (bottom "0px")
+      (color (to-css-color red)))
     (keyframes "shake"
       (keyframe-points ["from" "to"]
         (transform "translate3d(0, 0, 0)"))

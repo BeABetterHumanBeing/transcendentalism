@@ -393,6 +393,18 @@
                                                              "/column" (:j %)})))
               contents*)]))))
 
+(defn credit
+  "Adds /credit property to all /item/segments produced by some function"
+  ([f] (credit "Anonymous" f))
+  ([whom f]
+    (fn [t]
+      (let [triples (flatten (f t)),
+            subs (map :sub
+                      (filter #(= (:pred %) "/type/segment") triples))]
+        (concat
+          triples
+          (map #(->Triple % "/segment/author" whom {}) subs))))))
+
 (defn directive-label-menus
   "Generates menu essays for labels"
   [triples]

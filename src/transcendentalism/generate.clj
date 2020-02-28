@@ -160,10 +160,21 @@
   [graph encoded_id encodings footnote-map]
   (reify Renderer
     (render-block [renderer block-sub]
-      (apply str
-        (map #(render-item renderer
-                           (get-node graph (get-unique graph % "/segment/contains")))
-             (transitive-closure graph block-sub "/segment/flow/inline"))))
+      (let [authors (all-triples graph block-sub "/segment/author"),
+            contents
+            (apply str
+                   (map #(render-item renderer
+                                      (get-node graph
+                                        (get-unique graph % "/segment/contains")))
+                        (transitive-closure
+                          graph block-sub "/segment/flow/inline")))]
+        (if (empty? authors)
+            contents
+            (div {"class" "authors-parent"}
+              (div {"class" "authors"}
+                (div {"class" "authors-chain"} "")
+                (str/join ", " (map :obj authors)))
+              contents))))
     (render-item [renderer node]
       (let [item-type (filter #(not (= % "/type/item")) (get-types node))]
         (case (first item-type)

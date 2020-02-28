@@ -47,12 +47,11 @@
       "later point in time, like when it's full of people for the housewarming"
       "party.")
 
-    ; TODO - credit oco
-    (ifwbls
+    (credit "oco" (ifwbls
       "the plumber would show up to install the kitchen sink only to discover"
       "the kitchen has been repurposed into a second living room. In fact there"
       "doesn't seem to be any kitchen or plumbing features planned at all. The"
-      "plumber makes a note to bring this up at the next all-hands.")
+      "plumber makes a note to bring this up at the next all-hands."))
 
     (ifwbls
       "venture realtors might throw billions of dollars at an obviously unstable,"
@@ -94,11 +93,10 @@
       "new house, the laundry will still be done in the mostly-deconstructed"
       "remains of the old house.")
 
-    ; TODO - credit anonymous
-    (ifwbls
+    (credit (ifwbls
       "your new laundry machine would just be a shim. When you drop your laundry"
       "in the new machine, it would actually get washed by the old machine, but"
-      "you wouldn't be able to tell.")
+      "you wouldn't be able to tell."))
 
     ^{:no-block true} (fn [t]
       (->Triple :if-houses-were-built-like-software "/essay/flow/home" :monad {}))

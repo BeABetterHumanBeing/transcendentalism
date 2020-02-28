@@ -111,6 +111,10 @@
         :unique true,
         :required true,
       },
+      "/author" {
+        :description "Who wrote the segment",
+        :range-type :string,
+      },
     }))
 
 (def item-schema
