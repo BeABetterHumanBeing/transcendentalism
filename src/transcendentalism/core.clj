@@ -4,6 +4,7 @@
      'transcendentalism.essays.consciousness
      'transcendentalism.essays.epistemology
      'transcendentalism.essays.intro
+     'transcendentalism.essays.miscellaneous
      'transcendentalism.essays.morality
      'transcendentalism.essays.ontology
      'transcendentalism.essays.physics
@@ -23,7 +24,7 @@
     (apply-directives
       meta-directives intro-essays physics-essays ontology-essays
       epistemology-essays morality-essays religion-essays politics-essays
-      consciousness-essays)))
+      consciousness-essays miscellaneous-essays)))
 
 (defn -main
   "Validates the website's graph, and generates its files"
