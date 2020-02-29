@@ -341,7 +341,23 @@
       },
     }))
 
+(def raw-html-schema
+  (schematize-type "/item/raw_html"
+    {
+      :description "Raw HTML, bypassing the schema. Use with caution.",
+      :super-type "/type/item",
+    }
+    {
+      "/contains" {
+        :description "The HTML content as a string",
+        :range-type :string,
+        :unique true,
+        :required true,
+      },
+    }))
+
 (def schema-data
   (merge essay-schema event-schema image-schema quote-schema inline-item-schema
     poem-schema segment-schema big-emoji-schema item-schema q-and-a-schema
-    bullet-list-schema contact-schema definition-schema table-schema))
+    bullet-list-schema contact-schema definition-schema table-schema
+    raw-html-schema))

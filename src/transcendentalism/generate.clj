@@ -38,7 +38,7 @@
 
 (defn- body [attrs & contents] (xml-tag "body" attrs (apply str contents)))
 
-(defn- div [attrs & contents] (xml-tag "div" attrs (apply str contents)))
+(defn div [attrs & contents] (xml-tag "div" attrs (apply str contents)))
 
 (defn- p [attrs contents] (xml-tag "p" attrs contents))
 
@@ -154,6 +154,7 @@
   (render-contact [renderer node] "Renders a /type/item/contact")
   (render-definition [renderer node] "Renders a /type/item/definition")
   (render-table [renderer node] "Renders a /type/item/table")
+  (render-raw-html [renderer node] "Renders a /type/item/raw_html")
   (render-inline-item [renderer node] "Renders a /type/item/inline"))
 
 (defn- create-renderer
@@ -187,6 +188,7 @@
           "/type/item/contact" (render-contact renderer node),
           "/type/item/definition" (render-definition renderer node),
           "/type/item/table" (render-table renderer node),
+          "/type/item/raw_html" (render-raw-html renderer node),
           "/type/item/inline" (render-inline-item renderer node),
           (assert false
             (str "ERROR - Type " (first item-type) " not supported")))))
@@ -293,6 +295,8 @@
                                                         (:obj (first val)))))))
                               (range -1 (inc col-max)))))))
                  (range -1 (inc row-max)))))))
+    (render-raw-html [renderer node]
+      (unique-or-nil node "/item/raw_html/contains"))
     (render-inline-item [renderer node]
       (let [text (unique-or-nil node "/item/inline/text"),
             tangent (unique-or-nil node "/item/inline/tangent"),

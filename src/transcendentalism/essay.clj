@@ -405,6 +405,15 @@
           triples
           (map #(->Triple % "/segment/author" whom {}) subs))))))
 
+(defn html-passthrough
+  "Takes some HTML, and passes it straight-through, effectively by-passing the
+   schema layer. This should only be used for bespoke content."
+   [html]
+   (block-item
+    (fn [sub]
+      [(types schema sub "/item/raw_html")
+       (->Triple sub "/item/raw_html/contains" html {})])))
+
 (defn directive-label-menus
   "Generates menu essays for labels"
   [triples]

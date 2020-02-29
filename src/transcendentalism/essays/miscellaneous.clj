@@ -1,6 +1,8 @@
-(ns transcendentalism.essays.miscellaneous)
+(ns transcendentalism.essays.miscellaneous
+  (:require [clojure.string :as str]))
 
 (use 'transcendentalism.essay
+     'transcendentalism.generate
      'transcendentalism.graph)
 
 ; Miscellaneous essays are essays that aren't organized elsewhere in the
@@ -235,6 +237,62 @@
         (->Triple :singularity "/essay/flow/home" :monad {}))
   )))
 
+(def scale-of-humanity
+  (essay :scale-of-humanity "The Scale of Humanity"
+    (text
+      "Humanity, in its entirety, is composed of roughly 7,530,000,000 souls at"
+      "the time of this writing. That's a <b>LOT</b> of people making up its"
+      "whole. You, no matter what you think of yourself, highly or lowly, are"
+      "but a <i>single</i> one of them. You are just 1 / 7,530,000,000th of the"
+      "entire puzzle.")
+
+    (paragraph
+      (text
+        "Humans simply aren't good at grasping numbers of this magnitude. In"
+        "order to help you, I've inserted below an image with 7,530,000,000"
+        "black pixels, one one of which is a different color than the rest"
+        "(wihte). I want you to scroll through it, and ")
+      (tangent :lost-pixel "find that pixel")
+      (text "."))
+
+    (footnote :lost-pixel
+      (text
+        "Have trouble finding it? Try cleaning your monitor. I assure you I did"
+        "nothing to try to hide it, and I heartily encourage you to keep on"
+        "searching until you find it. It may take a few minutes, but your"
+        "patience will be richly rewarded."))
+
+    (text
+      "That pixel, dearest reader, is you. That is the whole of the sum of your"
+      "contributions to the world. Take a moment to think about just how tiny,"
+      "just how utterly insignificant you are.")
+
+    (text
+      "My hope here isn't to cut you down, or to make you small. You are already"
+      "small. My hope here is to help you realize, to internalize, the humility"
+      "with whiche you should approach the term \"everybody\".")
+
+    (html-passthrough
+      (let [height 7530000]
+        (div {"style" (str/join ";" ["position:relative"
+                                     "margin-right:auto"
+                                     "margin-left:auto"
+                                     "background-color:#000"
+                                     "width:1000px"
+                                     (str "height:" height "px")
+                                     "left:-125px"])}
+          "<!-- Haha, you little cheater! -->"
+          (div {"style" (str/join ";" ["position:absolute"
+                                       "width:1px",
+                                       "height:1px"
+                                       "background-color:#fff"
+                                       (str "left:" (rand-int 1000) "px")
+                                       (str "top:" (rand-int height) "px")])}))))
+
+    ^{:no-block true} (fn [t]
+        (->Triple :scale-of-humanity "/essay/flow/home" :monad {}))
+  ))
+
 (def miscellaneous-essays
   [(directive-under-construction)
-   if-houses-were-built-like-software singularity])
+   if-houses-were-built-like-software singularity scale-of-humanity])
