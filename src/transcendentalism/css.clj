@@ -143,12 +143,15 @@
       (color (to-css-color yellow))
       (cursor "pointer"))
     (css "div" {"class" "authors-parent"}
-      (position "relative"))
+      (position "relative")
+      (border-style "none" "solid" "none" "none")
+      (border-width "1px")
+      (border-color (to-css-color orange)))
     (css "div" {"class" "authors-chain"}
       (position "relative")
       (width "30px")
       (border-style "dashed")
-      (border-color (to-css-color red))
+      (border-color (to-css-color orange))
       (border-width "1px" "0" "0" "0")
       (right "35px")
       (bottom "-10px"))
@@ -157,7 +160,7 @@
       (width "100px")
       (right "-130px")
       (bottom "0px")
-      (color (to-css-color red)))
+      (color (to-css-color orange)))
     (keyframes "shake"
       (keyframe-points ["from" "to"]
         (transform "translate3d(0, 0, 0)"))

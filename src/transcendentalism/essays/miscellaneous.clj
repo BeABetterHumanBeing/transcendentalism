@@ -200,7 +200,8 @@
     "growth is by leaps and bounds. In many (non-logistic) graph representations,"
     "the portion after this elbow becomes seemingly verticle.")
 
-  ; TODO - image of a typical hockey-stick graph.
+  (image "../resources/exponential_growth.png"
+         "Diagram of exponential growth")
 
   (paragraph
     (text "Unfortunately, life in the vertical world ")
@@ -217,7 +218,8 @@
       "Almost every single 'exponential' trend (like population growth, or"
       "Moore's law) ends up simply being the first half of logistic growth.")
 
-    ; TODO - image of logistic growth
+    (image "../resources/logistic_growth.png"
+           "Diagram of logistic growth, showing it asymptotically approaching a limit")
 
     (text
       "Moreover, if the singularity is the elbow in the hockey stick, then it's"
