@@ -310,7 +310,7 @@
       },
       "/part_of_speech" {
         :description "The part of speech the word belongs to",
-        :range-type [:noun],
+        :range-type [:noun :adjective],
         :unique true,
         :required true,
       },

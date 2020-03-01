@@ -259,6 +259,7 @@
       (let [word (unique-or-nil node "/item/definition/word"),
             part-of-speech ({
               :noun "noun",
+              :adjective "adj.",
               } (unique-or-nil node "/item/definition/part_of_speech")
               "unk"),
             definitions (get-ordered-objs node "/item/definition/definition")]
