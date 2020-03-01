@@ -160,8 +160,7 @@
               "conscious. For the counterargument, consider ")
         (tangent (f 2) "John Searle's")
         (text " ")
-        (link "https://en.wikipedia.org/wiki/Chinese_room" "Chinese Room")
-        (text "."))
+        (link "https://en.wikipedia.org/wiki/Chinese_room" "Chinese Room") dot)
 
       (footnote (f 2)
         (text "I'm required to tell you my joke that I don't think John Searle"
@@ -257,8 +256,7 @@
         "social gathering \"clothes and self-decoration\" is more frequently used."
         "For yet another example, when getting cut open by a surgeon for a"
         "transplant, the \"brain\" is ")
-      (tangent (f 1) "used")
-      (text "."))
+      (tangent (f 1) "used") dot)
 
     (footnote (f 1)
       (text "As the newly incorporated organs join your physical body, and the"

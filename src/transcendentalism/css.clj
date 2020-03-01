@@ -191,7 +191,7 @@
       (grid-row-gap "8px"))
     (css "div" {"class" "q_and_a_header"}
       (font-weight "bold"))
-    (css "ul" {"class" "bullet_list"}
+    (css "" {"class" "bullet_list"}
       (margin-block-start "5px")
       (margin-block-end "5px"))
     (css "div" {"class" "contact-centered"}

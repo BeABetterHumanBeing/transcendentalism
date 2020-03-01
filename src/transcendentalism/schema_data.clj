@@ -278,6 +278,12 @@
         :range-type "/type/segment",
         :required true,
       },
+      "/is_ordered" {
+        :description "Whether the list should be ordered, or bullet-pointed",
+        :range-type :bool,
+        :unique true,
+        ; TODO - add 'false' as the default value
+      },
     }))
 
 (def contact-schema

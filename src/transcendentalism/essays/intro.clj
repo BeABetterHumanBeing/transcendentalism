@@ -66,7 +66,7 @@
           "see the code, you can find it on ")
         (link "https://github.com/BeABetterHumanBeing/transcendentalism"
               "Github &#8594 BeABetterHumanBeing &#8594 transcendentalism")
-        (text ".")))
+        dot))
 
     (paragraph
       (text
@@ -135,8 +135,7 @@
         (text
           "I tell a lot of stories, so it won't be that hard, if you can put up"
           "with my ")
-        (tangent :sub-footnote "rambling")
-        (text "."))
+        (tangent :sub-footnote "rambling") dot)
 
       (footnote :sub-footnote
         (paragraph
@@ -192,8 +191,7 @@
         "needs, to tell you what you might find interesting and useful, and to"
         "spare you the things you might rather put off until later. Additionally,"
         "I regret that I cannot learn anything from <i>you</i>; this is decidedly ")
-      (tangent (f 1) "a one-way road")
-      (text "."))
+      (tangent (f 1) "a one-way road") dot)
 
     (footnote (f 1)
       (q-and-a

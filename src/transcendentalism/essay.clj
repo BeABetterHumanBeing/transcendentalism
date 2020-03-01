@@ -296,6 +296,9 @@
       [((apply text lines) t)
        (->Triple (item-sub k) "/item/inline/url" url {})])))
 
+; A very commonly-used particle.
+(def dot (text "."))
+
 (defn q-and-a
   [q a]
   (block-item
@@ -308,24 +311,33 @@
          (->Triple sub "/item/q_and_a/question" q-sub {})
          (->Triple sub "/item/q_and_a/answer" a-sub {})]))))
 
+(defn- inner-bullet-list
+  [sub is-ordered header-or-nil & items]
+  (let [item-subs (map #(sub-suffix sub (str "i" %))
+                       (range (count items))),
+        header-sub (sub-suffix sub "h")]
+    (concat
+      (types schema sub "/item/bullet_list")
+      (if (nil? header-or-nil)
+        []
+        [(header-or-nil (create-essay-thread header-sub))
+         (->Triple sub "/item/bullet_list/header" header-sub {})])
+      (if is-ordered
+        [(->Triple sub "/item/bullet_list/is_ordered" true {})]
+        [])
+      (map #((first %) (create-essay-thread (second %)))
+           (map vector items item-subs))
+      (map #(->Triple sub "/item/bullet_list/point" (first %)
+                      {"/order" (second %)})
+           (map vector item-subs (range (count item-subs)))))))
+
 (defn bullet-list
   [header-or-nil & items]
-  (block-item
-    (fn [sub]
-      (let [item-subs (map #(sub-suffix sub (str "i" %))
-                           (range (count items))),
-            header-sub (sub-suffix sub "h")]
-        (concat
-          (types schema sub "/item/bullet_list")
-          (if (nil? header-or-nil)
-            []
-            [(header-or-nil (create-essay-thread header-sub))
-             (->Triple sub "/item/bullet_list/header" header-sub {})])
-          (map #((first %) (create-essay-thread (second %)))
-               (map vector items item-subs))
-          (map #(->Triple sub "/item/bullet_list/point" (first %)
-                          {"/order" (second %)})
-               (map vector item-subs (range (count item-subs)))))))))
+  (block-item #(apply inner-bullet-list % false header-or-nil items)))
+
+(defn numbered-list
+  [header-or-nil & items]
+  (block-item #(apply inner-bullet-list % true header-or-nil items)))
 
 (defn contact-email
   [email-address]

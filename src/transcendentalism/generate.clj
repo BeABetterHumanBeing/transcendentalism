@@ -48,6 +48,8 @@
 
 (defn- ul [attrs & contents] (xml-tag "ul" attrs (apply str contents)))
 
+(defn- ol [attrs & contents] (xml-tag "ol" attrs (apply str contents)))
+
 (defn- li [attrs contents] (xml-tag "li" attrs contents))
 
 (defn- hr [] (str "<hr>"))
@@ -227,7 +229,8 @@
           (div {} (render-block renderer a-block)))))
     (render-bullet-list [renderer node]
       (let [header-block-or-nil (unique-or-nil node "/item/bullet_list/header"),
-            point-blocks (get-ordered-objs node "/item/bullet_list/point")]
+            point-blocks (get-ordered-objs node "/item/bullet_list/point"),
+            is_ordered (unique-or-nil node "/item/bullet_list/is_ordered")]
         (div {}
           (if (nil? header-block-or-nil)
               ""
@@ -235,7 +238,9 @@
                 (render-block
                   renderer
                   header-block-or-nil)))
-          (apply ul {"class" "bullet_list"}
+          (apply
+            (if (or (nil? is_ordered) (not is_ordered)) ul ol)
+            {"class" "bullet_list"}
             (into [] (map #(li {} (render-block renderer %)) point-blocks))))))
     (render-contact [renderer node]
       (let [email-address (unique-or-nil node "/item/contact/email"),

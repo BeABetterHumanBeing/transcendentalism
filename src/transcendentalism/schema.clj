@@ -212,6 +212,8 @@
                        (string? (:obj triple)))
                   (and (= range-type :number)
                        (number? (:obj triple)))
+                  (and (= range-type :bool)
+                       (instance? Boolean (:obj triple)))
                   (and (= range-type :time)
                        (is-valid-time (:obj triple)))
                   (and (string? range-type)
