@@ -4,6 +4,7 @@
     [clojure.string :as str]))
 
 (use 'transcendentalism.encoding
+     'transcendentalism.generate
      'transcendentalism.graph
      'transcendentalism.schema)
 
@@ -298,6 +299,11 @@
 
 ; A very commonly-used particle.
 (def dot (text "."))
+
+(defn m
+  "Makes some text monospaced"
+  [& lines]
+  (span {"class" "mono"} (str/join " " lines)))
 
 (defn q-and-a
   [q a]

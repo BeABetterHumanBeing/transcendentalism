@@ -42,7 +42,7 @@
 
 (defn- p [attrs contents] (xml-tag "p" attrs contents))
 
-(defn- span [attrs & contents] (xml-tag "span" attrs (apply str contents)))
+(defn span [attrs & contents] (xml-tag "span" attrs (apply str contents)))
 
 (defn- a [attrs contents] (xml-tag "a" attrs contents))
 

@@ -745,83 +745,100 @@
 (def analytical-science-example
   (let [f (footnoter :analytical-science-example)]
   (essay :analytical-science-example "Three Logicians Walk into a Bar"
-    (text "TODO")
+    (quote*
+      (str/join " " [
+        "Three logicians walk into a bar. The bartender asks them, \"do you all"
+        "want a beer?\". The first is unsure, and replies \"I don't know\". The"
+        "second is likewise unsure, and replies \"I don't know\". The third"
+        "confidently answers \"yes!\". The bartender serves them all beers."
+      ]))
+
+    (numbered-list
+      (text "Here's a formalization of the proof that demonstrates the joke's"
+            "consistency (i.e. lack of contradiction).")
+      (numbered-list
+        (text "Let" (m "^") "be the binary AND operator.")
+        (text "<b>Axiom</b>:" (m "false ^ P") "is" (m "false") "for any"
+              "proposition" (m "P") ".")
+        (text "<b>Axiom</b>:" (m "true ^ true") "is" (m "true") ".")
+        (text "<b>Axiom</b>: Associativity." (m "P ^ Q") "implies" (m "Q ^ P")
+              "for any propositions" (m "P") "and" (m "Q") "."))
+      (numbered-list
+        (text "Let" (m "==") "be the binary EQUALITY operator.")
+        (text "<b>Axiom</b>:" (m "P == unsure") "and" (m "P == false") "implies"
+              "a contradiction for any proposition" (m "P") "."))
+      (text "Let" (m "L_n") "be the proposition that logician" (m "n")
+            "wants a beer.")
+      (numbered-list
+        (text "Proposition" (m "Q == (L_1 ^ L_2) ^ L_3") "(the bartender's question).")
+        (text "<b>Axiom</b>:" (m "Q == true") "implies that the bartender serves"
+              "all logicians beers."))
+      (text "Let" (m "Q_n") "(logician" (m "n") "'s answer) be the value of"
+            (m "Q") "according to logician" (m "n") ". This evaluates to" (m "Q")
+            "with" (m "L_n") "being appropriately substituted.")
+      (numbered-list
+        (text (m "Q_1 == unsure") "by joke.")
+        (text "Suppose" (m "L_1 == false") ".")
+        (text (m "Q_1 == (false ^ L_2) ^ L_3") ", by (5) and (6.1).")
+        (text (m "Q_1 == (false ^ L_2) ^ L_3") "implies" (m "Q_1 == false ^ L_3")
+              ", by (1.1) and (6.2).")
+        (text (m "Q_1 == false ^ L_3") "implies" (m "Q_1 == false")
+              ", by (1.1) and (6.3).")
+        (text (m "L_1 == false") "implies a contradiction, by (2.1) and (6.4)."))
+      (text "Therefore" (m "L_1") "is true, by (6.1) and (6.5).")
+      (numbered-list
+        (text (m "Q_2 == unsure") "by joke.")
+        (text "Suppose" (m "L_2 == false") ".")
+        (text (m "Q_2 == (L_1 ^ false) ^ L_3") ", by (5) and (8.1).")
+        (text (m "Q_2 == (L_1 ^ false) ^ L_3") "implies"
+              (m "Q_2 == (true ^ false) ^ L_3") ", by (7) and (8.2).")
+        (text (m "Q_2 == (true ^ false) ^ L_3") "implies"
+              (m "Q_2 == (false ^ true) ^ L_3") ", by (1.3) and (8.3).")
+        (text (m "Q_2 == (false ^ true) ^ L_3") "implies" (m "Q_2 == false ^ L_3")
+              ", by (1.1) and (8.4).")
+        (text (m "Q_2 == false ^ L_3") "implies" (m "Q_2 == false")
+              ", by (1.1) and (8.5).")
+        (text (m "L_2 == false") "implies a contradiction, by (2.1) and (8.6)."))
+      (text "Therefore" (m "L_2 == true") ", by (8.1) and (8.7).")
+      (numbered-list
+        (text (m "Q_3 == true") ", by joke.")
+        (text "Suppose" (m "L_3 == false") ".")
+        (text (m "Q_3 == (L_1 ^ L_2) ^ false") ", by (5) and (10.1).")
+        (text (m "Q_3 == (L_1 ^ L_2) ^ false") "implies" (m "Q_3 == (true ^ L_2)"
+              "^ false") ", by (7) and (10.2).")
+        (text (m "Q_3 == (true ^ L_2) ^ false") "implies" (m "Q_3 == (true ^ true)"
+              "^ false") ", by (9) and (10.3).")
+        (text (m "Q_3 == (true ^ true) ^ false") "implies" (m "Q_3 == true ^ false")
+              ", by (1.2) and (10.4).")
+        (text (m "Q_3 == true ^ false") "implies" (m "Q_3 == false ^ true")
+              ", by (1.3) and (10.5).")
+        (text (m "Q_3 == false ^ true") "implies" (m "Q_3 == false")
+              ", by (1.1) and (10.6).")
+        (text (m "L_3 == false") "implies a contradiction, by (2.1) and (10.7)."))
+      (text "Therefore" (m "L_3 == true") ", by (10.1) and (10.8).")
+      (text (m "Q == (L_1 ^ L_2) ^ L_3") "implies" (m "Q == (true ^ L_2) ^ L_3")
+            ", by (4) and (7).")
+      (text (m "Q == (true ^ L_2) ^ L_3") "implies" (m "Q == (true ^ true) ^ L_3")
+            ", by (9) and (12).")
+      (text (m "Q == (true ^ true) ^ L_3") "implies" (m "Q == (true ^ true) ^ true")
+            ", by (11) and (13).")
+      (text (m "Q == (true ^ true) ^ true") "implies" (m "Q == true ^ true")
+            ", by (1.2) and (14).")
+      (text (m "Q == true ^ true") "implies" (m "Q == true") ", by (1.2) and (15).")
+      (text (m "Q == true") "implies that the bartender serves all logicians"
+            "beers, by (4.1) and (16). <b>QED</b>."))
+
+    (paragraph
+      (text "As you can see, formalizations are often cumbersome, unwieldy,"
+            "long, and difficult to follow. It's therefore no surprise that"
+            "most analysis ")
+      (tangent (f 1) "does not apply level of rigor")
+      (text "!"))
+
+    (footnote (f 1)
+      (text "A more rigorous formalization would be a machine-readable one, but"
+            "it is omitted on account that this essay is being read by humans."))
   )))
-
-; ```none
-; Three logicians walk into a bar. The bartender asks them, "do you all want a
-; beer?". The first is unsure, and replies "I don't know". The second is likewise
-; unsure, and replies "I don't know". The third confidently answers "yes!". The
-; bartender serves them all beers.
-; ```
-
-; Here's a formalization of the proof that demonstrates the joke's consistency
-; (i.e. lack of contradiction).
-
-; 1.  Let `^` be the binary AND operator.
-;     1.  Axiom: `false ^ P` is `false` for any proposition `P`.
-;     1.  Axiom: `true ^ true` is `true`.
-;     1.  Axiom: Associativity. `P ^ Q` implies `Q ^ P` for any propositions `P`
-;         and `Q`.
-; 1.  Let `==` be the binary EQUALITY operator.
-;     1.  Axiom: `P == unsure` and `P == false` implies a contradiction for any
-;         proposition `P`.
-; 1.  Let `L_n` be the proposition that logician `n` wants a beer.
-; 1.  Let `Q == (L_1 ^ L_2) ^ L_3` (the bartender's question).
-;     1.  Axiom: `Q == true` implies that the bartender serves all logicians
-;         beers.
-; 1.  Let `Q_n` (logician `n`'s answer) be the value of `Q` according to logician
-;     `n`. This evaluates to `Q` with `L_n` being appropriately substituted.
-; 1.  `Q_1 == unsure`, by joke.
-;     1.  Suppose `L_1 == false`.
-;     1.  `Q_1 == (false ^ L_2) ^ L_3`, by (5) and (6.1).
-;     1.  `Q_1 == (false ^ L_2) ^ L_3` implies `Q_1 == false ^ L_3`, by (1.1) and
-;         (6.2).
-;     1.  `Q_1 == false ^ L_3` implies `Q_1 == false`, by (1.1) and (6.3).
-;     1.  `L_1 == false` implies a contradiction, by (2.1) and (6.4).
-; 1.  Therefore `L_1` is true, by (6.1) and (6.5).
-; 1.  `Q_2 == unsure`, by joke.
-;     1.   Suppose `L_2 == false`.
-;     1.   `Q_2 == (L_1 ^ false) ^ L_3`, by (5) and (8.1).
-;     1.   `Q_2 == (L_1 ^ false) ^ L_3` implies `Q_2 == (true ^ false) ^ L_3`, by
-;          (7) and (8.2).
-;     1.   `Q_2 == (true ^ false) ^ L_3` implies `Q_2 == (false ^ true) ^ L_3`, by
-;          (1.3) and (8.3).
-;     1.   `Q_2 == (false ^ true) ^ L_3` implies `Q_2 == false ^ L_3`, by (1.1)
-;          and (8.4).
-;     1.   `Q_2 == false ^ L_3` implies `Q_2 == false`, by (1.1) and (8.5).
-;     1.   `L_2 == false` implies a contradiction, by (2.1) and (8.6).
-; 1.  Therefore `L_2 == true`, by (8.1) and (8.7).
-; 1.  `Q_3 == true`, by joke.
-;     1.   Suppose `L_3 == false`.
-;     1.   `Q_3 == (L_1 ^ L_2) ^ false`, by (5) and (10.1).
-;     1.   `Q_3 == (L_1 ^ L_2) ^ false` implies `Q_3 == (true ^ L_2) ^ false`, by
-;          (7) and (10.2).
-;     1.   `Q_3 == (true ^ L_2) ^ false` implies `Q_3 == (true ^ true) ^ false`,
-;          by (9) and (10.3).
-;     1.   `Q_3 == (true ^ true) ^ false` implies `Q_3 == true ^ false`, by (1.2)
-;          and (10.4).
-;     1.   `Q_3 == true ^ false` implies `Q_3 == false ^ true`, by (1.3) and
-;          (10.5).
-;     1.   `Q_3 == false ^ true` implies `Q_3 == false`, by (1.1) and (10.6).
-;     1.   `L_3 == false` implies a contradiction, by (2.1) and (10.7).
-; 1.  Therefore `L_3 == true`, by (10.1) and (10.8).
-; 1.  `Q == (L_1 ^ L_2) ^ L_3` implies `Q == (true ^ L_2) ^ L_3`, by (4) and (7).
-; 1.  `Q == (true ^ L_2) ^ L_3` implies `Q == (true ^ true) ^ L_3`, by (9) and
-;     (12).
-; 1.  `Q == (true ^ true) ^ L_3` implies `Q == (true ^ true) ^ true`, by (11) and
-;     (13).
-; 1.  `Q == (true ^ true) ^ true` implies `Q == true ^ true`, by (1.2) and (14).
-; 1.  `Q == true ^ true` implies `Q == true`, by (1.2) and (15).
-; 1.  `Q == true` implies that the bartender serves all logicians beers, by (4.1)
-;     and (16). QED.
-
-; As you can see, formalizations are often cumbersome, unwieldy, long, and
-; difficult to follow. It's therefore no surprise that most analysis does not
-; apply that level of rigor!
-
-; NOTE: A more rigorous formalization would be a machine-readable one, but it is
-; omitted on account that this essay is being read by humans.
 
 ; ## Empiricism
 

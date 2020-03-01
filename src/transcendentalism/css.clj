@@ -142,6 +142,10 @@
     (css "span" {"class" "see-also"}
       (color (to-css-color yellow))
       (cursor "pointer"))
+    (css "span" {"class" "mono"}
+      (font-family "Monaco" "monospace")
+      (font-size "small")
+      (color (to-css-color light-blue)))
     (css "div" {"class" "authors-parent"}
       (position "relative")
       (border-style "none" "solid" "none" "none")
