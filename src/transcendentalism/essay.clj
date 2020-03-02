@@ -4,8 +4,8 @@
     [clojure.string :as str]))
 
 (use 'transcendentalism.encoding
-     'transcendentalism.generate
      'transcendentalism.graph
+     'transcendentalism.html
      'transcendentalism.schema)
 
 (defprotocol EssayThread
@@ -374,7 +374,7 @@
                     {"/order" i}))
         (range (count definitions)))])))
 
-(defn table
+(defn matrix
   [rows columns contents]
   (block-item
     (fn [sub]

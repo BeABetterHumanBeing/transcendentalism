@@ -2,8 +2,8 @@
   (:require [clojure.string :as str]))
 
 (use 'transcendentalism.essay
-     'transcendentalism.generate
      'transcendentalism.graph
+     'transcendentalism.html
      'transcendentalism.svg)
 
 ; The monad

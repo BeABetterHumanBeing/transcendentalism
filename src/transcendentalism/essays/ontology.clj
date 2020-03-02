@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]))
 
 (use 'transcendentalism.essay
-     'transcendentalism.generate)
+     'transcendentalism.html)
 
 ; Ontology
 ; This essay serves as the entry point to all ontological essays: those that

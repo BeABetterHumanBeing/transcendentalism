@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]))
 
 (use 'transcendentalism.essay
-     'transcendentalism.generate)
+     'transcendentalism.html)
 
 ; Materialism
 ; This essay serves as the entry point to all physics- and material-world-
@@ -416,7 +416,7 @@
         "would be bosons, and the nodes, their interactions with fermions."))
 
     (let [dims ["A" "B" "C" "D"]]
-      (table
+      (matrix
         dims dims
         [[nil "A-B" "A-C" nil]
          ["A-B" nil nil "B-D"]

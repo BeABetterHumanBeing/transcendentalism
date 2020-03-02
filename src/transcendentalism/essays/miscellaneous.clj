@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]))
 
 (use 'transcendentalism.essay
-     'transcendentalism.generate
+     'transcendentalism.html
      'transcendentalism.graph)
 
 ; Miscellaneous essays are essays that aren't organized elsewhere in the
