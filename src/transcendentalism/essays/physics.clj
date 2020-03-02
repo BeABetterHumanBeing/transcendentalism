@@ -841,96 +841,170 @@
             "it is omitted on account that this essay is being read by humans."))
   )))
 
-; ## Empiricism
+(def empirical-science
+  (let [f (footnoter :empirical-science)]
+  (essay :empirical-science "Empiricism"
+    (text
+      "Empiricism works in the " (b "material") " domain of " (b "physical reality")
+      ". While it can be done by anyone, in practice most emprical inquiries"
+      "are expensive and require specialized equipment, and so is usually only"
+      "done by trained scientists working at institutions with laboratories"
+      "set up for the purpose of enabling their inquiries. Example disciplines"
+      "include physics, chemistry, biology, volcanology, and pharmacology.")
 
-; Empiricism works in the **material** domain of **physical reality**. While it
-; can be done by anyone, in practice most emprical inquiries are expensive and
-; require specialized equipment, and so is usually only done by trained scientists
-; working at institutions with laboratories set up for the purpose of enabling
-; their inquiries. Example disciplines include physics, chemistry, biology,
-; volcanology, and pharmacology.
+    (text
+      "Empiricism works by constructing, embelleshing, and re-evaluating an"
+      "understanding of physical reality that's composed of scientific "
+      (b "theories") ". Theories start off as plausible explanations, which are"
+      "then decomposed into specific, testable " (b "experimental hypotheses")
+      ". After the experiment is conducted, the results are analyzed to"
+      "determine whether a reasonable default assumption, the "
+      (b "null hypothesis") ", was false.")
 
-; Empiricism works by constructing, embelleshing, and re-evaluating an
-; understanding of physical reality that's composed of scientific **theories**.
-; Theories start off as plausible explanations, which are then decomposed into
-; specific, testable **experimental hypotheses**. **Experiments** are designed to
-; evaluate whether there's merit to a given hypothesis compared to some reasonable
-; default **null hypothesis**. After the experiment is conducted, the results are
-; analyzed to determine whether the reasonable default was in fact rejected.
+    (text
+      "Much of empiricism is also subject to peer review, in which third-party"
+      "scientists with relevant background knowledge evaluate the quality and"
+      "results of an experiment. Furthermore, because the experiment design is"
+      "published along with the results, the experiment can be re-run by other"
+      "groups of scientists to confirm or refute the results.")
 
-; Much of empiricism is also subject to peer review, in which third-party
-; scientists with relevant background knowledge evaluate the quality and results
-; of an experiment. Furthermore, because the experiment design is published along
-; with the results, the experiment can be re-run by other groups of scientists to
-; confirm or deny the results.
+    (bullet-list
+      (text "Empirical science is founded on a number of assumptions:")
+      (text
+        "That the results being examined are objective, or subject-invariant. This"
+        "means that any scientist (with the appropriate resources) should be able"
+        "to duplicate any experiment, and that the results of the experiment"
+        "should be applicable to everyone.")
+      (paragraph
+        (text
+          "Assumes the universe is isotropic, or that the process behind physical"
+          "reality is generally the same in all places and times. Essentially,"
+          "it says that scientific experiments don't intrinsically depend on "
+          (i "where") " they are performed, " (i "which") " direction or"
+          "orientation they are performed along, and " (i "when") " they are ")
+        (tangent (f 1) "conducted") dot))
 
-; ### Empirical Truth
+    (footnote (f 1)
+      (text "Note that relativity does bend this rule somewhat, where physical"
+            "results begin to fall apart or act differently at high speeds, low"
+            "temperatures, and small scales. Nevertheless, if one controls for"
+            "these variables, one reclaims the isotropic assumption."))
 
-; Empirical science is founded on a number of assumptions:
+    (paragraph
+      (text "Empirical truth operates within ")
+      (tangent (f 2) (i "paradigms"))
+      (text
+        ", or broader consensuses in the scientific community. The general"
+        "pattern of empirical progress is that a paradigm will lay out a way of"
+        "thinking about the world, and the scientific community explores the"
+        "limits of the paradigm's application in small, incremental advances."
+        "Eventually, however, the limits become too constrained, ")
+      (tangent (f 3) "the failure cases too persistent")
+      (text
+        " and the workarounds too clunky, at which point the community will"
+        "start to be open to considering a newer, more powerful paradigm to"
+        "resolve these contradictions. Once a new paradigm emerges that appears"
+        "to explain the existing empirical phenomena as well as the contradictions"
+        "that plagued the old paradigm, the consensus will rapidly shift to the"
+        "new paradigm, and then proceed in the slow, incremental fashion again"
+        "from there."))
 
-; *   That the results being examined are objective, or subject-invariant. This
-;     means that any scientist (with the appropriate resources) should be able to
-;     duplicate any experiment, and that the results of the experiment should be
-;     applicable to everyone.
-; *   Assumes the universe is isotropic, or that the process behind physical
-;     reality is generally the same in all places and times. Essentially, it says
-;     that scientific experiments don't intrinsically depend on *where* they are
-;     performed, *which* direction or orientation they are performed along, and
-;     *when* they are conducted.
-;     *   Note that relativity does bend this rule somewhat, where physical
-;         results begin to fall apart or act differently at high speeds, low
-;         temperatures, and small scales. Nevertheless, if one controls for these
-;         variables, one reclaims the isotropic assumption.
+    (footnote (f 2)
+      (paragraph
+        (text (b "Fun fact") ": the word 'paradigm' originally referred to what"
+              "we might today call \"the canonical example\". All that changed"
+              "in the wake of Thomas Kuhn's ")
+        (link "https://en.wikipedia.org/wiki/The_Structure_of_Scientific_Revolutions"
+              "Structure of Scientific Revolutions")
+        (text ", which introduced the term " (i "paradigm shift") " to the world.")))
 
-; Empirical truth operates within *paradigms*, or broader consensuses in the
-; scientific community. The general pattern of empirical progress is that a
-; paradigm will lay out a way of thinking about the world, and the scientific
-; community explores the limits of this paradigm's application in small,
-; incremental advances. Eventually, however, the limits become too constrained,
-; the failure cases too persistent and the workarounds too clunky, at which point
-; the community will start to be open to a newer, more powerful paradigm to
-; resolve these contradictions. Once a new paradigm emerges that appears to
-; explain the existing empirical phenomena as well as the contradictions that
-; plagued the old paradigm, the consensus will rapidly shift to the new paradigm,
-; and then proceed in the slow, incremental fashion again from there.
+    (footnote (f 3)
+      (paragraph
+        (text
+          "Consider the beta-amyloid hypothesis for Alzheimer's, which says the"
+          "disease is caused by build-up of protein plaques in the brain. For"
+          "all the years and money being put into research for treatments, there"
+          "have been ")
+        (tangent (f 4) "zero successes") dot))
 
-; The key observation here is that the body of empirical knowledge is not
-; monolithic, and its progress is not constant. Despite its assumption of
-; objectivity, it is very much a social phenomenon.
+    (footnote (f 4)
+      ; TODO see-also ideological failure (where ideology is wrong, but so)
+      ; entrenched that it's incapable of self-correction.
+      (text "It's actually an excellent example of ideological failure."))
 
-; NOTE: The word *paradigm* used to mean *the canonical example* of a thing. All
-; that changed in the wake of Thomas Kuhn's
-; [Structure of Scientific Revolutions](https://en.wikipedia.org/wiki/The_Structure_of_Scientific_Revolutions),
-; which introduced the term *paradigm shift* to the world. Generally good book to
-; read; I do recommend.
+    (text
+      "The key observation here is that the body of empirical knowledge is not"
+      "monolithic, and its progress is not constant. Despite its assumption of"
+      "objectivity, it is very much a social phenomenon.")
 
-; ### Scientific Method
+    (numbered-list
+      (text "Most empirical science depends on the " (b "scientific method") ".")
+      (text "See an interesting phenomenon that you would like to learn more about.")
+      (text "Develop a theory about how the phenomenon works, and then select a"
+            "testable hypothesis about the phenomenon that would distinguish a"
+            "world in which your theory is true against one in which it isn't.")
+      (numbered-list
+        (text "Design an experiment that tests this hypothesis.")
+        (text "Select a null hypothesis, a statement that reflects the state of"
+              "the world as though the phenomenon did not exist.")
+        (text "Determine exactly what evidence would need be gathered in order"
+              "to test the hypothesis.")
+        (paragraph
+          (text
+            "Determine the power level of the experiment, which is the strength of"
+            "the effect you'd need to see in order to be satisfied that your null"
+            "hypothesis must be false. Note that this value is arbitrary, though"
+            "an unfortunate number of researchers grab " (m "p=0.05") " and ")
+          (tangent (f 5) "run with it blindly") dot))
+      (numbered-list
+        (text "Conduct the experiment.")
+        (paragraph
+          (text "Set up your environment to ")
+          (tangent (f 6) "control for extraneous influences") dot)
+        (text "Collect your data in a means that prevents you as the experimenter"
+              "from subtley messing with the results."))
+      (text "Analyze the data according to your original test plan. Draw"
+            "conclusions based off of that plan."))
 
-; Much empirical science depends on the **scientific method**.
+    (footnote (f 5)
+      (q-and-a
+        (text "What does p-value mean?")
+        (text "The p-value is the probability that an experiment would see a"
+              "result at least as extreme as the one actually observed, provided"
+              "that the null hypothesis were true. Repeat after me: "
+              (b "p-value is not a margin of confidence") "!"))
+      (q-and-a
+        (text "What are some other common p-values?")
+        ; TODO - double-check that I have the right information for six-sigmas.
+        (text
+          "Depends on the discipline. As the p-value gets smaller, the amount"
+          "of data required goes up, and with it the cost of the experiment."
+          "The generally most rigorous discipline is physics, whose gold-standard"
+          "is six-sigmas, where one sigma is 1%."))
+      (q-and-a
+        (text "How do I choose the right p-value?")
+        (text "The p-value should be chosen by the key decision-maker. This is"
+              "whoever will depend on the results of the experiment, and it is"
+              "their job to choose a value that trades off the expense of the"
+              "experiment (they're also typically the bank-roller) against the"
+              "amount of risk they are willing to accept that they might get"
+              "an incorrect result."))
+      (q-and-a
+        (text "Do I have to have a p-value?")
+        (text "No. p-values are figment of using frequentist statistical"
+              "analysis to evaluate results. If you are using Bayesian analysis,"
+              ; TODO add link to confidence interval.
+              "you will want a confidence interval. And if you don't care about"
+              "rigor or empirical correctness at all, you can ignore it altogether.")))
 
-; 1.  See an interesting phenomenon that you would like to learn more about.
-; 1.  Develop a theory about how the phenomenon works, and then select a testable
-;     hypothesis about the phenomenon.
-; 1.  Design an experiment that tests this hypothesis.
-;     1.  Select a null hypothesis, a statement that reflects the state of the
-;         world as though the phenomenon did not exist.
-;     1.  Determine exactly what evidence would need be gathered in order to test
-;         the hypothesis.
-;     1.  Determine the power level of the experiment, which is the strength of
-;         the effect you'd need to see in order to be satisfied that your null
-;         hypothesis must be false. Note that this value is arbitrary, though an
-;         unfortunate amount of science grabs "p=0.05" and runs with it blindly.
-; 1.  Conduct the experiment.
-;     1.  Set up your environment to control for extraneous influences.
-;     1.  Collect your data in a means that prevents you as the experimenter from
-;         subtley messing with the results.
-; 1.  Analyze the data according to your original test plan. Draw conclusions
-;     based off of that plan.
-
-; NOTE: Different disciplines will adapt and modify the scientific method to suit
-; their particular scenario. For example, some disciplines aren't capable of
-; setting up controlled experiments, and so much draw observations as they appear
-; naturally beyond the control of the empiricist.
+    (footnote (f 6)
+      (text
+        "Different disciplines will adapt and modify the scientific method to"
+        "suit their particular area of study. For example, some disciplines"
+        "(like volcanology) aren't capable of setting up controlled experiments,"
+        "and so much draw observations as they appear naturally beyond the"
+        "control of the empiricist."))
+  )))
 
 ; ### Example - Zodiac Compatibility
 
@@ -969,7 +1043,7 @@
 
 ; *(Determine the power level of the experiment, which is the strength of the
 ; effect you'd need to see in order to be satisfied that your null hypothesis must
-; be false.)* I'm going to go ahead and blindly grab p=0.05. What this means is
+; be false.)* I'm going to be unfortunate and go ahead and blindly grab p=0.05. What this means is
 ; that I am satisfied with rejecting the null hypothesis if a more extreme result
 ; than the one observed from the data has a less than 5% chance of occurring. I
 ; have no good reason for choosing 0.05 in particular; there's no money or lives
@@ -1138,12 +1212,6 @@
 ; exes share a birthday along with another good friend. None of these observations
 ; are supported by this evidence.
 
-(def empirical-science
-  (let [f (footnoter :empirical-science)]
-  (essay :empirical-science "Empiricism"
-    (text "TODO")
-  )))
-
 (def empirical-science-example
   (let [f (footnoter :empirical-science-example)]
   (essay :empirical-science-example "Empiricism"
@@ -1168,7 +1236,7 @@
    (essay-series [:three-sciences :empirical-science :empirical-science-example])
    (essay-series [:three-sciences :phenomenological-science :phenomenological-science-example])
    (directive-under-construction
-     :empirical-science :empirical-science-example :phenomenological-science
+     :empirical-science-example :phenomenological-science
      :phenomenological-science-example :modeling)
    materialism universal-model universal-order universal-shape speed-limits
    three-sciences analytical-science analytical-science-example empirical-science
