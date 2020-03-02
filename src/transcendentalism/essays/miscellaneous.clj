@@ -11,7 +11,7 @@
 
 (def if-houses-were-built-like-software
   (let [ifwbls (fn [& lines]
-                 (apply text "<b>If houses were built like software</b>, " lines))]
+                 (apply text (b "If houses were built like software") ", " lines))]
   (essay :if-houses-were-built-like-software "If Houses Were Built Like Software"
     (ifwbls
       "the door hinges would've been made by Allan. He's been making hinges his"
@@ -109,7 +109,7 @@
   (essay :singularity "The Singularity"
 
   (text
-    "The <b>singularity</b> is almost upon us! While its realization has been"
+    "The " (b "singularity") " is almost upon us! While its realization has been"
     "patiently waiting in the wings, brooding and gestating, the idea of it has"
     "been percolating somewhat freely through the future-minded circles I often"
     "find myself in.")
@@ -162,7 +162,7 @@
     "unleashed manners and styles of living no previous generation of human"
     "beings had ever conceived of, and the greater sense took hold of advanced"
     "industrial society that it was beginning to witness the advent of a new"
-    "phenomenon: the <b>future</b>.")
+    "phenomenon: the " (b "future") ".")
 
   (paragraph
     (text
@@ -190,7 +190,7 @@
       "Just pause and think about any particular piece of technology that we now"
       "take for granted. It's difficult, almost impossible, to imagine just what"
       "changes something like \"refridgeration\" brought to the world. Suddenly"
-      "you can  have fresh, exotic fruit <i>any time of the year</i>! Truly a"
+      "you can have fresh, exotic fruit <i>any time of the year</i>! Truly a"
       "miracle! It's inventions like this that might lead you to think that"
       "humanity has conquered nature."))
 
@@ -228,7 +228,7 @@
       "safe to conclude that we're already living in the singularity, and have"
       "been for centuries. While people tend to think of the singularity as a"
       "single \"ah ha!\" moment, the defining property of exponential growth is"
-      "that the graph is scale-invariant, which is to say that it's <i>all</i>"
+      "that the graph is scale-invariant, which is to say that it's " (i "all")
       "elbow, and nothing but elbow.")
 
     (text "How's your singularity going? Can't complain about mine."))
@@ -241,9 +241,9 @@
   (essay :scale-of-humanity "The Scale of Humanity"
     (text
       "Humanity, in its entirety, is composed of roughly 7,530,000,000 souls at"
-      "the time of this writing. That's a <b>LOT</b> of people making up its"
+      "the time of this writing. That's a " (b "LOT") " of people making up its"
       "whole. You, no matter what you think of yourself, highly or lowly, are"
-      "but a <i>single</i> one of them. You are just 1 / 7,530,000,000th of the"
+      "but a " (i "single") " one of them. You are just 1 / 7,530,000,000th of the"
       "entire puzzle.")
 
     (paragraph

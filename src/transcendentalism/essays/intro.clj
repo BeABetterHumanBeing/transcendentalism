@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]))
 
 (use 'transcendentalism.essay
+     'transcendentalism.generate
      'transcendentalism.graph
      'transcendentalism.svg)
 
@@ -56,7 +57,7 @@
       (tangent :footnote-1 "from scratch")
       (text
         " and, as a backend engineer, this was a recipe for, ummm, how shall we"
-        "say, <i>curious</i> frontend design choices."))
+        "say, " (i "curious") " frontend design choices."))
 
     (footnote :footnote-1
       (paragraph

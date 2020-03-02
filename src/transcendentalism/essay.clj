@@ -270,11 +270,20 @@
   [& lines]
   (fn [t]
     (let [sub (minor-key t),
-          item-keyword (item-sub sub)]
+          item-keyword (item-sub sub),
+          joined-lines (reduce
+                         (fn [result line]
+                           (if (or (= (count line) 0)
+                                   (= (.charAt line 0) \<)
+                                   (= (count result) 0)
+                                   (= (.charAt result (dec (count result))) \>))
+                               (str result line)
+                               (str result " " line)))
+                         (first lines) (rest lines))]
       [(types schema sub "/segment")
        (->Triple sub "/segment/contains" item-keyword {})
        (types schema item-keyword "/item/inline")
-       (->Triple item-keyword "/item/inline/text" (str/join " " lines) {})])))
+       (->Triple item-keyword "/item/inline/text" joined-lines {})])))
 
 (defn tangent
   [footnote-sub & lines]

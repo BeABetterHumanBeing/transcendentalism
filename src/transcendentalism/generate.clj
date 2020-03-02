@@ -32,6 +32,7 @@
   (doseq [file (.listFiles (io/as-file dirname))]
     (io/delete-file file)))
 
+; TODO - move HTML-related things to their own file, update dependencies
 (defn- html [& contents] (xml-tag "html" {} (apply str contents)))
 
 (defn- head [contents] (xml-tag "head" {} contents))
@@ -45,6 +46,10 @@
 (defn span [attrs & contents] (xml-tag "span" attrs (apply str contents)))
 
 (defn- a [attrs contents] (xml-tag "a" attrs contents))
+
+(defn i [contents] (xml-tag "i" {} contents))
+
+(defn b [contents] (xml-tag "b" {} contents))
 
 (defn- ul [attrs & contents] (xml-tag "ul" attrs (apply str contents)))
 

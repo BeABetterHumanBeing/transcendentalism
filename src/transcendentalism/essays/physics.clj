@@ -1,7 +1,8 @@
 (ns transcendentalism.essays.physics
   (:require [clojure.string :as str]))
 
-(use 'transcendentalism.essay)
+(use 'transcendentalism.essay
+     'transcendentalism.generate)
 
 ; Materialism
 ; This essay serves as the entry point to all physics- and material-world-
@@ -28,8 +29,8 @@
         ". It serves as a sort of lower-bound for what is known about reality,"
         "and by no means should be mistaken for an upper-bound of what can be"
         ; TODO - pull out TM to a class that auto-formats it.
-        "known. Generally on <i>Transcendental Metaphysics</i>, materialism is"
-        "treated as an elaborate and compelling ")
+        "known. Generally on " (i "Transcendental Metaphysics") ", materialism"
+        "is treated as an elaborate and compelling ")
       (see-also :mental-traps "mental trap")
       (text
         ", but that doesn't make it wrong, in the sense that it is still extremely"
@@ -129,7 +130,7 @@
         "The most accurate model, i.e. the perfect one, is the one with the"
         "same amount of complexity as the real thing. Which, since we're"
         "talking about the physical universe here, is to say that it"
-        "<i>itself</i> is its own perfect model."))
+        (i "itself") " is its own perfect model."))
 
     (paragraph
       (text
@@ -155,7 +156,7 @@
       (text
         "Any sufficiently ambitious model of the universe will eventually run"
         "up against this hard limitation, and most do so very quickly. You see,"
-        "the universe is <i>big</i>, to put it lightly, and there's a lot going"
+        "the universe is " (b "big") ", to put it lightly, and there's a lot going"
         "on ")
       (tangent (f 2) "out there")
       (text
@@ -163,7 +164,7 @@
         "understanding, not simulation. I'm not here to predict the future"
         "states of the universe, nor to ")
       (tangent (f 3) "reconstruct its past")
-      (text ", rather just to consider <i>how</i> one might seek to model it."))
+      (text ", rather just to consider " (i "how") " one might seek to model it."))
 
     (footnote (f 2)
       (paragraph
@@ -447,18 +448,18 @@
       "all the constraints.")
 
     (text
-      "The <i>appearance</i> of the physical universe having three dimensions is"
-      "the product of the observation that <i>assuming</i> three dimensions allows"
-      "for the most cohesive solution to the problem. It's not perfect, though."
-      "Recognizing that space is non-Euclidean, that space-time (as the"
-      "field-like solution to this problem is ordinarily called) is <i>curved</i>,"
-      "is an acknowledgement that our assumption is observed to be false at"
+      "The " (i "appearance") " of the physical universe having three dimensions"
+      "is the product of the observation that " (i "assuming") " three dimensions"
+      "allows for the most cohesive solution to the problem. It's not perfect,"
+      "though. Recognizing that space is non-Euclidean, that space-time (as the"
+      "field-like solution to this problem is ordinarily called) is " (i "curved")
+      ", is an acknowledgement that our assumption is observed to be false at"
       "large distances and high momenta.")
 
     (text
       "The next best approximation (or refinement, if you will), includes"
-      "<i>inflation</i>. Inflation is observed in that the universe is slightly"
-      "<i>hyperbolic</i>, that it exhibits a <i>negative curvature</i>, or that"
+      (i "inflation") ". Inflation is observed in that the universe is slightly"
+      (i "hyperbolic") ", that it exhibits a " (i "negative curvature") ", or that"
       "parallel lines tend to get further apart from each other as they move"
       "away from the singularity that marks the universe's beginning.")
 
@@ -494,7 +495,7 @@
     (footnote (f 2)
       (paragraph
         (text
-          "A <b>pocket dimension</b> is a subgraph of the sparse matrix whose"
+          "A " (b "pocket dimension") " is a subgraph of the sparse matrix whose"
           "intersection with the larger matrix is limited to only a (comparatively)"
           "small 'pocket' of interactions. If the intersection is small enough,"
           "it won't meaningfully distort the space-time 'solution' of the larger"
@@ -522,7 +523,7 @@
       "like in our time-based sparse matrix? Since we've abandoned both the idea"
       "of position as well as velocity, it may seem an absurd statement to"
       "reason about, however remember that we've simply substituted the idea of"
-      "objective location for <i>events</i> and the relationships between them.")
+      "objective location for " (i "events") " and the relationships between them.")
 
     (bullet-list
       (paragraph
@@ -551,8 +552,8 @@
         "\"Speed\" is an artificial fiction, from the point of view of the"
         "sparse event-matrix. It's the result of looking at sequences of"
         "interactions in the matrix for a given particle and, after mapping"
-        "these interactions onto 3D space, estimating the <i>average</i> speed"
-        "over segments between interactions."))
+        "these interactions onto 3D space, estimating the " (i "average")
+        " speed over segments between interactions."))
 
     (footnote (f 2)
       (paragraph
@@ -608,7 +609,7 @@
 
     (text
       "In my mind, I have found it useful to decompose science into roughly"
-      "three domains. Each <b>domain</b> is an area of scientific discovery that"
+      "three domains. Each " (b "domain") " is an area of scientific discovery that"
       "has its own rules, assumptions, and process. While they have some overlap,"
       "reinforcing and informing each other, what makes each domain distinct is"
       "that it delves into and explores a territory that has (on the grand"
@@ -625,7 +626,7 @@
         (text ")")))
 
     (footnote (f 1)
-      (text "The domains are <i>ordered</i>, and their order is by time: i.e."
+      (text "The domains are " (i "ordered") ", and their order is by time: i.e."
             "phenomenology is the oldest domain of rigorous knowledge acquisition,"
             "and empiricism is the most recent."))
 
@@ -655,17 +656,17 @@
   (let [f (footnoter :analytical-science)]
   (essay :analytical-science "Analysis"
     (text
-      "Analysis works in the <i>virtual</i> domain of <b>abstraction</b>. It can"
-      "typically be done anywhere, by anyone, with a lot of rational thinking"
-      "and scratch paper (or a computer). Example disciplines include"
+      "Analysis works in the " (i "virtual") " domain of " (b "abstraction")
+      ". It can typically be done anywhere, by anyone, with a lot of rational"
+      "thinking and scratch paper (or a computer). Example disciplines include"
       "mathematics, (some) philosophy, and computer science.")
 
     (text
       "Analysis typically starts from a set of initial propositions, called"
-      "<b>axioms</b> and <b>rules</b> that allow the scientist to derive new"
-      "propositions from existing ones. Analytical claims are <b>statements</b>,"
-      "and the <b>proof</b> of a proposition is the sequence of rules that"
-      "<b>derive</b> the conclusion from the axioms.")
+      (b "axioms") " and " (b "rules") " that allow the scientist to derive new"
+      "propositions from existing ones. Analytical claims are " (b "statements")
+      ", and the " (b "proof") " of a proposition is the sequence of rules that"
+      (b "derive") " the conclusion from the axioms.")
 
     (numbered-list
       (text "This is the way that truth operates in analysis:")
@@ -676,10 +677,10 @@
             "derived by rules from a set of true statements."))
 
     (paragraph
-      (text "A <b>valid</b> proof is one in which if the assumptions are true,"
+      (text "A " (b "valid") " proof is one in which if the assumptions are true,"
             "the conclusion ")
       (tangent (f 1) "must necessarily be true")
-      (text ". A <b>sound</b> proof is a valid proof assumptions are ")
+      (text ". A " (b "sound" ) " proof is a valid proof assumptions are ")
       (tangent (f 2) "true") dot)
 
     (footnote (f 1)
@@ -699,7 +700,7 @@
       (paragraph
         (text "The other version of the `fallacy fallacy` is mistaking a weak"
               "fallacy for a strong one. This version ")
-        (tangent (f 5) "is <i>rampant</i> in human reasoning") dot))
+        (tangent (f 5) "is " (i "rampant") " in human reasoning") dot))
 
     (footnote (f 5)
       (bullet-list
@@ -719,10 +720,10 @@
 
     (paragraph
       (text "Logical ")
-      (tangent (f 4) "<b>fallacies</b>")
-      (text " derive from analysis. A <b>strong</b> (or <b>formal</b>) fallacy"
-            "is one which renders a proof invalid. A <b>weak</b> (or"
-            "<b>informal</b>) fallacy doesn't invalidate a proof, but it suggests"
+      (tangent (f 4) (b "fallacies"))
+      (text " derive from analysis. A " (b "strong") " (or " (b "formal") ") fallacy"
+            "is one which renders a proof invalid. A " (b "weak") " (or"
+            (b "informal") ") fallacy doesn't invalidate a proof, but it suggests"
             "that the proof may not be sound."))
 
     (footnote (f 4)
@@ -737,7 +738,7 @@
       "to reason rationally about a situation. For most practical purposes,"
       "this is sufficient; the logic can be followed by other scientists, and"
       "does a reasonable job of convincing them of its conclusions. However, if"
-      "a higher bar of rigor is required, analysis can be <b>formalized</b> by"
+      "a higher bar of rigor is required, analysis can be " (b "formalized") " by"
       "writing unambiguous proofs that can be checked by a theorem-prover, or"
       "other piece of software that verifies that each derivation in the proof"
       "is valid."))))
@@ -757,82 +758,82 @@
       (text "Here's a formalization of the proof that demonstrates the joke's"
             "consistency (i.e. lack of contradiction).")
       (numbered-list
-        (text "Let" (m "^") "be the binary AND operator.")
-        (text "<b>Axiom</b>:" (m "false ^ P") "is" (m "false") "for any"
-              "proposition" (m "P") ".")
-        (text "<b>Axiom</b>:" (m "true ^ true") "is" (m "true") ".")
-        (text "<b>Axiom</b>: Associativity." (m "P ^ Q") "implies" (m "Q ^ P")
-              "for any propositions" (m "P") "and" (m "Q") "."))
+        (text "Let " (m "^") " be the binary AND operator.")
+        (text (b "Axiom") ": " (m "false ^ P") " is " (m "false") " for any"
+              "proposition " (m "P") ".")
+        (text (b "Axiom") ": " (m "true ^ true") " is " (m "true") ".")
+        (text (b "Axiom") ": Associativity. " (m "P ^ Q") " implies " (m "Q ^ P")
+              " for any propositions " (m "P") " and " (m "Q") "."))
       (numbered-list
-        (text "Let" (m "==") "be the binary EQUALITY operator.")
-        (text "<b>Axiom</b>:" (m "P == unsure") "and" (m "P == false") "implies"
-              "a contradiction for any proposition" (m "P") "."))
-      (text "Let" (m "L_n") "be the proposition that logician" (m "n")
-            "wants a beer.")
+        (text "Let " (m "==") " be the binary EQUALITY operator.")
+        (text (b "Axiom") ": " (m "P == unsure") " and " (m "P == false") " implies"
+              "a contradiction for any proposition " (m "P") "."))
+      (text "Let " (m "L_n") " be the proposition that logician " (m "n")
+            " wants a beer.")
       (numbered-list
-        (text "Proposition" (m "Q == (L_1 ^ L_2) ^ L_3") "(the bartender's question).")
-        (text "<b>Axiom</b>:" (m "Q == true") "implies that the bartender serves"
+        (text "Proposition " (m "Q == (L_1 ^ L_2) ^ L_3") " (the bartender's question).")
+        (text (b "Axiom") ": " (m "Q == true") " implies that the bartender serves"
               "all logicians beers."))
-      (text "Let" (m "Q_n") "(logician" (m "n") "'s answer) be the value of"
-            (m "Q") "according to logician" (m "n") ". This evaluates to" (m "Q")
-            "with" (m "L_n") "being appropriately substituted.")
+      (text "Let " (m "Q_n") " (logician " (m "n") "'s answer) be the value of "
+            (m "Q") " according to logician " (m "n") ". This evaluates to "
+            (m "Q") " with " (m "L_n") " being appropriately substituted.")
       (numbered-list
-        (text (m "Q_1 == unsure") "by joke.")
-        (text "Suppose" (m "L_1 == false") ".")
+        (text (m "Q_1 == unsure") " by joke.")
+        (text "Suppose " (m "L_1 == false") ".")
         (text (m "Q_1 == (false ^ L_2) ^ L_3") ", by (5) and (6.1).")
-        (text (m "Q_1 == (false ^ L_2) ^ L_3") "implies" (m "Q_1 == false ^ L_3")
+        (text (m "Q_1 == (false ^ L_2) ^ L_3") " implies " (m "Q_1 == false ^ L_3")
               ", by (1.1) and (6.2).")
-        (text (m "Q_1 == false ^ L_3") "implies" (m "Q_1 == false")
+        (text (m "Q_1 == false ^ L_3") " implies " (m "Q_1 == false")
               ", by (1.1) and (6.3).")
-        (text (m "L_1 == false") "implies a contradiction, by (2.1) and (6.4)."))
-      (text "Therefore" (m "L_1") "is true, by (6.1) and (6.5).")
+        (text (m "L_1 == false") " implies a contradiction, by (2.1) and (6.4)."))
+      (text "Therefore " (m "L_1") " is true, by (6.1) and (6.5).")
       (numbered-list
-        (text (m "Q_2 == unsure") "by joke.")
-        (text "Suppose" (m "L_2 == false") ".")
+        (text (m "Q_2 == unsure") " by joke.")
+        (text "Suppose " (m "L_2 == false") ".")
         (text (m "Q_2 == (L_1 ^ false) ^ L_3") ", by (5) and (8.1).")
-        (text (m "Q_2 == (L_1 ^ false) ^ L_3") "implies"
+        (text (m "Q_2 == (L_1 ^ false) ^ L_3") " implies "
               (m "Q_2 == (true ^ false) ^ L_3") ", by (7) and (8.2).")
-        (text (m "Q_2 == (true ^ false) ^ L_3") "implies"
+        (text (m "Q_2 == (true ^ false) ^ L_3") " implies "
               (m "Q_2 == (false ^ true) ^ L_3") ", by (1.3) and (8.3).")
-        (text (m "Q_2 == (false ^ true) ^ L_3") "implies" (m "Q_2 == false ^ L_3")
+        (text (m "Q_2 == (false ^ true) ^ L_3") " implies " (m "Q_2 == false ^ L_3")
               ", by (1.1) and (8.4).")
-        (text (m "Q_2 == false ^ L_3") "implies" (m "Q_2 == false")
+        (text (m "Q_2 == false ^ L_3") " implies " (m "Q_2 == false")
               ", by (1.1) and (8.5).")
-        (text (m "L_2 == false") "implies a contradiction, by (2.1) and (8.6)."))
-      (text "Therefore" (m "L_2 == true") ", by (8.1) and (8.7).")
+        (text (m "L_2 == false") " implies a contradiction, by (2.1) and (8.6)."))
+      (text "Therefore " (m "L_2 == true") ", by (8.1) and (8.7).")
       (numbered-list
         (text (m "Q_3 == true") ", by joke.")
-        (text "Suppose" (m "L_3 == false") ".")
+        (text "Suppose " (m "L_3 == false") ".")
         (text (m "Q_3 == (L_1 ^ L_2) ^ false") ", by (5) and (10.1).")
-        (text (m "Q_3 == (L_1 ^ L_2) ^ false") "implies" (m "Q_3 == (true ^ L_2)"
+        (text (m "Q_3 == (L_1 ^ L_2) ^ false") " implies " (m "Q_3 == (true ^ L_2)"
               "^ false") ", by (7) and (10.2).")
-        (text (m "Q_3 == (true ^ L_2) ^ false") "implies" (m "Q_3 == (true ^ true)"
+        (text (m "Q_3 == (true ^ L_2) ^ false") " implies " (m "Q_3 == (true ^ true)"
               "^ false") ", by (9) and (10.3).")
-        (text (m "Q_3 == (true ^ true) ^ false") "implies" (m "Q_3 == true ^ false")
+        (text (m "Q_3 == (true ^ true) ^ false") " implies " (m "Q_3 == true ^ false")
               ", by (1.2) and (10.4).")
-        (text (m "Q_3 == true ^ false") "implies" (m "Q_3 == false ^ true")
+        (text (m "Q_3 == true ^ false") " implies " (m "Q_3 == false ^ true")
               ", by (1.3) and (10.5).")
-        (text (m "Q_3 == false ^ true") "implies" (m "Q_3 == false")
+        (text (m "Q_3 == false ^ true") " implies " (m "Q_3 == false")
               ", by (1.1) and (10.6).")
-        (text (m "L_3 == false") "implies a contradiction, by (2.1) and (10.7)."))
-      (text "Therefore" (m "L_3 == true") ", by (10.1) and (10.8).")
-      (text (m "Q == (L_1 ^ L_2) ^ L_3") "implies" (m "Q == (true ^ L_2) ^ L_3")
+        (text (m "L_3 == false") " implies a contradiction, by (2.1) and (10.7)."))
+      (text "Therefore " (m "L_3 == true") ", by (10.1) and (10.8).")
+      (text (m "Q == (L_1 ^ L_2) ^ L_3") " implies " (m "Q == (true ^ L_2) ^ L_3")
             ", by (4) and (7).")
-      (text (m "Q == (true ^ L_2) ^ L_3") "implies" (m "Q == (true ^ true) ^ L_3")
+      (text (m "Q == (true ^ L_2) ^ L_3") " implies " (m "Q == (true ^ true) ^ L_3")
             ", by (9) and (12).")
-      (text (m "Q == (true ^ true) ^ L_3") "implies" (m "Q == (true ^ true) ^ true")
+      (text (m "Q == (true ^ true) ^ L_3") " implies " (m "Q == (true ^ true) ^ true")
             ", by (11) and (13).")
-      (text (m "Q == (true ^ true) ^ true") "implies" (m "Q == true ^ true")
+      (text (m "Q == (true ^ true) ^ true") " implies " (m "Q == true ^ true")
             ", by (1.2) and (14).")
-      (text (m "Q == true ^ true") "implies" (m "Q == true") ", by (1.2) and (15).")
-      (text (m "Q == true") "implies that the bartender serves all logicians"
-            "beers, by (4.1) and (16). <b>QED</b>."))
+      (text (m "Q == true ^ true") " implies " (m "Q == true") ", by (1.2) and (15).")
+      (text (m "Q == true") " implies that the bartender serves all logicians"
+            "beers, by (4.1) and (16). " (b "QED") "."))
 
     (paragraph
       (text "As you can see, formalizations are often cumbersome, unwieldy,"
             "long, and difficult to follow. It's therefore no surprise that"
             "most analysis ")
-      (tangent (f 1) "does not apply level of rigor")
+      (tangent (f 1) "does not apply this level of rigor")
       (text "!"))
 
     (footnote (f 1)

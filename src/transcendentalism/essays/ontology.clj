@@ -1,7 +1,8 @@
 (ns transcendentalism.essays.ontology
   (:require [clojure.string :as str]))
 
-(use 'transcendentalism.essay)
+(use 'transcendentalism.essay
+     'transcendentalism.generate)
 
 ; Ontology
 ; This essay serves as the entry point to all ontological essays: those that
@@ -19,7 +20,7 @@
   (essay :tower-of-objectivity "The Tower of Objectivity"
 
     (text
-      "The <b>Tower of Existence</b> supposes that some kinds of existence (or"
+      "The " (b "Tower of Existence") " supposes that some kinds of existence (or"
       "ontologies) are more fundamental than others. The reasoning goes that you"
       "can construct one kind of existence from another, and so it follows that"
       "the most basic existence, the one which cannot be constructed upon any"
@@ -30,7 +31,7 @@
 
     (paragraph
       (text
-        "Most often, I see <b>Objective Reality</b> used as the foundation for"
+        "Most often, I see " (b "Objective Reality") " used as the foundation for"
         "the Tower of Existence. Objective reality is the reality that exists"
         "outside of your head, the reality of matter, of light, of the"
         "interaction of forces and particles. Objective reality is the realm of"
@@ -68,7 +69,7 @@
 
     (text
       "Once our tower includes the concept of subjectivity, it can be extended"
-      "with what are called <b>Interstitial Realities</b>. This term isn't widely"
+      "with what are called " (b "Interstitial Realities") ". This term isn't widely"
       "known, so I'll take some time to clarify it.")
 
     (text
@@ -80,7 +81,7 @@
       "extends outside of the subjects.")
 
     (text
-      "<b>Example</b> <i>America</i>. America is not a physical object (though"
+      (b "Example") " " (i "America") ". America is not a physical object (though"
       "the concept of it may be mapped to a physical area). America is similarly"
       "not really a subjective opinion; while there may be plenty of varying"
       "opinions about it, were I to decide that America is my cup of coffee, my"
@@ -90,7 +91,7 @@
       "\"where is America?\" that things like 'borders' exist.")
 
     (text
-      "<b>Example</b> <i>Racism</i>. Racism is not a physical object (again,"
+      (b "Example") " " (i "Racism") ". Racism is not a physical object (again,"
       "though the concept of it may be mapped to particular actions, and race"
       "may be ascribed to particular people). Racism is similarly not a"
       "subjective opinion; closing your eyes and saying \"nope, it's not real\""
@@ -120,8 +121,8 @@
             "for the phrase ")
       (link "https://en.wikipedia.org/wiki/Cogito,_ergo_sum"
             "\"I think, therefore I am\"")
-      (text ". He constructed a thought experiment in <b>solipsism</b>, which I"
-            "will briefly cover here."))
+      (text ". He constructed a thought experiment in " (b "solipsism") ", which"
+            "I will briefly cover here."))
 
     (definition "Solipsism" :noun
       (str/join " " [
@@ -150,14 +151,14 @@
       (text
         ". The gist of the test is that if you were chatting with two individuals"
         "through a computer (and one of the them was actually just another"
-        "computer), and you were unable to determine <i>which</i> of the two was"
-        "the computer, then for all practical purposes ")
+        "computer), and you were unable to determine " (i "which") " of the two"
+        "was the computer, then for all practical purposes ")
       (tangent (f 1) "that other computer must be conscious being."))
 
     (footnote (f 1)
       (paragraph
-        (text "This chain of reasoning doesn't <i>prove</i> that the computer is"
-              "conscious. For the counterargument, consider ")
+        (text "This chain of reasoning doesn't " (i "prove") " that the computer"
+              "is conscious. For the counterargument, consider ")
         (tangent (f 2) "John Searle's")
         (text " ")
         (link "https://en.wikipedia.org/wiki/Chinese_room" "Chinese Room") dot)
@@ -173,8 +174,8 @@
       "realities out of it again, using the results from the Turing Test to"
       "combat our self-imposed solipsism. The chain of reasoning goes that while"
       "you cannot prove that the other \"seemingly\" conscious beings in your"
-      "subjective existence are <i>actually</i> conscious, you similarly cannot"
-      "prove that they <i>aren't</i> actually conscious, and so in this"
+      "subjective existence are " (i "actually") " conscious, you similarly cannot"
+      "prove that they " (i "aren't") " actually conscious, and so in this"
       "ambiguity you are free to choose either. As it turns out, there's more"
       "you can do with the world if you think that other conscious beings exist"
       "to some extent beyond yourself, and so almost everyone ends up falling"
@@ -190,8 +191,8 @@
       "You can build a notion of objective reality on top of this notion of"
       "interstitial reality by taking objective reality to be the asymptote"
       "towards which all interstitial objects approach: that of"
-      "<b>subject-invariance</b>. The idea here is that if <i>literally</i>"
-      "everyone perceives the same subjective fact, then that fact <i>must</i>"
+      (b "subject-invariance") ". The idea here is that if " (i "literally")
+      "everyone perceives the same subjective fact, then that fact " (i "must")
       "be indistinguishable from an objective fact. And, in the same way that"
       "a being being indistinguishable from a conscious one allows us to treat"
       "it as conscious, these facts then become objective.")
@@ -204,7 +205,7 @@
 
     (text
       "I'd also like to emphasize that the two constructions of the Tower of"
-      "Existence are <i>duals</i> of each other, in that you can pretty much"
+      "Existence are " (i "duals") " of each other, in that you can pretty much"
       "arrive at the same conclusions no matter which way you go, though one"
       "may often be easier than another to reach."))))
 
@@ -215,17 +216,17 @@
     (text
       "Both the Objective and Subjective Towers of Existence are built around a"
       "particular assumption that lies so close to their core it can be difficult"
-      "to notice: they assume the existence of the <b>self</b>.")
+      "to notice: they assume the existence of the " (b "self") ".")
 
     (text
       "In particular, the notion of \"subjective\" requires a subject, and a"
       "subject is created by construction around the notion of its self (literally,"
       "itself). The whole idea that objective and subjective reality are"
-      "<i>different</i> (let alone that one is more fundamental than the other)"
+      (i "different") " (let alone that one is more fundamental than the other)"
       "requires this self-based distinction.")
 
     (text "We arrive at a third \"Tower\" of Existence by discarding this notion"
-          "of self, and it is what I call <b>unified reality</b>.")
+          "of self, and it is what I call " (b "unified reality") ".")
 
     (text
       "The basic idea here is that there's a single reality encompassing all of"
