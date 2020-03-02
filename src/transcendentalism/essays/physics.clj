@@ -1006,216 +1006,236 @@
         "control of the empiricist."))
   )))
 
-; ### Example - Zodiac Compatibility
-
-; NOTE: Because empirical science is messier than analytical science, I'm not
-; going to be quite as rigorous about the experiment that I conduct here. It's
-; intention, after all, is to help illustrate the process, not meaningfully
-; contribute to the state of the knowledge of objective reality.
-
-; *(See an interesting phenomenon that you would like to learn more about.)* A
-; friend of mine told me that he thought a pair of people's zodiac signs were a
-; significant factor in whether or not the two people would get along well
-; together. I found this to be intriguing, and so I decided to conduct an
-; experiment to determine whether there might be weight to it.
-
-; *(Develop a theory about how the phenomenon works, and then select a testable
-; hypothesis about the phenomenon.)* In this case, I'm not particularly interested
-; in *how* astrology works, rather I'm am merely trying to determine *whether* it
-; works. Our null hypothesis is that there is no relationship between the
-; likelihood that two people are friends based on their zodiac sign. If we can
-; reject this null hypothesis, then there may be a basis of thinking that this
-; particular aspect of astrology has some weight.
-
-; *(Determine exactly what evidence would need be gathered in order to test the
-; hypothesis.)* Since zodiac sign is a function of one's birthday, what's required
-; is the birthdays of a given test subject, and all of their friends.
-; Specifically, I will be using myself as the test subject, and Facebook as the
-; source for the birthdays of my friends. I will determine my friend's zodiac
-; signs from their birthdays, then bucket them by their zodiac sign, and determine
-; the extent to which this distribution deviates from the expected even
-; distribution.
-
-; NOTE: This experimental setup introduces some additional assumptions into our
-; hypothesis, like that there's no correlation between zodiac sign and whether one
-; opts out of making one's birthday visible on Facebook to friends. Good
-; empiricism always requires paying attention to the additional constraints.
-
-; *(Determine the power level of the experiment, which is the strength of the
-; effect you'd need to see in order to be satisfied that your null hypothesis must
-; be false.)* I'm going to be unfortunate and go ahead and blindly grab p=0.05. What this means is
-; that I am satisfied with rejecting the null hypothesis if a more extreme result
-; than the one observed from the data has a less than 5% chance of occurring. I
-; have no good reason for choosing 0.05 in particular; there's no money or lives
-; resting on the result that might warrant a higher level of doubt.
-
-; *(Collect your data in a means that prevents you as the experimenter from
-; subtley messing with the results.)* Here's the list of all my Facebook friends'
-; visible birthdays (n=876):
-
-; ```
-; birthdays = [
-;     (1, 1), (1, 1), (1, 2), (1, 3), (1, 4), (1, 4), (1, 7), (1, 8), (1, 8),
-;     (1, 9), (1, 10), (1, 10), (1, 12), (1, 12), (1, 12), (1, 13), (1, 14),
-;     (1, 14), (1, 15), (1, 15), (1, 15), (1, 16), (1, 17), (1, 17), (1, 17),
-;     (1, 17), (1, 18), (1, 18), (1, 19), (1, 20), (1, 20), (1, 21), (1, 22),
-;     (1, 23), (1, 23), (1, 23), (1, 24), (1, 24), (1, 25), (1, 25), (1, 25),
-;     (1, 26), (1, 26), (1, 27), (1, 27), (1, 27), (1, 27), (1, 28), (1, 28),
-;     (1, 28), (1, 29), (1, 29), (1, 29), (1, 29), (1, 29), (1, 31), (1, 31),
-;     (1, 31), (2, 1), (2, 1), (2, 2), (2, 2), (2, 2), (2, 3), (2, 5), (2, 5),
-;     (2, 5), (2, 6), (2, 6), (2, 6), (2, 6), (2, 7), (2, 7), (2, 8), (2, 9),
-;     (2, 10), (2, 11), (2, 11), (2, 11), (2, 11), (2, 11), (2, 12), (2, 12),
-;     (2, 13), (2, 13), (2, 13), (2, 14), (2, 15), (2, 15), (2, 16), (2, 16),
-;     (2, 18), (2, 18), (2, 20), (2, 20), (2, 20), (2, 20), (2, 21), (2, 21),
-;     (2, 23), (2, 23), (2, 23), (2, 25), (2, 25), (2, 25), (2, 25), (2, 25),
-;     (2, 26), (2, 26), (2, 26), (2, 26), (2, 27), (2, 27), (2, 27), (2, 27),
-;     (2, 28), (2, 28), (2, 28), (2, 28), (2, 28), (3, 1), (3, 2), (3, 3), (3, 3),
-;     (3, 4), (3, 4), (3, 4), (3, 4), (3, 4), (3, 4), (3, 5), (3, 5), (3, 6),
-;     (3, 6), (3, 6), (3, 6), (3, 7), (3, 7), (3, 7), (3, 7), (3, 8), (3, 9),
-;     (3, 9), (3, 10), (3, 10), (3, 11), (3, 11), (3, 13), (3, 13), (3, 13),
-;     (3, 14), (3, 14), (3, 14), (3, 16), (3, 16), (3, 16), (3, 17), (3, 17),
-;     (3, 17), (3, 17), (3, 17), (3, 17), (3, 19), (3, 19), (3, 19), (3, 19),
-;     (3, 19), (3, 20), (3, 20), (3, 21), (3, 21), (3, 22), (3, 22), (3, 23),
-;     (3, 23), (3, 24), (3, 24), (3, 25), (3, 25), (3, 25), (3, 25), (3, 26),
-;     (3, 26), (3, 28), (3, 28), (3, 29), (3, 29), (3, 29), (3, 29), (3, 30),
-;     (3, 30), (4, 1), (4, 1), (4, 1), (4, 1), (4, 3), (4, 3), (4, 3), (4, 3),
-;     (4, 3), (4, 4), (4, 4), (4, 4), (4, 4), (4, 5), (4, 5), (4, 5), (4, 6),
-;     (4, 6), (4, 6), (4, 6), (4, 6), (4, 6), (4, 6), (4, 6), (4, 7), (4, 7),
-;     (4, 8), (4, 8), (4, 8), (4, 10), (4, 10), (4, 10), (4, 11), (4, 11),
-;     (4, 11), (4, 11), (4, 12), (4, 12), (4, 13), (4, 13), (4, 13), (4, 13),
-;     (4, 15), (4, 15), (4, 15), (4, 15), (4, 16), (4, 17), (4, 17), (4, 17),
-;     (4, 19), (4, 19), (4, 19), (4, 19), (4, 20), (4, 20), (4, 21), (4, 21),
-;     (4, 21), (4, 22), (4, 22), (4, 23), (4, 23), (4, 23), (4, 23), (4, 23),
-;     (4, 23), (4, 24), (4, 24), (4, 24), (4, 25), (4, 25), (4, 26), (4, 26),
-;     (4, 27), (4, 27), (4, 27), (4, 28), (4, 28), (4, 29), (4, 29), (4, 29),
-;     (4, 30), (4, 30), (4, 30), (5, 1), (5, 2), (5, 2), (5, 2), (5, 2), (5, 4),
-;     (5, 4), (5, 4), (5, 5), (5, 5), (5, 5), (5, 6), (5, 6), (5, 8), (5, 9),
-;     (5, 10), (5, 10), (5, 10), (5, 11), (5, 11), (5, 11), (5, 11), (5, 12),
-;     (5, 12), (5, 12), (5, 13), (5, 13), (5, 14), (5, 14), (5, 14), (5, 15),
-;     (5, 15), (5, 16), (5, 17), (5, 17), (5, 18), (5, 19), (5, 20), (5, 20),
-;     (5, 20), (5, 20), (5, 21), (5, 21), (5, 21), (5, 21), (5, 22), (5, 22),
-;     (5, 22), (5, 23), (5, 23), (5, 23), (5, 23), (5, 24), (5, 24), (5, 24),
-;     (5, 25), (5, 25), (5, 25), (5, 26), (5, 26), (5, 26), (5, 27), (5, 28),
-;     (5, 28), (5, 28), (5, 29), (5, 30), (5, 31), (5, 31), (6, 1), (6, 1),
-;     (6, 2), (6, 2), (6, 2), (6, 3), (6, 3), (6, 4), (6, 5), (6, 5), (6, 6),
-;     (6, 6), (6, 6), (6, 6), (6, 7), (6, 7), (6, 7), (6, 9), (6, 9), (6, 9),
-;     (6, 10), (6, 10), (6, 11), (6, 11), (6, 11), (6, 11), (6, 11), (6, 11),
-;     (6, 12), (6, 12), (6, 12), (6, 13), (6, 13), (6, 13), (6, 13), (6, 13),
-;     (6, 14), (6, 14), (6, 14), (6, 15), (6, 15), (6, 16), (6, 16), (6, 17),
-;     (6, 17), (6, 17), (6, 18), (6, 19), (6, 19), (6, 19), (6, 20), (6, 20),
-;     (6, 20), (6, 20), (6, 21), (6, 21), (6, 21), (6, 21), (6, 22), (6, 22),
-;     (6, 23), (6, 23), (6, 23), (6, 24), (6, 25), (6, 25), (6, 28), (6, 28),
-;     (6, 28), (6, 29), (6, 29), (6, 29), (6, 29), (6, 29), (6, 30), (6, 30),
-;     (6, 30), (6, 30), (6, 30), (6, 30), (7, 1), (7, 1), (7, 1), (7, 2), (7, 2),
-;     (7, 2), (7, 2), (7, 4), (7, 4), (7, 4), (7, 4), (7, 4), (7, 4), (7, 5),
-;     (7, 5), (7, 5), (7, 6), (7, 6), (7, 6), (7, 7), (7, 7), (7, 7), (7, 7),
-;     (7, 7), (7, 8), (7, 8), (7, 8), (7, 9), (7, 12), (7, 12), (7, 12), (7, 13),
-;     (7, 13), (7, 13), (7, 13), (7, 13), (7, 13), (7, 13), (7, 14), (7, 14),
-;     (7, 15), (7, 15), (7, 15), (7, 15), (7, 16), (7, 16), (7, 17), (7, 17),
-;     (7, 17), (7, 18), (7, 18), (7, 19), (7, 19), (7, 19), (7, 20), (7, 20),
-;     (7, 20), (7, 20), (7, 20), (7, 20), (7, 21), (7, 21), (7, 21), (7, 21),
-;     (7, 23), (7, 23), (7, 24), (7, 24), (7, 24), (7, 25), (7, 25), (7, 25),
-;     (7, 25), (7, 26), (7, 26), (7, 26), (7, 27), (7, 28), (7, 28), (7, 30),
-;     (7, 30), (7, 30), (7, 30), (7, 31), (7, 31), (8, 1), (8, 3), (8, 3), (8, 3),
-;     (8, 3), (8, 3), (8, 3), (8, 4), (8, 4), (8, 4), (8, 4), (8, 5), (8, 5),
-;     (8, 5), (8, 5), (8, 7), (8, 7), (8, 7), (8, 7), (8, 8), (8, 8), (8, 9),
-;     (8, 9), (8, 9), (8, 10), (8, 10), (8, 10), (8, 10), (8, 11), (8, 12),
-;     (8, 13), (8, 13), (8, 13), (8, 14), (8, 15), (8, 15), (8, 15), (8, 15),
-;     (8, 16), (8, 16), (8, 17), (8, 18), (8, 18), (8, 19), (8, 20), (8, 20),
-;     (8, 20), (8, 20), (8, 20), (8, 20), (8, 21), (8, 22), (8, 22), (8, 22),
-;     (8, 22), (8, 22), (8, 23), (8, 23), (8, 24), (8, 24), (8, 24), (8, 25),
-;     (8, 25), (8, 26), (8, 26), (8, 26), (8, 26), (8, 27), (8, 27), (8, 28),
-;     (8, 29), (8, 30), (8, 30), (8, 30), (8, 30), (8, 31), (8, 31), (8, 31),
-;     (8, 31), (9, 2), (9, 3), (9, 3), (9, 4), (9, 5), (9, 5), (9, 5), (9, 6),
-;     (9, 6), (9, 6), (9, 7), (9, 8), (9, 9), (9, 9), (9, 9), (9, 10), (9, 11),
-;     (9, 12), (9, 12), (9, 13), (9, 14), (9, 14), (9, 15), (9, 15), (9, 16),
-;     (9, 16), (9, 16), (9, 17), (9, 18), (9, 18), (9, 18), (9, 18), (9, 19),
-;     (9, 19), (9, 20), (9, 20), (9, 20), (9, 20), (9, 21), (9, 21), (9, 22),
-;     (9, 22), (9, 23), (9, 23), (9, 24), (9, 24), (9, 24), (9, 24), (9, 24),
-;     (9, 25), (9, 25), (9, 25), (9, 26), (9, 28), (9, 28), (9, 28), (9, 29),
-;     (9, 30), (9, 30), (9, 30), (9, 30), (10, 1), (10, 2), (10, 2), (10, 3),
-;     (10, 3), (10, 3), (10, 3), (10, 3), (10, 4), (10, 5), (10, 5), (10, 5),
-;     (10, 6), (10, 7), (10, 7), (10, 8), (10, 8), (10, 8), (10, 8), (10, 9),
-;     (10, 9), (10, 9), (10, 9), (10, 9), (10, 10), (10, 10), (10, 10), (10, 10),
-;     (10, 11), (10, 12), (10, 12), (10, 13), (10, 13), (10, 13), (10, 13),
-;     (10, 13), (10, 13), (10, 13), (10, 13), (10, 14), (10, 14), (10, 15),
-;     (10, 15), (10, 15), (10, 17), (10, 17), (10, 18), (10, 20), (10, 21),
-;     (10, 22), (10, 22), (10, 22), (10, 23), (10, 23), (10, 23), (10, 24),
-;     (10, 24), (10, 24), (10, 25), (10, 25), (10, 26), (10, 26), (10, 28),
-;     (10, 30), (10, 30), (10, 30), (10, 30), (10, 31), (10, 31), (10, 31),
-;     (11, 1), (11, 1), (11, 2), (11, 3), (11, 3), (11, 4), (11, 5), (11, 5),
-;     (11, 5), (11, 6), (11, 8), (11, 8), (11, 9), (11, 9), (11, 9), (11, 9),
-;     (11, 9), (11, 9), (11, 10), (11, 10), (11, 10), (11, 10), (11, 11),
-;     (11, 12), (11, 14), (11, 14), (11, 15), (11, 16), (11, 16), (11, 16),
-;     (11, 16), (11, 16), (11, 16), (11, 16), (11, 18), (11, 19), (11, 20),
-;     (11, 20), (11, 21), (11, 21), (11, 21), (11, 22), (11, 22), (11, 23),
-;     (11, 23), (11, 24), (11, 24), (11, 24), (11, 25), (11, 26), (11, 26),
-;     (11, 26), (11, 26), (11, 27), (11, 27), (11, 27), (11, 28), (11, 29),
-;     (11, 29), (11, 29), (11, 29), (11, 30), (11, 30), (11, 30), (12, 1),
-;     (12, 1), (12, 2), (12, 2), (12, 2), (12, 3), (12, 4), (12, 5), (12, 5),
-;     (12, 5), (12, 5), (12, 5), (12, 6), (12, 6), (12, 6), (12, 6), (12, 7),
-;     (12, 7), (12, 7), (12, 7), (12, 7), (12, 8), (12, 8), (12, 8), (12, 9),
-;     (12, 9), (12, 9), (12, 9), (12, 9), (12, 9), (12, 9), (12, 10), (12, 10),
-;     (12, 10), (12, 12), (12, 12), (12, 12), (12, 13), (12, 13), (12, 14),
-;     (12, 14), (12, 14), (12, 14), (12, 15), (12, 15), (12, 15), (12, 15),
-;     (12, 15), (12, 16), (12, 16), (12, 17), (12, 17), (12, 17), (12, 17),
-;     (12, 18), (12, 18), (12, 18), (12, 18), (12, 18), (12, 19), (12, 19),
-;     (12, 20), (12, 21), (12, 22), (12, 22), (12, 23), (12, 23), (12, 23),
-;     (12, 23), (12, 23), (12, 24), (12, 24), (12, 24), (12, 24), (12, 25),
-;     (12, 25), (12, 26), (12, 26), (12, 26), (12, 26), (12, 27), (12, 27),
-;     (12, 27), (12, 28), (12, 28), (12, 29), (12, 29), (12, 29), (12, 29),
-;     (12, 31), (12, 31), (12, 31)]
-; ```
-
-; *(Analyze the data according to your original test plan. Draw conclusions based
-; off of that plan.)*
-
-; |Zodiac Sign|Expected Ratio|Observed Ratio|
-; |-----------|--------------|--------------|
-; |Capricorn  |0.082         |0.073         |
-; |Aquarius   |0.082         |0.087         |
-; |Pieces     |0.082         |0.087         |
-; |Aries      |0.085         |0.082         |
-; |Taurus     |0.085         |0.094         |
-; |Gemini     |0.088         |0.103         |
-; |Cancer     |0.085         |0.088         |
-; |Leo        |0.085         |0.074         |
-; |Virgo      |0.082         |0.081         |
-; |Libra      |0.085         |0.070         |
-; |Scorpio    |0.079         |0.096         |
-; |Sagittarius|0.079         |0.066         |
-
-; The distance between the expected and observed incidence of occurrence is
-; `0.094`. Next, to establish the p-value associated with this number, 100000
-; simulations were run in which 876 birthdays were randomly distributed through
-; the calendar year, and the error values for each one was calculated. In 26.74%
-; of the simulations, the error value was higher than the observed error value.
-; Since 0.2674 > 0.05, **the null hypothesis is not rejected by this experiment**.
-
-; For your viewing pleasure, I have rendered the calendar year with all my
-; friends' birthdays, delimiting it by month and zodiac sign.
-
-; ![a visual distribution of the collected data over a calendar year, delimited by
-; months and zodiac signs](images/zodiac.png)
-
-; NOTE: All figures here have been rounded to three decimal points for display
-; purposes. In the image, the word in yellow is "Gemini"; my apologies for it
-; being hard to read.
-
-; NOTE: The fact that the observed distribution is not even may lead an empiricist
-; to conclude that there is something going on. This conclusion is not necessarily
-; *wrong*; empirical science does not prove negative statements. Instead, we
-; merely cannot conclude that it's *right* from this experiment. It's very easy to
-; find patterns that empiricism does not reveal; in running this experiment, I had
-; the subjective observation that one of the signs with fewer observed friends'
-; birthdays (Sagittarius) also included a number of frenemies, and that two of my
-; exes share a birthday along with another good friend. None of these observations
-; are supported by this evidence.
-
 (def empirical-science-example
   (let [f (footnoter :empirical-science-example)]
-  (essay :empirical-science-example "Empiricism"
-    (text "TODO")
+  (essay :empirical-science-example "Zodiac Compatibility"
+    (text
+      (i "(See an interesting phenomenon that you would like to learn more about.)")
+      " A friend of mine told me that he thought a pair of people's zodiac signs"
+      "were a significant factor in whether or not the two people would get along"
+      "well together. I found this to be intriguing, and so I decided to conduct"
+      "an experiment to determine whether there might be weight to it.")
+
+    (paragraph
+      (text
+        (i (str/join " " [
+             "(Develop a theory about how the phenomenon works, and then select"
+             "a testable hypothesis about the phenomenon.)"]))
+        " In this case, I'm not particularly interested in " (i "how") " it"
+        "works, rather I'm am merely trying to determine ")
+      (tangent (f 1) (str (i "whether") " it works at all"))
+      (text
+        ". Our null hypothesis is that there is no relationship between the"
+        "likelihood that two people are friends based on their zodiac sign. If"
+        "we can reject this null hypothesis, then there may be a basis of"
+        "thinking that this particular aspect of astrology has some weight."))
+
+    (footnote (f 1)
+      (text
+        "Because empirical science is messier than analytical science, I'm not"
+        "going to be quite as rigorous about the experiment that I conduct here."
+        "It's intention, after all, is to help illustrate the process, not"
+        "meaningfully contribute to the state of the knowledge of objective"
+        "reality."))
+
+    (paragraph
+      (text
+        (i (str/join " " [
+             "(Determine exactly what evidence would need be gathered in order"
+             "to test the hypothesis.)"]))
+        " Since zodiac sign is a function of one's birthday, what's required is"
+        "the birthdays of a given test subject, and all of their friends."
+        "Specifically, I will be using myself as the test subject, and ")
+      (tangent (f 2) "Facebook as the source")
+      (text
+        " for the birthdays of my friends. I will determine my friend's zodiac"
+        "signs from their birthdays, then bucket them by their zodiac sign, and"
+        "determine the extent to which this distribution deviates from the"
+        "expected null-hypothesis distribution."))
+
+    (footnote (f 2)
+      (text
+        "This experimental setup introduces some additional assumptions into our"
+        "hypothesis, like that there's no correlation between zodiac sign and"
+        "whether one opts out of making one's birthday visible on Facebook to"
+        "friends. Good empiricism always requires paying attention to the"
+        "additional constraints."))
+
+    (text
+      (i (str/join " " [
+           "(Determine the power level of the experiment, which is the strength"
+           "of the effect you'd need to see in order to be satisfied that your"
+           "null hypothesis must be false.)"]))
+      " I'm going to be unfortunate and go ahead and blindly grab " (m "p=0.05")
+      ". What this means is that I am satisfied with rejecting the null"
+      "hypothesis if a more extreme result than the one observed from the data"
+      "has a less than 5% chance of occurring. I have no good reason for choosing"
+      "0.05 in particular; there's no money or lives resting on the result that"
+      "might warrant a higher level of doubt.")
+
+    (paragraph
+      (text
+        (i (str/join " " [
+             "(Collect your data in a means that prevents you as the experimenter"
+             "from subtley messing with the results.)"])) " ")
+      (tangent (f 3) "Here's the list")
+      (text " of all my Facebook friends' visible birthdays ("
+            (m "n=876") ", in " (m "(month, day)") " pairs):"))
+
+    (footnote (f 3)
+      (text "Most studies don't publish their raw data like this one does, which"
+            "makes independent verification difficult."))
+
+    (matrix [] []
+      [["(1, 1)" "(1, 1)" "(1, 2)" "(1, 3)" "(1, 4)" "(1, 4)" "(1, 7)" "(1, 8)" "(1, 8)" "(1, 9)"]
+       ["(1, 10)" "(1, 10)" "(1, 12)" "(1, 12)" "(1, 12)" "(1, 13)" "(1, 14)" "(1, 14)" "(1, 15)" "(1, 15)"]
+       ["(1, 15)" "(1, 16)" "(1, 17)" "(1, 17)" "(1, 17)" "(1, 17)" "(1, 18)" "(1, 18)" "(1, 19)" "(1, 20)"]
+       ["(1, 20)" "(1, 21)" "(1, 22)" "(1, 23)" "(1, 23)" "(1, 23)" "(1, 24)" "(1, 24)" "(1, 25)" "(1, 25)"]
+       ["(1, 25)" "(1, 26)" "(1, 26)" "(1, 27)" "(1, 27)" "(1, 27)" "(1, 27)" "(1, 28)" "(1, 28)" "(1, 28)"]
+       ["(1, 29)" "(1, 29)" "(1, 29)" "(1, 29)" "(1, 29)" "(1, 31)" "(1, 31)" "(1, 31)" "(2, 1)" "(2, 1)"]
+       ["(2, 2)" "(2, 2)" "(2, 2)" "(2, 3)" "(2, 5)" "(2, 5)" "(2, 5)" "(2, 6)" "(2, 6)" "(2, 6)"]
+       ["(2, 6)" "(2, 7)" "(2, 7)" "(2, 8)" "(2, 9)" "(2, 10)" "(2, 11)" "(2, 11)" "(2, 11)" "(2, 11)"]
+       ["(2, 11)" "(2, 12)" "(2, 12)" "(2, 13)" "(2, 13)" "(2, 13)" "(2, 14)" "(2, 15)" "(2, 15)" "(2, 16)"]
+       ["(2, 16)" "(2, 18)" "(2, 18)" "(2, 20)" "(2, 20)" "(2, 20)" "(2, 20)" "(2, 21)" "(2, 21)" "(2, 23)"]
+       ["(2, 23)" "(2, 23)" "(2, 25)" "(2, 25)" "(2, 25)" "(2, 25)" "(2, 25)" "(2, 26)" "(2, 26)" "(2, 26)"]
+       ["(2, 26)" "(2, 27)" "(2, 27)" "(2, 27)" "(2, 27)" "(2, 28)" "(2, 28)" "(2, 28)" "(2, 28)" "(2, 28)"]
+       ["(3, 1)" "(3, 2)" "(3, 3)" "(3, 3)" "(3, 4)" "(3, 4)" "(3, 4)" "(3, 4)" "(3, 4)" "(3, 4)"]
+       ["(3, 5)" "(3, 5)" "(3, 6)" "(3, 6)" "(3, 6)" "(3, 6)" "(3, 7)" "(3, 7)" "(3, 7)" "(3, 7)"]
+       ["(3, 8)" "(3, 9)" "(3, 9)" "(3, 10)" "(3, 10)" "(3, 11)" "(3, 11)" "(3, 13)" "(3, 13)" "(3, 13)"]
+       ["(3, 14)" "(3, 14)" "(3, 14)" "(3, 16)" "(3, 16)" "(3, 16)" "(3, 17)" "(3, 17)" "(3, 17)" "(3, 17)"]
+       ["(3, 17)" "(3, 17)" "(3, 19)" "(3, 19)" "(3, 19)" "(3, 19)" "(3, 19)" "(3, 20)" "(3, 20)" "(3, 21)"]
+       ["(3, 21)" "(3, 22)" "(3, 22)" "(3, 23)" "(3, 23)" "(3, 24)" "(3, 24)" "(3, 25)" "(3, 25)" "(3, 25)"]
+       ["(3, 25)" "(3, 26)" "(3, 26)" "(3, 28)" "(3, 28)" "(3, 29)" "(3, 29)" "(3, 29)" "(3, 29)" "(3, 30)"]
+       ["(3, 30)" "(4, 1)" "(4, 1)" "(4, 1)" "(4, 1)" "(4, 3)" "(4, 3)" "(4, 3)" "(4, 3)" "(4, 3)"]
+       ["(4, 4)" "(4, 4)" "(4, 4)" "(4, 4)" "(4, 5)" "(4, 5)" "(4, 5)" "(4, 6)" "(4, 6)" "(4, 6)"]
+       ["(4, 6)" "(4, 6)" "(4, 6)" "(4, 6)" "(4, 6)" "(4, 7)" "(4, 7)" "(4, 8)" "(4, 8)" "(4, 8)"]
+       ["(4, 10)" "(4, 10)" "(4, 10)" "(4, 11)" "(4, 11)" "(4, 11)" "(4, 11)" "(4, 12)" "(4, 12)" "(4, 13)"]
+       ["(4, 13)" "(4, 13)" "(4, 13)" "(4, 15)" "(4, 15)" "(4, 15)" "(4, 15)" "(4, 16)" "(4, 17)" "(4, 17)"]
+       ["(4, 17)" "(4, 19)" "(4, 19)" "(4, 19)" "(4, 19)" "(4, 20)" "(4, 20)" "(4, 21)" "(4, 21)" "(4, 21)"]
+       ["(4, 22)" "(4, 22)" "(4, 23)" "(4, 23)" "(4, 23)" "(4, 23)" "(4, 23)" "(4, 23)" "(4, 24)" "(4, 24)"]
+       ["(4, 24)" "(4, 25)" "(4, 25)" "(4, 26)" "(4, 26)" "(4, 27)" "(4, 27)" "(4, 27)" "(4, 28)" "(4, 28)"]
+       ["(4, 29)" "(4, 29)" "(4, 29)" "(4, 30)" "(4, 30)" "(4, 30)" "(5, 1)" "(5, 2)" "(5, 2)" "(5, 2)"]
+       ["(5, 2)" "(5, 4)" "(5, 4)" "(5, 4)" "(5, 5)" "(5, 5)" "(5, 5)" "(5, 6)" "(5, 6)" "(5, 8)"]
+       ["(5, 9)" "(5, 10)" "(5, 10)" "(5, 10)" "(5, 11)" "(5, 11)" "(5, 11)" "(5, 11)" "(5, 12)" "(5, 12)"]
+       ["(5, 12)" "(5, 13)" "(5, 13)" "(5, 14)" "(5, 14)" "(5, 14)" "(5, 15)" "(5, 15)" "(5, 16)" "(5, 17)"]
+       ["(5, 17)" "(5, 18)" "(5, 19)" "(5, 20)" "(5, 20)" "(5, 20)" "(5, 20)" "(5, 21)" "(5, 21)" "(5, 21)"]
+       ["(5, 21)" "(5, 22)" "(5, 22)" "(5, 22)" "(5, 23)" "(5, 23)" "(5, 23)" "(5, 23)" "(5, 24)" "(5, 24)"]
+       ["(5, 24)" "(5, 25)" "(5, 25)" "(5, 25)" "(5, 26)" "(5, 26)" "(5, 26)" "(5, 27)" "(5, 28)" "(5, 28)"]
+       ["(5, 28)" "(5, 29)" "(5, 30)" "(5, 31)" "(5, 31)" "(6, 1)" "(6, 1)" "(6, 2)" "(6, 2)" "(6, 2)"]
+       ["(6, 3)" "(6, 3)" "(6, 4)" "(6, 5)" "(6, 5)" "(6, 6)" "(6, 6)" "(6, 6)" "(6, 6)" "(6, 7)"]
+       ["(6, 7)" "(6, 7)" "(6, 9)" "(6, 9)" "(6, 9)" "(6, 10)" "(6, 10)" "(6, 11)" "(6, 11)" "(6, 11)"]
+       ["(6, 11)" "(6, 11)" "(6, 11)" "(6, 12)" "(6, 12)" "(6, 12)" "(6, 13)" "(6, 13)" "(6, 13)" "(6, 13)"]
+       ["(6, 13)" "(6, 14)" "(6, 14)" "(6, 14)" "(6, 15)" "(6, 15)" "(6, 16)" "(6, 16)" "(6, 17)" "(6, 17)"]
+       ["(6, 17)" "(6, 18)" "(6, 19)" "(6, 19)" "(6, 19)" "(6, 20)" "(6, 20)" "(6, 20)" "(6, 20)" "(6, 21)"]
+       ["(6, 21)" "(6, 21)" "(6, 21)" "(6, 22)" "(6, 22)" "(6, 23)" "(6, 23)" "(6, 23)" "(6, 24)" "(6, 25)"]
+       ["(6, 25)" "(6, 28)" "(6, 28)" "(6, 28)" "(6, 29)" "(6, 29)" "(6, 29)" "(6, 29)" "(6, 29)" "(6, 30)"]
+       ["(6, 30)" "(6, 30)" "(6, 30)" "(6, 30)" "(6, 30)" "(7, 1)" "(7, 1)" "(7, 1)" "(7, 2)" "(7, 2)"]
+       ["(7, 2)" "(7, 2)" "(7, 4)" "(7, 4)" "(7, 4)" "(7, 4)" "(7, 4)" "(7, 4)" "(7, 5)" "(7, 5)"]
+       ["(7, 5)" "(7, 6)" "(7, 6)" "(7, 6)" "(7, 7)" "(7, 7)" "(7, 7)" "(7, 7)" "(7, 7)" "(7, 8)"]
+       ["(7, 8)" "(7, 8)" "(7, 9)" "(7, 12)" "(7, 12)" "(7, 12)" "(7, 13)" "(7, 13)" "(7, 13)" "(7, 13)"]
+       ["(7, 13)" "(7, 13)" "(7, 13)" "(7, 14)" "(7, 14)" "(7, 15)" "(7, 15)" "(7, 15)" "(7, 15)" "(7, 16)"]
+       ["(7, 16)" "(7, 17)" "(7, 17)" "(7, 17)" "(7, 18)" "(7, 18)" "(7, 19)" "(7, 19)" "(7, 19)" "(7, 20)"]
+       ["(7, 20)" "(7, 20)" "(7, 20)" "(7, 20)" "(7, 20)" "(7, 21)" "(7, 21)" "(7, 21)" "(7, 21)" "(7, 23)"]
+       ["(7, 23)" "(7, 24)" "(7, 24)" "(7, 24)" "(7, 25)" "(7, 25)" "(7, 25)" "(7, 25)" "(7, 26)" "(7, 26)"]
+       ["(7, 26)" "(7, 27)" "(7, 28)" "(7, 28)" "(7, 30)" "(7, 30)" "(7, 30)" "(7, 30)" "(7, 31)" "(7, 31)"]
+       ["(8, 1)" "(8, 3)" "(8, 3)" "(8, 3)" "(8, 3)" "(8, 3)" "(8, 3)" "(8, 4)" "(8, 4)" "(8, 4)"]
+       ["(8, 4)" "(8, 5)" "(8, 5)" "(8, 5)" "(8, 5)" "(8, 7)" "(8, 7)" "(8, 7)" "(8, 7)" "(8, 8)"]
+       ["(8, 8)" "(8, 9)" "(8, 9)" "(8, 9)" "(8, 10)" "(8, 10)" "(8, 10)" "(8, 10)" "(8, 11)" "(8, 12)"]
+       ["(8, 13)" "(8, 13)" "(8, 13)" "(8, 14)" "(8, 15)" "(8, 15)" "(8, 15)" "(8, 15)" "(8, 16)" "(8, 16)"]
+       ["(8, 17)" "(8, 18)" "(8, 18)" "(8, 19)" "(8, 20)" "(8, 20)" "(8, 20)" "(8, 20)" "(8, 20)" "(8, 20)"]
+       ["(8, 21)" "(8, 22)" "(8, 22)" "(8, 22)" "(8, 22)" "(8, 22)" "(8, 23)" "(8, 23)" "(8, 24)" "(8, 24)"]
+       ["(8, 24)" "(8, 25)" "(8, 25)" "(8, 26)" "(8, 26)" "(8, 26)" "(8, 26)" "(8, 27)" "(8, 27)" "(8, 28)"]
+       ["(8, 29)" "(8, 30)" "(8, 30)" "(8, 30)" "(8, 30)" "(8, 31)" "(8, 31)" "(8, 31)" "(8, 31)" "(9, 2)"]
+       ["(9, 3)" "(9, 3)" "(9, 4)" "(9, 5)" "(9, 5)" "(9, 5)" "(9, 6)" "(9, 6)" "(9, 6)" "(9, 7)"]
+       ["(9, 8)" "(9, 9)" "(9, 9)" "(9, 9)" "(9, 10)" "(9, 11)" "(9, 12)" "(9, 12)" "(9, 13)" "(9, 14)"]
+       ["(9, 14)" "(9, 15)" "(9, 15)" "(9, 16)" "(9, 16)" "(9, 16)" "(9, 17)" "(9, 18)" "(9, 18)" "(9, 18)"]
+       ["(9, 18)" "(9, 19)" "(9, 19)" "(9, 20)" "(9, 20)" "(9, 20)" "(9, 20)" "(9, 21)" "(9, 21)" "(9, 22)"]
+       ["(9, 22)" "(9, 23)" "(9, 23)" "(9, 24)" "(9, 24)" "(9, 24)" "(9, 24)" "(9, 24)" "(9, 25)" "(9, 25)"]
+       ["(9, 25)" "(9, 26)" "(9, 28)" "(9, 28)" "(9, 28)" "(9, 29)" "(9, 30)" "(9, 30)" "(9, 30)" "(9, 30)"]
+       ["(10, 1)" "(10, 2)" "(10, 2)" "(10, 3)" "(10, 3)" "(10, 3)" "(10, 3)" "(10, 3)" "(10, 4)" "(10, 5)"]
+       ["(10, 5)" "(10, 5)" "(10, 6)" "(10, 7)" "(10, 7)" "(10, 8)" "(10, 8)" "(10, 8)" "(10, 8)" "(10, 9)"]
+       ["(10, 9)" "(10, 9)" "(10, 9)" "(10, 9)" "(10, 10)" "(10, 10)" "(10, 10)" "(10, 10)" "(10, 11)" "(10, 12)"]
+       ["(10, 12)" "(10, 13)" "(10, 13)" "(10, 13)" "(10, 13)" "(10, 13)" "(10, 13)" "(10, 13)" "(10, 13)" "(10, 14)"]
+       ["(10, 14)" "(10, 15)" "(10, 15)" "(10, 15)" "(10, 17)" "(10, 17)" "(10, 18)" "(10, 20)" "(10, 21)" "(10, 22)"]
+       ["(10, 22)" "(10, 22)" "(10, 23)" "(10, 23)" "(10, 23)" "(10, 24)" "(10, 24)" "(10, 24)" "(10, 25)" "(10, 25)"]
+       ["(10, 26)" "(10, 26)" "(10, 28)" "(10, 30)" "(10, 30)" "(10, 30)" "(10, 30)" "(10, 31)" "(10, 31)" "(10, 31)"]
+       ["(11, 1)" "(11, 1)" "(11, 2)" "(11, 3)" "(11, 3)" "(11, 4)" "(11, 5)" "(11, 5)" "(11, 5)" "(11, 6)"]
+       ["(11, 8)" "(11, 8)" "(11, 9)" "(11, 9)" "(11, 9)" "(11, 9)" "(11, 9)" "(11, 9)" "(11, 10)" "(11, 10)"]
+       ["(11, 10)" "(11, 10)" "(11, 11)" "(11, 12)" "(11, 14)" "(11, 14)" "(11, 15)" "(11, 16)" "(11, 16)" "(11, 16)"]
+       ["(11, 16)" "(11, 16)" "(11, 16)" "(11, 16)" "(11, 18)" "(11, 19)" "(11, 20)" "(11, 20)" "(11, 21)" "(11, 21)"]
+       ["(11, 21)" "(11, 22)" "(11, 22)" "(11, 23)" "(11, 23)" "(11, 24)" "(11, 24)" "(11, 24)" "(11, 25)" "(11, 26)"]
+       ["(11, 26)" "(11, 26)" "(11, 26)" "(11, 27)" "(11, 27)" "(11, 27)" "(11, 28)" "(11, 29)" "(11, 29)" "(11, 29)"]
+       ["(11, 29)" "(11, 30)" "(11, 30)" "(11, 30)" "(12, 1)" "(12, 1)" "(12, 2)" "(12, 2)" "(12, 2)" "(12, 3)"]
+       ["(12, 4)" "(12, 5)" "(12, 5)" "(12, 5)" "(12, 5)" "(12, 5)" "(12, 6)" "(12, 6)" "(12, 6)" "(12, 6)"]
+       ["(12, 7)" "(12, 7)" "(12, 7)" "(12, 7)" "(12, 7)" "(12, 8)" "(12, 8)" "(12, 8)" "(12, 9)" "(12, 9)"]
+       ["(12, 9)" "(12, 9)" "(12, 9)" "(12, 9)" "(12, 9)" "(12, 10)" "(12, 10)" "(12, 10)" "(12, 12)" "(12, 12)"]
+       ["(12, 12)" "(12, 13)" "(12, 13)" "(12, 14)" "(12, 14)" "(12, 14)" "(12, 14)" "(12, 15)" "(12, 15)" "(12, 15)"]
+       ["(12, 15)" "(12, 15)" "(12, 16)" "(12, 16)" "(12, 17)" "(12, 17)" "(12, 17)" "(12, 17)" "(12, 18)" "(12, 18)"]
+       ["(12, 18)" "(12, 18)" "(12, 18)" "(12, 19)" "(12, 19)" "(12, 20)" "(12, 21)" "(12, 22)" "(12, 22)" "(12, 23)"]
+       ["(12, 23)" "(12, 23)" "(12, 23)" "(12, 23)" "(12, 24)" "(12, 24)" "(12, 24)" "(12, 24)" "(12, 25)" "(12, 25)"]
+       ["(12, 26)" "(12, 26)" "(12, 26)" "(12, 26)" "(12, 27)" "(12, 27)" "(12, 27)" "(12, 28)" "(12, 28)" "(12, 29)"]
+       ["(12, 29)" "(12, 29)" "(12, 29)" "(12, 31)" "(12, 31)" "(12, 31)"]])
+
+    (text (i (str/join " " [
+      "(Analyze the data according to your original test plan. Draw conclusions"
+      "based off of that plan.)"])))
+
+    (matrix
+      [] ["Zodiac Sign" "Expected Ratio" "Observed Ratio"]
+      [["Capricorn" (tangent (f 4) "0.082") "0.073"]
+       ["Aquarius" "0.082" "0.087"]
+       ["Pieces" "0.082" "0.087"]
+       ["Aries" "0.085" "0.082"]
+       ["Taurus" "0.085" "0.094"]
+       [(tangent (f 5) "Gemini") "0.088" "0.103"]
+       ["Cancer" "0.085" "0.088"]
+       ["Leo" "0.085" "0.074"]
+       ["Virgo" "0.082" "0.081"]
+       ["Libra" "0.085" "0.070"]
+       ["Scorpio" "0.079" "0.096"]
+       ["Sagittarius" "0.079" "0.066"]])
+
+    (footnote (f 4)
+      (text "All figures here have been rounded to three decimal points for"
+            "display purposes."))
+
+    (footnote (f 5)
+      (text "In the image, the word in yellow is \"Gemini\"; my apologies for it"
+            "being hard to read."))
+
+    (paragraph
+      (text "The distance between the expected and observed incidence of"
+            "occurrence is ")
+      (tangent (f 6) (m "0.094"))
+      (text
+        ". Next, to establish the p-value associated with this number, 100000"
+        "simulations were run in which 876 birthdays were randomly distributed"
+        "through the calendar year, and the error values for each one was"
+        "calculated. In 26.74% of the simulations, the error value was higher"
+        "than the observed error value. Since " (m "0.2674 > 0.05") ", "
+        (b "the null hypothesis is not rejected by this experiment") "."))
+
+    (footnote (f 6)
+      (text
+        "The fact that the observed distribution is not even may lead an"
+        "empiricist to conclude that there is something going on. This conclusion"
+        "is not necessarily " (i "wrong") "; empirical science does not prove"
+        "negative statements. Instead, we merely cannot conclude that it's "
+        (i "right") " from this experiment. It's very easy to find patterns"
+        "that empiricism does not reveal; in running this experiment, I had the"
+        "subjective observation that one of the signs with fewer observed friends'"
+        "birthdays (Sagittarius) also included a number of frenemies, and that"
+        "two of my exes share a birthday along with another good friend. None"
+        "of these observations are supported by this evidence."))
+
+    (text "For your viewing pleasure, I have rendered the calendar year with all"
+          "my friends' birthdays, delimiting it by month and zodiac sign.")
+
+    (image "../resources/zodiac.png"
+           (str/join " " [
+              "A visual distribution of the collected data over a calendar year,"
+              "delimited by months and zodiac signs."])
+           700 150)
   )))
 
 (def phenomenological-science
@@ -1236,8 +1256,7 @@
    (essay-series [:three-sciences :empirical-science :empirical-science-example])
    (essay-series [:three-sciences :phenomenological-science :phenomenological-science-example])
    (directive-under-construction
-     :empirical-science-example :phenomenological-science
-     :phenomenological-science-example :modeling)
+     :phenomenological-science :phenomenological-science-example :modeling)
    materialism universal-model universal-order universal-shape speed-limits
    three-sciences analytical-science analytical-science-example empirical-science
    empirical-science-example phenomenological-science phenomenological-science-example

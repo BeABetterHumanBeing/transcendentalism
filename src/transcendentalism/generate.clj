@@ -319,6 +319,10 @@
              (q-chain
                (q-or (q-pred "/item/q_and_a/question")
                      (q-pred "/item/q_and_a/answer")
+                     (q-pred (fn [triple data]
+                               (merge data {:row (property triple "/row" -1),
+                                            :col (property triple "/col" -1)}))
+                             "/item/table/cell")
                      (q-pred "/item/bullet_list/header")
                      (q-pred (fn [triple data]
                                (assoc data :order (property triple "/order" 0)))
@@ -331,7 +335,7 @@
          sub),
         sorted-gq-result
         (sort (compare-by-priority gq-result
-                :inline :in-item :order :in-item-inline)
+                :inline :in-item :order :row :col :in-item-inline)
               (keys gq-result))]
     (into [] sorted-gq-result)))
 
