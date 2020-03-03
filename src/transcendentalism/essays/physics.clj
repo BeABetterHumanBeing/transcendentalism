@@ -597,9 +597,295 @@
 (def modeling
   (let [f (footnoter :modeling)]
   (essay :modeling "Modeling"
-    (text "TODO")
+    (paragraph
+      (text (b "Formalization") " is the proccess by which a ")
+      (tangent (f 1) "model")
+      (text
+        " is made " (b "objective") ". We are used to maintaining models in our"
+        "heads as toys or play-thinks to reason about the world, but it is when"
+        "we put them down on paper or code them up on a computer that they"
+        "become something that can be more readily shared. A formalized model"
+        "has the advantages that it can be passed around, reasoned with by"
+        "entities, and used as the basis for calculation, prediction, or"
+        "verification. Models can be formalized in many different ways. If you"
+        "can prove that two formalizations are isomorphic to each other (i.e."
+        "that there is a 1-to-1 mapping between them), then you can demonstrate"
+        "that they are in fact equivalent. If they are not isomorphic, then "
+        (i "technically") " they are not the same model. Nevertheless, depending"
+        "on what you are trying to do with them, they may still be effectively"
+        "interchangeable."))
+
+    (footnote (f 1)
+      (text
+        "I assume that most of you are familiar mith modeling. As such, rather"
+        "than use this article to describe what modeling is, I'm going to use it"
+        "more as a grab-bag of perspectives / nuances / observations / theories"
+        "/ etc about the process of modeling."))
+
+    (numbered-list
+      (text
+        (b "Descriptive models") " merely seek to describe the some aspect of"
+        "reality. The purpose of these models is to facilitate "
+        ; TODO - Consider making a glossary, so that these words can be defined
+        ; elsewhere, and auto-included here.
+        (i "structuralization") ", the process of looking at the continuous"
+        "flow of reality and separating or deconstructing it into parts. This"
+        "process involves the following general steps:")
+      (text
+        (b "Segmentation") ": The process of separating bits and pieces of"
+        "reality from each other. "
+        ; TODO - enable graceful multi-line is, bs, and ms.
+        (i "Ex \"this image is composed of lines and colors like so\"") ".")
+      (text
+        (b "Recognition") ": The process of categorizing these bits and pieces"
+        "against prototypes for which some body of knowledge already exists. "
+        (i "Ex \"these lines and colors make up a collection of cars\"") ".")
+      (text
+        (b "Synthesis") ": The process of assembling these bits and pieces,"
+        "using the knowledge of their prototypes, into a larger understanding"
+        "of the corner of reality being structuralized. "
+        (i "Ex \"I'm looking at a traffic jam\"") "."))
+
+    (paragraph
+      (text "Descriptive modeling makes up the bulk of rational thinking, and"
+            "the majority of it happens well beneath human awareness. We tend"
+            "to think about things at ")
+      (tangent (f 2) "the highest available level")
+      (text ", revisiting and revising lower models only when the task at hand"
+            "requires it, or to explore anomalies or correct for errors."))
+
+    (footnote (f 2)
+      (text
+        "While it's tempting to reach for \"universal\" models when describing"
+        "the world, it's important to recognize that suitability is dictated by"
+        "the local context. For example, airplanes are the fastest practical way"
+        "to get around the world, but one would not take an airplane to get from"
+        "the couch to the bathroom."))
+
+    (text
+      "Descriptive models can be reasoned about by their " (b "accuracy") ", or"
+      "how closely they match the portion of reality being described. A big part"
+      "of learning about the world is simply finding more and more accurate"
+      "models for understanding it. Note that there is typically no a priori"
+      "\"winner\" within a collection of competing models; which one is most"
+      "accurate is a function of what you want to do with it.")
+
+    (text
+      ; TODO - Turn these into headings, which are slightly larger text, and can
+      ; be independently linked to.
+      (b "Prescriptive models") " are simply models that are used as the basis"
+      "for action. Ex \"when your taxi driver tells you to buy stock X, you sell"
+      "it instead\". Prescriptive models are extensions beyond descriptive"
+      "models (which merely say what things " (i "are") ", and not what you"
+      "should " (i "do") " with them).")
+
+    (paragraph
+      (text "Once you have a prescriptive model, you can start to measure its ")
+      (tangent (f 3) (b "accuracy"))
+      (text ". Accuracy is simply a measure of how close the model matches"
+            "reality (and can be used to compare models' suitabilities). This"
+            "is done by making predictions, acting on the predictions, and"
+            "comparing the expected results against the actual results."))
+
+    (footnote (f 3)
+      (text
+        "Models do not strictly have to be prescriptive to measure their"
+        "accuracy. However since they are the ones that are being used as the"
+        "basis for action, they are the ones whose accuracy you are more likely"
+        "to care about, since being wrong now starts to mean making mistakes."
+        "Additionally, testing descriptive models often amounts to just"
+        "waiting and seeing, which takes a lot of the experimental control out"
+        "of your hands."))
+
+    (text
+      "At the heart of modeling is what I call the "
+      (b "fundamental modeling tradeoff") ". All models are subject to this"
+      "tradeoff, and this tradeoff is often the overriding concern in the"
+      "selection of a model. The tradeoff states:")
+
+    ; TODO - make a thesis element which pulls out and highlights it
+    (text "The maximum accuracy of a model is bound by its complexity.")
+
+    (text
+      "Cast into another light, it roughly says that more accurate models tend"
+      "to be more complex. This does not mean that more complex models are "
+      (i "necessarily") " more accurate; it's very easy to take a model and add"
+      "unnecessary and useless complexity to it.")
+
+    (bullet-list
+      (text "The tradeoff has two extreme cases:")
+      (text
+        (b "Trivial Simplicity") ":  When a model's complexity is reduced to"
+        "the absolute minimum, it trivializes the model. Trivial models always"
+        "make the exact same predictions, or the exact same description, and"
+        ; TODO - pull out examples into their own fun chaining mechanism (use
+        ; green outlines). This might require re-doing footnotes too...
+        ; TODO - possibility for re-doing footnotes: create reverse preds for
+        ; segment-flow predicates, and follow them home to retriev paths.
+        ; TODO - add an option so that 'expanded' elements can start off open
+        "thus the best it can do is to match the most common cases. "
+        (i "Ex \"our model for predicting whether it will snow tomorrow is to assume 'no'.\""))
+      (text
+        (b "Perfect Simulation") ": When a model's accuracy " (i "exactly")
+        " matches the thing it is trying to model. In that case, the model must"
+        "be at least as complex as the thing itself, and in these cases, it"
+        "often makes more sense to not use a model at all. "
+        (i "Ex \"our model for predicting whether it will snow tomorrow is to wait and see.\"")))
+
+    (paragraph
+      (text
+        "Almost all models fall somewhere between these extremes, and there are"
+        "often various levels between them that can be chosen. Ex modeling the"
+        "human body at the level of organs, cells, molecules, ")
+      (tangent (f 4) "or subatomic particles") dot)
+
+    (footnote (f 4)
+      (text "Reminds me of a joke. The definition of an expert is a person who"
+            "knows more and more about less and less, until they know absolutely"
+            "everything about nothing."))
+
     (file-under :modeling :physics)
   )))
+
+; ## Analogy
+
+; An analogy is a mapping between descriptive models. While a model provides a
+; useful structure for reasoning about a thing, the structure also sets
+; limitations on how far the reasoning can be taken. If the model isn't a perfect
+; simulation, these limitations are then artificial, and we frequently might want
+; to step beyond their bounds. Shifting to another analogous perspective is one
+; means of overcoming these limitations (the other being broadening of scope;
+; which may come with higher complexity penalties).
+
+; TODO(gierl): Come up with a good example of an analogy to demonstrate.
+
+; In general, analogies should be used for pedagogy only. If a person doesn't know
+; much about a thing, comparing it to an analogous thing for which they have
+; greater familiarity is an excellent means of helping them to grasp the idea.
+
+; The flip side of this is that analogies should *not* be used for argumentation.
+; Each mapping from one model to another analogous model introduces errors into
+; the final result. If you're arguing from an analogy, you are running a
+; heightened risk of simply being wrong. Nevertheless, this generally doesn't stop
+; arguments from analogies; getting the audience to understand your argument is
+; the largest hurdle in getting them to believe it to be true.
+
+; TODO(gierl): Show how our analogy can be used to distort the truth in an
+; argument.
+
+; TODO(gierl): Overextension
+
+; ## Models
+
+; In most of my essays, when I find a model useful, I will introduce it in situ.
+; Below is a collection of "stray" models; ones that are either shared between
+; essays and are therefore placed here where they can be more easily referenced,
+; or orphan models, ones that I think are fun to look at, but are otherwise
+; provided without any real context.
+
+; ### Anthropomorphization
+
+; Perhaps the single most ubiquitous model that's used is the self. Our own being,
+; our bodies, or thoughts and feeling and lives,.. these are the things that are
+; most familiar to us, most readily available to us. Our self accompanies us into
+; this world, and it follows us until we leave it as well.
+
+; It's only natural that this self should then be used, in bits and pieces, as one
+; of the foundational models through which other models are constructed by
+; projecting ourself onto them. I observe this effect nearly everywhere:
+
+; *   Understanding other people's internal emotional state requires understanding
+;     their emotions to work in a similar way to yours. Reconstructing within
+;     yourself the emotions that others feel is empathy.
+; *   Animals are often anthropomorphized, giving them human thoughts and
+;     feelings. Stories that involve talking animals is the most obvious example
+;     of this.
+;     *   Note that mammals, because they have a limbic system, have the
+;         capability of communicating their emotional state across species. It is
+;         perhaps the singular most useful trait that mammalia has, and the one
+;         that allows us our close communication with e.g. dogs and cats.
+; *   Large groups of people are often characterized as though they were a single,
+;     person-like entity. This stereotype (because that is what it is) is composed
+;     of common threads that run through its base population.
+;     *   Using such stereotypes as a predictive model has relatively low
+;         accuracy, however the usefulness derived from their descriptive
+;         capabilities, especially in light of their relative simplicity, make
+;         stereotypes remarkably *efficient* models.
+
+; ### Brain as a Recursive Filter
+
+; Since the brain is the seat of how humans think about the world, it makes sense
+; to have a fairly robust model for how the brain itself works. This gooey,
+; white-and-gray mass is incredibly complicated, so needless to say most models of
+; its function are gross simplifications.
+
+; One model that I've found particularly useful is to think of the brain as a
+; recursive filter. It receives input from the outside world in the form of
+; signals that arrive through its various input nerves (the main one being the
+; brain stem, but some senses arrive via their own conduit, esp. the eyes, ears,
+; and nose). Thes signals then get processed as they pass through the brain,
+; gradually working their way up through higher levels of semantic abstraction
+; until they break through into conscious awareness.
+
+; The key construction to note, however, is that this filter is recursive: some
+; (most) of its inputs derive from within itself. If the brain were discretized as
+; a state machine moving from one state to the next, the greater contribution to
+; its next state comes from its previous ones, rather than from whatever stimuli
+; arrive between the two states.
+
+; Some variations on this perspective are:
+
+; *   To model thinking as a literal wave (a brainwave) that passes through the
+;     filter. EEGs and the like prove that much of the brain's computation does
+;     actually take place in the form of a variety of waves that fluxuate at
+;     different frequencies in the brain.
+; *   To model static perceptual phenomena (like the state of the world when
+;     inputs are held close to constant) as being standing waves; they are in
+;     constant motion, however each one passes close enough to its previous state
+;     to give the illusion of not moving. Some phenomena, like seizures, can also
+;     be thought of as static waves.
+
+; ### Perspective as Glasses
+
+; Your perspective can be modeled as though it were a pair of glasses that you
+; wear. Perspectives intercede between reality and your perception of it. As
+; information comes in, it gets distorted by the perspectives that it passes
+; through, yielding a warped but functional understanding of the world.
+
+; NOTE: Unlike real glasses, you might wear a variety of perspectives all at once.
+; They may work to cancel out each other, or they may work to exaggerate each
+; other. Also unlike real glasses, perspectives are hard to remove, and crucially
+; you cannot remove them all. There really is no such thing as having a perfectly
+; undistorted view of the world. Because they cannot be removed, and because they
+; intercede between reality and all your perceptions of it, many people fall into
+; thinking that they have a clear view of the world.
+
+; Some aspects of the world are only visible under certain perspectives, and
+; differing perspectives may even lead to almost-contradictory understandings.
+; Much misunderstanding and ideological differences come simply from differences
+; in perspective; two people could be looking at exactly the same thing and reach
+; entirely opposite conclusions.
+
+; The *privileged* perspective is the closest one gets to having a totally
+; undistorted perspective of the world. Contrary to expectations, this isn't the
+; result of having no perspectives whatsoever (which would be more akin to
+; blindness), it can be thought of as the limit for having all perspectives
+; simultaneously. Two perspectives can interfere in ways that reveal more than
+; either one alone, and so being able to entertain all perspectives at once yields
+; the maximum amount of information.
+
+; When perspectives clash with each other, they create *dissonance*. Because
+; dissonance is jarring, and results in apparent contradictions, people tend to
+; accumulate perspectives that have high *coherence* with each other, where
+; coherent views produce little dissonance. Rationalism holds that objective
+; truth would be the joint perspective with no dissonance.
+
+; NOTE: This perspective-as-glasses model can be over-extended in a variety of
+; ways. One would be to ask about the "strength" of a prescription on these
+; glasses. While a person can be more or less heavily reliant on a perspective,
+; glasses of different strength have different distortions, which is not the same
+; thing. Another would be to ask what these glasses are made of; perspectives are
+; not material things.
 
 (def three-sciences
   (let [f (footnoter :three-science)]
@@ -1256,7 +1542,7 @@
    (essay-series [:three-sciences :empirical-science :empirical-science-example])
    (essay-series [:three-sciences :phenomenological-science :phenomenological-science-example])
    (directive-under-construction
-     :phenomenological-science :phenomenological-science-example :modeling)
+     :phenomenological-science :phenomenological-science-example)
    materialism universal-model universal-order universal-shape speed-limits
    three-sciences analytical-science analytical-science-example empirical-science
    empirical-science-example phenomenological-science phenomenological-science-example
