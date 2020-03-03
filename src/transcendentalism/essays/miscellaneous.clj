@@ -294,5 +294,4 @@
   ))
 
 (def miscellaneous-essays
-  [(directive-under-construction)
-   if-houses-were-built-like-software singularity scale-of-humanity])
+  [if-houses-were-built-like-software singularity scale-of-humanity])

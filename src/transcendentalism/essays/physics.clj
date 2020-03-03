@@ -1,7 +1,8 @@
 (ns transcendentalism.essays.physics
   (:require [clojure.string :as str]))
 
-(use 'transcendentalism.essay
+(use 'transcendentalism.directive
+     'transcendentalism.essay
      'transcendentalism.html)
 
 ; Materialism

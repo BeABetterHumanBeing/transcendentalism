@@ -1,6 +1,7 @@
 (ns transcendentalism.essays.consciousness)
 
-(use 'transcendentalism.essay)
+(use 'transcendentalism.directive
+     'transcendentalism.essay)
 
 ; Ego Development Theory
 ; This essay serves as the entry point to all (non-esoteric)

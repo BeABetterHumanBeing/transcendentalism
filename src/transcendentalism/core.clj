@@ -1,6 +1,7 @@
 (ns transcendentalism.core)
 
-(use 'transcendentalism.essay
+(use 'transcendentalism.directive
+     'transcendentalism.essay
      'transcendentalism.essays.consciousness
      'transcendentalism.essays.epistemology
      'transcendentalism.essays.intro

@@ -1,6 +1,7 @@
 (ns transcendentalism.essays.epistemology)
 
-(use 'transcendentalism.essay)
+(use 'transcendentalism.directive
+     'transcendentalism.essay)
 
 ; Epistemology
 ; This essay serves as the entry point to all epistemological essays, about

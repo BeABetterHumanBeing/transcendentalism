@@ -1,6 +1,7 @@
 (ns transcendentalism.essays.politics)
 
-(use 'transcendentalism.essay)
+(use 'transcendentalism.directive
+     'transcendentalism.essay)
 
 ; Enlightened Centrism
 ; This essay serves as the entry point to all political essays.
