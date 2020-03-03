@@ -23,7 +23,6 @@
   ([essay-sub] (create-essay-thread essay-sub essay-sub))
   ([essay-sub sub]
    (let [key-gen (create-key-gen sub)]
-     ; TODO let the essay thread also extend a footnote-name generating protocol.
      (reify EssayThread
        (get-essay-sub [essay-thread] essay-sub)
        (fork-essay-thread [essay-thread new-sub]
@@ -229,6 +228,9 @@
 ; A very commonly-used particle.
 (def dot (text "."))
 
+(def tm
+  (i "Transcendental Metaphysics"))
+
 (defn m
   "Makes some text monospaced"
   [& lines]
@@ -317,7 +319,7 @@
             item (fn [val gen-triple]
                    (if (nil? val)
                      []
-                     (let [t (fork-essay-thread t (sub-suffix sub (gen-key 4)))]
+                     (let [t (fork-essay-thread t (sub-suffix sub (gen-key 5)))]
                        (conj (if (string? val)
                                  ((text val) t)
                                  (val t))

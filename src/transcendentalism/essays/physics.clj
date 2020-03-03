@@ -28,9 +28,8 @@
       (text
         ". It serves as a sort of lower-bound for what is known about reality,"
         "and by no means should be mistaken for an upper-bound of what can be"
-        ; TODO - pull out TM to a class that auto-formats it.
-        "known. Generally on " (i "Transcendental Metaphysics") ", materialism"
-        "is treated as an elaborate and compelling ")
+        "known. Generally on " (tm) ", materialism is treated as an elaborate"
+        "and compelling ")
       (see-also :mental-traps "mental trap")
       (text
         ", but that doesn't make it wrong, in the sense that it is still extremely"
@@ -628,9 +627,8 @@
         "process involves the following general steps:")
       (text
         (b "Segmentation") ": The process of separating bits and pieces of"
-        "reality from each other. "
-        ; TODO - enable graceful multi-line is, bs, and ms.
-        (i "Ex \"this image is composed of lines and colors like so\"") ".")
+        "reality from each other. " (i "Ex \"this image is composed of lines"
+        "and colors like so\"") ".")
       (text
         (b "Recognition") ": The process of categorizing these bits and pieces"
         "against prototypes for which some body of knowledge already exists. "
@@ -715,9 +713,6 @@
         "make the exact same predictions, or the exact same description, and"
         ; TODO - pull out examples into their own fun chaining mechanism (use
         ; green outlines). This might require re-doing footnotes too...
-        ; TODO - possibility for re-doing footnotes: create reverse preds for
-        ; segment-flow predicates, and follow them home to retriev paths.
-        ; TODO - add an option so that 'expanded' elements can start off open
         "thus the best it can do is to match the most common cases. "
         (i "Ex \"our model for predicting whether it will snow tomorrow is to assume 'no'.\""))
       (text

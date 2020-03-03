@@ -16,9 +16,9 @@
 
 (defn a [attrs contents] (xml-tag "a" attrs contents))
 
-(defn i [contents] (xml-tag "i" {} contents))
+(defn i [& contents] (xml-tag "i" {} (str/join " " contents)))
 
-(defn b [contents] (xml-tag "b" {} contents))
+(defn b [& contents] (xml-tag "b" {} (str/join " " contents)))
 
 (defn ul [attrs & contents] (xml-tag "ul" attrs (apply str contents)))
 
