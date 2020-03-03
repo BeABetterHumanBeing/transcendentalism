@@ -55,12 +55,12 @@
         "unorthodox structure of the site; I've been using it as a playground"
         "for some of the more experimental ideas I've been toying with. I wrote the"
         "whole thing ")
-      (tangent :footnote-1 "from scratch")
+      (tangent (f 1) "from scratch")
       (text
         " and, as a backend engineer, this was a recipe for, ummm, how shall we"
         "say, " (i "curious") " frontend design choices."))
 
-    (footnote :footnote-1
+    (footnote (f 1)
       (paragraph
         (text
           "In clojure, no less. I used it as an opportunity to teach myself"
@@ -78,10 +78,10 @@
         "wandering through these pages will be an experience not unlike wandering"
         "through a garden maze; getting lost is half the fun, and there is all"
         "kinds of ")
-      (tangent :footnote-2 "treasure")
+      (tangent (f 2) "treasure")
       (text " hidden away for you to find."))
 
-    (footnote :footnote-2
+    (footnote (f 2)
       (text
         "Note that there are some essays which can only be reached by clicking"
         "'Random' on the home page.")
@@ -125,32 +125,32 @@
     (paragraph
       (text
         "I do have a diary, but it's not on this website. If you read ")
-      (tangent :footnote-3 "enough of this")
+      (tangent (f 1) "enough of this")
       (text
         ", you will surely get a great sense of who I am, but it's not"
         "<i>really</i> supposed to be about me. Given this opportunity to toot"
         "my own horn, I'd much rather be known as \"the guy who went home from"
         "the hospital in yellow socks\" than anything else."))
 
-    (footnote :footnote-3
+    (footnote (f 1)
       (paragraph
         (text
           "I tell a lot of stories, so it won't be that hard, if you can put up"
           "with my ")
-        (tangent :sub-footnote "rambling") dot)
+        (tangent (f 2) "rambling") dot)
 
-      (footnote :sub-footnote
+      (footnote (f 2)
         (paragraph
           (text
             "I'm partial to tangents, and tangents that go on tangents. The deep"
             "end of the pool is ")
-          (tangent :sub-sub-footnote "deeper")
+          (tangent (f 3) "deeper")
           (text " than you might expect."))
 
-        (footnote :sub-sub-footnote
-          (tangent :sub-sub-sub-footnote "Hahahaha")
+        (footnote (f 3)
+          (tangent (f 4) "Hahahaha")
 
-          (footnote :sub-sub-sub-footnote
+          (footnote (f 4)
             (text
               "It's worth noting that my tangents generally have a purpose."
               "This one happens to be for testing, to allow me to check that"
@@ -166,7 +166,7 @@
           "2010, I chose three adjectives that I thought described myself, and"
           "were moreover things that I liked about me. They were: interesting,"
           "enthusiastic, and ")
-        (tangent :adjectives-footnote "lovable")
+        (tangent (f 5) "lovable")
         (text
           ". Later on, in 2014, I expanded this list again, adding brave,"
           "compassionate, and just. It has been an excellent exercise in living"
@@ -175,7 +175,7 @@
           "to be tested over your principles; such badges are not won without"
           "work."))
 
-      (footnote :adjectives-footnote
+      (footnote (f 5)
         (text
           "I have since upgraded it to 'loving', to emphasize that it's more"
           "about what you give than what you receive.")
@@ -183,7 +183,6 @@
     )))
 
 (def connections
-  (let [f (footnoter :connections)]
   (essay :connections "Connections"
     (paragraph
       (text
@@ -245,7 +244,7 @@
               "following reasons:")
         (text "Commercial solicitation")
         (text "Requesting that I plug your blog, pet cause, or activism")
-        (see-also :apologies "Expressing anger or hate"))))))
+        (see-also :apologies "Expressing anger or hate")))))
 
 (def apologies
   (essay :apologies "Apologies"
@@ -265,10 +264,10 @@
         "If I get enough negative feedback over something I've written, I'll"
         "issue an apology for it in the space reserved below. At this time, it"
         "is (fortunately) ")
-      (tangent :far-corner "empty")
+      (tangent (f 1) "empty")
       (text ", and I hope to keep it that way."))
 
-    (footnote :far-corner
+    (footnote (f 1)
       (text
         "Not because I'm really that great at not offending people, but rather"
         "because not enough people have seen what I'm brewing in this far corner"

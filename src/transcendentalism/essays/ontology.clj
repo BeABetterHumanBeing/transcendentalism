@@ -17,7 +17,6 @@
   ))
 
 (def tower-of-objectivity
-  (let [f (footnoter :tower-of-objectivity)]
   (essay :tower-of-objectivity "The Tower of Objectivity"
 
     (text
@@ -105,10 +104,9 @@
       "objects, despite being constructed on top of subjective reality, really"
       "lies somewhere between objective and subjective realities (in terms of"
       "its apparent permanence and tangibility).")
-    )))
+    ))
 
 (def tower-of-subjectivity
-  (let [f (footnoter :tower-of-subjectivity)]
   (essay :tower-of-subjectivity "The Tower of Subjectivity"
     (text
       "Unfortunately for the Tower of Objectivity, using objective reality as"
@@ -208,10 +206,9 @@
       "I'd also like to emphasize that the two constructions of the Tower of"
       "Existence are " (i "duals") " of each other, in that you can pretty much"
       "arrive at the same conclusions no matter which way you go, though one"
-      "may often be easier than another to reach."))))
+      "may often be easier than another to reach.")))
 
 (def tower-of-unity
-  (let [f (footnoter :tower-of-unity)]
   (essay :tower-of-unity "The Tower of Unity"
 
     (text
@@ -287,7 +284,7 @@
         "I am not referring to \"coincidence\" in which in one intant two"
         "instances of the same thought coincide in two bodies (as with"
         "interstitial facts), but rather to where a single thought occurs in"
-        "more than one body.")))))
+        "more than one body."))))
 
 (def ontology-essays
   [(essay-series [:it-is :tower-of-objectivity :tower-of-subjectivity :tower-of-unity])

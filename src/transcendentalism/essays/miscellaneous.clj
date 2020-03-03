@@ -105,7 +105,6 @@
   )))
 
 (def singularity
-  (let [f (footnoter :singularity)]
   (essay :singularity "The Singularity"
 
   (text
@@ -235,7 +234,7 @@
 
     ^{:no-block true} (fn [t]
         (->Triple (get-essay-sub t) "/essay/flow/home" :monad {}))
-  )))
+  ))
 
 (def scale-of-humanity
   (essay :scale-of-humanity "The Scale of Humanity"

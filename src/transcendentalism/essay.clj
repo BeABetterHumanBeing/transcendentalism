@@ -59,18 +59,11 @@
   [sub suffix]
   (keyword (str (name sub) "-" suffix)))
 
-(defprotocol Footnoter
-  (get-footnote-name [footnoter number-or-sub] "Returns a footnote sub name"))
-
-(defn footnoter
-  [root-sub]
-  (let [f (reify Footnoter
-            (get-footnote-name [footnoter number-or-sub]
-              (if (number? number-or-sub)
-                (sub-suffix root-sub (str "f" number-or-sub))
-                number-or-sub)))]
-    (fn [number-or-sub]
-      (get-footnote-name f number-or-sub))))
+(defn f
+  "Returns a virtual sub that produces footnote names"
+  [num]
+  (fn [t]
+    (sub-suffix (get-essay-sub t) (str "f" num))))
 
 (defn root-menu
   "Marks a given essay as the root of some label"
@@ -113,9 +106,10 @@
                     (range (dec (count subs))))))))
 
 (defn footnote
-  [sub & fns]
+  [virtual-sub & fns]
   ^{:no-block true} (fn [t]
-    (let [t (fork-essay-thread t sub)]
+    (let [sub (if (fn? virtual-sub) (virtual-sub t) virtual-sub),
+          t (fork-essay-thread t sub)]
       (map #(% t)
         (reduce
           (fn [result f]
@@ -211,11 +205,12 @@
        (->Triple item-keyword "/item/inline/text" joined-lines {})])))
 
 (defn tangent
-  [footnote-sub & lines]
+  [virtual-sub & lines]
   (fn [t]
-    (let [k (minor-key t)]
+    (let [sub (if (fn? virtual-sub) (virtual-sub t) virtual-sub),
+          k (minor-key t)]
       [((apply text lines) t)
-       (->Triple (item-sub k) "/item/inline/tangent" footnote-sub {})])))
+       (->Triple (item-sub k) "/item/inline/tangent" sub {})])))
 
 (defn see-also
   [essay-sub & lines]
