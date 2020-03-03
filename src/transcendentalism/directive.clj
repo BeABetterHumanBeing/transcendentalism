@@ -3,7 +3,8 @@
     [clojure.set :as set]
     [clojure.string :as str]))
 
-(use 'transcendentalism.graph
+(use 'transcendentalism.essay
+     'transcendentalism.graph
      'transcendentalism.schema)
 
 (defn apply-directives
@@ -32,7 +33,7 @@
   "For every /item/inline/see_also, adds an equivalent /essay/flow/see_also"
   [triples]
   (let [graph (construct-graph triples),
-        essay-subs (map :sub (filter #(= (:pred %) "/type/essay") triples))]
+        essay-subs (all-nodes graph "/type/essay")]
     (reduce
       (fn [result essay-sub]
         (let [see_alsos (keys
@@ -86,3 +87,28 @@
                     #{} obj-to-cxns))))
             #{} sub-to-cxns))]
     (filter #(not (contains? dupes %)) triples)))
+
+(defn directive-label-menus
+  "Generates menu essays for labels"
+  [triples]
+  (let [menu-triples (filter #(= (:pred %) "/essay/flow/menu") triples),
+        menu-item-triples (group-by :obj
+                                    (filter #(= (property % "/label" nil)
+                                                :menu)
+                                            triples))]
+    (apply concat
+      triples
+      (map
+        (fn [menu-triple]
+          (let [sub (:obj menu-triple)]
+            (essay sub (property menu-triple "/title" (str sub))
+              (apply paragraph
+                (text "blah")
+                (map #(see-also % "") (map :sub (menu-item-triples sub))))
+
+              ; Menus' homes are the root of the menu.
+              ^{:no-block true} (fn [t]
+                [(->Triple sub "/essay/flow/home" (:sub menu-triple) {})
+                 (->Triple sub "/essay/label" :invisible {})])
+              )))
+        menu-triples))))
