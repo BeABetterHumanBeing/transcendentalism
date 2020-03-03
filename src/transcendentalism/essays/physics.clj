@@ -28,7 +28,7 @@
       (text
         ". It serves as a sort of lower-bound for what is known about reality,"
         "and by no means should be mistaken for an upper-bound of what can be"
-        "known. Generally on " (tm) ", materialism is treated as an elaborate"
+        "known. Generally on " tm ", materialism is treated as an elaborate"
         "and compelling ")
       (see-also :mental-traps "mental trap")
       (text
@@ -627,17 +627,17 @@
         "process involves the following general steps:")
       (text
         (b "Segmentation") ": The process of separating bits and pieces of"
-        "reality from each other. " (i "Ex \"this image is composed of lines"
-        "and colors like so\"") ".")
+        "reality from each other. " (ex "This image is composed of lines and"
+        "colors like so") ".")
       (text
         (b "Recognition") ": The process of categorizing these bits and pieces"
         "against prototypes for which some body of knowledge already exists. "
-        (i "Ex \"these lines and colors make up a collection of cars\"") ".")
+        (ex "These lines and colors make up a collection of cars") ".")
       (text
         (b "Synthesis") ": The process of assembling these bits and pieces,"
         "using the knowledge of their prototypes, into a larger understanding"
         "of the corner of reality being structuralized. "
-        (i "Ex \"I'm looking at a traffic jam\"") "."))
+        (ex "I'm looking at a traffic jam") "."))
 
     (paragraph
       (text "Descriptive modeling makes up the bulk of rational thinking, and"
@@ -667,8 +667,8 @@
       ; TODO - Turn these into headings, which are slightly larger text, and can
       ; be independently linked to.
       (b "Prescriptive models") " are simply models that are used as the basis"
-      "for action. Ex \"when your taxi driver tells you to buy stock X, you sell"
-      "it instead\". Prescriptive models are extensions beyond descriptive"
+      "for action. " (ex "When your taxi driver tells you to buy stock X, you"
+      "sell it instead") ". Prescriptive models are extensions beyond descriptive"
       "models (which merely say what things " (i "are") ", and not what you"
       "should " (i "do") " with them).")
 
@@ -711,23 +711,21 @@
         (b "Trivial Simplicity") ":  When a model's complexity is reduced to"
         "the absolute minimum, it trivializes the model. Trivial models always"
         "make the exact same predictions, or the exact same description, and"
-        ; TODO - pull out examples into their own fun chaining mechanism (use
-        ; green outlines). This might require re-doing footnotes too...
-        "thus the best it can do is to match the most common cases. "
-        (i "Ex \"our model for predicting whether it will snow tomorrow is to assume 'no'.\""))
+        "thus the best it can do is to match the most common cases. " (ex "Our"
+        "model for predicting whether it will snow tomorrow is to assume 'no'."))
       (text
         (b "Perfect Simulation") ": When a model's accuracy " (i "exactly")
         " matches the thing it is trying to model. In that case, the model must"
         "be at least as complex as the thing itself, and in these cases, it"
-        "often makes more sense to not use a model at all. "
-        (i "Ex \"our model for predicting whether it will snow tomorrow is to wait and see.\"")))
+        "often makes more sense to not use a model at all. " (ex "Our model for"
+        "predicting whether it will snow tomorrow is to wait and see.")))
 
     (paragraph
       (text
         "Almost all models fall somewhere between these extremes, and there are"
-        "often various levels between them that can be chosen. Ex modeling the"
-        "human body at the level of organs, cells, molecules, ")
-      (tangent (f 4) "or subatomic particles") dot)
+        "often various levels between them that can be chosen. " (ex "Modeling"
+        "the human body at the level of organs, cells, molecules") ", ")
+      (tangent (f 4) (i "or subatomic particles")) dot)
 
     (footnote (f 4)
       (text "Reminds me of a joke. The definition of an expert is a person who"
@@ -996,7 +994,7 @@
       (text "Logical ")
       (tangent (f 4) (b "fallacies"))
       (text " derive from analysis. A " (b "strong") " (or " (b "formal") ") fallacy"
-            "is one which renders a proof invalid. A " (b "weak") " (or"
+            "is one which renders a proof invalid. A " (b "weak") " (or "
             (b "informal") ") fallacy doesn't invalidate a proof, but it suggests"
             "that the proof may not be sound."))
 
@@ -1247,12 +1245,10 @@
               (b "p-value is not a margin of confidence") "!"))
       (q-and-a
         (text "What are some other common p-values?")
-        ; TODO - double-check that I have the right information for six-sigmas.
         (text
           "Depends on the discipline. As the p-value gets smaller, the amount"
           "of data required goes up, and with it the cost of the experiment."
-          "The generally most rigorous discipline is physics, whose gold-standard"
-          "is six-sigmas, where one sigma is 1%."))
+          "The generally most rigorous discipline is physics."))
       (q-and-a
         (text "How do I choose the right p-value?")
         (text "The p-value should be chosen by the key decision-maker. This is"
@@ -1265,9 +1261,9 @@
         (text "Do I have to have a p-value?")
         (text "No. p-values are figment of using frequentist statistical"
               "analysis to evaluate results. If you are using Bayesian analysis,"
-              ; TODO add link to confidence interval.
               "you will want a confidence interval. And if you don't care about"
-              "rigor or empirical correctness at all, you can ignore it altogether.")))
+              "rigor or empirical correctness at all, you can ignore it"
+              "altogether.")))
 
     (footnote (f 6)
       (text

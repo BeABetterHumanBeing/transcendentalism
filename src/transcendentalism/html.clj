@@ -1,4 +1,5 @@
-(ns transcendentalism.html)
+(ns transcendentalism.html
+  (:require [clojure.string :as str]))
 
 (use 'transcendentalism.xml)
 

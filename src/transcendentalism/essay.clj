@@ -225,6 +225,11 @@
       [((apply text lines) t)
        (->Triple (item-sub k) "/item/inline/url" url {})])))
 
+(defn ex
+  "Include an example"
+  [& lines]
+  (str (span {"class" "ex"} "Ex:") " " (i (str "\"" (str/join " " lines) "\""))))
+
 ; A very commonly-used particle.
 (def dot (text "."))
 

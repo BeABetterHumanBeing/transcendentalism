@@ -189,6 +189,8 @@
       (font-style "italic"))
     (css "p" {"class" "author"}
       (text-align "right"))
+    (css "span" {"class" "ex"}
+      (color (to-css-color green)))
     (css "div" {"class" "q_and_a"}
       (display "grid")
       (grid-template-columns "30px" "[qa_separator]" "auto")
