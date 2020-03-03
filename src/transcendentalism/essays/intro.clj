@@ -22,7 +22,8 @@
       "Daniel Gierl")
 
     ; The monad is the only segment whose home is reflexive.
-    ^{:no-block true} (fn [t] (->Triple :monad "/essay/flow/home" :monad {}))
+    ^{:no-block true} (fn [t]
+      (->Triple (get-essay-sub t) "/essay/flow/home" (get-essay-sub t) {}))
     ^{:no-block true} (fn [t]
       (fn [triples]
         (let [all-essays (into #{} (map :sub
@@ -30,8 +31,8 @@
                                                     "/type/essay")
                                                 triples)))]
           (conj triples
-            (->Triple :monad "/essay/flow/random" all-essays {})))))
-    (root-menu :monad :metaphysics "Metaphysics")
+            (->Triple (get-essay-sub t) "/essay/flow/random" all-essays {})))))
+    (root-menu :metaphysics "Metaphysics")
   ))
 
 ; About

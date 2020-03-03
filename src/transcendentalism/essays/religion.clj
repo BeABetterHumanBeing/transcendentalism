@@ -9,8 +9,8 @@
   (essay :holy-mountain "The Holy Mountain"
     (text "TODO")
 
-    (root-menu :holy-mountain :religion "Religion")
-    (file-under :holy-mountain :metaphysics)
+    (root-menu :religion "Religion")
+    (file-under :metaphysics)
   ))
 
 (def religion-essays

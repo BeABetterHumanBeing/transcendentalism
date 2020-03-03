@@ -10,8 +10,8 @@
   (essay :the-truth "The Truth"
     (text "TODO")
 
-    (root-menu :the-truth :epistemology "Ontology")
-    (file-under :the-truth :metaphysics)
+    (root-menu :epistemology "Ontology")
+    (file-under :metaphysics)
   ))
 
 (def epistemology-essays

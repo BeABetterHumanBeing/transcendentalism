@@ -12,8 +12,8 @@
   (essay :it-is "It Is"
     (text "TODO")
 
-    (root-menu :it-is :ontology "Ontology")
-    (file-under :it-is :metaphysics)
+    (root-menu :ontology "Ontology")
+    (file-under :metaphysics)
   ))
 
 (def tower-of-objectivity

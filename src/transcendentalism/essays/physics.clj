@@ -108,8 +108,8 @@
         "with real money. And besides, it turns out that the cutting edge of"
         "science is not inside the ivory tower."))
 
-    (root-menu :materialism :physics "Physics")
-    (file-under :materialism :metaphysics))))
+    (root-menu :physics "Physics")
+    (file-under :metaphysics))))
 
 (def universal-model
   (let [f (footnoter :universal-model)]
@@ -745,7 +745,7 @@
             "knows more and more about less and less, until they know absolutely"
             "everything about nothing."))
 
-    (file-under :modeling :physics)
+    (file-under :physics)
   )))
 
 ; ## Analogy
@@ -936,7 +936,7 @@
         "siblings alongside empiricism. Don't mistake conceptual peerage with"
         "equivalency!"))
 
-    (file-under :three-sciences :physics)
+    (file-under :physics)
   )))
 
 (def analytical-science

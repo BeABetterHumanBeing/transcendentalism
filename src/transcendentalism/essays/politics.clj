@@ -9,8 +9,8 @@
   (essay :enlightened-centrism "Enlightened Centrism"
     (text "TODO")
 
-    (root-menu :enlightened-centrism :politics "Politics")
-    (file-under :enlightened-centrism :metaphysics)
+    (root-menu :politics "Politics")
+    (file-under :metaphysics)
   ))
 
 (def politics-essays

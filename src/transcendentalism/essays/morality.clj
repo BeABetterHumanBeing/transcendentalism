@@ -10,8 +10,8 @@
   (essay :dominant-theory "Dominant Theory"
     (text "TODO")
 
-    (root-menu :dominant-theory :morality "Morality")
-    (file-under :dominant-theory :metaphysics)
+    (root-menu :morality "Morality")
+    (file-under :metaphysics)
   ))
 
 (def morality-essays

@@ -11,8 +11,8 @@
   (essay :ego-development-theory "Ego Development Theory"
     (text "TODO")
 
-    (root-menu :ego-development-theory :consciousness "Consciousness")
-    (file-under :ego-development-theory :metaphysics)
+    (root-menu :consciousness "Consciousness")
+    (file-under :metaphysics)
   )))
 
 (def mental-traps
@@ -20,7 +20,7 @@
   (essay :mental-traps "Mental Traps"
     (text "TODO")
 
-    (file-under :mental-traps :consciousness))))
+    (file-under :consciousness))))
 
 (def consciousness-essays
   [(essay-series [:ego-development-theory])

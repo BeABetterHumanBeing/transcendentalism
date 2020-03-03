@@ -101,7 +101,7 @@
       "you wouldn't be able to tell."))
 
     ^{:no-block true} (fn [t]
-      (->Triple :if-houses-were-built-like-software "/essay/flow/home" :monad {}))
+      (->Triple (get-essay-sub t) "/essay/flow/home" :monad {}))
   )))
 
 (def singularity
@@ -234,7 +234,7 @@
     (text "How's your singularity going? Can't complain about mine."))
 
     ^{:no-block true} (fn [t]
-        (->Triple :singularity "/essay/flow/home" :monad {}))
+        (->Triple (get-essay-sub t) "/essay/flow/home" :monad {}))
   )))
 
 (def scale-of-humanity
@@ -290,7 +290,7 @@
                                        (str "top:" (rand-int height) "px")])}))))
 
     ^{:no-block true} (fn [t]
-        (->Triple :scale-of-humanity "/essay/flow/home" :monad {}))
+        (->Triple (get-essay-sub t) "/essay/flow/home" :monad {}))
   ))
 
 (def miscellaneous-essays
