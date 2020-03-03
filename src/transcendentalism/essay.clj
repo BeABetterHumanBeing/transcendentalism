@@ -230,6 +230,8 @@
   [& lines]
   (str (span {"class" "ex"} "Ex:") " " (i (str "\"" (str/join " " lines) "\""))))
 
+(defn heading [line] (h2 {"class" "header"} line))
+
 ; A very commonly-used particle.
 (def dot (text "."))
 

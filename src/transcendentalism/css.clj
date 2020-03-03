@@ -102,6 +102,9 @@
         (padding "50px" "0" "0" "0")))
     (css "h1" {"class" "header"}
       (text-align "center"))
+    (css "h2" {"class" "header"}
+      (font-size "large")
+      (display "inline"))
     (css "img" {}
       (margin "0" "auto")
       (display "block"))

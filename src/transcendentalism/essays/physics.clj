@@ -618,8 +618,8 @@
 
     (numbered-list
       (text
-        (b "Descriptive models") " merely seek to describe the some aspect of"
-        "reality. The purpose of these models is to facilitate "
+        (heading "Descriptive models") " merely seek to describe the some aspect"
+        "of reality. The purpose of these models is to facilitate "
         ; TODO - Consider making a glossary, so that these words can be defined
         ; elsewhere, and auto-included here.
         (i "structuralization") ", the process of looking at the continuous"
@@ -664,13 +664,11 @@
       "accurate is a function of what you want to do with it.")
 
     (text
-      ; TODO - Turn these into headings, which are slightly larger text, and can
-      ; be independently linked to.
-      (b "Prescriptive models") " are simply models that are used as the basis"
-      "for action. " (ex "When your taxi driver tells you to buy stock X, you"
-      "sell it instead") ". Prescriptive models are extensions beyond descriptive"
-      "models (which merely say what things " (i "are") ", and not what you"
-      "should " (i "do") " with them).")
+      (heading "Prescriptive models") " are simply models that are used as the"
+      "basis for action. " (ex "When your taxi driver tells you to buy stock X,"
+      "you sell it instead") ". Prescriptive models are extensions beyond"
+      "descriptive models (which merely say what things " (i "are") ", and not"
+      "what you should " (i "do") " with them).")
 
     (paragraph
       (text "Once you have a prescriptive model, you can start to measure its ")
