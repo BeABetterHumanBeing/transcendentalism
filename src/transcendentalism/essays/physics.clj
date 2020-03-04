@@ -3,6 +3,7 @@
 
 (use 'transcendentalism.directive
      'transcendentalism.essay
+     'transcendentalism.glossary
      'transcendentalism.html)
 
 ; Materialism
@@ -10,15 +11,8 @@
 ; related essays.
 (def materialism
   (essay :materialism "Materialism"
-    (definition "Material" :noun
-      (str/join " " [
-        "The \"stuff\" that composes the physical universe: photons, electrons,"
-        "and the other fundamental particles of the standard model."]))
-
-    (definition "Materialism" :noun
-      (str/join " " [
-        "The deeply-rooted philosophy or world-view that reality is solely"
-        "composed of material."]))
+    (block-definition "Material")
+    (block-definition "Materialism")
 
     (paragraph
       (text
@@ -726,9 +720,9 @@
       (tangent (f 4) (i "or subatomic particles")) dot)
 
     (footnote (f 4)
-      (text "Reminds me of a joke. The definition of an expert is a person who"
-            "knows more and more about less and less, until they know absolutely"
-            "everything about nothing."))
+      (paragraph
+       (text "Reminds me of a joke. The definition of an ")
+       (inline-definition "Expert" "expert") dot))
 
     (file-under :physics)
   ))
@@ -875,8 +869,7 @@
 
 (def three-sciences
   (essay :three-sciences "Science"
-    (definition "Science" :noun
-      "A process for discovering new knowledge about reality.")
+    (block-definition "Science")
 
     (text
       "In my mind, I have found it useful to decompose science into roughly"

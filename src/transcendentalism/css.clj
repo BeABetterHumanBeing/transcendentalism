@@ -124,8 +124,13 @@
       (border-color (to-css-color yellow))
       (margin "10px" "-15px" "0px")
       (position "relative"))
+    (css "div" {"class" "glossary-definition"}
+      (display "none"))
     (css "div" {"class" "block"}
       (padding "10px" "25px"))
+    (css "span" {"class" "def-tangent"}
+      (color (to-css-color red))
+      (cursor "pointer"))
     (css "span" {"class" "tangent"}
       (color (to-css-color yellow))
       (cursor "pointer"))

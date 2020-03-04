@@ -3,6 +3,7 @@
 
 (use 'transcendentalism.directive
      'transcendentalism.essay
+     'transcendentalism.glossary
      'transcendentalism.html)
 
 ; Ontology
@@ -26,8 +27,7 @@
       "the most basic existence, the one which cannot be constructed upon any"
       "other, must then be the foundation of our tower.")
 
-    (definition "Objective" :adjective
-      "Existing as a property of an object, independent of any observer.")
+    (block-definition "Objective")
 
     (paragraph
       (text
@@ -50,8 +50,7 @@
         "onto objects, thereby removing themselves as the source of their moral"
         "reasoning."))
 
-    (definition "Subjective" :adjective
-      "Existing as a property of an observer in relation to some object.")
+    (block-definition "Subjective")
 
     (text
       "If we've rooted our tower with a solid foundation on objectivity, we can"
@@ -64,8 +63,7 @@
       "from these simple mechanics, and so ultimately the foundation of"
       "subjective reality is based in objective reality.")
 
-    (definition "Interstitial" :adjective
-      "Existing as a subjective property shared across a large number of subjects.")
+    (block-definition "Interstitial")
 
     (text
       "Once our tower includes the concept of subjectivity, it can be extended"
@@ -123,10 +121,7 @@
       (text ". He constructed a thought experiment in " (b "solipsism") ", which"
             "I will briefly cover here."))
 
-    (definition "Solipsism" :noun
-      (str/join " " [
-        "The belief that you are the only truly conscious being in the universe"
-        "and that all other subjects are figments of your consciousness."]))
+    (block-definition "Solipsism")
 
     (text
       "Descartes supposed that there was a demon who controlled his every sense,"

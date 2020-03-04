@@ -19,7 +19,7 @@
   (major-key [essay-thread] "Returns the current major key")
   (minor-key [essay-thread] "returns the current minor key"))
 
-(defn- create-essay-thread
+(defn create-essay-thread
   ([essay-sub] (create-essay-thread essay-sub essay-sub))
   ([essay-sub sub]
    (let [key-gen (create-key-gen sub)]
@@ -54,7 +54,7 @@
        (major-key [essay-thread] (prev-major-key key-gen))
        (minor-key [essay-thread] (prev-minor-key key-gen))))))
 
-(defn- sub-suffix
+(defn sub-suffix
   [sub suffix]
   (keyword (str (name sub) "-" suffix)))
 
@@ -117,9 +117,9 @@
               (concat result [push-block f])))
           [(first fns)] (rest fns))))))
 
-(defn- item-sub [sub] (sub-suffix sub "i"))
+(defn item-sub [sub] (sub-suffix sub "i"))
 
-(defn- block-item
+(defn block-item
   "Given a function that takes a sub and produces triples, adds the necessary
    triples to make it a block item"
   [f]
@@ -289,19 +289,6 @@
     (fn [t sub]
       [(types schema sub "/item/contact"),
        (->Triple sub "/item/contact/email" email-address {})])))
-
-(defn definition
-  [word part-of-speech & definitions]
-  (block-item
-    (fn [t sub]
-      [(types schema sub "/item/definition"),
-       (->Triple sub "/item/definition/word" word {}),
-       (->Triple sub "/item/definition/part_of_speech" part-of-speech {}),
-       (map
-        (fn [i]
-          (->Triple sub "/item/definition/definition" (nth definitions i)
-                    {"/order" i}))
-        (range (count definitions)))])))
 
 (defn matrix
   [rows columns contents]

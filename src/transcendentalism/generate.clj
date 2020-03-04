@@ -123,7 +123,7 @@
   (render-inline-item [renderer node] "Renders a /type/item/inline"))
 
 (defn- create-renderer
-  [graph encoded_id encodings footnote-map]
+  [graph encoded_id encodings footnote-map definition-map]
   (reify Renderer
     (render-block [renderer block-sub]
       (let [authors (all-triples graph block-sub "/segment/author"),
@@ -270,14 +270,21 @@
       (let [text (unique-or-nil node "/item/inline/text"),
             tangent (unique-or-nil node "/item/inline/tangent"),
             see-also (unique-or-nil node "/item/inline/see_also"),
-            link (unique-or-nil node "/item/inline/url")]
+            link (unique-or-nil node "/item/inline/url"),
+            definition (unique-or-nil node "/item/inline/definition")]
         (if (nil? tangent)
           (if (nil? see-also)
             (if (nil? link)
-              (span {} text)
+              (if (nil? definition)
+                (span {} text)
+                (span {"class" "def-tangent",
+                       "onclick" (call-js "toggleFootnote"
+                                   (js-str (:id (definition-map definition))))}
+                  text))
               (a {"href" link,
                   "target" "_blank"}
                 (str text " &#11016")))
+            
             (span {"class" "see-also",
                    "onclick" (call-js "seeAlsoSegment"
                                (js-str encoded_id)
@@ -304,6 +311,40 @@
           (if (and (= a-val b-val) (not (empty? etc)))
             (recur (first etc) (rest etc))
             (< a-val b-val)))))))
+
+(defn- collect-block-definitions
+  "Follows a sequence of inline segments, collecting their definitions"
+  [graph sub]
+  (let [gq-result
+        (gq
+         graph
+         (q-chain
+           (q-kleene (fn [sub data i] (assoc data :inline i))
+             (q-pred "/segment/flow/inline"))
+           (q-pred "/segment/contains")
+           (q-kleene (fn [sub data i] (assoc data :in-item i))
+             (q-chain
+               (q-or (q-pred "/item/q_and_a/question")
+                     (q-pred "/item/q_and_a/answer")
+                     (q-pred (fn [triple data]
+                               (merge data {:row (property triple "/row" -1),
+                                            :col (property triple "/col" -1)}))
+                             "/item/table/cell")
+                     (q-pred "/item/bullet_list/header")
+                     (q-pred (fn [triple data]
+                               (assoc data :order (property triple "/order" 0)))
+                             "/item/bullet_list/point"))
+               (q-kleene (fn [sub data i] (assoc data :in-item-inline i))
+                 ; Assumes questions, answers, and points are single-blocked.
+                 (q-pred "/segment/flow/inline"))
+               (q-pred "/segment/contains")))
+           (q-pred "/item/inline/definition"))
+         sub),
+        sorted-gq-result
+        (sort (compare-by-priority gq-result
+                :inline :in-item :order :row :col :in-item-inline)
+              (keys gq-result))]
+    (into [] sorted-gq-result)))
 
 (defn- collect-block-tangents
   "Follows a sequence of inline segments, collecting their tangents"
@@ -339,8 +380,30 @@
               (keys gq-result))]
     (into [] sorted-gq-result)))
 
+(defn- calculate-definition-map
+  "Returns a sub->{:id :root} map of all definitions under a given segment"
+  [graph sub]
+  (letfn
+    [(inner-definition-map [sub]
+       (let [definitions (collect-block-definitions graph sub),
+             next-block (get-unique graph sub "/segment/flow/block"),
+             new-definitions (reduce
+               (fn [result definition]
+                 (assoc result
+                   definition
+                   {:id (gen-key 8),
+                    :root sub}))
+               {} definitions)]
+         (apply merge
+           new-definitions
+           (if (nil? next-block)
+             {}
+             (inner-definition-map next-block))
+           (map #(inner-definition-map %) definitions))))]
+    (inner-definition-map sub)))
+
 (defn- calculate-footnote-map
-  "Returns a sub->{:ancestry :id} map of all footnotes under a given segment"
+  "Returns a sub->{:ancestry :id :root} map of all footnotes under a given segment"
   [graph sub]
   (letfn
     [(inner-footnote-map [sub ancestry idx]
@@ -365,7 +428,7 @@
 
 (defn- maybe-wrap-footnote
   "If the given sub is a footnote, wraps the provided content"
-  [footnote-map sub content]
+  [footnote-map definition-map sub content]
   (if (contains? footnote-map sub)
     (div {"class" (if (= (count (:ancestry (footnote-map sub)))
                          1)
@@ -373,7 +436,11 @@
                       "footnote"),
           "id" (:id (footnote-map sub))}
       content)
-    content))
+    (if (contains? definition-map sub)
+      (div {"class" "glossary-definition",
+            "id" (:id (definition-map sub))}
+        content)
+      content)))
 
 (defn- maybe-add-footnote-anchor
   "If the given sub is a footnote, adds the anchor (e.g. [1-2-1])"
@@ -390,16 +457,26 @@
 (defn- generate-essay-contents
   [graph encoded_id encodings segment]
   (letfn
-    [(generate-block-sequence [sub footnote-map]
-       (let [renderer (create-renderer graph encoded_id encodings footnote-map),
+    [(generate-block-sequence [sub footnote-map old-definition-map]
+       (let [definition-map (calculate-definition-map graph sub),
+             renderer (create-renderer graph encoded_id encodings
+                                       footnote-map definition-map),
              next-block (get-unique graph sub "/segment/flow/block")]
-         (maybe-wrap-footnote footnote-map sub
+         (maybe-wrap-footnote footnote-map old-definition-map sub
            (str/join "\n" [
              (div {"class" (dbg-able "block")}
                (maybe-add-footnote-anchor footnote-map sub)
                (render-block renderer sub)
                (str/join "\n"
-                 (map #(generate-block-sequence % footnote-map)
+                 (map #(generate-block-sequence % footnote-map definition-map)
+                      (reduce-kv
+                        (fn [result k v]
+                          (if (= (:root v) sub)
+                            (conj result k)
+                            result))
+                        [] definition-map)))
+               (str/join "\n"
+                 (map #(generate-block-sequence % footnote-map definition-map)
                       (reduce-kv
                         (fn [result k v]
                           (if (= (:root v) sub)
@@ -408,9 +485,11 @@
                         [] footnote-map))))
              (if (nil? next-block)
                ""
-               (generate-block-sequence next-block footnote-map))]))
+               (generate-block-sequence next-block footnote-map definition-map))]))
          ))]
-    (generate-block-sequence segment (calculate-footnote-map graph segment))))
+    (generate-block-sequence segment
+      (calculate-footnote-map graph segment)
+      (calculate-definition-map graph segment))))
 
 (defn- generate-under-construction-splash
   "Returns a div that shows that the segment is under construction"

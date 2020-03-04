@@ -12,6 +12,7 @@
      'transcendentalism.essays.politics
      'transcendentalism.essays.religion
      'transcendentalism.generate
+     'transcendentalism.glossary
      'transcendentalism.graph
      'transcendentalism.schema)
 
@@ -23,9 +24,9 @@
 (def graph
   (construct-graph
     (apply-directives
-      meta-directives intro-essays physics-essays ontology-essays
-      epistemology-essays morality-essays religion-essays politics-essays
-      consciousness-essays miscellaneous-essays)))
+      meta-directives glossary-definitions intro-essays physics-essays
+      ontology-essays epistemology-essays morality-essays religion-essays
+      politics-essays consciousness-essays miscellaneous-essays)))
 
 (defn -main
   "Validates the website's graph, and generates its files"
