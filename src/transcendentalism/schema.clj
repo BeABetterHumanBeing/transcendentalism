@@ -6,6 +6,9 @@
      'transcendentalism.schema-data
      'transcendentalism.time)
 
+; Whether or not to do property validation on the graph.
+(def enable-property-validation true)
+
 ; The Schema protocal is the interface through which the schema data above is
 ; accessed.
 (defprotocol Schema
@@ -17,10 +20,16 @@
   (required-preds [schema type] "Returns the required preds of the given type")
   (exclusive-preds [schema pred]
     "Returns the preds that are excluded by the existence of the given pred")
+  (exclusive-properties [schema pred property]
+    "Returns the properties that are excluded by the existence of the given property")
   (is-unique? [schema pred] "Whether the given predicate is unique")
   (get-supertypes [schema type] "Returns the set of supertypes of a given type")
   (get-domain-type [schema pred] "Returns the domain type, or nil")
-  (get-range-type [schema pred] "Returns the range type, or nil"))
+  (get-range-type [schema pred] "Returns the range type, or nil")
+  (get-properties [schema pred]
+    "Returns the sub-schema of properties for the given pred")
+  (get-preds-with-property [schema property]
+    "Returns all preds that accept the given property"))
 
 (defn create-schema
   [schema-data]
@@ -42,6 +51,8 @@
         #{}
         (keys schema-data)))
     (exclusive-preds [schema pred] (schema-data pred) :exclusive #{})
+    (exclusive-properties [schema pred property]
+      ((((schema-data pred) :properties {}) property {}) :exclusive #{}))
     (is-unique? [schema pred]
       (let [pred-data (schema-data pred)]
         (and (contains? pred-data :unique)
@@ -72,7 +83,16 @@
       (let [pred-data (schema-data pred)]
         (if (contains? pred-data :range-type)
           (pred-data :range-type)
-          nil)))))
+          nil)))
+    (get-properties [schema pred]
+      ((schema-data pred) :properties {}))
+    (get-preds-with-property [schema property]
+      (reduce-kv
+        (fn [result k v]
+          (if (contains? (v :properties {}) property)
+            (conj result k)
+            result))
+        #{} schema-data))))
 
 (defn types
   "Given a sub and list of types (without \"type\" prefix), returns the corresponding type triples."
@@ -117,17 +137,55 @@
 ; Code validation. The purpose of validation is to check the assumptions that
 ; are made by code generation.
 
+(defn- properties-all-valid?
+  "Validates that all properties in the graph exist"
+  [sub-schema triple]
+  (reduce-kv
+    (fn [result k v]
+      (conj result
+        (if (contains? sub-schema k)
+          nil
+          (str "Schema for pred " (:pred triple) " doesn't contain property " k))))
+    #{}
+    (:p-vs triple)))
+
 (defn- preds-all-valid?
   "Validates that all triples in the graph exist"
   [schema graph]
   (reduce
     (fn [result triple]
-      (conj result
+      (set/union result
         (if (exists? schema (:pred triple))
-          nil
-          (str "Schema doesn't contain pred \"" (:pred triple) "\""))))
+          (if enable-property-validation
+            (properties-all-valid? (get-properties schema (:pred triple)) triple)
+            #{})
+          #{(str "Schema doesn't contain pred \"" (:pred triple) "\"")})))
     #{}
     (all-triples graph)))
+
+(defn- required-properties-exist?
+  "Validates that all required properties exist"
+  [schema graph]
+  (if enable-property-validation
+    (reduce
+      (fn [result triple]
+        (let [triple-properties (set (keys (:p-vs triple))),
+              property-data (get-properties schema (:pred triple)),
+              required-properties
+                (reduce-kv
+                  (fn [result k v]
+                    (if (v :required false)
+                      (conj result k)
+                      result))
+                  #{} property-data)]
+          (if (set/subset? required-properties triple-properties)
+            result
+            (conj result
+              (str "pred " (:pred triple) " requires " required-properties
+                   " but only has " triple-properties)))))
+      #{}
+      (all-triples graph))
+    #{}))
 
 (defn- required-preds-exist?
   "Validates that all required predicates exist"
@@ -200,37 +258,55 @@
     #{}
     (all-triples graph)))
 
+(defn- range-type-matches
+  [graph range-type obj]
+  (or (nil? range-type)
+      (and (= range-type :string)
+           (string? obj))
+      (and (= range-type :number)
+           (number? obj))
+      (and (= range-type :bool)
+           (instance? Boolean obj))
+      (and (= range-type :time)
+           (is-valid-time obj))
+      (and (string? range-type)
+           (has-type? graph
+                      (if (vector? obj) (first obj) obj)
+                      range-type))
+      (and (vector? range-type)
+           (not (nil? (some #(= obj %) range-type))))))
+
+(defn- property-range-type-exists?
+  [schema graph triple]
+  (let [property-data (get-properties schema (:pred triple))]
+    (reduce-kv
+      (fn [result k v]
+        (let [range-type ((property-data k) :range-type nil)]
+          (if (range-type-matches graph range-type v)
+            result
+            (conj result
+                  (str (:sub triple) "-" (:pred triple) " has property " k
+                       ", but value " v " doesn't match range-type " range-type)))))
+      #{} (:p-vs triple))))
+
 (defn- range-type-exists?
   "Validates that the object has the required range type"
   [schema graph]
   (reduce
     (fn [result triple]
       (let [range-type (get-range-type schema (:pred triple))]
-        (conj result
-          (if (or (nil? range-type)
-                  (and (= range-type :string)
-                       (string? (:obj triple)))
-                  (and (= range-type :number)
-                       (number? (:obj triple)))
-                  (and (= range-type :bool)
-                       (instance? Boolean (:obj triple)))
-                  (and (= range-type :time)
-                       (is-valid-time (:obj triple)))
-                  (and (string? range-type)
-                       (has-type? graph
-                        (let [obj (:obj triple)]
-                          (if (vector? obj) (first obj) obj))
-                        range-type))
-                  (and (vector? range-type)
-                       (not (nil? (some #(= (:obj triple) %) range-type)))))
-            nil
-            (str (:sub triple) " has pred " (:pred triple)
-              " but obj " (:obj triple) " doesn't match required range type "
-              range-type)))))
+        (set/union result
+          (if (range-type-matches graph range-type (:obj triple))
+            (if enable-property-validation
+              (property-range-type-exists? schema graph triple)
+              #{})
+            #{(str (:sub triple) " has pred " (:pred triple)
+                   " but obj " (:obj triple) " doesn't match required range type "
+                   range-type)}))))
     #{}
     (all-triples graph)))
 
-(defn- order-conforms?
+(defn- order-conforms-pred?
   "Validates that all preds that have order are correctly ordered"
   [schema graph pred]
   (let [relation (get-relation graph pred)]
@@ -251,6 +327,14 @@
               (conj result (str sub " has non-distict ordinals: " ordinals)))
             (set/union result ordinal-errors))))
       #{} (participant-nodes relation))))
+
+(defn- order-conforms?
+  "Checks that all preds that have property /order are correctly ordered"
+  [schema graph]
+  (reduce
+    (fn [result pred]
+      (set/union result (order-conforms-pred? schema graph pred)))
+    #{} (get-preds-with-property schema "/order")))
 
 (defn- events-obey-causality?
   "Validates that events' timestamps are strickly before their leads_to"
@@ -320,7 +404,26 @@
           result abstract-types)))
     #{} (all-nodes graph)))
 
-(defn no-exclusive-violations?
+(defn- no-exclusive-property-violations?
+  "Validates that properties which have exclusivity requirements are met"
+  [schema graph]
+  (reduce
+    (fn [result triple]
+      (let [p-vs (:p-vs triple)]
+        (reduce
+          (fn [result property]
+            (reduce
+              (fn [result exclusive-property]
+                (if (contains? p-vs exclusive-property)
+                  (conj result
+                        (str (:pred triple) "-" property " excludes "
+                             exclusive-property ", but found anyway"))
+                  result))
+              result (exclusive-properties schema (:pred triple) property)))
+          result (keys p-vs))))
+    #{} (all-triples graph)))
+
+(defn- no-exclusive-violations?
   "Validates that predicates which have exclusivity requirements are met"
   [schema graph]
   (reduce
@@ -336,7 +439,11 @@
         result (exclusive-preds schema (:pred triple))))
     #{} (all-triples graph)))
 
-; TODO - Add triple property validation
+; TODO - optimize graph validation by splitting it across
+; 1) relation-validations
+; 2) node-validations
+; 3) triple-validations
+; 4) property-validations
 
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
@@ -346,13 +453,13 @@
       (fn [result validation-check]
         (set/union result (validation-check schema graph)))
       #{}
-      [preds-all-valid? required-preds-exist? unique-preds-unique?
-       required-supertypes-exist? domain-type-exists? range-type-exists?
-       #(order-conforms? %1 %2 "/item/contains") events-occur-in-past?
-       #(order-conforms? %1 %2 "/item/text/text") events-obey-causality?
-       home-is-monad-rooted-dag? #(order-conforms? %1 %2 "/item/poem/line")
-       no-abstract-subs? no-exclusive-violations?]),
+      [preds-all-valid? required-preds-exist? required-properties-exist?
+       unique-preds-unique? required-supertypes-exist? domain-type-exists?
+       range-type-exists? order-conforms? events-occur-in-past?
+       events-obey-causality? home-is-monad-rooted-dag? no-abstract-subs?
+       no-exclusive-violations? no-exclusive-property-violations?]),
      ; nil ends up in the set, and ought to be weeded out.
+     ; TODO - weed out nil. (conj #{} nil) adds nil to the set.
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))
     (empty? errors)))

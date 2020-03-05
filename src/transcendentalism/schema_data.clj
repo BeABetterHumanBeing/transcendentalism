@@ -20,8 +20,6 @@
         {} schema)
       full-type type-schema)))
 
-; TODO - Augment schema to have triple properties.
-
 (def event-schema
   (schematize-type "/event"
     {
@@ -58,12 +56,27 @@
         :description "Relation to the 'parent' essay",
         :required true,
         :unique true,
+        :properties {
+          "/label" {
+            :description "Metadata about the home",
+            :range-type [
+              :menu ; If the essay belongs to a menu,
+            ],
+          },
+        },
       },
       "/flow/see_also" {
         :description "Internal link to another essay",
       },
       "/flow/menu" {
         :description "Internal link to an essay menu",
+        :properties {
+          "/title" {
+            :description "The title of the menu",
+            :range-type :string,
+            :required true,
+          },
+        },
       },
       "/flow/random" {
         :description "Relation to a random essay",
@@ -232,6 +245,13 @@
           "A line that appears in the poem, uses :order property to sort",
         :range-type :string,
         :required true,
+        :properties {
+          "/order" {
+            :description "The ordinal of this line in the poem",
+            :range-type :number,
+            :required true,
+          },
+        },
       },
     }))
 
@@ -287,12 +307,20 @@
         :description "A bullet-pointed item. Uses :order property to sort",
         :range-type "/type/segment",
         :required true,
+        :properties {
+          "/order" {
+            :description "The ordinal of this point in the bullet list",
+            :range-type :number,
+            :unique true,
+            :required true,
+          },
+        },
       },
       "/is_ordered" {
         :description "Whether the list should be ordered, or bullet-pointed",
         :range-type :bool,
         :unique true,
-        ; TODO - add 'false' as the default value
+        :required true,
       },
     }))
 
@@ -334,6 +362,13 @@
         :description "A definition of the word",
         :range-type :string,
         :required true,
+        :properties {
+          "/order" {
+            :description "The ordinal of this definition among others",
+            :range-type :number,
+            :required true,
+          },
+        },
       },
     }))
 
@@ -348,12 +383,38 @@
         :description "A cell in the table",
         :range-type "/type/segment",
         :required true,
-        ; TODO - Add required /column and /row properties.
+        :properties {
+          "/column" {
+            :description "The column the cell appears in",
+            :range-type :number,
+            :unique true,
+            :required true,
+          },
+          "/row" {
+            :description "The row the cell appears in",
+            :range-type :number,
+            :unique true,
+            :required true,
+          },
+        }
       },
       "/label" {
         :description "A label for a column or row",
         :range-type "/type/segment"
-        ; TODO - Add required /column or /row property.
+        :properties {
+          "/column" {
+            :description "The column the label applies to",
+            :range-type :number,
+            :unique true,
+            :exclusive #{"/row"},
+          },
+          "/row" {
+            :description "The row the label applies to",
+            :range-type :number,
+            :unique true,
+            :exclusive #{"/column"},
+          },
+        },
       },
     }))
 

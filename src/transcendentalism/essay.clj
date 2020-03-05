@@ -266,9 +266,7 @@
         []
         [(header-or-nil (fork-essay-thread t header-sub))
          (->Triple sub "/item/bullet_list/header" header-sub {})])
-      (if is-ordered
-        [(->Triple sub "/item/bullet_list/is_ordered" true {})]
-        [])
+      [(->Triple sub "/item/bullet_list/is_ordered" is-ordered {})]
       (map #((first %) (fork-essay-thread t (second %)))
            (map vector items item-subs))
       (map #(->Triple sub "/item/bullet_list/point" (first %)
