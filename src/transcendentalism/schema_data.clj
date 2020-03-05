@@ -372,8 +372,23 @@
       },
     }))
 
+(def thesis-schema
+  (schematize-type "/item/thesis"
+    {
+      :description "A thesis, key point, or other information to call out",
+      :super-type "/type/item",
+    }
+    {
+      "/contains" {
+        :description "The thesis",
+        :range-type :string,
+        :unique true,
+        :required true,
+      },
+    }))
+
 (def schema-data
   (merge essay-schema event-schema image-schema quote-schema inline-item-schema
     poem-schema segment-schema big-emoji-schema item-schema q-and-a-schema
     bullet-list-schema contact-schema definition-schema table-schema
-    raw-html-schema))
+    raw-html-schema thesis-schema))

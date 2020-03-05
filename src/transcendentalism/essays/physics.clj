@@ -688,8 +688,7 @@
       "tradeoff, and this tradeoff is often the overriding concern in the"
       "selection of a model. The tradeoff states:")
 
-    ; TODO - make a thesis element which pulls out and highlights it
-    (text "The maximum accuracy of a model is bound by its complexity.")
+    (thesis "The maximum accuracy of a model is bound by its complexity.")
 
     (text
       "Cast into another light, it roughly says that more accurate models tend"

@@ -240,6 +240,13 @@
       (border-width "1px")
       (border-style "solid")
       (padding "10px" "10px" "5px" "10px"))
+    (css "div" {"class" "thesis"}
+      (border-style "solid")
+      (border-width "2px")
+      (border-color (to-css-color gray))
+      (margin "0px" "75px")
+      (padding "25px")
+      (text-align "center"))
     (css "table" {"class" "t"}
       (border-collapse "collapse")
       (margin "0px" "auto"))

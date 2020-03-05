@@ -290,6 +290,13 @@
       [(types schema sub "/item/contact"),
        (->Triple sub "/item/contact/email" email-address {})])))
 
+(defn thesis
+  [line]
+  (block-item
+    (fn [t sub]
+      [(types schema sub "/item/thesis"),
+       (->Triple sub "/item/thesis/contains" line {})])))
+
 (defn matrix
   [rows columns contents]
   (block-item

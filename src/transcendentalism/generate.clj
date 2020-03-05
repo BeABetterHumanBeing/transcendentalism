@@ -120,6 +120,7 @@
   (render-definition [renderer node] "Renders a /type/item/definition")
   (render-table [renderer node] "Renders a /type/item/table")
   (render-raw-html [renderer node] "Renders a /type/item/raw_html")
+  (render-thesis [renderer node] "Renders a /type/item/thesis")
   (render-inline-item [renderer node] "Renders a /type/item/inline"))
 
 (defn- create-renderer
@@ -154,6 +155,7 @@
           "/type/item/definition" (render-definition renderer node),
           "/type/item/table" (render-table renderer node),
           "/type/item/raw_html" (render-raw-html renderer node),
+          "/type/item/thesis" (render-thesis renderer node),
           "/type/item/inline" (render-inline-item renderer node),
           (assert false
             (str "ERROR - Type " (first item-type) " not supported")))))
@@ -266,6 +268,8 @@
                  (range -1 (inc row-max)))))))
     (render-raw-html [renderer node]
       (unique-or-nil node "/item/raw_html/contains"))
+    (render-thesis [renderer node]
+      (div {"class" "thesis"} (unique-or-nil node "/item/thesis/contains")))
     (render-inline-item [renderer node]
       (let [text (unique-or-nil node "/item/inline/text"),
             tangent (unique-or-nil node "/item/inline/tangent"),
