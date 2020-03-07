@@ -5,7 +5,8 @@
 
 ; The Holy Mountain
 ; This essay serves as the entry point to all religious and/or esoteric essays.
-(def holy-mountain
+(defn holy-mountain
+  []
   (essay :holy-mountain "The Holy Mountain"
     (text "TODO")
 
@@ -13,7 +14,8 @@
     (file-under :metaphysics)
   ))
 
-(def religion-essays
+(defn religion-essays
+  []
   [(essay-series [:holy-mountain])
    (directive-under-construction :holy-mountain)
-   holy-mountain])
+   (holy-mountain)])

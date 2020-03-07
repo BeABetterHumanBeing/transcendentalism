@@ -9,7 +9,8 @@
 ; Materialism
 ; This essay serves as the entry point to all physics- and material-world-
 ; related essays.
-(def materialism
+(defn materialism
+  []
   (essay :materialism "Materialism"
     (block-definition "Material")
     (block-definition "Materialism")
@@ -103,7 +104,8 @@
     (root-menu :physics "Physics")
     (file-under :metaphysics)))
 
-(def universal-model
+(defn universal-model
+  []
   (essay :universal-model "Universal Modeling"
     (text
       "Our understanding of the structure of the physical universe starts from"
@@ -256,7 +258,8 @@
       "A and C, B and D, and C and D."
     ])))
 
-(def universal-order
+(defn universal-order
+  []
   (essay :universal-order "Universal Order"
     (quote* "Time is what clocks measure")
 
@@ -420,7 +423,8 @@
       "computational perspective, makes it a ripe target for compression.")
     ))
 
-(def universal-shape
+(defn universal-shape
+  []
   (essay :universal-shape "The Shape of the Universe"
     (text
       "Once we've gotten comfortable with the idea of representing the universe"
@@ -504,7 +508,8 @@
               "bridge the pocket connecting the two universes.")))
   ))
 
-(def speed-limits
+(defn speed-limits
+  []
   (essay :speed-limits "Physical Speed Limits"
     (text
       "The speed limit of matter is the speed of light, a speed that can be"
@@ -583,7 +588,8 @@
       "(since the matrix only holds interactions).")
   ))
 
-(def modeling
+(defn modeling
+  []
   (essay :modeling "Modeling"
     (paragraph
       (text (b "Formalization") " is the proccess by which a ")
@@ -866,7 +872,8 @@
 ; thing. Another would be to ask what these glasses are made of; perspectives are
 ; not material things.
 
-(def three-sciences
+(defn three-sciences
+  []
   (essay :three-sciences "Science"
     (block-definition "Science")
 
@@ -915,7 +922,8 @@
     (file-under :physics)
   ))
 
-(def analytical-science
+(defn analytical-science
+  []
   (essay :analytical-science "Analysis"
     (text
       "Analysis works in the " (i "virtual") " domain of " (b "abstraction")
@@ -1005,7 +1013,8 @@
       "other piece of software that verifies that each derivation in the proof"
       "is valid.")))
 
-(def analytical-science-example
+(defn analytical-science-example
+  []
   (essay :analytical-science-example "Three Logicians Walk into a Bar"
     (quote*
       (str/join " " [
@@ -1102,7 +1111,8 @@
             "it is omitted on account that this essay is being read by humans."))
   ))
 
-(def empirical-science
+(defn empirical-science
+  []
   (essay :empirical-science "Empiricism"
     (text
       "Empiricism works in the " (b "material") " domain of " (b "physical reality")
@@ -1264,7 +1274,8 @@
         "control of the empiricist."))
   ))
 
-(def empirical-science-example
+(defn empirical-science-example
+  []
   (essay :empirical-science-example "Zodiac Compatibility"
     (text
       (i "(See an interesting phenomenon that you would like to learn more about.)")
@@ -1495,24 +1506,27 @@
            700 150)
   ))
 
-(def phenomenological-science
+(defn phenomenological-science
+  []
   (essay :phenomenological-science "Phenomenology"
     (text "TODO")
   ))
 
-(def phenomenological-science-example
+(defn phenomenological-science-example
+  []
   (essay :phenomenological-science-example "Phenomenology"
     (text "TODO")
   ))
 
-(def physics-essays
+(defn physics-essays
+  []
   [(essay-series [:materialism :universal-model :universal-order :universal-shape :speed-limits])
    (essay-series [:three-sciences :analytical-science :analytical-science-example])
    (essay-series [:three-sciences :empirical-science :empirical-science-example])
    (essay-series [:three-sciences :phenomenological-science :phenomenological-science-example])
    (directive-under-construction
      :phenomenological-science :phenomenological-science-example)
-   materialism universal-model universal-order universal-shape speed-limits
-   three-sciences analytical-science analytical-science-example empirical-science
-   empirical-science-example phenomenological-science phenomenological-science-example
-   modeling])
+   (materialism) (universal-model) (universal-order) (universal-shape)
+   (speed-limits) (three-sciences) (analytical-science) (analytical-science-example)
+   (empirical-science) (empirical-science-example) (phenomenological-science)
+   (phenomenological-science-example) (modeling)])

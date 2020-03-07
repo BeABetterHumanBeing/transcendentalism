@@ -4,14 +4,11 @@
             [clojure.math.numeric-tower :as math]))
 
 (use 'transcendentalism.color
+     'transcendentalism.flags
      'transcendentalism.graph
      'transcendentalism.schema
      'transcendentalism.time
      'transcendentalism.xml)
-
-; Whether to generate SVGs, or assume that they've already been created. Helps
-; optimize the process when changing non-SVG code.
-(def generate-svg false)
 
 ; Factor for converting from a TAU-based system to a PI-based one.
 (def TAU-2-PI (* Math/PI 2))
@@ -259,18 +256,18 @@
                    (recur (dec cnt) (vertex-map value))))),
         rootname (subname "root" sub (succ 1)),
         inner (fn [lvl n] (subname "inner" lvl (succ (dec n)) (succ n)))]
-    [(types (inner 1 1) "/event")
+    [(types schema (inner 1 1) "/event")
      (->Triple (inner 1 1) "/event/time" (get-hours-ago 2) {})
      (->Triple (inner 1 1) "/event/leads_to" (subname "subject" sub) {})
      (->Triple (inner 1 1) "/event/leads_to" (subname "subject" (succ 1)) {})
      (map
       (fn [n]
-        [(types (inner n 1) "/event")
+        [(types schema (inner n 1) "/event")
          (->Triple (inner n 1) "/event/time" (get-hours-ago (* 2 n)) {})
          (->Triple (inner n 1) "/event/leads_to" (inner (dec n) 1) {})
          (->Triple (inner n 1) "/event/leads_to" (inner (dec n) 2) {})])
       (range 2 6))
-     (types rootname "/event")
+     (types schema rootname "/event")
      (->Triple rootname "/event/time" (get-hours-ago 12) {})
      (->Triple rootname "/event/leads_to" (inner 5 1) {})
      (->Triple rootname "/event/leads_to" (inner 5 2) {})
@@ -297,14 +294,14 @@
         vertex-map (seq-pairs vertex-sequence),
         graph
     (construct-graph (concat (flatten [
-      (types :monad "/event")
-      (->Triple :monad "/event/time" "past")
+      (types schema :monad "/event")
+      (->Triple :monad "/event/time" "past" {})
       (map #(->Triple :monad "/event/leads_to"
-             (subname "root" (first %) (second %)))
+             (subname "root" (first %) (second %)) {})
         vertex-map)
       (map #(interior-triples vertex-map %) vertex-sequence)
-      (map #(types (subname "subject" %) "/event") vertex-sequence)
-      (map #(->Triple (subname "subject" %) "/event/time" "present")
+      (map #(types schema (subname "subject" %) "/event") vertex-sequence)
+      (map #(->Triple (subname "subject" %) "/event/time" "present" {})
         vertex-sequence)
      ])))]
     (assert (validate-graph schema graph))
@@ -360,7 +357,7 @@
   "Writes a given SVG to an image with the given name"
   [image-name width height svg-fn]
   (let [filename (str "resources/" image-name ".svg")]
-    (if generate-svg
+    (if (flag :generate-svg)
       (spit filename ((eval svg-fn) width height))
       (println "Skipping generating" filename))
     (str "../" filename)))

@@ -1,4 +1,5 @@
-(ns transcendentalism.core)
+(ns transcendentalism.core
+  (:require [clojure.string :as str]))
 
 (use 'transcendentalism.directive
      'transcendentalism.essay
@@ -11,6 +12,7 @@
      'transcendentalism.essays.physics
      'transcendentalism.essays.politics
      'transcendentalism.essays.religion
+     'transcendentalism.flags
      'transcendentalism.generate
      'transcendentalism.glossary
      'transcendentalism.graph
@@ -21,16 +23,19 @@
    directive-see-also-inline-to-flow
    directive-dedup-cxns])
 
-(def graph
+(defn collect-essays
+  []
   (construct-graph
     (apply-directives
-      meta-directives glossary-definitions intro-essays physics-essays
-      ontology-essays epistemology-essays morality-essays religion-essays
-      politics-essays consciousness-essays miscellaneous-essays)))
+      meta-directives glossary-definitions (intro-essays) (physics-essays)
+      (ontology-essays) (epistemology-essays) (morality-essays) (religion-essays)
+      (politics-essays) (consciousness-essays) (miscellaneous-essays))))
 
 (defn -main
   "Validates the website's graph, and generates its files"
   [& args]
-  (if (validate-graph schema graph)
-    (generate-output graph)
-    (println "Graph fails validation!")))
+  (apply set-flags args)
+  (let [graph (collect-essays)]
+    (if (validate-graph schema graph)
+      (generate-output graph)
+      (println "Graph fails validation!"))))

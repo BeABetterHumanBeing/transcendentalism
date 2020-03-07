@@ -6,7 +6,8 @@
 ; Dominant Theory
 ; This essay serves as the entry point to all ontological essays: those that
 ; explore the nature of being.
-(def dominant-theory
+(defn dominant-theory
+  []
   (essay :dominant-theory "Dominant Theory"
     (text "TODO")
 
@@ -14,7 +15,8 @@
     (file-under :metaphysics)
   ))
 
-(def morality-essays
+(defn morality-essays
+  []
   [(essay-series [:dominant-theory])
    (directive-under-construction :dominant-theory)
-   dominant-theory])
+   (dominant-theory)])

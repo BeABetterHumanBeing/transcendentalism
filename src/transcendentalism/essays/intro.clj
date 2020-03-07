@@ -8,10 +8,11 @@
 
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
-(def monad
+(defn monad
+  []
   (essay :monad "Transcendental Metaphysics"
     (image
-      (svg-to-image "monad" 800 800 'svg-monad)
+      (svg-to-image "monad" 800 800 svg-monad)
       "Animation of the star flower, with changes cascading inwards to a central point")
 
     (quote*
@@ -38,7 +39,8 @@
 ; About
 ; This sequence of essay_segments say a little about myself, this website, and
 ; what I hope to do with it.
-(def welcome
+(defn welcome
+  []
   (essay :welcome "Welcome"
     (big-emoji "&#x1f44b") ; Waving hand emoji
 
@@ -99,7 +101,8 @@
     (big-emoji "&#x1f64f") ; Praying hands emoji
   ))
 
-(def i-am-dan
+(defn i-am-dan
+  []
   (essay :i-am-dan "I Am Dan"
     (text
       "My name's Daniel Gierl. I was a plump, healthy baby with a full head of"
@@ -182,7 +185,8 @@
       )
     )))
 
-(def connections
+(defn connections
+  []
   (essay :connections "Connections"
     (paragraph
       (text
@@ -246,7 +250,8 @@
         (text "Requesting that I plug your blog, pet cause, or activism")
         (see-also :apologies "Expressing anger or hate")))))
 
-(def apologies
+(defn apologies
+  []
   (essay :apologies "Apologies"
     (text
       "Sometimes it's necessary to apologize for what I've written. And I mean"
@@ -274,6 +279,7 @@
         "of the internet to care."))
   ))
 
-(def intro-essays
+(defn intro-essays
+  []
   [(essay-series [:monad :welcome :i-am-dan :connections :apologies])
-   monad welcome i-am-dan connections apologies])
+   (monad) (welcome) (i-am-dan) (connections) (apologies)])

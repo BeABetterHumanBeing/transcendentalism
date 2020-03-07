@@ -5,7 +5,8 @@
 
 ; Enlightened Centrism
 ; This essay serves as the entry point to all political essays.
-(def enlightened-centrism
+(defn enlightened-centrism
+  []
   (essay :enlightened-centrism "Enlightened Centrism"
     (text "TODO")
 
@@ -13,7 +14,8 @@
     (file-under :metaphysics)
   ))
 
-(def politics-essays
+(defn politics-essays
+  []
   [(essay-series [:enlightened-centrism])
    (directive-under-construction :enlightened-centrism)
-   enlightened-centrism])
+   (enlightened-centrism)])

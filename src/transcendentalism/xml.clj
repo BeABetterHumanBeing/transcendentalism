@@ -1,13 +1,12 @@
 (ns transcendentalism.xml
   (:require [clojure.string :as str]))
 
-; Whether to generate debugging HTML or not.
-(def debugging-mode false)
+(use 'transcendentalism.flags)
 
 (defn debug
   "Passes through content if in debugging-mode, otherwise nullifies it"
   [content]
-  (if debugging-mode content ""))
+  (if (flag :debugging) content ""))
 
 (defn xml-open
   "Creates an open tag with attributes"

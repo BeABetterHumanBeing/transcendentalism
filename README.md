@@ -1,10 +1,12 @@
 # transcendentalism
 
-A Clojure library designed to ... well, that part is up to you.
+A Clojure library that generates the Transcendental Metaphysics website.
 
 ## Usage
 
-FIXME
+lein run
+
+Allowed boolean command flags: `debugging`, `static-html`, `generate-svg`.
 
 ## License
 

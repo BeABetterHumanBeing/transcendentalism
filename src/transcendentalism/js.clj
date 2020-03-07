@@ -3,10 +3,6 @@
 
 (use 'transcendentalism.xml)
 
-; Whether to generate the site without JS, so that essay segments link directly
-; to each other as static pages.
-(def static-html-mode false)
-
 (defn seg-id
   "Creates a segment-specific id"
   [encoded_id constant]

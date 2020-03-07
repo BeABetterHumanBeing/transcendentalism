@@ -4,6 +4,7 @@
 
 (use 'transcendentalism.css
      'transcendentalism.encoding
+     'transcendentalism.flags
      'transcendentalism.graph
      'transcendentalism.html
      'transcendentalism.js
@@ -36,7 +37,7 @@
 (defn- dbg-able
   "Adds the dbg class, if in debugging mode"
   [classes]
-  (if debugging-mode
+  (if (flag :debugging)
     (str "dbg " classes)
     classes))
 
@@ -75,7 +76,7 @@
   "Returns the HTML for a link in the footer"
   [encoded_id, cxn]
   (if (= (:type cxn) "random")
-    (if static-html-mode
+    (if (flag :static-html)
       "" ; Can't choose at random without JS.
       (button {"class" (str "link_segment " (:type cxn)),
                "onclick" (call-js "openRandomSegment"
@@ -89,7 +90,7 @@
                       "across" "&#8594 ",
                       "")
                     (:name cxn))]
-      (if static-html-mode
+      (if (flag :static-html)
         (a {"id" link-id,
             "href" (str (:encoded_obj cxn) ".html")}
           name)
@@ -512,7 +513,7 @@
       (xml-open "link" {
         "rel" "stylesheet",
         "href" "styles.css"})
-      (if static-html-mode
+      (if (flag :static-html)
         ""
         (str
           ; Include JQuery from Google CDN.
@@ -520,7 +521,7 @@
           (xml-tag "script" {"src" "script.js"} "")))))
     (let [id (sub encodings)]
       (body
-        (if static-html-mode
+        (if (flag :static-html)
           {}
           {
             "onload" (call-js "segmentLoadedCallback"
@@ -580,4 +581,4 @@
             (str "\"" (unique-or-nil (get-node graph sub) "/essay/title") "\"")
             filename))))
     (spit "output/styles.css" (stylesheet))
-    (if static-html-mode nil (spit "output/script.js" (script)))))
+    (if (flag :static-html) nil (spit "output/script.js" (script)))))

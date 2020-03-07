@@ -6,7 +6,8 @@
 ; Ego Development Theory
 ; This essay serves as the entry point to all (non-esoteric)
 ; consciousness-raising related essays.
-(def ego-development-theory
+(defn ego-development-theory
+  []
   (essay :ego-development-theory "Ego Development Theory"
     (text "TODO")
 
@@ -14,13 +15,15 @@
     (file-under :metaphysics)
   ))
 
-(def mental-traps
+(defn mental-traps
+  []
   (essay :mental-traps "Mental Traps"
     (text "TODO")
 
     (file-under :consciousness)))
 
-(def consciousness-essays
+(defn consciousness-essays
+  []
   [(essay-series [:ego-development-theory])
    (directive-under-construction :ego-development-theory :mental-traps)
-   ego-development-theory mental-traps])
+   (ego-development-theory) (mental-traps)])

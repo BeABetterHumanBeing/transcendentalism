@@ -9,7 +9,8 @@
 ; hierarchy. They may be linked-to via see-also, but otherwise the only way to
 ; find them would be to get lucky with the Random button.
 
-(def if-houses-were-built-like-software
+(defn if-houses-were-built-like-software
+  []
   (let [ifwbls (fn [& lines]
                  (apply text (b "If houses were built like software") ", " lines))]
   (essay :if-houses-were-built-like-software "If Houses Were Built Like Software"
@@ -104,7 +105,8 @@
       (->Triple (get-essay-sub t) "/essay/flow/home" :monad {}))
   )))
 
-(def singularity
+(defn singularity
+  []
   (essay :singularity "The Singularity"
 
   (text
@@ -236,7 +238,8 @@
         (->Triple (get-essay-sub t) "/essay/flow/home" :monad {}))
   ))
 
-(def scale-of-humanity
+(defn scale-of-humanity
+  []
   (essay :scale-of-humanity "The Scale of Humanity"
     (text
       "Humanity, in its entirety, is composed of roughly 7,530,000,000 souls at"
@@ -292,5 +295,6 @@
         (->Triple (get-essay-sub t) "/essay/flow/home" :monad {}))
   ))
 
-(def miscellaneous-essays
-  [if-houses-were-built-like-software singularity scale-of-humanity])
+(defn miscellaneous-essays
+  []
+  [(if-houses-were-built-like-software) (singularity) (scale-of-humanity)])

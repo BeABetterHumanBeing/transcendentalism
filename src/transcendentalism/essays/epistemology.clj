@@ -6,7 +6,8 @@
 ; Epistemology
 ; This essay serves as the entry point to all epistemological essays, about
 ; knowing and understanding.
-(def the-truth
+(defn the-truth
+  []
   (essay :the-truth "The Truth"
     (text "TODO")
 
@@ -14,7 +15,8 @@
     (file-under :metaphysics)
   ))
 
-(def epistemology-essays
+(defn epistemology-essays
+  []
   [(essay-series [:the-truth])
    (directive-under-construction :the-truth)
-   the-truth])
+   (the-truth)])
