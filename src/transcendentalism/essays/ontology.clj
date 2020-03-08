@@ -4,6 +4,7 @@
 (use 'transcendentalism.directive
      'transcendentalism.essay
      'transcendentalism.glossary
+     'transcendentalism.graph
      'transcendentalism.html)
 
 ; Ontology
@@ -12,11 +13,77 @@
 (defn it-is
   []
   (essay :it-is "It Is"
-    (text "TODO")
+    (text "Metaphysics is, broadly speaking, the way in which all the other"
+          "pieces of philosophy are stuck together. The foundation for this"
+          "endeavor, and its glue, is " (i "ontology") ".")
+
+    (text
+      (b "Ontology" " is the exploration of being. The simplest possible ontology"
+      "is \"it is\"; all other ontologies are just elaborations on this idea, on "
+      (i "what") " it is, " (i "how") " it came to " (i "be") " what it is, "
+      (i "whether") " it's real, " (i "what") " it is made of, and so on.")
+
+    (paragraph
+      (text "These elaborations are nothing more than distractions from the"
+            "point: it is. The simplest ontology is also the final answer. ")
+      (tangent (f 1) "Done") dot)
+
+    ; TODO - drawing of a monad
+
+    (footnote (f 1)
+      (paragraph
+        (text "Maddening, isn't it? You probably came here expecting to get"
+              "something more than the obvious. Fine. We'll allow ourselves to"
+              "get distracted with these elaborations just for fun. After all,"
+              "it's not about the final destination, but how one gets there that"
+              "counts. See ")
+        (see-also :self-reflecting-mirror "the self-reflecting mirror")
+        (text " for more.")))
 
     (root-menu :ontology "Ontology")
     (file-under :metaphysics)
   ))
+
+(defn self-reflecting-mirror
+  []
+  (essay :self-reflecting-mirror "The Self-Reflecting Mirror"
+    (text "Well, if it is, then what isn't it? We observe that in order to"
+          "make some sense of reality as an " (i "object") ", we must separate"
+          "out from that reality a " (i "subject") ", if for no other reason"
+          "than to give ourselves " (i "perspective") ".")
+
+    (text "Imagine, if you will, two mirrors lying face-to-face. When there's"
+          "no space between them, there's nothing to reflect on. Distance and"
+          "separation become the basic building blocks of reality.")
+
+    (text "The inverse corollary is that as distances vanish and separations"
+          "come together, reality winks itself out of existence. The object and"
+          "subject become close, until there's nothing that lies between them,"
+          "and then they merge, cancelling each other out as they fuse together.")
+
+    (text "You, as you exist right now, with all your perceptions, are defined"
+          "by these distances, by these separations. The whole of your perception"
+          "of reality is all the \"stuff\" that's gotten between those two"
+          "mirrors.")
+
+    ; TODO - you with your life, stuck between two mirrors
+
+    (text
+      "Where the nature of reality really departs from our metaphor of \"two"
+      "mirrors\" is that in reality, there's only one mirror; it gets separated"
+      "from itself. It's self-separation is not, however, perfectly even."
+      "Imperfections, variations, and asymmetries introduce distortions in the"
+      "reflection. It is precisely these distortions which, after an endless"
+      "recursive back-and-forth, become the very objects that appear in the"
+      "mirrors. They are given substance by the apparent stability of the end"
+      "result of this recursive process.")
+
+    ; TODO - sequence showing recursive unfolding of a red ball within a
+    ; circular mirror.
+
+    ^{:no-block true} (fn [t]
+      (->Triple (get-essay-sub t) "/essay/flow/home" :it-is {}))
+    ))
 
 (defn tower-of-objectivity
   []
@@ -288,5 +355,5 @@
 (defn ontology-essays
   []
   [(essay-series [:it-is :tower-of-objectivity :tower-of-subjectivity :tower-of-unity])
-   (directive-under-construction :it-is)
-   (it-is) (tower-of-objectivity) (tower-of-subjectivity) (tower-of-unity)])
+   (it-is) (tower-of-objectivity) (tower-of-subjectivity) (tower-of-unity)
+   (self-reflecting-mirror)])

@@ -760,14 +760,6 @@
 
 ; TODO(gierl): Overextension
 
-; ## Models
-
-; In most of my essays, when I find a model useful, I will introduce it in situ.
-; Below is a collection of "stray" models; ones that are either shared between
-; essays and are therefore placed here where they can be more easily referenced,
-; or orphan models, ones that I think are fun to look at, but are otherwise
-; provided without any real context.
-
 ; ### Anthropomorphization
 
 ; Perhaps the single most ubiquitous model that's used is the self. Our own being,
