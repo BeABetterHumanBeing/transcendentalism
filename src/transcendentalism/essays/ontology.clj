@@ -18,7 +18,7 @@
           "endeavor, and its glue, is " (i "ontology") ".")
 
     (text
-      (b "Ontology" " is the exploration of being. The simplest possible ontology"
+      (b "Ontology") " is the exploration of being. The simplest possible ontology"
       "is \"it is\"; all other ontologies are just elaborations on this idea, on "
       (i "what") " it is, " (i "how") " it came to " (i "be") " what it is, "
       (i "whether") " it's real, " (i "what") " it is made of, and so on.")
