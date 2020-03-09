@@ -211,7 +211,8 @@
   []
   [(essay-series [:ego-development-theory :level-1 :level-2 :level-3 :level-4
                   :level-5 :level-6])
-   (directive-under-construction :awareness-and-attention :mental-traps)
+   (directive-under-construction :awareness-and-attention :level-1 :level-2
+     :level-3 :level-4 :level-4-5 :level-5 :level-6 :mental-traps)
    (awareness-and-attention) (ego-development-theory) (level-1-ego) (level-2-ego)
    (level-3-ego) (level-4-ego) (level-4-5-ego) (level-5-ego) (level-6-ego)
    (mental-traps)])
