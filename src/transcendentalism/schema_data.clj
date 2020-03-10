@@ -311,7 +311,6 @@
           "/order" {
             :description "The ordinal of this point in the bullet list",
             :range-type :number,
-            :unique true,
             :required true,
           },
         },
@@ -387,13 +386,11 @@
           "/column" {
             :description "The column the cell appears in",
             :range-type :number,
-            :unique true,
             :required true,
           },
           "/row" {
             :description "The row the cell appears in",
             :range-type :number,
-            :unique true,
             :required true,
           },
         }
@@ -405,13 +402,11 @@
           "/column" {
             :description "The column the label applies to",
             :range-type :number,
-            :unique true,
             :exclusive #{"/row"},
           },
           "/row" {
             :description "The row the label applies to",
             :range-type :number,
-            :unique true,
             :exclusive #{"/column"},
           },
         },

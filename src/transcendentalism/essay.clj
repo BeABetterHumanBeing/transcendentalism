@@ -8,10 +8,12 @@
      'transcendentalism.schema)
 
 (defprotocol EssayThread
+  (add-triples [essay-thread new-triples] "Adds some triples to the thread")
+  (essay-triples [essay-thread] "Returns the triples on the thread")
   (get-essay-sub [essay-thread] "Returns the top-level essay sub")
   (fork-essay-thread [essay-thread new-sub]
     "Returns a new essay thread with the same essay sub")
-  (initiate [essay-thread] [essay-thread sub]
+  (initiate [essay-thread]
     "Adds a sub as the initial segment in an essay thread")
   (push-block [essay-thread] [essay-thread sub] "Adds a new block")
   (push-inline [essay-thread] [essay-thread sub]
@@ -20,21 +22,24 @@
   (minor-key [essay-thread] "returns the current minor key"))
 
 (defn create-essay-thread
-  ([essay-sub] (create-essay-thread essay-sub essay-sub))
+  ([essay-sub]
+    (let [t (create-essay-thread essay-sub essay-sub)]
+      (initiate t)
+      t))
   ([essay-sub sub]
-   (let [key-gen (create-key-gen sub)]
+   (let [key-gen (create-key-gen sub),
+         triples (atom [])]
      (reify EssayThread
+       (add-triples [essay-thread new-triples]
+         (reset! triples (concat @triples (flatten new-triples))))
+       (essay-triples [essay-thread] @triples)
        (get-essay-sub [essay-thread] essay-sub)
        (fork-essay-thread [essay-thread new-sub]
          (create-essay-thread essay-sub new-sub))
        (initiate [essay-thread]
          (let [prev (prev-major-key key-gen),
                sub (push-major-key key-gen)]
-           (->Triple prev "/essay/contains" sub {})))
-       (initiate [essay-thread sub]
-         (let [prev (prev-major-key key-gen)]
-           (push-major-key key-gen sub)
-           (->Triple prev "/essay/contains" sub {})))
+           (add-triples essay-thread [(->Triple prev "/essay/contains" sub {})])))
        (push-block [essay-thread]
          (let [prev (prev-major-key key-gen),
                sub (push-major-key key-gen)]
@@ -83,7 +88,6 @@
     (flatten [
       (types schema sub "/essay")
       (->Triple sub "/essay/title" title {})
-      (initiate t)
       (map #(% t)
         (reduce
           (fn [result f]
@@ -91,6 +95,7 @@
               (conj result f)
               (concat result [push-block f])))
           [(first fns)] (rest fns)))
+      (essay-triples t)
     ])))
 
 (defn essay-series
