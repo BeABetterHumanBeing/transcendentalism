@@ -4,6 +4,7 @@
 (use 'transcendentalism.directive
      'transcendentalism.essay
      'transcendentalism.glossary
+     'transcendentalism.graph
      'transcendentalism.html)
 
 ; Materialism
@@ -732,33 +733,118 @@
     (file-under :physics)
   ))
 
-; ## Analogy
+(defn analogy
+  []
+  (essay :analogy "Analogy"
+    (text
+      "An analogy is a mapping between descriptive models. While a model provides"
+      "a useful structure for reasoning about a thing, the structure also sets"
+      "limitations on how far the reasoning can be taken. If the model isn't a"
+      "perfect simulation, these limitations are then artificial, and we"
+      "frequently might want to step beyond their bounds. Shifting to another"
+      "analogous model is one means of overcoming these limitations (the"
+      "other being broadening of scope; which may come with higher complexity"
+      "penalties).")
 
-; An analogy is a mapping between descriptive models. While a model provides a
-; useful structure for reasoning about a thing, the structure also sets
-; limitations on how far the reasoning can be taken. If the model isn't a perfect
-; simulation, these limitations are then artificial, and we frequently might want
-; to step beyond their bounds. Shifting to another analogous perspective is one
-; means of overcoming these limitations (the other being broadening of scope;
-; which may come with higher complexity penalties).
+    (bullet-list
+      (paragraph
+        (text "Consider the " (b "Ship of State") ". In this analogy, the body"
+              "of the state is analogized to ")
+        (tangent (f 1) "being a ship") dot)
+      (text "The ship has a captain, as a state has its leader(s).")
+      (text "The ship has a great bulk, and moves in a cumbersome, and somewhat"
+            "unweildy fashion, just as a state has great momentum, and will"
+            "sometimes respond sluggishly to its leaders direction.")
+      (text "The ship must contend with weather, with storms, with currents, and"
+            "other forces that push it about, just as a state may be buffeted by"
+            "global economics, mass migrations, pandemics, and other forces.")
+      (paragraph
+        (text "The ship must be handled carefully to avoid dangers like shallow"
+              "shoals, reefs, and rocks, just as a state much carefully avoid"
+              "provoking protests, disobedience, and ")
+        (tangent (f 2) "the twin dangers of populism") dot)
+      (text "The ship is bound by a covenant and a contract among the sailors,"
+            "just as a state may be bound by a constitution and law."))
 
-; TODO(gierl): Come up with a good example of an analogy to demonstrate.
+    (footnote (f 1)
+      (paragraph
+        (text
+          "It's actually a really good analogy. For some other analogies, see ")
+        (see-also :anthropomorphization "anthropomorphization")
+        (text ", ")
+        (see-also :brain-as-recursive-filter "the brain as a recursive filter")
+        (text ", and ")
+        (see-also :perspective-as-glasses "perspective as glasses") dot))
 
-; In general, analogies should be used for pedagogy only. If a person doesn't know
-; much about a thing, comparing it to an analogous thing for which they have
-; greater familiarity is an excellent means of helping them to grasp the idea.
+    (footnote (f 2)
+      (credit "reddit.com/r/neoliberal"
+      (image "../resources/ship_of_state.png"
+        (str/join " " [
+          "An image of a ship, labeled \"the ship of state\", sailing between"
+          "two rocks, only labeled \"revolution\", and the other \"reaction\"."
+          "Above it reads \"hold course\", and beneath it \"steer clear the"
+          "populist tides\"."]))))
 
-; The flip side of this is that analogies should *not* be used for argumentation.
-; Each mapping from one model to another analogous model introduces errors into
-; the final result. If you're arguing from an analogy, you are running a
-; heightened risk of simply being wrong. Nevertheless, this generally doesn't stop
-; arguments from analogies; getting the audience to understand your argument is
-; the largest hurdle in getting them to believe it to be true.
+    (text "In general, analogies should be used for pedagogy only. If a person"
+          "doesn't know much about a thing, comparing it to an analogous thing"
+          "for which they have greater familiarity is an excellent means of"
+          "helping them to grasp the idea.")
 
-; TODO(gierl): Show how our analogy can be used to distort the truth in an
-; argument.
+    (text
+      "The flip side of this is that analogies should " (i "not") " be used for"
+      "argumentation. Each mapping from one model to another analogous model"
+      "introduces errors into the final result. If you're arguing from an analogy,"
+      "you are running a heightened risk of simply being wrong. Nevertheless,"
+      "this generally doesn't stop arguments from analogies; getting the"
+      "audience to understand your argument is the largest hurdle in getting"
+      "them to believe it to be true.")
 
-; TODO(gierl): Overextension
+    (text
+      "The most common problem that analogies encounter is " (b "overextension")
+      ". In overextension, one model is analogized to another, then reasoning"
+      "is expanded in that other model, then the analogy is brought back to the"
+      "first model, but the result is incongruous.")
+
+    (bullet-list
+      (text "Consider the following overextensions with our ship of state:")
+      (text
+        "Wind is the economy, driving the motion of the state. When a ship hits"
+        "becalmed seas, there's nothing to be done but wait it out, so therefore"
+        "when a state's economy stagnates, the correct course of action is to"
+        "wait it out.")
+      (text
+        "When a ship sets sail, it must have all the provisions that it needs"
+        "for the following journey. Therefore, at the beginning of every year,"
+        "the state should have stockpiled all the resources it will consume"
+        "until the next year."))
+  ))
+
+(defn anthropomorphization
+  []
+  (essay :anthropomorphization "Anthropomorphization"
+    (text "TODO")
+
+    ^{:no-block true} (fn [t]
+      (->Triple (get-essay-sub t) "/essay/flow/home" :modeling {}))
+    ))
+
+(defn brain-as-recursive-filter
+  []
+  (essay :brain-as-recursive-filter "The Brain as a Recursive Filter"
+    (text "TODO")
+
+    ^{:no-block true} (fn [t]
+      (->Triple (get-essay-sub t) "/essay/flow/home" :modeling {}))
+    ))
+
+(defn perspective-as-glasses
+  []
+  (essay :perspective-as-glasses "Perspective as Glasses"
+    (text "TODO")
+
+    ^{:no-block true} (fn [t]
+      (->Triple (get-essay-sub t) "/essay/flow/home" :modeling {}))
+    ))
 
 ; ### Anthropomorphization
 
@@ -1516,9 +1602,12 @@
    (essay-series [:three-sciences :analytical-science :analytical-science-example])
    (essay-series [:three-sciences :empirical-science :empirical-science-example])
    (essay-series [:three-sciences :phenomenological-science :phenomenological-science-example])
+   (essay-series [:modeling :analogy])
    (directive-under-construction
-     :phenomenological-science :phenomenological-science-example)
+     :phenomenological-science :phenomenological-science-example
+     :anthropomorphization :brain-as-recursive-filter :perspective-as-glasses)
    (materialism) (universal-model) (universal-order) (universal-shape)
    (speed-limits) (three-sciences) (analytical-science) (analytical-science-example)
    (empirical-science) (empirical-science-example) (phenomenological-science)
-   (phenomenological-science-example) (modeling)])
+   (phenomenological-science-example) (modeling) (analogy) (anthropomorphization)
+   (brain-as-recursive-filter) (perspective-as-glasses)])
