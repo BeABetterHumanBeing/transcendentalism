@@ -7,16 +7,7 @@
 
 (defn definition
   [word part-of-speech & definitions]
-  (block-item
-    (fn [t sub]
-      [(types schema sub "/item/definition"),
-       (->Triple sub "/item/definition/word" word {}),
-       (->Triple sub "/item/definition/part_of_speech" part-of-speech {}),
-       (map
-        (fn [i]
-          (->Triple sub "/item/definition/definition" (nth definitions i)
-                    {"/order" i}))
-        (range (count definitions)))])))
+  (fn [t] (knot-definition t word part-of-speech definitions)))
 
 (defn adef [& lines] (str/join " " lines))
 
