@@ -7,6 +7,12 @@
      'transcendentalism.html
      'transcendentalism.schema)
 
+(defn sub-suffix
+  [sub suffix]
+  (keyword (str (name sub) "-" suffix)))
+
+(defn item-sub [sub] (sub-suffix sub "i"))
+
 (defprotocol Loom
   (add-triples [loom new-triples] "Adds some triples to the thread")
   (essay-triples [loom] "Returns the triples on the thread")
@@ -21,6 +27,14 @@
   (minor-key [loom] "returns the current minor key")
   (knot-root-menu [loom label title]
     "Marks a given essay as the root of some label")
+  (knot-file-under [loom label] "Files the given essay under some label")
+  (knot-footnote [loom virtual-sub fns])
+  (knot-paragraph [loom fns])
+  (knot-text [loom lines])
+  (knot-tangent [loom virtual-sub lines])
+  (knot-see-also [loom essay-sub lines])
+  (knot-link [loom url lines])
+  (knot-credit [loom whom f])
   )
 
 (defn create-loom
@@ -33,7 +47,9 @@
          triples (atom [])]
      (reify Loom
        (add-triples [loom new-triples]
-         (reset! triples (concat @triples (flatten new-triples)))
+         (if (instance? transcendentalism.graph.Triple new-triples)
+           (reset! triples (conj @triples new-triples))
+           (reset! triples (concat @triples (flatten new-triples))))
          [])
        (essay-triples [loom] @triples)
        (get-essay-sub [loom] essay-sub)
@@ -43,27 +59,95 @@
          (let [prev (prev-major-key key-gen),
                sub (push-major-key key-gen)]
            (add-triples loom
-             [(->Triple prev "/essay/contains" sub {})])))
+             (->Triple prev "/essay/contains" sub {}))))
        (push-block [loom]
          (let [prev (prev-major-key key-gen),
                sub (push-major-key key-gen)]
            (add-triples loom
-             [(->Triple prev "/segment/flow/block" sub {})])))
+             (->Triple prev "/segment/flow/block" sub {}))))
        (push-inline [loom]
          (let [prev (prev-minor-key key-gen),
                sub (push-minor-key key-gen)]
            (add-triples loom
-             [(->Triple prev "/segment/flow/inline" sub {})])))
+             (->Triple prev "/segment/flow/inline" sub {}))))
        (major-key [loom] (prev-major-key key-gen))
        (minor-key [loom] (prev-minor-key key-gen))
        (knot-root-menu [loom label title]
          (add-triples loom
-           [(->Triple (get-essay-sub loom) "/essay/flow/menu" label {"/title" title})]))
+           (->Triple (get-essay-sub loom) "/essay/flow/menu" label {"/title" title})))
+       (knot-file-under [loom label]
+         (add-triples loom
+           (->Triple (get-essay-sub loom) "/essay/flow/home" label {"/label" :menu})))
+       (knot-footnote [loom virtual-sub fns]
+         (let [sub (if (fn? virtual-sub) (virtual-sub loom) virtual-sub),
+               loom (fork-loom loom sub)]
+           (concat
+             (flatten
+               (into [] (map #(% loom)
+                 (reduce
+                   (fn [result f]
+                     (if (contains? (meta f) :no-block)
+                       (conj result f)
+                       (concat result [push-block f])))
+                   [(first fns)] (rest fns)))))
+             (essay-triples loom))))
+       (knot-paragraph [loom fns]
+         (let [loom (fork-loom loom (major-key loom))]
+           (concat
+             (flatten
+               (into []
+                 (map #(% loom)
+                   (reduce
+                     (fn [result f]
+                       (concat result [push-inline f]))
+                     [(first fns)] (rest fns)))))
+             (essay-triples loom))))
+       (knot-text [loom lines]
+         (let [sub (minor-key loom),
+               item-keyword (item-sub sub),
+               joined-lines (reduce
+                              (fn [result line]
+                                (if (or (= (count line) 0)
+                                        (= (.charAt line 0) \<)
+                                        (= (count result) 0)
+                                        (= (.charAt result (dec (count result))) \>))
+                                    (str result line)
+                                    (str result " " line)))
+                              (first lines) (rest lines))]
+           (add-triples loom
+             [(types schema sub "/segment")
+              (->Triple sub "/segment/contains" item-keyword {})
+              (types schema item-keyword "/item/inline")
+              (->Triple item-keyword "/item/inline/text" joined-lines {})])))
+       (knot-tangent [loom virtual-sub lines]
+         (let [sub (if (fn? virtual-sub) (virtual-sub loom) virtual-sub),
+               k (minor-key loom)]
+           (add-triples loom
+             [(knot-text loom lines)
+              (->Triple (item-sub k) "/item/inline/tangent" sub {})])))
+       (knot-see-also [loom essay-sub lines]
+         (let [k (minor-key loom)]
+           (add-triples loom
+             [(knot-text loom lines)
+              (->Triple (item-sub k) "/item/inline/see_also" essay-sub {})])))
+       (knot-link [loom url lines]
+         (let [k (minor-key loom)]
+           (add-triples loom
+             [(knot-text loom lines)
+              (->Triple (item-sub k) "/item/inline/url" url {})])))
+       (knot-credit [loom whom f]
+         ; TODO - BUG - Since functions are no longer returning triples, they
+         ; will not have the appropriate credit added. Will have to add "author"
+         ; as the creator on the loom, so that one can change it, stitch away,
+         ; and return to before.
+         (let [triples (flatten (f loom)),
+               subs (map :sub
+                         (filter #(= (:pred %) "/type/segment") triples))]
+           (add-triples loom
+             (concat
+               triples
+               (map #(->Triple % "/segment/author" whom {}) subs)))))
        ))))
-
-(defn sub-suffix
-  [sub suffix]
-  (keyword (str (name sub) "-" suffix)))
 
 (defn f
   "Returns a virtual sub that produces footnote names"
@@ -76,10 +160,8 @@
   ^{:no-block true} (fn [t] (knot-root-menu t label title)))
 
 (defn file-under
-  "Files the given essay under some label"
   [label]
-  ^{:no-block true}
-  (fn [t] (->Triple (get-essay-sub t) "/essay/flow/home" label {"/label" :menu})))
+  ^{:no-block true} (fn [t] (knot-file-under t label)))
 
 (defn essay
   [sub title & fns]
@@ -111,21 +193,7 @@
 
 (defn footnote
   [virtual-sub & fns]
-  ^{:no-block true} (fn [t]
-    (let [sub (if (fn? virtual-sub) (virtual-sub t) virtual-sub),
-          t (fork-loom t sub)]
-      (concat
-        (flatten
-          (into [] (map #(% t)
-            (reduce
-              (fn [result f]
-                (if (contains? (meta f) :no-block)
-                  (conj result f)
-                  (concat result [push-block f])))
-              [(first fns)] (rest fns)))))
-        (essay-triples t)))))
-
-(defn item-sub [sub] (sub-suffix sub "i"))
+  ^{:no-block true} (fn [t] (knot-footnote t virtual-sub fns)))
 
 (defn block-item
   "Given a function that takes a sub and produces triples, adds the necessary
@@ -184,58 +252,23 @@
 
 (defn paragraph
   [& fns]
-  (fn [t]
-    (let [t (fork-loom t (major-key t))]
-      (concat
-        (flatten
-          (into []
-            (map #(% t)
-              (reduce
-                (fn [result f]
-                  (concat result [push-inline f]))
-                [(first fns)] (rest fns)))))
-        (essay-triples t)))))
+  (fn [t] (knot-paragraph t fns)))
 
 (defn text
   [& lines]
-  (fn [t]
-    (let [sub (minor-key t),
-          item-keyword (item-sub sub),
-          joined-lines (reduce
-                         (fn [result line]
-                           (if (or (= (count line) 0)
-                                   (= (.charAt line 0) \<)
-                                   (= (count result) 0)
-                                   (= (.charAt result (dec (count result))) \>))
-                               (str result line)
-                               (str result " " line)))
-                         (first lines) (rest lines))]
-      [(types schema sub "/segment")
-       (->Triple sub "/segment/contains" item-keyword {})
-       (types schema item-keyword "/item/inline")
-       (->Triple item-keyword "/item/inline/text" joined-lines {})])))
+  (fn [t] (knot-text t lines)))
 
 (defn tangent
   [virtual-sub & lines]
-  (fn [t]
-    (let [sub (if (fn? virtual-sub) (virtual-sub t) virtual-sub),
-          k (minor-key t)]
-      [((apply text lines) t)
-       (->Triple (item-sub k) "/item/inline/tangent" sub {})])))
+  (fn [t] (knot-tangent t virtual-sub lines)))
 
 (defn see-also
   [essay-sub & lines]
-  (fn [t]
-    (let [k (minor-key t)]
-      [((apply text lines) t)
-       (->Triple (item-sub k) "/item/inline/see_also" essay-sub {})])))
+  (fn [t] (knot-see-also t essay-sub lines)))
 
 (defn link
   [url & lines]
-  (fn [t]
-    (let [k (minor-key t)]
-      [((apply text lines) t)
-       (->Triple (item-sub k) "/item/inline/url" url {})])))
+  (fn [t] (knot-link t url lines)))
 
 (defn ex
   "Include an example"
@@ -340,7 +373,7 @@
                      []
                      (let [t (fork-loom t (sub-suffix sub (gen-key 5)))]
                        (conj (if (string? val)
-                                 ((text val) t)
+                                 (concat ((text val) t) (essay-triples t))
                                  (concat (val t) (essay-triples t)))
                              (gen-triple (minor-key t)))))),
             rows* (filter #(not (nil? (:val %))) (index-1d rows)),
@@ -364,14 +397,7 @@
 (defn credit
   "Adds /credit property to all /item/segments produced by some function"
   ([f] (credit "Anonymous" f))
-  ([whom f]
-    (fn [t]
-      (let [triples (flatten (f t)),
-            subs (map :sub
-                      (filter #(= (:pred %) "/type/segment") triples))]
-        (concat
-          triples
-          (map #(->Triple % "/segment/author" whom {}) subs))))))
+  ([whom f] (fn [t] (knot-credit t whom f))))
 
 (defn html-passthrough
   "Takes some HTML, and passes it straight-through, effectively by-passing the
