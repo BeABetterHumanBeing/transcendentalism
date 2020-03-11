@@ -15,9 +15,8 @@
     "Returns a new essay thread with the same essay sub")
   (initiate [essay-thread]
     "Adds a sub as the initial segment in an essay thread")
-  (push-block [essay-thread] [essay-thread sub] "Adds a new block")
-  (push-inline [essay-thread] [essay-thread sub]
-    "Adds a new inline to the current block")
+  (push-block [essay-thread] "Adds a new block")
+  (push-inline [essay-thread] "Adds a new inline to the current block")
   (major-key [essay-thread] "Returns the current major key")
   (minor-key [essay-thread] "returns the current minor key"))
 
@@ -31,31 +30,29 @@
          triples (atom [])]
      (reify EssayThread
        (add-triples [essay-thread new-triples]
-         (reset! triples (concat @triples (flatten new-triples))))
-       (essay-triples [essay-thread] @triples)
+         (reset! triples (concat @triples (flatten new-triples)))
+         [])
+       (essay-triples [essay-thread]
+        (println "essay-triples" @triples)
+        @triples)
        (get-essay-sub [essay-thread] essay-sub)
        (fork-essay-thread [essay-thread new-sub]
          (create-essay-thread essay-sub new-sub))
        (initiate [essay-thread]
          (let [prev (prev-major-key key-gen),
                sub (push-major-key key-gen)]
-           (add-triples essay-thread [(->Triple prev "/essay/contains" sub {})])))
+           (add-triples essay-thread
+             [(->Triple prev "/essay/contains" sub {})])))
        (push-block [essay-thread]
          (let [prev (prev-major-key key-gen),
                sub (push-major-key key-gen)]
-           (->Triple prev "/segment/flow/block" sub {})))
-       (push-block [essay-thread sub]
-         (let [prev (prev-major-key key-gen)]
-           (push-major-key key-gen sub)
-           (->Triple prev "/segment/flow/block" sub {})))
+           (add-triples essay-thread
+             [(->Triple prev "/segment/flow/block" sub {})])))
        (push-inline [essay-thread]
          (let [prev (prev-minor-key key-gen),
                sub (push-minor-key key-gen)]
-           (->Triple prev "/segment/flow/inline" sub {})))
-       (push-inline [essay-thread sub]
-         (let [prev (prev-minor-key key-gen)]
-           (push-minor-key key-gen sub)
-           (->Triple prev "/segment/flow/inline" sub {})))
+           (add-triples essay-thread
+             [(->Triple prev "/segment/flow/inline" sub {})])))
        (major-key [essay-thread] (prev-major-key key-gen))
        (minor-key [essay-thread] (prev-minor-key key-gen))))))
 
@@ -85,18 +82,19 @@
 (defn essay
   [sub title & fns]
   (let [t (create-essay-thread sub)]
-    (flatten [
-      (types schema sub "/essay")
-      (->Triple sub "/essay/title" title {})
-      (map #(% t)
-        (reduce
-          (fn [result f]
-            (if (contains? (meta f) :no-block)
-              (conj result f)
-              (concat result [push-block f])))
-          [(first fns)] (rest fns)))
-      (essay-triples t)
-    ])))
+    (concat 
+      (flatten [
+        (types schema sub "/essay")
+        (->Triple sub "/essay/title" title {})
+        (into [] (map #(% t)
+          (reduce
+            (fn [result f]
+              (if (contains? (meta f) :no-block)
+                (conj result f)
+                (concat result [push-block f])))
+            [(first fns)] (rest fns))))
+      ])
+      (essay-triples t))))
 
 (defn essay-series
   "Adds triples connecting a series of essay segments. The first segment will
@@ -114,13 +112,16 @@
   ^{:no-block true} (fn [t]
     (let [sub (if (fn? virtual-sub) (virtual-sub t) virtual-sub),
           t (fork-essay-thread t sub)]
-      (map #(% t)
-        (reduce
-          (fn [result f]
-            (if (contains? (meta f) :no-block)
-              (conj result f)
-              (concat result [push-block f])))
-          [(first fns)] (rest fns))))))
+      (concat
+        (flatten
+          (into [] (map #(% t)
+            (reduce
+              (fn [result f]
+                (if (contains? (meta f) :no-block)
+                  (conj result f)
+                  (concat result [push-block f])))
+              [(first fns)] (rest fns)))))
+        (essay-triples t)))))
 
 (defn item-sub [sub] (sub-suffix sub "i"))
 
@@ -183,11 +184,15 @@
   [& fns]
   (fn [t]
     (let [t (fork-essay-thread t (major-key t))]
-      (map #(% t)
-        (reduce
-          (fn [result f]
-            (concat result [push-inline f]))
-          [(first fns)] (rest fns))))))
+      (concat
+        (flatten
+          (into []
+            (map #(% t)
+              (reduce
+                (fn [result f]
+                  (concat result [push-inline f]))
+                [(first fns)] (rest fns)))))
+        (essay-triples t)))))
 
 (defn text
   [& lines]
