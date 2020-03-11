@@ -72,17 +72,24 @@
   ([word] (inline-definition word word))
   ([word word-as-written]
    (fn [t]
-     (let [word-data (glossary word),
-           sub (glossary-sub word),
-           k (minor-key t)]
-       [((text word-as-written) t)
-        (->Triple (item-sub k) "/item/inline/definition" sub {})]))))
+     (add-triples t
+       (let [word-data (glossary word),
+             sub (glossary-sub word),
+             k (minor-key t)]
+         [((text word-as-written) t)
+          (->Triple (item-sub k) "/item/inline/definition" sub {})])))))
 
-(def glossary-definitions
-  (let [t (create-loom :glossary)]
+(defn glossary-essay
+  []
+  (essay :glossary "Glossary"
+    (text "TODO - block-define all words alphabetically here")
+
+    ^{:no-block true} (fn [t]
     (reduce-kv
       (fn [result k v]
         (concat result
                 ((footnote (glossary-sub k)
                    (apply definition k (:pos v) (:defs v))) t)))
-      [] glossary)))
+      [] glossary))
+    (add-home :monad)
+    ))

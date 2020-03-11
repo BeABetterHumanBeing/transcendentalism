@@ -824,8 +824,7 @@
   (essay :anthropomorphization "Anthropomorphization"
     (text "TODO")
 
-    ^{:no-block true} (fn [t]
-      (->Triple (get-essay-sub t) "/essay/flow/home" :modeling {}))
+    (add-home :modeling)
     ))
 
 (defn brain-as-recursive-filter
@@ -833,8 +832,7 @@
   (essay :brain-as-recursive-filter "The Brain as a Recursive Filter"
     (text "TODO")
 
-    ^{:no-block true} (fn [t]
-      (->Triple (get-essay-sub t) "/essay/flow/home" :modeling {}))
+    (add-home :modeling)
     ))
 
 (defn perspective-as-glasses
@@ -842,8 +840,7 @@
   (essay :perspective-as-glasses "Perspective as Glasses"
     (text "TODO")
 
-    ^{:no-block true} (fn [t]
-      (->Triple (get-essay-sub t) "/essay/flow/home" :modeling {}))
+    (add-home :modeling)
     ))
 
 ; ### Anthropomorphization

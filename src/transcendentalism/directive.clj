@@ -108,7 +108,8 @@
 
               ; Menus' homes are the root of the menu.
               ^{:no-block true} (fn [t]
-                [(->Triple sub "/essay/flow/home" (:sub menu-triple) {})
-                 (->Triple sub "/essay/label" :invisible {})])
+                (add-triples t
+                 [(->Triple sub "/essay/flow/home" (:sub menu-triple) {})
+                  (->Triple sub "/essay/label" :invisible {})]))
               )))
         menu-triples))))

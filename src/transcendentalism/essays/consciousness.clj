@@ -184,8 +184,7 @@
   (essay :level-4-5 "Post-Modern Thinking"
     (text "TODO")
 
-    ^{:no-block true} (fn [t]
-      (->Triple (get-essay-sub t) "/essay/flow/home" :ego-development-theory {}))
+    (add-home :ego-development-theory)
   ))
 
 (defn level-5-ego

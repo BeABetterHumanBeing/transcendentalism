@@ -28,7 +28,7 @@
   []
   (construct-graph
     (apply-directives
-      meta-directives glossary-definitions (intro-essays) (physics-essays)
+      meta-directives (glossary-essay) (intro-essays) (physics-essays)
       (ontology-essays) (epistemology-essays) (morality-essays) (religion-essays)
       (politics-essays) (consciousness-essays) (miscellaneous-essays)
       (love-essays))))

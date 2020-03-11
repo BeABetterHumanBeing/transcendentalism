@@ -101,8 +101,7 @@
       "in the new machine, it would actually get washed by the old machine, but"
       "you wouldn't be able to tell."))
 
-    ^{:no-block true} (fn [t]
-      (->Triple (get-essay-sub t) "/essay/flow/home" :monad {}))
+    (add-home :monad)
   )))
 
 (defn singularity
@@ -234,8 +233,7 @@
 
     (text "How's your singularity going? Can't complain about mine."))
 
-    ^{:no-block true} (fn [t]
-        (->Triple (get-essay-sub t) "/essay/flow/home" :monad {}))
+    (add-home :monad)
   ))
 
 (defn scale-of-humanity
@@ -291,8 +289,7 @@
                                        (str "left:" (rand-int 1000) "px")
                                        (str "top:" (rand-int height) "px")])}))))
 
-    ^{:no-block true} (fn [t]
-        (->Triple (get-essay-sub t) "/essay/flow/home" :monad {}))
+    (add-home :monad)
   ))
 
 (defn miscellaneous-essays

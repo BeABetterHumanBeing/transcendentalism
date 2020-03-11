@@ -7,6 +7,7 @@
      'transcendentalism.time)
 
 ; Whether or not to do property validation on the graph.
+; TODO - move this to flags.
 (def enable-property-validation true)
 
 ; The Schema protocal is the interface through which the schema data above is

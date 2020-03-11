@@ -25,9 +25,11 @@
   (push-inline [loom] "Adds a new inline to the current block")
   (major-key [loom] "Returns the current major key")
   (minor-key [loom] "returns the current minor key")
+  (knot-essay [loom sub title fns])
   (knot-root-menu [loom label title]
     "Marks a given essay as the root of some label")
   (knot-file-under [loom label] "Files the given essay under some label")
+  (knot-add-home [loom sub])
   (knot-footnote [loom virtual-sub fns])
   (knot-paragraph [loom fns])
   (knot-text [loom lines])
@@ -88,35 +90,47 @@
              (->Triple prev "/segment/flow/inline" sub {}))))
        (major-key [loom] (prev-major-key key-gen))
        (minor-key [loom] (prev-minor-key key-gen))
+       (knot-essay [loom sub title fns]
+         (doall (map #(% loom)
+           (reduce
+             (fn [result f]
+               (if (contains? (meta f) :no-block)
+                 (conj result f)
+                 (concat result [push-block f])))
+             [(first fns)] (rest fns))))
+         (add-triples loom [
+           (types schema sub "/essay")
+           (->Triple sub "/essay/title" title {})]))
        (knot-root-menu [loom label title]
          (add-triples loom
            (->Triple (get-essay-sub loom) "/essay/flow/menu" label {"/title" title})))
        (knot-file-under [loom label]
          (add-triples loom
            (->Triple (get-essay-sub loom) "/essay/flow/home" label {"/label" :menu})))
+       (knot-add-home [loom sub]
+         (add-triples loom
+           (->Triple (get-essay-sub loom) "/essay/flow/home" sub {})))
        (knot-footnote [loom virtual-sub fns]
-         (let [sub (if (fn? virtual-sub) (virtual-sub loom) virtual-sub),
-               loom (fork-loom loom sub)]
-           (concat
-             (flatten
-               (into [] (map #(% loom)
-                 (reduce
-                   (fn [result f]
-                     (if (contains? (meta f) :no-block)
-                       (conj result f)
-                       (concat result [push-block f])))
-                   [(first fns)] (rest fns)))))
+         (add-triples loom
+           (let [sub (if (fn? virtual-sub) (virtual-sub loom) virtual-sub),
+                 loom (fork-loom loom sub)]
+             (doall (map #(% loom)
+               (reduce
+                 (fn [result f]
+                   (if (contains? (meta f) :no-block)
+                     (conj result f)
+                     (concat result [push-block f])))
+                 [(first fns)] (rest fns))))
              (essay-triples loom))))
        (knot-paragraph [loom fns]
-         (let [loom (fork-loom loom (major-key loom))]
-           (concat
-             (flatten
-               (into []
-                 (map #(% loom)
-                   (reduce
-                     (fn [result f]
-                       (concat result [push-inline f]))
-                     [(first fns)] (rest fns)))))
+         (add-triples loom
+           (let [loom (fork-loom loom (major-key loom))]
+             (doall
+               (map #(% loom)
+                 (reduce
+                   (fn [result f]
+                     (concat result [push-inline f]))
+                   [(first fns)] (rest fns))))
              (essay-triples loom))))
        (knot-text [loom lines]
          (let [sub (minor-key loom),
@@ -328,19 +342,8 @@
 (defn essay
   [sub title & fns]
   (let [t (create-loom sub)]
-    (concat 
-      (flatten [
-        (types schema sub "/essay")
-        (->Triple sub "/essay/title" title {})
-        (into [] (map #(% t)
-          (reduce
-            (fn [result f]
-              (if (contains? (meta f) :no-block)
-                (conj result f)
-                (concat result [push-block f])))
-            [(first fns)] (rest fns))))
-      ])
-      (essay-triples t))))
+    (knot-essay t sub title fns)
+    (essay-triples t)))
 
 (defn essay-series
   "Adds triples connecting a series of essay segments. The first segment will
@@ -443,3 +446,7 @@
 (defn html-passthrough
   [html]
   (fn [t] (knot-html-passthrough t html)))
+
+(defn add-home
+  [sub]
+  ^{:no-block true} (fn [t] (knot-add-home t sub)))

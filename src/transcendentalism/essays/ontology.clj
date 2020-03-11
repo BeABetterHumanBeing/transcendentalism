@@ -81,8 +81,7 @@
     ; TODO - sequence showing recursive unfolding of a red ball within a
     ; circular mirror.
 
-    ^{:no-block true} (fn [t]
-      (->Triple (get-essay-sub t) "/essay/flow/home" :it-is {}))
+    (add-home :it-is)
     ))
 
 (defn tower-of-objectivity
