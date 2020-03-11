@@ -68,6 +68,8 @@
          (if (instance? transcendentalism.graph.Triple new-triples)
            (reset! triples (conj @triples new-triples))
            (reset! triples (concat @triples (flatten new-triples))))
+         ; TODO - change the below to nil, ensuring that it isn't being passed
+         ; into triples anywhere. There are currently 12 exceptions.
          [])
        (essay-triples [loom] @triples)
        (get-essay-sub [loom] essay-sub)
@@ -183,10 +185,10 @@
            (add-triples loom
              (concat [(types schema block-sub "/segment"),
                       (->Triple block-sub "/segment/contains" item-sub {})]
-                     (f loom item-sub)))))
+                     (f item-sub)))))
        (knot-poem [loom lines]
          (knot-block-item loom
-           (fn [loom sub]
+           (fn [sub]
              [(types schema sub "/item/poem")
               (map
                 (fn [i]
@@ -195,7 +197,7 @@
                 (range (count lines)))])))
        (knot-image [loom url alt-text width height]
          (knot-block-item loom
-           (fn [loom sub]
+           (fn [sub]
              [(types schema sub "/item/image")
               (->Triple sub "/item/image/url" url {})
               (->Triple sub "/item/image/alt_text" alt-text {})
@@ -207,7 +209,7 @@
                 (->Triple sub "/item/image/height" height {}))])))
        (knot-quote [loom q author]
          (knot-block-item loom
-           (fn [loom sub]
+           (fn [sub]
              [(types schema sub "/item/quote")
               (->Triple sub "/item/quote/text" q {})
               (if (nil? author)
@@ -215,26 +217,26 @@
                 (->Triple sub "/item/quote/author" author {}))])))
        (knot-big-emoji [loom emoji]
          (knot-block-item loom
-           (fn [loom sub]
+           (fn [sub]
              [(types schema sub "/item/big_emoji")
               (->Triple sub "/item/big_emoji/emoji" emoji {})])))
        (knot-q-and-a [loom q a]
          (knot-block-item loom
-           (fn [t sub]
+           (fn [sub]
              (let [q-sub (sub-suffix sub "q"),
                    a-sub (sub-suffix sub "a"),
-                   q-loom (fork-loom t q-sub),
-                   a-loom (fork-loom t a-sub)]
-               [(q q-loom)
-                (a a-loom)
-                (types schema sub "/item/q_and_a")
+                   q-loom (fork-loom loom q-sub),
+                   a-loom (fork-loom loom a-sub)]
+               (q q-loom)
+               (a a-loom)
+               [(types schema sub "/item/q_and_a")
                 (->Triple sub "/item/q_and_a/question" q-sub {})
                 (->Triple sub "/item/q_and_a/answer" a-sub {})
                 (essay-triples q-loom)
                 (essay-triples a-loom)]))))
        (knot-list [loom is-ordered header-or-nil items]
          (knot-block-item loom
-           (fn [t sub]
+           (fn [sub]
              (let [item-subs (map #(sub-suffix sub (str "i" %))
                                   (range (count items))),
                    header-sub (sub-suffix sub "h")]
@@ -242,31 +244,31 @@
                  (types schema sub "/item/bullet_list")
                  (if (nil? header-or-nil)
                    []
-                   (let [header-loom (fork-loom t header-sub)]
-                     [(header-or-nil header-loom)
-                      (->Triple sub "/item/bullet_list/header" header-sub {})
+                   (let [header-loom (fork-loom loom header-sub)]
+                     (header-or-nil header-loom)
+                     [(->Triple sub "/item/bullet_list/header" header-sub {})
                       (essay-triples header-loom)]))
                  [(->Triple sub "/item/bullet_list/is_ordered" is-ordered {})]
-                 (map #(let [item-loom (fork-loom t (second %))]
-                         (concat ((first %) item-loom)
-                                 (essay-triples item-loom)))
+                 (map #(let [item-loom (fork-loom loom (second %))]
+                         ((first %) item-loom)
+                         (essay-triples item-loom))
                       (map vector items item-subs))
                  (map #(->Triple sub "/item/bullet_list/point" (first %)
                                  {"/order" (second %)})
                       (map vector item-subs (range (count item-subs)))))))))
        (knot-contact-email [loom email-address]
          (knot-block-item loom
-           (fn [t sub]
+           (fn [sub]
              [(types schema sub "/item/contact"),
               (->Triple sub "/item/contact/email" email-address {})])))
        (knot-thesis [loom line]
          (knot-block-item loom
-           (fn [t sub]
+           (fn [sub]
              [(types schema sub "/item/thesis"),
               (->Triple sub "/item/thesis/contains" line {})])))
        (knot-matrix [loom rows columns contents]
          (knot-block-item loom
-           (fn [t sub]
+           (fn [sub]
              (let [index-1d (fn [items]
                               (reduce
                                 (fn [result i]
@@ -286,11 +288,12 @@
                    item (fn [val gen-triple]
                           (if (nil? val)
                             []
-                            (let [t (fork-loom t (sub-suffix sub (gen-key 5)))]
-                              (conj (if (string? val)
-                                        (concat (knot-text t [val]) (essay-triples t))
-                                        (concat (val t) (essay-triples t)))
-                                    (gen-triple (minor-key t)))))),
+                            (let [loom (fork-loom loom (sub-suffix sub (gen-key 5)))]
+                              (if (string? val)
+                                  (knot-text loom [val])
+                                  (val loom))
+                              (conj (essay-triples loom)
+                                    (gen-triple (minor-key loom)))))),
                    rows* (filter #(not (nil? (:val %))) (index-1d rows)),
                    columns* (filter #(not (nil? (:val %))) (index-1d columns)),
                    contents* (filter #(not (nil? (:val %))) (index-2d contents))]
@@ -310,12 +313,12 @@
                      contents*)]))))
        (knot-html-passthrough [loom html]
          (knot-block-item loom
-           (fn [t sub]
+           (fn [sub]
              [(types schema sub "/item/raw_html")
               (->Triple sub "/item/raw_html/contains" html {})])))
        (knot-definition [loom word part-of-speech definitions]
          (knot-block-item loom
-           (fn [t sub]
+           (fn [sub]
              [(types schema sub "/item/definition"),
               (->Triple sub "/item/definition/word" word {}),
               (->Triple sub "/item/definition/part_of_speech" part-of-speech {}),
