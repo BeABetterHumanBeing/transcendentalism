@@ -7,54 +7,59 @@
      'transcendentalism.html
      'transcendentalism.schema)
 
-(defprotocol EssayThread
-  (add-triples [essay-thread new-triples] "Adds some triples to the thread")
-  (essay-triples [essay-thread] "Returns the triples on the thread")
-  (get-essay-sub [essay-thread] "Returns the top-level essay sub")
-  (fork-essay-thread [essay-thread new-sub]
+(defprotocol Loom
+  (add-triples [loom new-triples] "Adds some triples to the thread")
+  (essay-triples [loom] "Returns the triples on the thread")
+  (get-essay-sub [loom] "Returns the top-level essay sub")
+  (fork-loom [loom new-sub]
     "Returns a new essay thread with the same essay sub")
-  (initiate [essay-thread]
+  (initiate [loom]
     "Adds a sub as the initial segment in an essay thread")
-  (push-block [essay-thread] "Adds a new block")
-  (push-inline [essay-thread] "Adds a new inline to the current block")
-  (major-key [essay-thread] "Returns the current major key")
-  (minor-key [essay-thread] "returns the current minor key"))
+  (push-block [loom] "Adds a new block")
+  (push-inline [loom] "Adds a new inline to the current block")
+  (major-key [loom] "Returns the current major key")
+  (minor-key [loom] "returns the current minor key")
+  (knot-root-menu [loom label title]
+    "Marks a given essay as the root of some label")
+  )
 
-(defn create-essay-thread
+(defn create-loom
   ([essay-sub]
-    (let [t (create-essay-thread essay-sub essay-sub)]
+    (let [t (create-loom essay-sub essay-sub)]
       (initiate t)
       t))
   ([essay-sub sub]
    (let [key-gen (create-key-gen sub),
          triples (atom [])]
-     (reify EssayThread
-       (add-triples [essay-thread new-triples]
+     (reify Loom
+       (add-triples [loom new-triples]
          (reset! triples (concat @triples (flatten new-triples)))
          [])
-       (essay-triples [essay-thread]
-        (println "essay-triples" @triples)
-        @triples)
-       (get-essay-sub [essay-thread] essay-sub)
-       (fork-essay-thread [essay-thread new-sub]
-         (create-essay-thread essay-sub new-sub))
-       (initiate [essay-thread]
+       (essay-triples [loom] @triples)
+       (get-essay-sub [loom] essay-sub)
+       (fork-loom [loom new-sub]
+         (create-loom essay-sub new-sub))
+       (initiate [loom]
          (let [prev (prev-major-key key-gen),
                sub (push-major-key key-gen)]
-           (add-triples essay-thread
+           (add-triples loom
              [(->Triple prev "/essay/contains" sub {})])))
-       (push-block [essay-thread]
+       (push-block [loom]
          (let [prev (prev-major-key key-gen),
                sub (push-major-key key-gen)]
-           (add-triples essay-thread
+           (add-triples loom
              [(->Triple prev "/segment/flow/block" sub {})])))
-       (push-inline [essay-thread]
+       (push-inline [loom]
          (let [prev (prev-minor-key key-gen),
                sub (push-minor-key key-gen)]
-           (add-triples essay-thread
+           (add-triples loom
              [(->Triple prev "/segment/flow/inline" sub {})])))
-       (major-key [essay-thread] (prev-major-key key-gen))
-       (minor-key [essay-thread] (prev-minor-key key-gen))))))
+       (major-key [loom] (prev-major-key key-gen))
+       (minor-key [loom] (prev-minor-key key-gen))
+       (knot-root-menu [loom label title]
+         (add-triples loom
+           [(->Triple (get-essay-sub loom) "/essay/flow/menu" label {"/title" title})]))
+       ))))
 
 (defn sub-suffix
   [sub suffix]
@@ -67,11 +72,8 @@
     (sub-suffix (get-essay-sub t) (str "f" num))))
 
 (defn root-menu
-  "Marks a given essay as the root of some label"
   [label title]
-  ^{:no-block true}
-  (fn [t]
-    (->Triple (get-essay-sub t) "/essay/flow/menu" label {"/title" title})))
+  ^{:no-block true} (fn [t] (knot-root-menu t label title)))
 
 (defn file-under
   "Files the given essay under some label"
@@ -81,7 +83,7 @@
 
 (defn essay
   [sub title & fns]
-  (let [t (create-essay-thread sub)]
+  (let [t (create-loom sub)]
     (concat 
       (flatten [
         (types schema sub "/essay")
@@ -111,7 +113,7 @@
   [virtual-sub & fns]
   ^{:no-block true} (fn [t]
     (let [sub (if (fn? virtual-sub) (virtual-sub t) virtual-sub),
-          t (fork-essay-thread t sub)]
+          t (fork-loom t sub)]
       (concat
         (flatten
           (into [] (map #(% t)
@@ -183,7 +185,7 @@
 (defn paragraph
   [& fns]
   (fn [t]
-    (let [t (fork-essay-thread t (major-key t))]
+    (let [t (fork-loom t (major-key t))]
       (concat
         (flatten
           (into []
@@ -258,12 +260,16 @@
   (block-item
     (fn [t sub]
       (let [q-sub (sub-suffix sub "q"),
-            a-sub (sub-suffix sub "a")]
-        [(q (fork-essay-thread t q-sub))
-         (a (fork-essay-thread t a-sub))
+            a-sub (sub-suffix sub "a"),
+            q-loom (fork-loom t q-sub),
+            a-loom (fork-loom t a-sub)]
+        [(q q-loom)
+         (a a-loom)
          (types schema sub "/item/q_and_a")
          (->Triple sub "/item/q_and_a/question" q-sub {})
-         (->Triple sub "/item/q_and_a/answer" a-sub {})]))))
+         (->Triple sub "/item/q_and_a/answer" a-sub {})
+         (essay-triples q-loom)
+         (essay-triples a-loom)]))))
 
 (defn- inner-bullet-list
   [t sub is-ordered header-or-nil & items]
@@ -274,10 +280,14 @@
       (types schema sub "/item/bullet_list")
       (if (nil? header-or-nil)
         []
-        [(header-or-nil (fork-essay-thread t header-sub))
-         (->Triple sub "/item/bullet_list/header" header-sub {})])
+        (let [header-loom (fork-loom t header-sub)]
+          [(header-or-nil header-loom)
+           (->Triple sub "/item/bullet_list/header" header-sub {})
+           (essay-triples header-loom)]))
       [(->Triple sub "/item/bullet_list/is_ordered" is-ordered {})]
-      (map #((first %) (fork-essay-thread t (second %)))
+      (map #(let [item-loom (fork-loom t (second %))]
+              (concat ((first %) item-loom)
+                      (essay-triples item-loom)))
            (map vector items item-subs))
       (map #(->Triple sub "/item/bullet_list/point" (first %)
                       {"/order" (second %)})
@@ -328,10 +338,10 @@
             item (fn [val gen-triple]
                    (if (nil? val)
                      []
-                     (let [t (fork-essay-thread t (sub-suffix sub (gen-key 5)))]
+                     (let [t (fork-loom t (sub-suffix sub (gen-key 5)))]
                        (conj (if (string? val)
                                  ((text val) t)
-                                 (val t))
+                                 (concat (val t) (essay-triples t)))
                              (gen-triple (minor-key t)))))),
             rows* (filter #(not (nil? (:val %))) (index-1d rows)),
             columns* (filter #(not (nil? (:val %))) (index-1d columns)),

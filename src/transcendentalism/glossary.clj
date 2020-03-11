@@ -88,7 +88,7 @@
         (->Triple (item-sub k) "/item/inline/definition" sub {})]))))
 
 (def glossary-definitions
-  (let [t (create-essay-thread :glossary)]
+  (let [t (create-loom :glossary)]
     (reduce-kv
       (fn [result k v]
         (concat result
