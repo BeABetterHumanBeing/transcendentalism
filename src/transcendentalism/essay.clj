@@ -3,13 +3,11 @@
     [clojure.string :as str]))
 
 (use 'transcendentalism.encoding
+     'transcendentalism.glossary
      'transcendentalism.graph
      'transcendentalism.html
+     'transcendentalism.loom
      'transcendentalism.schema)
-
-(defn sub-suffix
-  [sub suffix]
-  (keyword (str (name sub) "-" suffix)))
 
 (defn item-sub [sub] (sub-suffix sub "i"))
 
@@ -23,52 +21,9 @@
     (= (count bindings) 0) `(do ~@body)
     (symbol? (bindings 0)) `(let [~(bindings 0) (fork-loom ~loom ~(bindings 1))]
                               (with-fork ~loom ~(subvec bindings 2) ~@body)
-                              (add-triples ~loom (essay-triples ~(bindings 0)))
-                              )
+                              (add-triples ~loom (essay-triples ~(bindings 0))))
     :else (throw (IllegalArgumentException.
                    "with-fork only allows Symbols in bindings"))))
-
-(defprotocol Loom
-  (add-triples [loom new-triples] "Adds some triples to the thread")
-  (essay-triples [loom] "Returns the triples on the thread")
-  (get-essay-sub [loom] "Returns the top-level essay sub")
-  (fork-loom [loom new-sub]
-    "Returns a new essay thread with the same essay sub")
-  (initiate [loom]
-    "Adds a sub as the initial segment in an essay thread")
-  (push-block [loom] "Adds a new block")
-  (push-inline [loom] "Adds a new inline to the current block")
-  (major-key [loom] "Returns the current major key")
-  (minor-key [loom] "returns the current minor key")
-  (knot-essay [loom sub title fns])
-  (knot-root-menu [loom label title]
-    "Marks a given essay as the root of some label")
-  (knot-file-under [loom label] "Files the given essay under some label")
-  (knot-add-home [loom sub])
-  (knot-footnote [loom virtual-sub fns])
-  (knot-paragraph [loom fns])
-  (knot-text [loom lines])
-  (knot-tangent [loom virtual-sub lines])
-  (knot-see-also [loom essay-sub lines])
-  (knot-link [loom url lines])
-  (knot-credit [loom whom f]
-    "Adds /credit property to all /item/segments produced by some function")
-  (knot-block-item [loom f]
-    "Given a function that takes a sub and produces triples, adds the necessary
-     triples to make it a block item")
-  (knot-poem [loom lines])
-  (knot-image [loom url alt-text width height])
-  (knot-quote [loom q author])
-  (knot-big-emoji [loom emoji])
-  (knot-q-and-a [loom q a])
-  (knot-list [loom is-ordered header-or-nil items])
-  (knot-contact-email [loom email-address])
-  (knot-thesis [loom line])
-  (knot-matrix [loom rows columns contents])
-  (knot-html-passthrough [loom html]
-    "Takes some HTML, and passes it straight-through, effectively by-passing the
-     schema layer. This should only be used for bespoke content.")
-  (knot-definition [loom word part-of-speech definitions]))
 
 (defn create-loom
   ([essay-sub]
@@ -83,9 +38,7 @@
          (if (instance? transcendentalism.graph.Triple new-triples)
            (reset! triples (conj @triples new-triples))
            (reset! triples (concat @triples (flatten new-triples))))
-         ; TODO - change the below to nil, ensuring that it isn't being passed
-         ; into triples anywhere. There are currently 12 exceptions.
-         [])
+         nil)
        (essay-triples [loom] @triples)
        (get-essay-sub [loom] essay-sub)
        (fork-loom [loom new-sub]
@@ -167,19 +120,26 @@
        (knot-tangent [loom virtual-sub lines]
          (let [sub (if (fn? virtual-sub) (virtual-sub loom) virtual-sub),
                k (minor-key loom)]
+           (knot-text loom lines)
            (add-triples loom
-             [(knot-text loom lines)
-              (->Triple (item-sub k) "/item/inline/tangent" sub {})])))
+             (->Triple (item-sub k) "/item/inline/tangent" sub {}))))
        (knot-see-also [loom essay-sub lines]
          (let [k (minor-key loom)]
+           (knot-text loom lines)
            (add-triples loom
-             [(knot-text loom lines)
-              (->Triple (item-sub k) "/item/inline/see_also" essay-sub {})])))
+             (->Triple (item-sub k) "/item/inline/see_also" essay-sub {}))))
        (knot-link [loom url lines]
          (let [k (minor-key loom)]
+           (knot-text loom lines)
            (add-triples loom
-             [(knot-text loom lines)
-              (->Triple (item-sub k) "/item/inline/url" url {})])))
+             (->Triple (item-sub k) "/item/inline/url" url {}))))
+       (knot-inline-definition [loom word word-as-written]
+         (let [word-data (glossary word),
+               sub (glossary-sub word),
+               k (minor-key loom)]
+           (knot-text loom [word-as-written])
+           (add-triples loom
+             (->Triple (item-sub k) "/item/inline/definition" sub {}))))
        (knot-credit [loom whom f]
          ; TODO - BUG - Since functions are no longer returning triples, they
          ; will not have the appropriate credit added. Will have to add "author"
@@ -466,3 +426,18 @@
 (defn add-home
   [sub]
   ^{:no-block true} (fn [t] (knot-add-home t sub)))
+
+(defn glossary-essay
+  []
+  (essay :glossary "Glossary"
+    (text "TODO - block-define all words alphabetically here")
+
+    ^{:no-block true} (fn [t]
+    (reduce-kv
+      (fn [result k v]
+        (concat result
+                ((footnote (glossary-sub k)
+                   (apply definition k (:pos v) (:defs v))) t)))
+      [] glossary))
+    (add-home :monad)
+    ))

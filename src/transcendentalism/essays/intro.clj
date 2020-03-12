@@ -4,6 +4,7 @@
 (use 'transcendentalism.essay
      'transcendentalism.graph
      'transcendentalism.html
+     'transcendentalism.loom
      'transcendentalism.svg)
 
 ; The monad

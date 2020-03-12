@@ -5,6 +5,7 @@
 
 (use 'transcendentalism.essay
      'transcendentalism.graph
+     'transcendentalism.loom
      'transcendentalism.schema)
 
 (defn apply-directives
