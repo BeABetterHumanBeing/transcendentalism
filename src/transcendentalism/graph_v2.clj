@@ -3,9 +3,9 @@
             [clojure.string :as str]))
 
 (defrecord V [v])
-(defrecord PV [p-vs])
+(defrecord PV [p-vs]) ; TODO remove as optimization
 (defrecord OPV [o pv])
-(defrecord POPV [p-opvs])
+(defrecord POPV [p-opvs]) ; TODO remove as optimization
 (defrecord SPOPV [s popv])
 (defrecord G [s-popvs t-ss])
 
@@ -15,7 +15,9 @@
     (fn [result pv]
       (reduce-kv
         (fn [result p vs]
-          (assoc result p (set/union (result p #{}) vs)))
+          (if (empty? vs)
+              result
+              (assoc result p (set/union (result p #{}) vs))))
         result (:p-vs pv)))
     {} pvs))
 
@@ -25,7 +27,9 @@
     (fn [result popv]
       (reduce-kv
         (fn [result p opvs]
-          (assoc result p (set/union (result p #{}) opvs)))
+          (if (empty? opvs)
+              result
+              (assoc result p (set/union (result p #{}) opvs))))
         result (:p-opvs popv)))
     {} popvs))
 
@@ -69,8 +73,9 @@
     (get-sub [node] (:s spopv))
     (get-types [node]
       (into #{} (filter #(str/starts-with? % "/type") (get-preds node))))
-    (get-preds [node] (keys (:popv spopv)))
-    (get-triples [node pred] (map create-triple ((:popv spopv) pred #{})))
+    (get-preds [node] (into #{} (keys (:p-opvs (:popv spopv)))))
+    (get-triples [node pred]
+      (into #{} (map create-triple ((:p-opvs (:popv spopv)) pred #{}))))
     (to-spopv [node] spopv)))
 
 (defn create-graph
@@ -81,9 +86,9 @@
       (let [popv ((:s-popvs g) sub nil)]
         (if (nil? popv)
             nil
-            (create-node (->SPOPV sub (->POPV popv))))))
+            (create-node (->SPOPV sub popv)))))
     (get-nodes [graph type]
-      (into #{} (map #(create-node (->SPOPV % (->POPV ((:s-popvs g) %))))
+      (into #{} (map #(create-node (->SPOPV % ((:s-popvs g) %)))
                      ((:t-ss g) type #{}))))
     (has-type? [graph sub type] (contains? ((:t-ss g) type #{}) sub))))
 
@@ -122,7 +127,8 @@
       (build-triple [builder obj]
         (reset! my-triples
           (conj @my-triples
-            (->OPV obj (apply merge-pvs (map get-built-properties @my-property-builders))))))
+            (->OPV obj (->PV (apply merge-pvs
+                                    (map get-built-properties @my-property-builders)))))))
       (get-built-triples [builder] (->POPV {pred @my-triples})))))
 
 (defn- create-node-builder
@@ -138,8 +144,9 @@
       (build-node [builder sub]
         (reset! my-nodes
           (conj @my-nodes
-            (->SPOPV sub (apply merge-popvs (->POPV {full-type #{}})
-                                            (map get-built-triples @my-triple-builders))))))
+            (->SPOPV sub (->POPV (apply merge-popvs
+                                        (->POPV {full-type #{nil}})
+                                        (map get-built-triples @my-triple-builders)))))))
       (get-built-nodes [builder] @my-nodes))))
 
 (defn- assoc-all
