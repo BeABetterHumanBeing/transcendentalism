@@ -24,9 +24,9 @@
     (build-node type-a-builder :a2)
     (build-node type-b-builder :b1)
     (let [graph (create-graph (get-built-graph graph-builder)),
-          expected-a1 (->SPOPV :a1 (->POPV {"/type/a" #{nil}})),
-          expected-a2 (->SPOPV :a2 (->POPV {"/type/a" #{nil}})),
-          expected-b1 (->SPOPV :b1 (->POPV {"/type/b" #{nil}}))]
+          expected-a1 (->SPOPV :a1 {"/type/a" #{nil}}),
+          expected-a2 (->SPOPV :a2 {"/type/a" #{nil}}),
+          expected-b1 (->SPOPV :b1 {"/type/b" #{nil}})]
       (testing "Test graph with only nodes"
         (is (= #{"/type/a", "/type/b"} (get-all-types graph)))
         (is (= expected-a1 (to-spopv (get-node graph :a1))))
@@ -54,15 +54,15 @@
     (build-triple pred-bar-builder "bar1")
     (build-node type-a-builder :a3) ; Has three predicates.
     (let [graph (create-graph (get-built-graph graph-builder)),
-          expected-foo1 (->OPV "foo1" (->PV {})),
-          expected-foo2 (->OPV "foo2" (->PV {})),
-          expected-bar1 (->OPV "bar1" (->PV {})),
-          expected-a1 (->SPOPV :a1 (->POPV {"/type/a" #{nil}})),
-          expected-a2 (->SPOPV :a2 (->POPV {"/type/a" #{nil},
-                                            "/foo" #{expected-foo1}})),
-          expected-a3 (->SPOPV :a3 (->POPV {"/type/a" #{nil},
-                                            "/foo" #{expected-foo1 expected-foo2},
-                                            "/bar" #{expected-bar1}})),
+          expected-foo1 (->OPV "foo1" {}),
+          expected-foo2 (->OPV "foo2" {}),
+          expected-bar1 (->OPV "bar1" {}),
+          expected-a1 (->SPOPV :a1 {"/type/a" #{nil}}),
+          expected-a2 (->SPOPV :a2 {"/type/a" #{nil},
+                                    "/foo" #{expected-foo1}}),
+          expected-a3 (->SPOPV :a3 {"/type/a" #{nil},
+                                    "/foo" #{expected-foo1 expected-foo2},
+                                    "/bar" #{expected-bar1}}),
           node-a1 (get-node graph :a1),
           node-a2 (get-node graph :a2),
           node-a3 (get-node graph :a3)]

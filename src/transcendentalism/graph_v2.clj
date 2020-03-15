@@ -3,35 +3,49 @@
             [clojure.string :as str]))
 
 (defrecord V [v])
-(defrecord PV [p-vs]) ; TODO remove as optimization
-(defrecord OPV [o pv])
-(defrecord POPV [p-opvs]) ; TODO remove as optimization
-(defrecord SPOPV [s popv])
+(defrecord OPV [o p-vs])
+(defrecord SPOPV [s p-opvs])
 (defrecord G [s-popvs t-ss])
+
+(defmacro reduce-all
+  "bingings => [inner-binding ...]
+   inner-binding => [name coll]
+                 => [name1 name2 map]
+
+   Creates a nested tower of reductions, using reduce if inner-binding has two
+   values, or reduce-kv if it has three. The same accumulator is passed through
+   the entire tower."
+  [result initial-value bindings & body]
+  (cond
+    (= (count bindings) 0) `(do ~@body)
+    (= (count (bindings 0)) 2) `(reduce
+                                  (fn [~result ~((bindings 0) 0)]
+                                    (reduce-all ~result ~result ~(subvec bindings 1) ~@body))
+                                  ~initial-value ~((bindings 0) 1))
+    (= (count (bindings 0)) 3) `(reduce-kv
+                                  (fn [~result ~((bindings 0) 0) ~((bindings 0) 1)]
+                                    (reduce-all ~result ~result ~(subvec bindings 1) ~@body))
+                                  ~initial-value ~((bindings 0) 2))
+    :else (throw (IllegalArgumentException.
+                   "reduce-all only does reduce or reduce-kv"))))
 
 (defn- merge-pvs
   [& pvs]
-  (reduce
-    (fn [result pv]
-      (reduce-kv
-        (fn [result p vs]
-          (if (empty? vs)
-              result
-              (assoc result p (set/union (result p #{}) vs))))
-        result (:p-vs pv)))
-    {} pvs))
+  (reduce-all result {}
+              [[pv pvs]
+               [p vs pv]]
+    (if (empty? vs)
+        result
+        (assoc result p (set/union (result p #{}) vs)))))
 
 (defn- merge-popvs
   [& popvs]
-  (reduce
-    (fn [result popv]
-      (reduce-kv
-        (fn [result p opvs]
-          (if (empty? opvs)
-              result
-              (assoc result p (set/union (result p #{}) opvs))))
-        result (:p-opvs popv)))
-    {} popvs))
+  (reduce-all result {}
+              [[popv popvs]
+               [p opvs popv]]
+    (if (empty? opvs)
+        result
+        (assoc result p (set/union (result p #{}) opvs)))))
 
 (defprotocol Property
   (get-val [property])
@@ -63,8 +77,8 @@
   [opv]
   (reify Triple
     (get-obj [triple] (:o opv))
-    (get-props [triple] (keys (:pv opv)))
-    (get-properties [triple prop] (map create-property ((:pv opv) prop #{})))
+    (get-props [triple] (keys (:p-vs opv)))
+    (get-properties [triple prop] (map create-property ((:p-vs opv) prop #{})))
     (to-opv [triple] opv)))
 
 (defn create-node
@@ -73,9 +87,9 @@
     (get-sub [node] (:s spopv))
     (get-types [node]
       (into #{} (filter #(str/starts-with? % "/type") (get-preds node))))
-    (get-preds [node] (into #{} (keys (:p-opvs (:popv spopv)))))
+    (get-preds [node] (into #{} (keys (:p-opvs spopv))))
     (get-triples [node pred]
-      (into #{} (map create-triple ((:p-opvs (:popv spopv)) pred #{}))))
+      (into #{} (map create-triple ((:p-opvs spopv) pred #{}))))
     (to-spopv [node] spopv)))
 
 (defn create-graph
@@ -113,7 +127,7 @@
     (reify PropertyBuilder
       (build-property [builder val]
         (reset! my-properties (conj @my-properties (-> V val))))
-      (get-built-properties [builder] (->PV {prop @my-properties})))))
+      (get-built-properties [builder] {prop @my-properties}))))
 
 (defn- create-triple-builder
   [pred]
@@ -127,9 +141,9 @@
       (build-triple [builder obj]
         (reset! my-triples
           (conj @my-triples
-            (->OPV obj (->PV (apply merge-pvs
-                                    (map get-built-properties @my-property-builders)))))))
-      (get-built-triples [builder] (->POPV {pred @my-triples})))))
+            (->OPV obj (apply merge-pvs
+                              (map get-built-properties @my-property-builders))))))
+      (get-built-triples [builder] {pred @my-triples}))))
 
 (defn- create-node-builder
   [type]
@@ -144,9 +158,9 @@
       (build-node [builder sub]
         (reset! my-nodes
           (conj @my-nodes
-            (->SPOPV sub (->POPV (apply merge-popvs
-                                        (->POPV {full-type #{nil}})
-                                        (map get-built-triples @my-triple-builders)))))))
+            (->SPOPV sub (apply merge-popvs
+                                {full-type #{nil}}
+                                (map get-built-triples @my-triple-builders))))))
       (get-built-nodes [builder] @my-nodes))))
 
 (defn- assoc-all
@@ -170,7 +184,7 @@
         (let [spopvs (apply set/union (map get-built-nodes @my-node-builders)),
               s-popvs (reduce
                         (fn [result spopv]
-                          (assoc result (:s spopv) (:popv spopv)))
+                          (assoc result (:s spopv) (:p-opvs spopv)))
                         {} spopvs)
               t-ss (reduce
                      (fn [result spopv]
