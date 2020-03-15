@@ -6,8 +6,7 @@
 (defrecord OPV [o pv])
 (defrecord POPV [p-opvs])
 (defrecord SPOPV [s popv])
-(defrecord TSPOPV [t-spopvs])
-(defrecord GTSPOPV [g tspopv])
+(defrecord G [s-popvs t-ss])
 
 (defprotocol Property
   (get-val [property]))
@@ -20,9 +19,10 @@
   (get-preds [node])
   (get-triples [node pred]))
 (defprotocol Graph
-  (get-name [graph])
   (get-types [graph])
-  (get-nodes [graph type]))
+  (get-node [graph node])
+  (get-nodes [graph type])
+  (has-type? [graph node type]))
 
 (defn create-property
   [v]
@@ -44,10 +44,12 @@
     (get-triples [node pred] (map create-triple ((:popv spopv) pred #{})))))
 
 (defn create-graph
-  [gtspopv]
+  [g]
   (reify Graph
-    (get-name [graph] (:g gtspopv))
-    (get-types [graph] (keys (:tspopv gtspopv)))
-    (get-nodes [graph type] (map create-node ((:tspopv gtspopv) type #{})))))
+    (get-types [graph] (keys (:t-ss g)))
+    (get-node [graph node] (create-node (->SPOPV node ((:s-popvs g) node))))
+    (get-nodes [graph type] (map #(create-node (->SPOPV % ((:s-popvs g) %)))
+                                 ((:t-ss g) type #{})))
+    (has-type? [graph node type] (contains? ((:t-ss g) type #{}) node))))
 
 ; TODO - will need functions to gracefully merge and prune trees

@@ -1,7 +1,8 @@
 (ns transcendentalism.constraint-v2
   (:require [clojure.set :as set]))
 
-(use 'transcendentalism.graph-v2)
+(use 'transcendentalism.graph-v2
+     'transcendentalism.time)
 
 (defprotocol Constraint
   (validate [constraint graph data]))
@@ -55,9 +56,7 @@
              (is-valid-time data))
         (and (string? range-type)
              allow-nodes
-             (has-type? graph
-                        (if (vector? data) (first data) data)
-                        range-type))
+             (has-type? graph data range-type))
         (and (vector? range-type)
              (not (nil? (some #(= data %) range-type))))))))
 
@@ -76,7 +75,7 @@
       (let [child-count (count ((get-children level) data tpp))]
         (if (> child-count 1)
             #{(str tpp " is unique, but found " child-count)}
-            #{}))))
+            #{})))))
 
 (defn- exclusive-constraint
   [tpp level exclusions]
@@ -97,8 +96,8 @@
         (if (nil? constraint)
           result
           (conj result constraint))))
-    (prop-schema :constraints [])
-    prop-schema))
+    (schema :constraints [])
+    schema))
 
 (defn- meta-constraints-from-schema
   "f takes three args: the child's key, and the key and value from child schema"
@@ -177,7 +176,7 @@
               :unique (if %3 (unique-constraint %1 :node) nil)
               :exclusive (if (empty? %3) nil (exclusive-constraint %1 :node %3))
               nil)),
-        node-constraints (constraints-from-schema type-schema #(nil))]
+        node-constraints (constraints-from-schema type-schema (fn [_ _] nil))]
     (reify Constraint
       (validate [constraint graph node]
         (set/union
@@ -190,8 +189,8 @@
   (let [type-constraints
           (child-constraints graph-schema :graph create-node-constraints),
         type-meta-constraints
-          (meta-constraints-from-schema graph-schema :graph #(nil)),
-        graph-constraints (constraints-from-schema graph-schema #(nil))]
+          (meta-constraints-from-schema graph-schema :graph (fn [_ _ _] nil)),
+        graph-constraints (constraints-from-schema graph-schema (fn [_ _] nil))]
     (reify Constraint
       (validate [constraint _ graph]
         (set/union
