@@ -30,7 +30,7 @@
   (case level
     :triple get-props
     :node get-preds
-    :graph get-types
+    :graph get-all-types
     nil))
 
 (defn- get-children

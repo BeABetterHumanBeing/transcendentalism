@@ -11,31 +11,40 @@
 
 (defn- merge-pvs
   [& pvs]
-  (reduce-kv
-    (fn [result p vs]
-      (assoc result p (set/union (result p #{}) vs)))
+  (reduce
+    (fn [result pv]
+      (reduce-kv
+        (fn [result p vs]
+          (assoc result p (set/union (result p #{}) vs)))
+        result (:p-vs pv)))
     {} pvs))
 
 (defn- merge-popvs
   [& popvs]
-  (reduce-kv
-    (fn [result p opvs]
-      (assoc result p (set/union (result p #{}) opvs)))
+  (reduce
+    (fn [result popv]
+      (reduce-kv
+        (fn [result p opvs]
+          (assoc result p (set/union (result p #{}) opvs)))
+        result (:p-opvs popv)))
     {} popvs))
 
 (defprotocol Property
-  (get-val [property]))
+  (get-val [property])
+  (to-v [property]))
 (defprotocol Triple
   (get-obj [triple])
   (get-props [triple])
-  (get-properties [triple prop]))
+  (get-properties [triple prop])
+  (to-opv [triple]))
 (defprotocol Node
   (get-sub [node])
   (get-types [node])
   (get-preds [node])
-  (get-triples [node pred]))
+  (get-triples [node pred])
+  (to-spopv [node]))
 (defprotocol Graph
-  (get-types [graph])
+  (get-all-types [graph])
   (get-node [graph node])
   (get-nodes [graph type])
   (has-type? [graph node type]))
@@ -43,30 +52,39 @@
 (defn create-property
   [v]
   (reify Property
-    (get-val [property] (:v v))))
+    (get-val [property] (:v v))
+    (to-v [property] v)))
 
 (defn create-triple
   [opv]
   (reify Triple
     (get-obj [triple] (:o opv))
     (get-props [triple] (keys (:pv opv)))
-    (get-properties [triple prop] (map create-property ((:pv opv) prop #{})))))
+    (get-properties [triple prop] (map create-property ((:pv opv) prop #{})))
+    (to-opv [triple] opv)))
 
 (defn create-node
   [spopv]
   (reify Node
     (get-sub [node] (:s spopv))
-    (get-types [node] (filter #(str/starts-with? % "/type") (get-preds node)))
+    (get-types [node]
+      (into #{} (filter #(str/starts-with? % "/type") (get-preds node))))
     (get-preds [node] (keys (:popv spopv)))
-    (get-triples [node pred] (map create-triple ((:popv spopv) pred #{})))))
+    (get-triples [node pred] (map create-triple ((:popv spopv) pred #{})))
+    (to-spopv [node] spopv)))
 
 (defn create-graph
   [g]
   (reify Graph
-    (get-types [graph] (keys (:t-ss g)))
-    (get-node [graph sub] (create-node (->SPOPV sub ((:s-popvs g) sub))))
-    (get-nodes [graph type] (map #(create-node (->SPOPV % ((:s-popvs g) %)))
-                                 ((:t-ss g) type #{})))
+    (get-all-types [graph] (into #{} (keys (:t-ss g))))
+    (get-node [graph sub]
+      (let [popv ((:s-popvs g) sub nil)]
+        (if (nil? popv)
+            nil
+            (create-node (->SPOPV sub (->POPV popv))))))
+    (get-nodes [graph type]
+      (into #{} (map #(create-node (->SPOPV % (->POPV ((:s-popvs g) %))))
+                     ((:t-ss g) type #{}))))
     (has-type? [graph sub type] (contains? ((:t-ss g) type #{}) sub))))
 
 (defprotocol GraphBuilder
@@ -109,7 +127,8 @@
 
 (defn- create-node-builder
   [type]
-  (let [my-nodes (atom #{}),
+  (let [full-type (str "/type" type),
+        my-nodes (atom #{}),
         my-triple-builders (atom [])]
     (reify NodeBuilder
       (get-triple-builder [builder pred]
@@ -119,7 +138,7 @@
       (build-node [builder sub]
         (reset! my-nodes
           (conj @my-nodes
-            (->SPOPV sub (apply merge-popvs (->POPV {type nil})
+            (->SPOPV sub (apply merge-popvs (->POPV {full-type #{}})
                                             (map get-built-triples @my-triple-builders))))))
       (get-built-nodes [builder] @my-nodes))))
 
@@ -127,9 +146,10 @@
   ([my-map my-val]
     my-map)
   ([my-map my-val & my-keys]
-    (assoc-all (let [first-key (first my-keys)]
-                 (assoc my-map first-key (conj (my-map first-key #{}) my-val)))
-               my-val (rest my-keys))))
+    (apply assoc-all
+      (let [first-key (first my-keys)]
+        (assoc my-map first-key (conj (my-map first-key #{}) my-val)))
+      my-val (rest my-keys))))
 
 (defn create-graph-builder
   []

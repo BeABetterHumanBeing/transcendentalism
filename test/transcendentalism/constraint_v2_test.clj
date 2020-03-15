@@ -131,5 +131,7 @@
 (def graph-constraints (create-graph-constraints test-schema))
 
 (deftest empty-graph-test
-  (testing "Validate empty graph"
-    (is (= #{} (validate graph-constraints nil (create-graph (->G {} {})))))))
+  (let [graph-builder (create-graph-builder)]
+    (testing "Validate empty graph"
+      (is (= #{} (validate graph-constraints nil
+                           (create-graph (get-built-graph graph-builder))))))))
