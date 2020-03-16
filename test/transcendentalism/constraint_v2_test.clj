@@ -213,9 +213,9 @@
         person-builder (get-node-builder graph-builder "/person"),
         place-builder (get-node-builder graph-builder "/place"),
         thing-builder (get-node-builder graph-builder "/thing")]
-    (build-node person-builder :ms-peacock)
-    (build-node place-builder :library)
-    (build-node thing-builder :candlestick)
+    (build-node person-builder :ms-peacock) ; Requires triples
+    (build-node place-builder :library) ; Requires triples
+    (build-node thing-builder :candlestick) ; Requires triples
     (testing "Validate required triples"
       (is (= #{"/name is required" "/texture is required" "/coords is required"
                "/birthday is required" "/location is required"}
@@ -236,16 +236,16 @@
     (build-triple name-builder "Ms Peacock")
     (build-triple name-builder "Jacqueline")
     (build-triple parent-builder :ms-peacock)
-    (build-triple parent-builder :ms-peacock)
+    (build-triple parent-builder :ms-peacock) ; TODO - this should trigger acyclic validation check.
     (build-triple birthday-builder (get-hours-ago 20))
-    (build-triple birthday-builder (get-hours-ago 200))
+    (build-triple birthday-builder (get-hours-ago 200)) ; Violates uniqueness
     (build-triple location-builder :library)
-    (build-triple location-builder :library)
+    (build-triple location-builder :ballroom) ; Violates uniqueness, range-type
     (build-triple favorite-thing-builder :candlestick)
-    (build-triple favorite-thing-builder :candlestick)
+    (build-triple favorite-thing-builder :rope) ; Violates uniqueness, range-type
     (build-node person-builder :ms-peacock)
     (build-triple coords-builder "coords-A")
-    (build-triple coords-builder "coords-B")
+    (build-triple coords-builder "coords-B") ; Violates uniqueness
     (build-node place-builder :library)
     (build-triple texture-builder :hard)
     (build-triple texture-builder :soft)
@@ -254,5 +254,61 @@
       (is (= #{"/birthday is unique, but found 2"
                "/texture is unique, but found 2"
                "/coords is unique, but found 2"
+               "/location is unique, but found 2"
+               ":rope does not match range type /type/thing"
+               ":ballroom does not match range type /type/place"
                "/lng is required" "/order is required" "/lat is required"}
+             (do-validate graph-builder))))))
+
+(deftest unique-property-and-range-type-test
+  (let [graph-builder (create-graph-builder),
+        person-builder (get-node-builder graph-builder "/person"),
+        name-builder (get-triple-builder person-builder "/name"),
+        parent-builder (get-triple-builder person-builder "/parent"),
+        birthday-builder (get-triple-builder person-builder "/birthday"),
+        location-builder (get-triple-builder person-builder "/location"),
+        favorite-thing-builder (get-triple-builder person-builder "/favorite_thing"),
+        order-builder (get-property-builder favorite-thing-builder "/order"),
+        place-builder (get-node-builder graph-builder "/place"),
+        coords-builder (get-triple-builder place-builder "/coords"),
+        lat-builder (get-property-builder coords-builder "/lat"),
+        lng-builder (get-property-builder coords-builder "/lng"),
+        thing-builder (get-node-builder graph-builder "/thing"),
+        texture-builder (get-triple-builder thing-builder "/texture"),
+        hardness-builder (get-property-builder texture-builder "/kind_of_hardness"),
+        softness-builder (get-property-builder texture-builder "/kind_of_softness")]
+    (build-triple name-builder 0x2323) ; Not a string
+    (build-triple parent-builder :ms-peacock)
+    (build-triple birthday-builder "200 hours ago") ; Not a time
+    (build-triple location-builder :candlestick) ; Not a place
+    (build-property order-builder "not-a-number")
+    (build-property order-builder "not-another-number") ; Violates uniqueness
+    (build-triple favorite-thing-builder :library) ; Not a thing
+    (build-node person-builder :ms-peacock)
+    (build-property lat-builder :not-a-number)
+    (build-property lat-builder :not-another-number) ; Violates uniqueness
+    (build-property lng-builder "not-a-number")
+    (build-property lng-builder "not-another-number") ; Violates uniqueness
+    (build-triple coords-builder "coords-A")
+    (build-node place-builder :library)
+    (build-property hardness-builder :stony) ; Not a valid enum value
+    (build-property hardness-builder :stonier) ; Violates uniqueness
+    (build-triple texture-builder :hard-and-soft) ; Not a valid enum value
+    (build-node thing-builder :candlestick)
+    (testing "Validate unique predicates, and range types"
+      (is (= #{"/order is unique, but found 2"
+               "/lat is unique, but found 2"
+               "/lng is unique, but found 2"
+               "/kind_of_hardness is unique, but found 2"
+               ":not-a-number does not match range type :number"
+               ":not-another-number does not match range type :number"
+               "not-a-number does not match range type :number"
+               "not-another-number does not match range type :number"
+               ":hard-and-soft does not match range type [:hard :soft]"
+               ":library does not match range type /type/thing"
+               ":candlestick does not match range type /type/place"
+               ":stony does not match range type [:pointy :rocky :steely]"
+               "8995 does not match range type :string"
+               ":stonier does not match range type [:pointy :rocky :steely]"
+               "200 hours ago does not match range type :time"}
              (do-validate graph-builder))))))

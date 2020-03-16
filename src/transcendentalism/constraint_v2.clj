@@ -90,13 +90,15 @@
   [tpp level exclusions]
   (reify Constraint
     (validate [constraint graph data]
-      (let [overlap (set/intersection exclusions
-                                      (into #{} ((get-child-keys level) data)))]
-      (if (empty? overlap)
+      (if (empty? ((get-children level) data tpp))
           #{}
-          #{(str tpp " excludes " exclusions ", but found " overlap)})))))
+          (let [overlap (set/intersection exclusions
+                                          (into #{} ((get-child-keys level) data)))]
+          (if (empty? overlap)
+              #{}
+              #{(str tpp " excludes " exclusions ", but found " overlap)}))))))
 
-(defn- constraints-from-schema
+(defn- builtin-constraints-from-schema
   "f takes two args: the key and value from schema"
   [schema f]
   (reduce-kv
@@ -105,22 +107,30 @@
         (if (nil? constraint)
           result
           (conj result constraint))))
-    (schema :constraints [])
-    schema))
+    [] schema))
 
-(defn- meta-constraints-from-schema
+(defn- custom-constraints-from-schema
+  "f takes two args: the key and value from schema"
+  [schema]
+  (schema :constraints []))
+
+(defn- builtin-meta-constraints-from-schema
   "f takes three args: the child's key, and the key and value from child schema"
   [schema level f]
+  (reduce-all result []
+              [[prop child-schema (schema (child-keyword level) {})]
+               [k v child-schema]]
+    (let [constraint (f prop k v)]
+      (if (nil? constraint)
+          result
+          (conj result constraint)))))
+
+(defn- custom-meta-constraints-from-schema
+  "f takes three args: the child's key, and the key and value from child schema"
+  [schema level]
   (reduce-kv
-    (fn [result prop child-schema]
-      (reduce-kv
-        (fn [result k v]
-          (let [constraint (f prop k v)]
-            (if (nil? constraint)
-                result
-                (conj result constraint))))
-        (concat result (child-schema :meta-constraints []))
-        child-schema))
+    (fn [result _ child-schema]
+      (concat result (child-schema :meta-constraints [])))
     [] (schema (child-keyword level) {})))
 
 (defn- child-constraints
@@ -144,65 +154,97 @@
 
 (defn- create-property-constraints
   [prop-schema]
-  (let [constraints (constraints-from-schema prop-schema
-                      #(case %1
-                        :range-type (range-type-constraint :property %2 false)
-                        nil))]
+  (let [builtin-constraints
+         (builtin-constraints-from-schema prop-schema
+           #(case %1
+             :range-type (range-type-constraint :property %2 false)
+             nil)),
+        custom-constraints (custom-constraints-from-schema prop-schema)]
     (reify Constraint
       (validate [constraint graph property]
-        (apply and-constraint graph property constraints)))))
+        (let [builtin-checks
+                (apply and-constraint graph property builtin-constraints)]
+          (if (empty? builtin-checks)
+              (apply and-constraint graph property custom-constraints)
+              builtin-checks))))))
 
 (defn- create-triple-constraints
   [pred-schema]
   (let [prop-constraints
           (child-constraints pred-schema :triple create-property-constraints),
-        prop-meta-constraints
-          (meta-constraints-from-schema pred-schema :triple
+        builtin-prop-meta-constraints
+          (builtin-meta-constraints-from-schema pred-schema :triple
             #(case %2
               :required (if %3 (required-constraint %1 :triple) nil)
               :unique (if %3 (unique-constraint %1 :triple) nil)
               :exclusive (if (empty? %3) nil (exclusive-constraint %1 :triple %3))
               nil)),
-        triple-constraints (constraints-from-schema pred-schema
-                             #(case %1
-                               :range-type (range-type-constraint :triple %2 true)
-                               nil))]
+        builtin-triple-constraints
+          (builtin-constraints-from-schema pred-schema
+             #(case %1
+               :range-type (range-type-constraint :triple %2 true)
+               nil)),
+        custom-prop-meta-constraints
+          (custom-meta-constraints-from-schema pred-schema :triple),
+        custom-triple-constraints (custom-constraints-from-schema pred-schema)]
     (reify Constraint
       (validate [constraint graph triple]
-        (set/union
-          (check-child-constraints graph triple :triple prop-constraints)
-          (apply set/union (map #(validate % graph triple) prop-meta-constraints))
-          (apply and-constraint graph triple triple-constraints))))))
+        (let [builtin-checks
+               (set/union
+                 (check-child-constraints graph triple :triple prop-constraints)
+                 (apply set/union (map #(validate % graph triple)
+                                       builtin-prop-meta-constraints))
+                 (apply and-constraint graph triple builtin-triple-constraints))]
+          (if (empty? builtin-checks)
+              (set/union
+                (check-child-constraints graph triple :triple prop-constraints)
+                (apply set/union (map #(validate % graph triple)
+                                      custom-prop-meta-constraints))
+                (apply and-constraint graph triple custom-triple-constraints))
+              builtin-checks))))))
 
 (defn- create-node-constraints
   [type-schema]
   (let [pred-constraints
           (child-constraints type-schema :node create-triple-constraints),
-        pred-meta-constraints
-          (meta-constraints-from-schema type-schema :node
+        builtin-pred-meta-constraints
+          (builtin-meta-constraints-from-schema type-schema :node
             #(case %2
               :required (if %3 (required-constraint %1 :node) nil)
               :unique (if %3 (unique-constraint %1 :node) nil)
               :exclusive (if (empty? %3) nil (exclusive-constraint %1 :node %3))
               nil)),
-        node-constraints (constraints-from-schema type-schema (fn [_ _] nil))]
+        custom-pred-meta-constraints
+          (custom-meta-constraints-from-schema type-schema :node),
+        custom-node-constraints (custom-constraints-from-schema type-schema)]
     (reify Constraint
       (validate [constraint graph node]
-        (set/union
-          (check-child-constraints graph node :node pred-constraints)
-          (apply set/union (map #(validate % graph node) pred-meta-constraints))
-          (apply and-constraint graph node node-constraints))))))
+        (let [builtin-checks
+               (set/union
+                 (check-child-constraints graph node :node pred-constraints)
+                 (apply set/union (map #(validate % graph node)
+                                       builtin-pred-meta-constraints)))]
+          (if (empty? builtin-checks)
+              (set/union
+                (apply set/union (map #(validate % graph node)
+                                      custom-pred-meta-constraints))
+                (apply and-constraint graph node custom-node-constraints))
+              builtin-checks))))))
 
 (defn create-graph-constraints
   [graph-schema]
   (let [type-constraints
           (child-constraints graph-schema :graph create-node-constraints),
-        type-meta-constraints
-          (meta-constraints-from-schema graph-schema :graph (fn [_ _ _] nil)),
-        graph-constraints (constraints-from-schema graph-schema (fn [_ _] nil))]
+        custom-type-meta-constraints
+          (custom-meta-constraints-from-schema graph-schema :graph),
+        custom-graph-constraints (custom-constraints-from-schema graph-schema)]
     (reify Constraint
       (validate [constraint _ graph]
-        (set/union
-          (check-child-constraints graph graph :graph type-constraints)
-          (apply set/union (map #(validate % graph graph) type-meta-constraints))
-          (apply and-constraint graph graph graph-constraints))))))
+        (let [builtin-checks
+               (check-child-constraints graph graph :graph type-constraints)]
+          (if (empty? builtin-checks)
+              (set/union
+                (apply set/union (map #(validate % graph graph)
+                                      custom-type-meta-constraints))
+                (apply and-constraint graph graph custom-graph-constraints))
+              builtin-checks))))))
