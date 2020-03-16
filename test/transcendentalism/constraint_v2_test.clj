@@ -26,11 +26,16 @@
         "/parent" {
           :range-type "/type/person"
           :unique true,
+          :exclusive #{"/child"},
+        },
+        "/child" {
+          :range-type "/type/person",
+          :unique true,
+          :exclusive #{"/parent"},
         },
         "/birthday" {
           :range-type :time,
           :unique true,
-          :required true,
         },
         "/location" {
           :range-type "/type/place",
@@ -218,7 +223,7 @@
     (build-node thing-builder :candlestick) ; Requires triples
     (testing "Validate required triples"
       (is (= #{"/name is required" "/texture is required" "/coords is required"
-               "/birthday is required" "/location is required"}
+               "/location is required"}
              (do-validate graph-builder))))))
 
 (deftest unique-triple-required-property-test
@@ -312,3 +317,48 @@
                ":stonier does not match range type [:pointy :rocky :steely]"
                "200 hours ago does not match range type :time"}
              (do-validate graph-builder))))))
+
+(deftest exclusivity-and-range-test
+  (let [graph-builder (create-graph-builder),
+        person-builder (get-node-builder graph-builder "/person"),
+        name-builder (get-triple-builder person-builder "/name"),
+        parent-builder (get-triple-builder person-builder "/parent"),
+        child-builder (get-triple-builder person-builder "/child"),
+        location-builder (get-triple-builder person-builder "/location"),
+        place-builder (get-node-builder graph-builder "/place"),
+        coords-builder (get-triple-builder place-builder "/coords"),
+        lat-builder (get-property-builder coords-builder "/lat"),
+        lng-builder (get-property-builder coords-builder "/lng"),
+        thing-builder (get-node-builder graph-builder "/thing"),
+        texture-builder (get-triple-builder thing-builder "/texture"),
+        hardness-builder (get-property-builder texture-builder "/kind_of_hardness"),
+        softness-builder (get-property-builder texture-builder "/kind_of_softness")]
+    (build-triple name-builder "Ms Peacock with a loooooooooong name")
+    (build-triple location-builder :library)
+    (build-node person-builder :ms-white)
+    (build-node person-builder :mr-green)
+    (build-triple parent-builder :ms-white)
+    (build-triple child-builder :mr-green)
+    (build-node person-builder :ms-peacock)
+    (build-property lat-builder 100)
+    (build-property lng-builder 200)
+    (build-triple coords-builder "coords-A")
+    (build-node place-builder :library)
+    (build-property hardness-builder :rocky)
+    (build-property softness-builder :feathery)
+    (build-triple texture-builder :hard)
+    (build-node thing-builder :candlestick)
+    (testing "Validate exclusive properties and triples, and custom range checks"
+      (is (= #{"Ms Peacock with a loooooooooong name has more than 20 characters"
+               "/lng must be in [-180, 180]"
+               "/lat must be in [-90, 90]"
+               "/child excludes #{\"/parent\"}, but found #{\"/parent\"}"
+               "/parent excludes #{\"/child\"}, but found #{\"/child\"}"
+               "/kind_of_hardness excludes #{\"/kind_of_softness\"}, but found #{\"/kind_of_softness\"}"
+              "/kind_of_softness excludes #{\"/kind_of_hardness\"}, but found #{\"/kind_of_hardness\"}"}
+             (do-validate graph-builder))))))
+
+; TODO - texture mis-match
+; TODO - parenting cycle
+; TODO - people over 20
+; TODO - indistinct ordering
