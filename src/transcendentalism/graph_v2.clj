@@ -77,8 +77,9 @@
   [opv]
   (reify Triple
     (get-obj [triple] (:o opv))
-    (get-props [triple] (keys (:p-vs opv)))
-    (get-properties [triple prop] (map create-property ((:p-vs opv) prop #{})))
+    (get-props [triple] (into #{} (keys (:p-vs opv))))
+    (get-properties [triple prop]
+      (into #{} (map create-property ((:p-vs opv) prop #{}))))
     (to-opv [triple] opv)))
 
 (defn create-node
@@ -126,7 +127,7 @@
   (let [my-properties (atom #{})]
     (reify PropertyBuilder
       (build-property [builder val]
-        (reset! my-properties (conj @my-properties (-> V val))))
+        (reset! my-properties (conj @my-properties (->V val))))
       (get-built-properties [builder] {prop @my-properties}))))
 
 (defn- create-triple-builder

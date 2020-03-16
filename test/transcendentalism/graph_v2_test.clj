@@ -10,6 +10,10 @@
   [triples]
   (into #{} (map to-opv triples)))
 
+(defn- properties-to-v
+  [properties]
+  (into #{} (map to-v properties)))
+
 (deftest empty-graph-test
   (let [graph-builder (create-graph-builder),
         graph (create-graph (get-built-graph graph-builder))]
@@ -66,7 +70,7 @@
           node-a1 (get-node graph :a1),
           node-a2 (get-node graph :a2),
           node-a3 (get-node graph :a3)]
-      (testing "Test graph with one node and some triples"
+      (testing "Test graph with nodes with triples"
         (is (= #{"/type/a"} (get-all-types graph)))
         (is (= expected-a1 (to-spopv node-a1)))
         (is (= expected-a2 (to-spopv node-a2)))
@@ -92,3 +96,83 @@
         (is (= #{expected-foo1 expected-foo2}
                (triples-to-opv (get-triples node-a3 "/foo"))))
         (is (= #{expected-bar1} (triples-to-opv (get-triples node-a3 "/bar"))))))))
+
+(deftest graph-properties-test
+  (let [graph-builder (create-graph-builder),
+        type-a-builder (get-node-builder graph-builder "/a"),
+        pred-foo-builder (get-triple-builder type-a-builder "/foo"),
+        prop-do-builder (get-property-builder pred-foo-builder "/do"),
+        prop-re-builder (get-property-builder pred-foo-builder "/re"),
+        prop-mi-builder (get-property-builder pred-foo-builder "/mi")]
+    (build-property prop-do-builder 111)
+    (build-node type-a-builder :a1) ; Has no triples, and therefore no properties.
+    (build-triple pred-foo-builder "foo1")
+    (build-node type-a-builder :a2) ; Has one triple, with one property.
+    (build-property prop-re-builder 222)
+    (build-property prop-re-builder 333)
+    (build-triple pred-foo-builder "foo2")
+    (build-node type-a-builder :a3) ; Has one triple, with three properties.
+    (build-property prop-mi-builder 444) ; No triple has this property.
+    (let [graph (create-graph (get-built-graph graph-builder)),
+          expected-do (->V 111),
+          expected-re1 (->V 222),
+          expected-re2 (->V 333),
+          expected-foo1 (->OPV "foo1" {"/do" #{expected-do}}),
+          expected-foo2 (->OPV "foo2" {"/do" #{expected-do},
+                                       "/re" #{expected-re1 expected-re2}}),
+          expected-a1 (->SPOPV :a1 {"/type/a" #{nil}}),
+          expected-a2 (->SPOPV :a2 {"/type/a" #{nil},
+                                    "/foo" #{expected-foo1}}),
+          expected-a3 (->SPOPV :a3 {"/type/a" #{nil},
+                                    "/foo" #{expected-foo1 expected-foo2}}),
+          node-a1 (get-node graph :a1),
+          node-a2 (get-node graph :a2),
+          node-a3 (get-node graph :a3),
+          triples-a2 (get-triples node-a2 "/foo"),
+          triples-a3 (get-triples node-a3 "/foo")]
+      (testing "Test graph with nodes with a triple with properties"
+        (is (= expected-a1 (to-spopv node-a1)))
+        (is (= expected-a2 (to-spopv node-a2)))
+        (is (= expected-a3 (to-spopv node-a3)))
+        (is (= #{"/type/a"} (get-preds node-a1)))
+        (is (= #{"/type/a" "/foo"} (get-preds node-a2)))
+        (is (= #{"/type/a" "/foo"} (get-preds node-a3)))
+        (is (= #{} (get-triples node-a1 "/foo")))
+        (is (= #{expected-foo1} (triples-to-opv triples-a2)))
+        (is (= #{expected-foo1 expected-foo2} (triples-to-opv triples-a3))))
+      (let [triple-a2-foo1 (first triples-a2),
+            triple-a3-foo1 (first (filter #(= (get-obj %) "foo1") triples-a3)),
+            triple-a3-foo2 (first (filter #(= (get-obj %) "foo2") triples-a3)),
+            do-props-a2-foo1 (get-properties triple-a2-foo1 "/do"),
+            re-props-a2-foo1 (get-properties triple-a2-foo1 "/re"),
+            mi-props-a2-foo1 (get-properties triple-a2-foo1 "/mi"),
+            do-props-a3-foo1 (get-properties triple-a3-foo1 "/do"),
+            re-props-a3-foo1 (get-properties triple-a3-foo1 "/re"),
+            mi-props-a3-foo1 (get-properties triple-a3-foo1 "/mi"),
+            do-props-a3-foo2 (get-properties triple-a3-foo2 "/do"),
+            re-props-a3-foo2 (get-properties triple-a3-foo2 "/re"),
+            mi-props-a3-foo2 (get-properties triple-a3-foo2 "/mi")]
+        (testing "Testing the triples themselves"
+          (is (= "foo1" (get-obj triple-a2-foo1)))
+          (is (= "foo1" (get-obj triple-a3-foo1)))
+          (is (= "foo2" (get-obj triple-a3-foo2)))
+          (is (= #{"/do"} (get-props triple-a2-foo1)))
+          (is (= #{"/do"} (get-props triple-a3-foo1)))
+          (is (= #{"/do" "/re"} (get-props triple-a3-foo2)))
+          (is (= #{expected-do} (properties-to-v do-props-a2-foo1)))
+          (is (= #{} re-props-a2-foo1))
+          (is (= #{} mi-props-a2-foo1))
+          (is (= #{expected-do} (properties-to-v do-props-a3-foo1)))
+          (is (= #{} re-props-a3-foo1))
+          (is (= #{} mi-props-a3-foo1))
+          (is (= #{expected-do} (properties-to-v do-props-a3-foo2)))
+          (is (= #{expected-re1 expected-re2} (properties-to-v re-props-a3-foo2)))
+          (is (= #{} mi-props-a3-foo2)))
+        (let [prop-a3-foo2-re1 (filter #(= (get-val %) 222) re-props-a3-foo2),
+              prop-a3-foo2-re2 (filter #(= (get-val %) 333) re-props-a3-foo2)]
+          (testing "Testing the properties"
+            (is (= expected-do (to-v (first do-props-a2-foo1))))
+            (is (= expected-do (to-v (first do-props-a3-foo1))))
+            (is (= expected-do (to-v (first do-props-a3-foo2))))
+            (is (= expected-re1 (to-v (first prop-a3-foo2-re1))))
+            (is (= expected-re2 (to-v (first prop-a3-foo2-re2))))))))))
