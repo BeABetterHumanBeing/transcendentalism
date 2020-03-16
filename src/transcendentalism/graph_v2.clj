@@ -7,6 +7,10 @@
 (defrecord SPOPV [s p-opvs])
 (defrecord G [s-popvs t-ss])
 
+(defn is-type?
+  [pred]
+  (str/starts-with? pred "/type"))
+
 (defmacro reduce-all
   "bingings => [inner-binding ...]
    inner-binding => [name coll]
@@ -87,7 +91,7 @@
   (reify Node
     (get-sub [node] (:s spopv))
     (get-types [node]
-      (into #{} (filter #(str/starts-with? % "/type") (get-preds node))))
+      (into #{} (filter is-type?) (get-preds node)))
     (get-preds [node] (into #{} (keys (:p-opvs spopv))))
     (get-triples [node pred]
       (into #{} (map create-triple ((:p-opvs spopv) pred #{}))))

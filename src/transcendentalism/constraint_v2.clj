@@ -11,11 +11,10 @@
   [graph data & constraints]
   (apply set/union (map #(validate % graph data) constraints)))
 
-(defn- not-recognized-constraint
+(defn- nil-constraint
   [name]
   (reify Constraint
-    (validate [constraint graph data]
-      #{(str name " is not recognized in the schema")})))
+    (validate [constraint graph data] #{})))
 
 (defn- child-keyword
   [level]
@@ -41,24 +40,34 @@
     :graph get-nodes
     nil))
 
+(defn- get-inner-data
+  [level]
+  (case level
+    :property get-val
+    :triple get-obj
+    nil))
+
 (defn- range-type-constraint
-  [range-type allow-nodes]
+  [level range-type allow-nodes]
   (reify Constraint
-    (validate [constraint graph data]
-      (or (nil? range-type)
-        (and (= range-type :string)
-             (string? data))
-        (and (= range-type :number)
-             (number? data))
-        (and (= range-type :bool)
-             (instance? Boolean data))
-        (and (= range-type :time)
-             (is-valid-time data))
-        (and (string? range-type)
-             allow-nodes
-             (has-type? graph data range-type))
-        (and (vector? range-type)
-             (not (nil? (some #(= data %) range-type))))))))
+    (validate [constraint graph wrapped-data]
+      (let [data ((get-inner-data level) wrapped-data)]
+        (if (or (nil? range-type)
+              (and (= range-type :string)
+                   (string? data))
+              (and (= range-type :number)
+                   (number? data))
+              (and (= range-type :bool)
+                   (instance? Boolean data))
+              (and (= range-type :time)
+                   (is-valid-time data))
+              (and (string? range-type)
+                   allow-nodes
+                   (has-type? graph data range-type))
+              (and (vector? range-type)
+                   (not (nil? (some #(= data %) range-type)))))
+          #{}
+          #{(str data " does not match range type " range-type)})))))
 
 (defn- required-constraint
   [tpp level]
@@ -126,7 +135,7 @@
   [graph data level constraints]
   (reduce
     (fn [result s]
-      (let [constraint (constraints s (not-recognized-constraint s))]
+      (let [constraint (constraints s (nil-constraint s))]
         (reduce
           (fn [result v]
             (set/union result (validate constraint graph v)))
@@ -137,7 +146,7 @@
   [prop-schema]
   (let [constraints (constraints-from-schema prop-schema
                       #(case %1
-                        :range-type (range-type-constraint %2 false)
+                        :range-type (range-type-constraint :property %2 false)
                         nil))]
     (reify Constraint
       (validate [constraint graph property]
@@ -156,7 +165,7 @@
               nil)),
         triple-constraints (constraints-from-schema pred-schema
                              #(case %1
-                               :range-type (range-type-constraint %2 true)
+                               :range-type (range-type-constraint :triple %2 true)
                                nil))]
     (reify Constraint
       (validate [constraint graph triple]
