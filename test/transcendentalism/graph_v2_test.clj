@@ -16,18 +16,16 @@
 
 (deftest empty-graph-test
   (let [graph-builder (create-graph-builder),
-        graph (create-graph (get-built-graph graph-builder))]
+        graph (create-graph (get-built-graph graph-builder {}))]
     (testing "Test empty graph"
       (is (= #{} (get-all-types graph))))))
 
 (deftest graph-nodes-test
-  (let [graph-builder (create-graph-builder),
-        type-a-builder (get-node-builder graph-builder "/a"),
-        type-b-builder (get-node-builder graph-builder "/b")]
-    (build-node type-a-builder :a1)
-    (build-node type-a-builder :a2)
-    (build-node type-b-builder :b1)
-    (let [graph (create-graph (get-built-graph graph-builder)),
+  (let [node-builder (create-node-builder)]
+    (build-node node-builder "/a" :a1 {})
+    (build-node node-builder "/a" :a2 {})
+    (build-node node-builder "/b" :b1 {})
+    (let [graph (create-graph (get-built-graph (create-graph-builder) node-builder)),
           expected-a1 (->SPOPV :a1 {"/type/a" #{nil}}),
           expected-a2 (->SPOPV :a2 {"/type/a" #{nil}}),
           expected-b1 (->SPOPV :b1 {"/type/b" #{nil}})]
@@ -47,17 +45,17 @@
         (is (not (has-type? graph :b1 "/type/a")))))))
 
 (deftest graph-triples-test
-  (let [graph-builder (create-graph-builder),
-        type-a-builder (get-node-builder graph-builder "/a"),
-        pred-foo-builder (get-triple-builder type-a-builder "/foo"),
-        pred-bar-builder (get-triple-builder type-a-builder "/bar")]
-    (build-node type-a-builder :a1) ; Has no predicates.
-    (build-triple pred-foo-builder "foo1")
-    (build-node type-a-builder :a2) ; Has one predicate.
-    (build-triple pred-foo-builder "foo2")
-    (build-triple pred-bar-builder "bar1")
-    (build-node type-a-builder :a3) ; Has three predicates.
-    (let [graph (create-graph (get-built-graph graph-builder)),
+  (let [node-builder (create-node-builder)]
+    (build-node node-builder "/a" :a1 {})
+    (let [triple-builder (create-triple-builder)]
+      (build-triple triple-builder "/foo" "foo1" {})
+      (build-node node-builder "/a" :a2 triple-builder))
+    (let [triple-builder (create-triple-builder)]
+      (build-triple triple-builder "/foo" "foo1" {})
+      (build-triple triple-builder "/foo" "foo2" {})
+      (build-triple triple-builder "/bar" "bar1" {})
+      (build-node node-builder "/a" :a3 triple-builder))
+    (let [graph (create-graph (get-built-graph (create-graph-builder) node-builder)),
           expected-foo1 (->OPV "foo1" {}),
           expected-foo2 (->OPV "foo2" {}),
           expected-bar1 (->OPV "bar1" {}),
@@ -98,22 +96,22 @@
         (is (= #{expected-bar1} (triples-to-opv (get-triples node-a3 "/bar"))))))))
 
 (deftest graph-properties-test
-  (let [graph-builder (create-graph-builder),
-        type-a-builder (get-node-builder graph-builder "/a"),
-        pred-foo-builder (get-triple-builder type-a-builder "/foo"),
-        prop-do-builder (get-property-builder pred-foo-builder "/do"),
-        prop-re-builder (get-property-builder pred-foo-builder "/re"),
-        prop-mi-builder (get-property-builder pred-foo-builder "/mi")]
-    (build-property prop-do-builder 111)
-    (build-node type-a-builder :a1) ; Has no triples, and therefore no properties.
-    (build-triple pred-foo-builder "foo1")
-    (build-node type-a-builder :a2) ; Has one triple, with one property.
-    (build-property prop-re-builder 222)
-    (build-property prop-re-builder 333)
-    (build-triple pred-foo-builder "foo2")
-    (build-node type-a-builder :a3) ; Has one triple, with three properties.
-    (build-property prop-mi-builder 444) ; No triple has this property.
-    (let [graph (create-graph (get-built-graph graph-builder)),
+  (let [node-builder (create-node-builder)]
+    (build-node node-builder "/a" :a1 {})
+    (let [prop-builder (create-property-builder),
+          pred-builder (create-triple-builder)]
+      (build-property prop-builder "/do" 111)
+      (build-triple pred-builder "/foo" "foo1" prop-builder)
+      (build-node node-builder "/a" :a2 pred-builder))
+    (let [prop-builder (create-property-builder),
+          pred-builder (create-triple-builder)]
+      (build-property prop-builder "/do" 111)
+      (build-triple pred-builder "/foo" "foo1" prop-builder)
+      (build-property prop-builder "/re" 222)
+      (build-property prop-builder "/re" 333)
+      (build-triple pred-builder "/foo" "foo2" prop-builder)
+      (build-node node-builder "/a" :a3 pred-builder))
+    (let [graph (create-graph (get-built-graph (create-graph-builder) node-builder)),
           expected-do (->V 111),
           expected-re1 (->V 222),
           expected-re2 (->V 333),
