@@ -55,10 +55,12 @@
             (reify Constraint
               (validate [constraint graph node]
                 (let [fave-things (get-triples node "/favorite_thing"),
-                      fave-ordinals (map #(get-properties % "/order") fave-things)]
-                  (if (distinct? fave-ordinals)
+                      fave-orders (map #(first (get-properties % "/order")) fave-things),
+                      fave-ordinals (into [] (map get-val fave-orders))]
+                  (if (or (empty? fave-ordinals)
+                          (apply distinct? fave-ordinals))
                       #{}
-                      #{(str fave-ordinals " are not distinct")}))))
+                      #{(str "/orders " fave-ordinals " are not distinct")}))))
           ],
         },
       },
@@ -69,10 +71,12 @@
             ; hard things (totally contrived, but it's for testing purposes).
             (let [birthday (first (get-triples node "/birthday"))]
               (if (or (nil? birthday)
-                      (< (hours-ago (to-time (get-obj birthday))) 175320))
+                      (> (hours-ago (to-time (get-obj birthday))) -175320))
                   #{}
-                  (let [fave-things (get-triples node "/favorite_thing"),
-                        texture-triples (map #(get-triples % "/texture") fave-things),
+                  (let [fave-things (map get-obj (get-triples node "/favorite_thing")),
+                        texture-triples
+                          (apply set/union
+                            (map #(get-triples (get-node graph %) "/texture") fave-things)),
                         hard-textures (filter #(= (get-obj %) :hard) texture-triples)]
                     (if (empty? hard-textures)
                         #{}
@@ -82,12 +86,12 @@
         (reify Constraint
           (validate [constraint _ graph]
             ; The graph composed of 'parents' must be acyclic.
-            (let [people (get-nodes graph "/type/person"),
+            (let [people (into #{} (map get-sub (get-nodes graph "/type/person"))),
                   person-parent (reduce
                                   (fn [result person]
                                     (assoc result
-                                      (get-sub person)
-                                      (map :get-sub (get-triples person "/parent"))))
+                                      person
+                                      (map get-obj (get-triples (get-node graph person) "/parent"))))
                                   {} people)]
               (loop [prev #{},
                      curr (into #{} (keys person-parent))]
@@ -155,10 +159,10 @@
                   (validate [constraint graph triple]
                     (let [kind-of-softness (get-properties triple
                                                            "/kind_of_softness")]
-                      (if (or (empty? kind-of-softness)
-                              (= (get-obj triple) :hard))
-                          #{}
-                          #{"/kind_of_softness requires that /texture be :soft"}))))
+                      (if (and (not (empty? kind-of-softness))
+                               (= (get-obj triple) :hard))
+                          #{"/kind_of_softness requires that /texture be :soft"}
+                          #{}))))
               ],
             },
             "/kind_of_hardness" {
@@ -170,10 +174,10 @@
                   (validate [constraint graph triple]
                     (let [kind-of-hardness (get-properties triple
                                                            "/kind_of_hardness")]
-                      (if (or (empty? kind-of-hardness)
-                              (= (get-obj triple) :soft))
-                          #{}
-                          #{"/kind_of_hardness requires that /texture be :hard"}))))
+                      (if (and (not (empty? kind-of-hardness))
+                               (= (get-obj triple) :soft))
+                          #{"/kind_of_hardness requires that /texture be :hard"}
+                          #{}))))
               ],
             },
           },
@@ -241,7 +245,7 @@
     (build-triple name-builder "Ms Peacock")
     (build-triple name-builder "Jacqueline")
     (build-triple parent-builder :ms-peacock)
-    (build-triple parent-builder :ms-peacock) ; TODO - this should trigger acyclic validation check.
+    (build-triple parent-builder :ms-peacock)
     (build-triple birthday-builder (get-hours-ago 20))
     (build-triple birthday-builder (get-hours-ago 200)) ; Violates uniqueness
     (build-triple location-builder :library)
@@ -358,7 +362,84 @@
               "/kind_of_softness excludes #{\"/kind_of_hardness\"}, but found #{\"/kind_of_hardness\"}"}
              (do-validate graph-builder))))))
 
-; TODO - texture mis-match
-; TODO - parenting cycle
-; TODO - people over 20
-; TODO - indistinct ordering
+(deftest custom-constraints-test
+  (let [graph-builder (create-graph-builder),
+        person-builder (get-node-builder graph-builder "/person"),
+        name-builder (get-triple-builder person-builder "/name"),
+        birthday-builder (get-triple-builder person-builder "/birthday"),
+        location-builder (get-triple-builder person-builder "/location"),
+        place-builder (get-node-builder graph-builder "/place"),
+        coords-builder (get-triple-builder place-builder "/coords"),
+        lat-builder (get-property-builder coords-builder "/lat"),
+        lng-builder (get-property-builder coords-builder "/lng"),
+        favorite-thing-builder (get-triple-builder person-builder "/favorite_thing")]
+    (build-triple name-builder "Ms Peacock")
+    (build-triple birthday-builder (get-hours-ago 200000)) ; Over 20 years
+    (let [order-builder (get-property-builder favorite-thing-builder "/order")]
+      (build-property order-builder 1)
+      (build-triple favorite-thing-builder :candlestick))
+    (let [order-builder (get-property-builder favorite-thing-builder "/order")]
+      (build-property order-builder 1) ; Violates ordering.
+      (build-triple favorite-thing-builder :rope))
+    (build-triple location-builder :library)
+    (build-node person-builder :ms-peacock)
+    (let [thing-builder (get-node-builder graph-builder "/thing"),
+          texture-builder (get-triple-builder thing-builder "/texture"),
+          hardness-builder (get-property-builder texture-builder "/kind_of_hardness")]
+      (build-property hardness-builder :steely)
+      (build-triple texture-builder :soft) ; Texture mis-match
+      (build-node thing-builder :rope))
+    (let [thing-builder (get-node-builder graph-builder "/thing"),
+          texture-builder (get-triple-builder thing-builder "/texture"),
+          softness-builder (get-property-builder texture-builder "/kind_of_softness")]
+      (build-property softness-builder :feathery)
+      (build-triple texture-builder :hard) ; Texture mis-match
+      (build-node thing-builder :candlestick))
+    (build-property lat-builder 45)
+    (build-property lng-builder 90)
+    (build-triple coords-builder "coords-A")
+    (build-node place-builder :library)
+    (testing "Validate custom [meta-]constraints"
+      (is (= #{"/kind_of_softness requires that /texture be :soft"
+               "/kind_of_hardness requires that /texture be :hard"
+               "People over 20 can't like hard things"
+               "/orders [1 1] are not distinct"}
+             (do-validate graph-builder))))))
+
+(deftest whole-graph-custom-constraints-test
+  (let [graph-builder (create-graph-builder),
+        place-builder (get-node-builder graph-builder "/place"),
+        coords-builder (get-triple-builder place-builder "/coords"),
+        lat-builder (get-property-builder coords-builder "/lat"),
+        lng-builder (get-property-builder coords-builder "/lng")]
+    (let [person-builder (get-node-builder graph-builder "/person"),
+          name-builder (get-triple-builder person-builder "/name"),
+          parent-builder (get-triple-builder person-builder "/parent"),
+          location-builder (get-triple-builder person-builder "/location")]
+      (build-triple name-builder "Ms Peacock")
+      (build-triple location-builder :library)
+      (build-triple parent-builder :mr-green)
+      (build-node person-builder :ms-peacock))
+    (let [person-builder (get-node-builder graph-builder "/person"),
+          name-builder (get-triple-builder person-builder "/name"),
+          parent-builder (get-triple-builder person-builder "/parent"),
+          location-builder (get-triple-builder person-builder "/location")]
+      (build-triple name-builder "Mr Green")
+      (build-triple location-builder :library)
+      (build-triple parent-builder :ms-white)
+      (build-node person-builder :mr-green))
+    (let [person-builder (get-node-builder graph-builder "/person"),
+          name-builder (get-triple-builder person-builder "/name"),
+          parent-builder (get-triple-builder person-builder "/parent"),
+          location-builder (get-triple-builder person-builder "/location")]
+      (build-triple name-builder "Ms White")
+      (build-triple location-builder :library)
+      (build-triple parent-builder :ms-peacock)
+      (build-node person-builder :ms-white))
+    (build-property lat-builder 45)
+    (build-property lng-builder 90)
+    (build-triple coords-builder "coords-A")
+    (build-node place-builder :library)
+    (testing "Validate custom whole-graph constraints"
+      (is (= #{"Found parentage cycle with #{:mr-green :ms-peacock :ms-white}"}
+             (do-validate graph-builder))))))
