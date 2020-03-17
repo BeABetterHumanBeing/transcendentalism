@@ -209,9 +209,7 @@
   (let [node-builder (create-node-builder)]
     (testing "Validate empty graph"
       (is (= #{} (do-validate node-builder))))
-    (let [triple-builder (create-triple-builder)]
-      (build-triple triple-builder "/not_a_pred" "blah" {})
-      (build-node node-builder "/not_a_type" :a1 triple-builder))
+    (build-node node-builder "/not_a_type" :a1 {"/not_a_pred" "blah"})
     (testing "Validate non-existent type"
       (is (= #{"/type/not_a_type is not an allowed type"}
              (do-validate node-builder))))))
@@ -228,26 +226,14 @@
 
 (deftest unique-triple-required-property-test
   (let [node-builder (create-node-builder)]
-    (let [triple-builder (create-triple-builder)]
-      (build-triple triple-builder "/name" "Ms Peacock" {})
-      (build-triple triple-builder "/name" "Jacqueline" {})
-      (build-triple triple-builder "/parent" :ms-peacock {})
-      (build-triple triple-builder "/parent" :ms-peacock {})
-      (build-triple triple-builder "/birthday" (get-hours-ago 20) {})
-      (build-triple triple-builder "/birthday" (get-hours-ago 200) {}) ; Violates uniqueness
-      (build-triple triple-builder "/location" :library {})
-      (build-triple triple-builder "/location" :ballroom {}) ; Violates uniqueness, range-type
-      (build-triple triple-builder "/favorite_thing" :candlestick {})
-      (build-triple triple-builder "/favorite_thing" :rope {}) ; Violates uniqueness, range-type
-      (build-node node-builder "/person" :ms-peacock triple-builder))
-    (let [triple-builder (create-triple-builder)]
-      (build-triple triple-builder "/coords" "coords-A" {})
-      (build-triple triple-builder "/coords" "coords-B" {}) ; Violates uniqueness
-      (build-node node-builder "/place" :library triple-builder))
-    (let [triple-builder (create-triple-builder)]
-      (build-triple triple-builder "/texture" :hard {})
-      (build-triple triple-builder "/texture" :soft {})
-      (build-node node-builder "/thing" :candlestick triple-builder))
+    (build-node node-builder "/person" :ms-peacock
+      {"/name" #{"Ms Peacock" "Jacqueline"},
+       "/birthday" #{(get-hours-ago 20) (get-hours-ago 200)},
+       "/location" #{:library :ballroom},
+       "/favorite_thing" #{:candlestick :rope}})
+    (build-node node-builder "/place" :library
+      {"/coords" #{"coords-A" "coords-B"}})
+    (build-node node-builder "/thing" :candlestick {"/texture" #{:hard :soft}})
     (testing "Validate required triples"
       (is (= #{"/birthday is unique, but found 2"
                "/texture is unique, but found 2"
@@ -260,30 +246,17 @@
 
 (deftest unique-property-and-range-type-test
   (let [node-builder (create-node-builder)]
-    (let [triple-builder (create-triple-builder)]
-      (build-triple triple-builder "/name" 0x2323 {}) ; Not a string
-      (build-triple triple-builder "/parent" :ms-peacock {})
-      (build-triple triple-builder "/birthday" "200 hours ago" {}) ; Not a time
-      (build-triple triple-builder "/location" :candlestick {}) ; Not a place
-      (let [property-builder (create-property-builder)]
-        (build-property property-builder "/order" "not-a-number")
-        (build-property property-builder "/order" "not-another-number") ; Violates uniqueness
-        (build-triple triple-builder "/location" :library property-builder)) ; Not a thing
-      (build-node node-builder "/person" :ms-peacock triple-builder))
-    (let [triple-builder (create-triple-builder),
-          property-builder (create-property-builder)]
-      (build-property property-builder "/lat" :not-a-number)
-      (build-property property-builder "/lat" :not-another-number) ; Violates uniqueness
-      (build-property property-builder "/lng" "not-a-number")
-      (build-property property-builder "/lng" "not-another-number") ; Violates uniqueness
-      (build-triple triple-builder "/coords" "coords-A" property-builder)
-      (build-node node-builder "/place" :library triple-builder))
-    (let [triple-builder (create-triple-builder),
-          property-builder (create-property-builder)]
-      (build-property property-builder "/kind_of_hardness" :stony) ; Not a valid enum value
-      (build-property property-builder "/kind_of_hardness" :stonier) ; Violates uniqueness
-      (build-triple triple-builder "/texture" :hard-and-soft property-builder) ; Not a valid enum value
-      (build-node node-builder "/thing" :candlestick triple-builder))
+    (build-node node-builder "/person" :ms-peacock
+      {"/name" 0x2323,
+       "/parent" :ms-peacock,
+       "/birthday" "200 hours ago",
+       "/location" #{:candlestick
+                     [:library {"/order" #{"not-a-number" "not-another-number"}}]}})
+    (build-node node-builder "/place" :library
+      {"/coords" ["coords-A" {"/lat" #{:not-a-number :not-another-number},
+                              "/lng" #{"not-a-number" "not-another-number"}}]})
+    (build-node node-builder "/thing" :candlestick
+      {"/texture" [:hard-and-soft {"/kind_of_hardness" #{:stony :stonier}}]})
     (testing "Validate unique predicates, and range types"
       (is (= #{"/location is unique, but found 2"
                "/lat is unique, but found 2"
@@ -311,18 +284,11 @@
       (build-triple triple-builder "/parent" :ms-white {})
       (build-triple triple-builder "/child" :mr-green {})
       (build-node node-builder "/person" :ms-peacock triple-builder))
-    (let [triple-builder (create-triple-builder),
-          property-builder (create-property-builder)]
-      (build-property property-builder "/lat" 100)
-      (build-property property-builder "/lng" 200)
-      (build-triple triple-builder "/coords" "coords-A" property-builder)
-      (build-node node-builder "/place" :library triple-builder))
-    (let [triple-builder (create-triple-builder),
-          property-builder (create-property-builder)]
-      (build-property property-builder "/kind_of_hardness" :rocky)
-      (build-property property-builder "/kind_of_softness" :feathery)
-      (build-triple triple-builder "/texture" :hard property-builder)
-      (build-node node-builder "/thing" :candlestick triple-builder))
+    (build-node node-builder "/place" :library
+      {"/coords" ["coords-A" {"/lat" 100, "/lng" 200}]})
+    (build-node node-builder "/thing" :candlestick
+      {"/texture" [:hard {"/kind_of_hardness" :rocky,
+                          "/kind_of_softness" :feathery}]})
     (testing "Validate exclusive properties and triples, and custom range checks"
       (is (= #{"Ms Peacock with a loooooooooong name has more than 20 characters"
                "/lng must be in [-180, 180]"
@@ -335,33 +301,18 @@
 
 (deftest custom-constraints-test
   (let [node-builder (create-node-builder)]
-    (let [triple-builder (create-triple-builder)]
-      (build-triple triple-builder "/name" "Ms Peacock" {})
-      (build-triple triple-builder "/birthday" (get-hours-ago 200000) {}) ; Over 20 years
-      (let [property-builder (create-property-builder)]
-        (build-property property-builder "/order" 1)
-        (build-triple triple-builder "/favorite_thing" :candlestick property-builder))
-      (let [property-builder (create-property-builder)]
-        (build-property property-builder "/order" 1) ; Violates ordering.
-        (build-triple triple-builder "/favorite_thing" :rope property-builder))
-      (build-triple triple-builder "/location" :library {})
-      (build-node node-builder "/person" :ms-peacock triple-builder))
-    (let [triple-builder (create-triple-builder),
-          property-builder (create-property-builder)]
-      (build-property property-builder "/kind_of_hardness" :steely)
-      (build-triple triple-builder "/texture" :soft property-builder) ; Texture mis-match
-      (build-node node-builder "/thing" :rope triple-builder))
-    (let [triple-builder (create-triple-builder),
-          property-builder (create-property-builder)]
-      (build-property property-builder "/kind_of_softness" :feathery)
-      (build-triple triple-builder "/texture" :hard property-builder) ; Texture mis-match
-      (build-node node-builder "/thing" :candlestick triple-builder))
-    (let [triple-builder (create-triple-builder),
-          property-builder (create-property-builder)]
-      (build-property property-builder "/lat" 45)
-      (build-property property-builder "/lng" 90)
-      (build-triple triple-builder "/coords" "coords-A" property-builder)
-      (build-node node-builder "/place" :library triple-builder))
+    (build-node node-builder "/person" :ms-peacock
+      {"/name" "Ms Peacock",
+       "/birthday" (get-hours-ago 200000), ; Over 20 years
+       "/favorite_thing" #{[:candlestick {"/order" 1}]
+                           [:rope {"/order" 1}]},
+       "/location" :library})
+    (build-node node-builder "/thing" :rope
+      {"/texture" [:soft {"/kind_of_hardness" :steely}]})
+    (build-node node-builder "/thing" :candlestick
+      {"/texture" [:hard {"/kind_of_softness" :feathery}]})
+    (build-node node-builder "/place" :library
+      {"/coords" ["coords-A" {"/lat" 45, "/lng" 90}]})
     (testing "Validate custom [meta-]constraints"
       (is (= #{"/kind_of_softness requires that /texture be :soft"
                "/kind_of_hardness requires that /texture be :hard"
@@ -371,27 +322,20 @@
 
 (deftest whole-graph-custom-constraints-test
   (let [node-builder (create-node-builder)]
-    (let [triple-builder (create-triple-builder)]
-      (build-triple triple-builder "/name" "Ms Peacock" {})
-      (build-triple triple-builder "/location" :library {})
-      (build-triple triple-builder "/parent" :mr-green {})
-      (build-node node-builder "/person" :ms-peacock triple-builder))
-    (let [triple-builder (create-triple-builder)]
-      (build-triple triple-builder "/name" "Mr Green" {})
-      (build-triple triple-builder "/location" :library {})
-      (build-triple triple-builder "/parent" :ms-white {})
-      (build-node node-builder "/person" :mr-green triple-builder))
-    (let [triple-builder (create-triple-builder)]
-      (build-triple triple-builder "/name" "Ms White" {})
-      (build-triple triple-builder "/location" :library {})
-      (build-triple triple-builder "/parent" :ms-peacock {})
-      (build-node node-builder "/person" :ms-white triple-builder))
-    (let [triple-builder (create-triple-builder),
-          property-builder (create-property-builder)]
-        (build-property property-builder "/lat" 45)
-        (build-property property-builder "/lng" 90)
-        (build-triple triple-builder "/coords" "coords-A" property-builder)
-        (build-node node-builder "/place" :library triple-builder))
+    (build-node node-builder "/person" :ms-peacock
+      {"/name" "Ms Peacock",
+       "/location" :library,
+       "/parent" :mr-green})
+    (build-node node-builder "/person" :mr-green
+      {"/name" "Mr Green",
+       "/location" :library,
+       "/parent" :ms-white})
+    (build-node node-builder "/person" :ms-white
+      {"/name" "Ms White",
+       "/location" :library,
+       "/parent" :ms-peacock})
+    (build-node node-builder "/place" :library
+      {"/coords" ["coords-A" {"/lat" 45, "/lng" 90}]})
     (testing "Validate custom whole-graph constraints"
       (is (= #{"Found parentage cycle with #{:mr-green :ms-peacock :ms-white}"}
              (do-validate node-builder))))))

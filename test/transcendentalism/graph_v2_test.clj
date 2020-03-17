@@ -15,8 +15,8 @@
   (into #{} (map to-v properties)))
 
 (deftest empty-graph-test
-  (let [graph-builder (create-graph-builder),
-        graph (create-graph (get-built-graph graph-builder {}))]
+  (let [graph (create-graph (get-built-graph (create-graph-builder)
+                                             (create-node-builder)))]
     (testing "Test empty graph"
       (is (= #{} (get-all-types graph))))))
 
