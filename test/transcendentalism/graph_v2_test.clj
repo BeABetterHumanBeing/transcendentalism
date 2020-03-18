@@ -333,13 +333,13 @@
           (is (= :smith (gq querier query :chad)))
           ; What is the Church's occupation?
           (is (empty? (gq querier query :church))))
-        (let [query-relationships (with-meta (q-prop "/relationship")
-                                             {:get-val true, :unique true})
+        (let [query-relationship (with-meta (q-prop "/relationship")
+                                            {:get-val true, :unique true})
               query (with-meta (q-chain (q-pred "/relative"
                                                 (prune-unless
                                                   #(= :spouse
                                                       (gq querier
-                                                          query-relationships
+                                                          query-relationship
                                                           %)))) (q-node)
                                         (q-pred "/name"))
                                {:get-obj true})]
@@ -371,4 +371,73 @@
           ; What places are transitively near the Church?
           (is (= #{"Church" "Home" "Smithy" "Forest" "Storehouse"}
                  (gq querier query :church))))
-        ))))
+        (let [warm-query (with-meta (q-chain (q-pred "/climate")
+                                             (q-prop "/is_warm"))
+                                    {:get-val true,
+                                     :unique true})
+              query (with-meta (q-chain (q-pred "/works_at") (q-node)
+                                        (q-pred "/nearby")
+                                        (q-node
+                                          (prune-unless
+                                            #(= false
+                                                (gq querier warm-query %))))
+                                        (q-pred "/name"))
+                               {:get-obj true})]
+          ; Cold places near where Greg works?
+          (is (= #{"Forest"} (gq querier query :greg)))
+          ; Cold places near where Wilma works?
+          (is (= #{} (gq querier query :wilma))))
+        (let [query-relationship (with-meta (q-prop "/relationship")
+                                            {:get-val true, :unique true}),
+              query (with-meta (q-chain
+                                 (q-pred "/relative"
+                                         (prune-unless
+                                           #(= :parent
+                                               (gq querier query-relationship %)))) (q-node)
+                                 (q-pred "/relative"
+                                         (prune-unless
+                                           #(= :child
+                                               (gq querier query-relationship %)))) (q-node)
+                                 (q-pred "/name"))
+                               {:get-obj true})]
+          ; Children of Alice's parents?
+          (is (= #{"Alice" "Greg"} (gq querier query :alice))))
+        (let [query-relationship (with-meta (q-prop "/relationship")
+                                            {:get-val true, :unique true}),
+              query (with-meta (q-chain
+                                 (q-pred "/relative"
+                                         (prune-unless
+                                           #(= :parent
+                                               (gq querier query-relationship %))))
+                                 (q-node (prune-unless
+                                           #(= :male
+                                               (gq querier
+                                                   (with-meta (q-pred "/sex")
+                                                              {:get-obj true,
+                                                               :unique true})
+                                                   %))))
+                                 (q-pred "/relative"
+                                         (prune-unless
+                                           #(= :child
+                                               (gq querier query-relationship %)))) (q-node)
+                                 (q-pred "/name"))
+                               {:get-obj true})]
+          ; Children of Alice's father?
+          (is (= #{} (gq querier query :alice))))
+        (let [warm-query (with-meta (q-chain (q-pred "/climate")
+                                             (q-prop "/is_warm"))
+                                    {:get-val true,
+                                     :unique true}),
+              query (with-meta (q-chain (q-or (q-pred "/lives_at")
+                                              (q-pred "/works_at")) (q-node)
+                                        (q-pred "/nearby")
+                                        (q-node
+                                          (prune-unless
+                                            #(= true
+                                                (gq querier warm-query %))))
+                                        (q-pred "/name"))
+                               {:get-obj true})]
+          ; Warm places near where Wilma lives or works?
+          (is (= #{"Home" "Smithy"} (gq querier query :wilma)))
+          ; Warm places near where Greg lives or works?
+          (is (= #{} (gq querier query :greg))))))))
