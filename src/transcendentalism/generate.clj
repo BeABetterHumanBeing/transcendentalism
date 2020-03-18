@@ -132,7 +132,7 @@
             contents
             (apply str
                    (map #(render-item renderer
-                                      (get-node graph
+                                      (get-node-v1 graph
                                         (get-unique graph % "/segment/contains")))
                         (transitive-closure
                           graph block-sub "/segment/flow/inline")))]
@@ -144,7 +144,7 @@
                 (str/join ", " (map :obj authors)))
               contents))))
     (render-item [renderer node]
-      (let [item-type (filter #(not (= % "/type/item")) (get-types node))]
+      (let [item-type (filter #(not (= % "/type/item")) (get-types-v1 node))]
         (case (first item-type)
           "/type/item/poem" (render-poem renderer node),
           "/type/item/big_emoji" (render-big-emoji renderer node),
@@ -244,7 +244,7 @@
       (let [labels-n-cells
               (filter #(contains? #{"/item/table/label",
                                     "/item/table/cell"} (:pred %))
-                      (get-triples node))
+                      (get-triples-v1 node))
             row-max (apply max (map #(property % "/row" -1) labels-n-cells)),
             col-max (apply max (map #(property % "/column" -1) labels-n-cells)),
             triples-by-row (group-by #(property % "/row" -1) labels-n-cells)]
@@ -321,29 +321,29 @@
   "Follows a sequence of inline segments, collecting their definitions"
   [graph sub]
   (let [gq-result
-        (gq
+        (gq-v1
          graph
-         (q-chain
+         (q-chain-v1
            (q-kleene (fn [sub data i] (assoc data :inline i))
-             (q-pred "/segment/flow/inline"))
-           (q-pred "/segment/contains")
+             (q-pred-v1 "/segment/flow/inline"))
+           (q-pred-v1 "/segment/contains")
            (q-kleene (fn [sub data i] (assoc data :in-item i))
-             (q-chain
-               (q-or (q-pred "/item/q_and_a/question")
-                     (q-pred "/item/q_and_a/answer")
-                     (q-pred (fn [triple data]
-                               (merge data {:row (property triple "/row" -1),
-                                            :col (property triple "/col" -1)}))
-                             "/item/table/cell")
-                     (q-pred "/item/bullet_list/header")
-                     (q-pred (fn [triple data]
-                               (assoc data :order (property triple "/order" 0)))
-                             "/item/bullet_list/point"))
+             (q-chain-v1
+               (q-or-v1 (q-pred-v1 "/item/q_and_a/question")
+                        (q-pred-v1 "/item/q_and_a/answer")
+                        (q-pred-v1 (fn [triple data]
+                                     (merge data {:row (property triple "/row" -1),
+                                                  :col (property triple "/col" -1)}))
+                                   "/item/table/cell")
+                        (q-pred-v1 "/item/bullet_list/header")
+                        (q-pred-v1 (fn [triple data]
+                                     (assoc data :order (property triple "/order" 0)))
+                                   "/item/bullet_list/point"))
                (q-kleene (fn [sub data i] (assoc data :in-item-inline i))
                  ; Assumes questions, answers, and points are single-blocked.
-                 (q-pred "/segment/flow/inline"))
-               (q-pred "/segment/contains")))
-           (q-pred "/item/inline/definition"))
+                 (q-pred-v1 "/segment/flow/inline"))
+               (q-pred-v1 "/segment/contains")))
+           (q-pred-v1 "/item/inline/definition"))
          sub),
         sorted-gq-result
         (sort (compare-by-priority gq-result
@@ -355,29 +355,29 @@
   "Follows a sequence of inline segments, collecting their tangents"
   [graph sub]
   (let [gq-result
-        (gq
+        (gq-v1
          graph
-         (q-chain
+         (q-chain-v1
            (q-kleene (fn [sub data i] (assoc data :inline i))
-             (q-pred "/segment/flow/inline"))
-           (q-pred "/segment/contains")
+             (q-pred-v1 "/segment/flow/inline"))
+           (q-pred-v1 "/segment/contains")
            (q-kleene (fn [sub data i] (assoc data :in-item i))
-             (q-chain
-               (q-or (q-pred "/item/q_and_a/question")
-                     (q-pred "/item/q_and_a/answer")
-                     (q-pred (fn [triple data]
-                               (merge data {:row (property triple "/row" -1),
-                                            :col (property triple "/col" -1)}))
-                             "/item/table/cell")
-                     (q-pred "/item/bullet_list/header")
-                     (q-pred (fn [triple data]
-                               (assoc data :order (property triple "/order" 0)))
-                             "/item/bullet_list/point"))
+             (q-chain-v1
+               (q-or-v1 (q-pred-v1 "/item/q_and_a/question")
+                        (q-pred-v1 "/item/q_and_a/answer")
+                        (q-pred-v1 (fn [triple data]
+                                     (merge data {:row (property triple "/row" -1),
+                                                  :col (property triple "/col" -1)}))
+                                   "/item/table/cell")
+                        (q-pred-v1 "/item/bullet_list/header")
+                        (q-pred-v1 (fn [triple data]
+                                     (assoc data :order (property triple "/order" 0)))
+                                   "/item/bullet_list/point"))
                (q-kleene (fn [sub data i] (assoc data :in-item-inline i))
                  ; Assumes questions, answers, and points are single-blocked.
-                 (q-pred "/segment/flow/inline"))
-               (q-pred "/segment/contains")))
-           (q-pred "/item/inline/tangent"))
+                 (q-pred-v1 "/segment/flow/inline"))
+               (q-pred-v1 "/segment/contains")))
+           (q-pred-v1 "/item/inline/tangent"))
          sub),
         sorted-gq-result
         (sort (compare-by-priority gq-result
@@ -578,7 +578,7 @@
           (println
             "Generated"
             sub
-            (str "\"" (unique-or-nil (get-node graph sub) "/essay/title") "\"")
+            (str "\"" (unique-or-nil (get-node-v1 graph sub) "/essay/title") "\"")
             filename))))
     (spit "output/styles.css" (stylesheet))
     (if (flag :static-html) nil (spit "output/script.js" (script)))))

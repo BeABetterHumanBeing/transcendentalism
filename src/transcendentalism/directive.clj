@@ -38,19 +38,19 @@
     (reduce
       (fn [result essay-sub]
         (let [see_alsos (keys
-              (gq
+              (gq-v1
                 graph
-                (q-chain
-                  (q-pred "/essay/contains")
+                (q-chain-v1
+                  (q-pred-v1 "/essay/contains")
                   gq-segment-to-item
                   gq-item-to-item
                   ; Because the see_also link may be buried in a tangent...
                   (q-kleene
-                    (q-chain
-                      (q-pred "/item/inline/tangent")
+                    (q-chain-v1
+                      (q-pred-v1 "/item/inline/tangent")
                       gq-segment-to-item
                       gq-item-to-item))
-                  (q-pred "/item/inline/see_also"))
+                  (q-pred-v1 "/item/inline/see_also"))
                essay-sub))]
           (concat result
             (into []

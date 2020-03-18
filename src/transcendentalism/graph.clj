@@ -30,7 +30,7 @@
     {} triples))
 
 ; The Graph protocol is the interface through which a graph is accessed.
-(defprotocol Graph
+(defprotocol GraphV1
   (all-triples [graph] [graph sub] [graph sub pred]
     "Returns a collection of all the triples in the graph [for a given [sub and pred]]")
   (all-nodes [graph] [graph type]
@@ -38,13 +38,13 @@
   (transitive-closure [graph sub pred]
     "Returns the sub, and all other subs that can be transitively reached by
      following pred")
-  (has-type? [graph sub type] "Returns whether the given sub has the given type.")
+  (has-type-v1? [graph sub type] "Returns whether the given sub has the given type.")
   (get-unique [graph sub pred]
     "Returns the obj of the unique triple on sub with pred, or nil if none exists")
   (get-time [graph sub]
     "Returns the time associated with the given sub, or nil if it has none")
   (get-relation [graph pred] "Returns the subgraph defined by the given pred")
-  (get-node [graph sub] "Returns the subgraph defined by the given sub"))
+  (get-node-v1 [graph sub] "Returns the subgraph defined by the given sub"))
 
 ; A Relation is the subgraph composed of only a single predicate.
 (defprotocol Relation
@@ -54,13 +54,13 @@
   (get-sinks [relation] "Returns all subs that are not subjects in the relation"))
 
 ; A Node is the subgraph that shares a common sub.
-(defprotocol Node
-  (get-types [node] "Returns all types asserted on the node")
+(defprotocol NodeV1
+  (get-types-v1 [node] "Returns all types asserted on the node")
   (get-ordered-objs [node pred]
     "Returns all objects with the given pred, in order")
   (unique-or-nil [node pred]
     "Returns the unique object of the given pred, or nil")
-  (get-triples [node] "Returns all triples asserted on the node"))
+  (get-triples-v1 [node] "Returns all triples asserted on the node"))
 
 (defn- construct-node
   [triples]
@@ -72,8 +72,8 @@
                 (assoc result pred (conj (result pred) triple))
                 (assoc result pred [triple]))))
           {} triples)]
-    (reify Node
-      (get-types [node]
+    (reify NodeV1
+      (get-types-v1 [node]
         (map :pred (filter #(str/starts-with? (:pred %) "/type") triples)))
       (get-ordered-objs [node pred]
         (map :obj
@@ -85,7 +85,7 @@
           (if (empty? selected)
             nil
             (:obj (first selected)))))
-      (get-triples [node] triples))))
+      (get-triples-v1 [node] triples))))
 
 (defn- construct-relation
   [relation-map]
@@ -112,7 +112,7 @@
   "Constructs a graph from a set of triples"
   [triples]
   (let [graph-data (index-by-sub triples)]
-    (reify Graph
+    (reify GraphV1
       (all-triples [graph]
         (flatten (map second (seq graph-data))))
       (all-triples [graph sub-or-pred]
@@ -124,7 +124,7 @@
       (all-nodes [graph]
         (keys graph-data))
       (all-nodes [graph type]
-        (filter #(has-type? graph % type) (all-nodes graph)))
+        (filter #(has-type-v1? graph % type) (all-nodes graph)))
       (transitive-closure [graph sub pred]
         (loop [results [],
                subs-to-process [sub]]
@@ -135,7 +135,7 @@
                            (map :obj (all-triples graph
                                                   (first subs-to-process)
                                                   pred)))))))
-      (has-type? [graph sub type]
+      (has-type-v1? [graph sub type]
         (if (contains? graph-data sub)
           (not (nil? (some #(= (:pred %) type) (sub graph-data))))
           false))
@@ -159,17 +159,17 @@
                         (result obj)
                         []))))
             {} (all-triples graph pred))))
-      (get-node [graph sub]
+      (get-node-v1 [graph sub]
         (construct-node (sub graph-data))))))
 
 ; Graph Queries provide regex support for graph traversals. Call your query
 ; using gq and using the meta-* versions of the queries if you want your call
 ; to be metadata-aware.
 
-(defn q-pred
+(defn q-pred-v1
   "Query that expands the path along a given pred. Moves tablet data from input
    sub to output sub, optionally calling a provided fn to update the data."
-  ([pred] (q-pred (fn [sub data] data) pred))
+  ([pred] (q-pred-v1 (fn [sub data] data) pred))
   ([f pred]
    (fn [graph tablet]
      (if (empty? tablet)
@@ -188,7 +188,7 @@
                  triples)))
            (keys tablet)))))))
 
-(defn q-chain
+(defn q-chain-v1
   "Query that chains together some number of other queries in sequence"
   [& queries]
   (fn [graph tablet]
@@ -199,7 +199,7 @@
           (query graph result))
         tablet queries))))
 
-(defn q-or
+(defn q-or-v1
   "Query that ORs together other queries, so that any path can be taken"
   [& queries]
   (fn [graph tablet]
@@ -232,7 +232,7 @@
                        {} next-tablet)
                      (inc iteration)))))))))
 
-(defn gq
+(defn gq-v1
   "Executes a metadata-sensitive graph query"
   [graph query sub]
   (query graph {sub {}}))

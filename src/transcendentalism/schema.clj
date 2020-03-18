@@ -106,25 +106,25 @@
 (def gq-segment-to-item
   "Returns a graph query that expands from /type/segment to all /type/item that
    it directly contains through its flows"
-   (q-chain
+   (q-chain-v1
      (q-kleene
-       (q-or (q-pred "/segment/flow/inline")
-             (q-pred "/segment/flow/block")))
-     (q-pred "/segment/contains")))
+       (q-or-v1 (q-pred-v1 "/segment/flow/inline")
+                (q-pred-v1 "/segment/flow/block")))
+     (q-pred-v1 "/segment/contains")))
 
 (def gq-item-to-item
   "Returns a graph query that expands from /type/item to other /type/items that
    are nested within them"
   (q-kleene
-     (q-chain
-       (q-or (q-pred "/item/q_and_a/question")
-             (q-pred "/item/q_and_a/answer")
-             (q-pred "/item/bullet_list/header")
-             (q-pred "/item/bullet_list/point"))
+     (q-chain-v1
+       (q-or-v1 (q-pred-v1 "/item/q_and_a/question")
+                (q-pred-v1 "/item/q_and_a/answer")
+                (q-pred-v1 "/item/bullet_list/header")
+                (q-pred-v1 "/item/bullet_list/point"))
        (q-kleene
          ; Assumes questions, answers, and points are single-blocked.
-         (q-pred "/segment/flow/inline"))
-       (q-pred "/segment/contains"))))
+         (q-pred-v1 "/segment/flow/inline"))
+       (q-pred-v1 "/segment/contains"))))
 
 (defn- pred-counts
   "Returns a map associating predicates with the number of times they appear"
@@ -252,7 +252,7 @@
       (let [domain-type (get-domain-type schema (:pred triple))]
         (conj result
           (if (or (nil? domain-type)
-                  (has-type? graph (:sub triple) domain-type))
+                  (has-type-v1? graph (:sub triple) domain-type))
             nil
             (str (:sub triple) " has pred " (:pred triple)
               " but is missing required domain type " domain-type)))))
@@ -271,9 +271,9 @@
       (and (= range-type :time)
            (is-valid-time obj))
       (and (string? range-type)
-           (has-type? graph
-                      (if (vector? obj) (first obj) obj)
-                      range-type))
+           (has-type-v1? graph
+                         (if (vector? obj) (first obj) obj)
+                         range-type))
       (and (vector? range-type)
            (not (nil? (some #(= obj %) range-type))))))
 
@@ -392,7 +392,7 @@
   [schema graph]
   (reduce
     (fn [result sub]
-      (let [types (get-types (get-node graph sub)),
+      (let [types (get-types-v1 (get-node-v1 graph sub)),
             abstract-types (filter #(is-abstract? schema %) types)]
         (reduce
           (fn [result abstract-type]

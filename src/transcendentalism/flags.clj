@@ -21,7 +21,8 @@
     :debugging false,
     :static-html false,
     ; Whether to generate SVGs, or assume that they've already been generated.
-    :generate-svg false, 
+    :generate-svg false,
+    :enable-v2 false,
   }))
 
 (defn set-flags
