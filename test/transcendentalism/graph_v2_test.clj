@@ -312,33 +312,39 @@
        "/climate" ["indoors" {"/is_dry" true,
                               "/is_warm" false}],
        "/nearby" :forest})
-    (let [graph (graph-from-node-builder node-builder)]
+    (let [graph (graph-from-node-builder node-builder),
+          querier (create-graph-querier graph)]
       (testing "Graph queries"
-        (let [query (q-chain (q-pred "/climate") (q-prop "/is_dry"))]
+        (let [query (with-meta (q-chain (q-pred "/climate") (q-prop "/is_dry"))
+                               {:get-val true,
+                                :unique true})]
           ; Is the forest dry?
-          (is (= false (get-val (first (keys (gq graph query (get-node graph :forest)))))))
+          (is (= false (gq querier query :forest)))
           ; Is the smithy dry?
-          (is (= true (get-val (first (keys (gq graph query (get-node graph :smithy)))))))
+          (is (= true (gq querier query :smithy)))
           ; Is Alice dry?
-          (is (empty? (gq graph query (get-node graph :alice)))))
-        (let [query (q-chain (q-pred "/works_at") (q-prop "/occupation"))]
+          (is (empty? (gq querier query :alice))))
+        (let [query (with-meta (q-chain (q-pred "/works_at") (q-prop "/occupation"))
+                               {:get-val true,
+                                :unique true})]
           ; What is Greg's occupation?
-          (is (= :merchant (get-val (first (keys (gq graph query (get-node graph :greg)))))))
+          (is (= :merchant (gq querier query :greg)))
           ; What is Chad's occupation?
-          (is (= :smith (get-val (first (keys (gq graph query (get-node graph :chad)))))))
+          (is (= :smith (gq querier query :chad)))
           ; What is the Church's occupation?
-          (is (empty? (gq graph query (get-node graph :church)))))
-        (let [query (q-chain (q-pred "/relative" (fn [triple data]
-                                                   (let [relationships (get-properties triple "/relationship")]
-                                                     (if (or (empty? relationships)
-                                                             (not (= :spouse (get-val (first relationships)))))
-                                                         nil
-                                                         data))))
-                             (q-node) (q-pred "/name"))]
+          (is (empty? (gq querier query :church))))
+        (let [query-relationships (with-meta (q-prop "/relationship") {:get-val true})
+              query (with-meta (q-chain (q-pred "/relative"
+                                                (fn [triple data]
+                                                  (if (= #{:spouse} (gq querier query-relationships triple))
+                                                      data
+                                                      nil)))
+                                        (q-node) (q-pred "/name"))
+                               {:get-obj true})]
           ; What is Bob's spouse's name?
-          (is (= #{"Alice"} (into #{} (map get-obj (keys (gq graph query (get-node graph :bob)))))))
+          (is (= #{"Alice"} (gq querier query :bob)))
           ; What is Alice's spouse's name?
-          (is (= #{"Bob"} (into #{} (map get-obj (keys (gq graph query (get-node graph :alice)))))))
+          (is (= #{"Bob"} (gq querier query :alice)))
           ; What is Greg's spouse's name?
-          (is (= #{} (into #{} (map get-obj (keys (gq graph query (get-node graph :greg))))))))
+          (is (= #{} (gq querier query :greg))))
         ))))

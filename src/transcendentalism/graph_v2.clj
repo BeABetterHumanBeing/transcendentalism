@@ -333,7 +333,25 @@
                        {} next-tablet)
                      (inc iteration)))))))))
 
-(defn gq
-  "Executes a metadata-sensitive graph query"
-  [graph query node]
-  (query graph {node {}}))
+(defprotocol GraphQuerier
+  (gq [querier query thing] "Executes a graph query")
+  (gq-with-meta [querier query thing] "Executes a metadata-sensitive graph query"))
+
+(defn create-graph-querier
+  [graph]
+  (reify GraphQuerier
+    (gq [querier query thing]
+      (let [result (keys (gq-with-meta querier query thing)),
+            query-meta (meta query),
+            objectified-result
+              (cond
+                (:get-val query-meta false) (into #{} (map get-val result))
+                (:get-obj query-meta false) (into #{} (map get-obj result))
+                :else result)]
+        (if (:unique query-meta false)
+            (if (empty? objectified-result)
+                nil
+                (first objectified-result))
+            objectified-result)))
+    (gq-with-meta [querier query thing]
+      (query graph {(if (keyword? thing) (get-node graph thing) thing) {}}))))
