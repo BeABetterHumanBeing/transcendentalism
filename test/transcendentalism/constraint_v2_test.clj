@@ -186,15 +186,7 @@
     },
   },
   :constraints [
-    (let [allowed-types #{"/type/person" "/type/place" "/type/thing"}]
-      (reify Constraint
-        (validate [constraint _ graph]
-          (reduce
-            (fn [result type]
-              (if (contains? allowed-types type)
-                  result
-                  (conj result (str type " is not an allowed type"))))
-            #{} (get-all-types graph)))))
+    (valid-type-constraint #{"/type/person" "/type/place" "/type/thing"})
   ],
 })
 

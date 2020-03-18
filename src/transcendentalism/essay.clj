@@ -69,7 +69,7 @@
                  (concat result [push-block f])))
              [(first fns)] (rest fns))))
          (add-triples loom [
-           (types schema sub "/essay")
+           (types schema-v1 sub "/essay")
            (->Triple sub "/essay/title" title {})]))
        (knot-root-menu [loom label title]
          (add-triples loom
@@ -113,9 +113,9 @@
                                     (str result " " line)))
                               (first lines) (rest lines))]
            (add-triples loom
-             [(types schema sub "/segment")
+             [(types schema-v1 sub "/segment")
               (->Triple sub "/segment/contains" item-keyword {})
-              (types schema item-keyword "/item/inline")
+              (types schema-v1 item-keyword "/item/inline")
               (->Triple item-keyword "/item/inline/text" joined-lines {})])))
        (knot-tangent [loom virtual-sub lines]
          (let [sub (if (fn? virtual-sub) (virtual-sub loom) virtual-sub),
@@ -156,13 +156,13 @@
          (let [block-sub (major-key loom),
                item-sub (item-sub block-sub)]
            (add-triples loom
-             (concat [(types schema block-sub "/segment"),
+             (concat [(types schema-v1 block-sub "/segment"),
                       (->Triple block-sub "/segment/contains" item-sub {})]
                      (f item-sub)))))
        (knot-poem [loom lines]
          (knot-block-item loom
            (fn [sub]
-             [(types schema sub "/item/poem")
+             [(types schema-v1 sub "/item/poem")
               (map
                 (fn [i]
                   (let [line (nth lines i)]
@@ -171,7 +171,7 @@
        (knot-image [loom url alt-text width height]
          (knot-block-item loom
            (fn [sub]
-             [(types schema sub "/item/image")
+             [(types schema-v1 sub "/item/image")
               (->Triple sub "/item/image/url" url {})
               (->Triple sub "/item/image/alt_text" alt-text {})
               (if (nil? width)
@@ -183,7 +183,7 @@
        (knot-quote [loom q author]
          (knot-block-item loom
            (fn [sub]
-             [(types schema sub "/item/quote")
+             [(types schema-v1 sub "/item/quote")
               (->Triple sub "/item/quote/text" q {})
               (if (nil? author)
                 []
@@ -191,7 +191,7 @@
        (knot-big-emoji [loom emoji]
          (knot-block-item loom
            (fn [sub]
-             [(types schema sub "/item/big_emoji")
+             [(types schema-v1 sub "/item/big_emoji")
               (->Triple sub "/item/big_emoji/emoji" emoji {})])))
        (knot-q-and-a [loom q a]
          (knot-block-item loom
@@ -203,7 +203,7 @@
                  (q q-loom)
                  (a a-loom)
                  (add-triples loom
-                   [(types schema sub "/item/q_and_a")
+                   [(types schema-v1 sub "/item/q_and_a")
                     (->Triple sub "/item/q_and_a/question" q-sub {})
                     (->Triple sub "/item/q_and_a/answer" a-sub {})]))))))
        (knot-list [loom is-ordered header-or-nil items]
@@ -216,7 +216,7 @@
                               ((first %) item-loom))
                            (map vector items item-subs)))
                (concat
-                 (types schema sub "/item/bullet_list")
+                 (types schema-v1 sub "/item/bullet_list")
                  (if (nil? header-or-nil)
                    []
                    (with-fork loom [header-loom header-sub]
@@ -230,12 +230,12 @@
        (knot-contact-email [loom email-address]
          (knot-block-item loom
            (fn [sub]
-             [(types schema sub "/item/contact"),
+             [(types schema-v1 sub "/item/contact"),
               (->Triple sub "/item/contact/email" email-address {})])))
        (knot-thesis [loom line]
          (knot-block-item loom
            (fn [sub]
-             [(types schema sub "/item/thesis"),
+             [(types schema-v1 sub "/item/thesis"),
               (->Triple sub "/item/thesis/contains" line {})])))
        (knot-matrix [loom rows columns contents]
          (knot-block-item loom
@@ -283,16 +283,16 @@
                           (->Triple sub "/item/table/cell" obj {"/row" (:i %),
                                                                 "/column" (:j %)})))
                  contents*))
-               (types schema sub "/item/table")))))
+               (types schema-v1 sub "/item/table")))))
        (knot-html-passthrough [loom html]
          (knot-block-item loom
            (fn [sub]
-             [(types schema sub "/item/raw_html")
+             [(types schema-v1 sub "/item/raw_html")
               (->Triple sub "/item/raw_html/contains" html {})])))
        (knot-definition [loom word part-of-speech definitions]
          (knot-block-item loom
            (fn [sub]
-             [(types schema sub "/item/definition"),
+             [(types schema-v1 sub "/item/definition"),
               (->Triple sub "/item/definition/word" word {}),
               (->Triple sub "/item/definition/part_of_speech" part-of-speech {}),
               (map

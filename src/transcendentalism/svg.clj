@@ -256,18 +256,18 @@
                    (recur (dec cnt) (vertex-map value))))),
         rootname (subname "root" sub (succ 1)),
         inner (fn [lvl n] (subname "inner" lvl (succ (dec n)) (succ n)))]
-    [(types schema (inner 1 1) "/event")
+    [(types schema-v1 (inner 1 1) "/event")
      (->Triple (inner 1 1) "/event/time" (get-hours-ago 2) {})
      (->Triple (inner 1 1) "/event/leads_to" (subname "subject" sub) {})
      (->Triple (inner 1 1) "/event/leads_to" (subname "subject" (succ 1)) {})
      (map
       (fn [n]
-        [(types schema (inner n 1) "/event")
+        [(types schema-v1 (inner n 1) "/event")
          (->Triple (inner n 1) "/event/time" (get-hours-ago (* 2 n)) {})
          (->Triple (inner n 1) "/event/leads_to" (inner (dec n) 1) {})
          (->Triple (inner n 1) "/event/leads_to" (inner (dec n) 2) {})])
       (range 2 6))
-     (types schema rootname "/event")
+     (types schema-v1 rootname "/event")
      (->Triple rootname "/event/time" (get-hours-ago 12) {})
      (->Triple rootname "/event/leads_to" (inner 5 1) {})
      (->Triple rootname "/event/leads_to" (inner 5 2) {})
@@ -294,17 +294,17 @@
         vertex-map (seq-pairs vertex-sequence),
         graph
     (construct-graph (concat (flatten [
-      (types schema :monad "/event")
+      (types schema-v1 :monad "/event")
       (->Triple :monad "/event/time" "past" {})
       (map #(->Triple :monad "/event/leads_to"
              (subname "root" (first %) (second %)) {})
         vertex-map)
       (map #(interior-triples vertex-map %) vertex-sequence)
-      (map #(types schema (subname "subject" %) "/event") vertex-sequence)
+      (map #(types schema-v1 (subname "subject" %) "/event") vertex-sequence)
       (map #(->Triple (subname "subject" %) "/event/time" "present" {})
         vertex-sequence)
      ])))]
-    (assert (validate-graph schema graph))
+    (assert (validate-graph schema-v1 graph))
     graph))
 
 (defn svg-monad

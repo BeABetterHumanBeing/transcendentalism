@@ -5,15 +5,42 @@
      'transcendentalism.graph-v2
      'transcendentalism.schema-data-v2)
 
+(defn- triples-by-pred
+  [triples]
+  (reduce
+    (fn [result triple]
+      (assoc result (:pred triple) (conj (result (:pred triple)) triple)))
+    {} triples))
+
+(defn- triples-to-opv
+  [triples]
+  (reduce
+    (fn [result triple]
+      (conj result [(:obj triple) (:p-vs triple)]))
+    #{} triples))
+
 (defn graph-to-v2
   [old-graph]
-  ; (create-graph (get-built-graph (create-graph-builder) node-builder))
-  (create-graph (get-built-graph (create-graph-builder) (create-node-builder)))
-  )
+  (let [triples (all-triples old-graph),
+        triples-by-sub (index-by-sub triples),
+        node-builder (create-node-builder)]
+    (doall
+      (map
+        (fn [[sub triples]]
+          (let [a-type (subs (:pred (first (filter #(is-type? (:pred %)) triples))) 0 5),
+                popv (reduce-kv
+                       (fn [result pred triples]
+                         (assoc result pred (triples-to-opv triples)))
+                       {} (triples-by-pred triples))]
+            (build-node node-builder a-type sub popv)))
+        triples-by-sub))
+    (create-graph (get-built-graph (create-graph-builder) node-builder))))
 
 (defn validate-graph-v2
   "Validates that a given graph conforms to a given schema."
   [graph-constraints graph]
-  (validate graph-constraints nil graph))
+  (let [errors (validate graph-constraints nil graph)]
+    (doall (map println errors))
+    (empty? errors)))
 
-(def schema-v2 (create-graph-constraints schema-data))
+(def schema (create-graph-constraints schema-data))

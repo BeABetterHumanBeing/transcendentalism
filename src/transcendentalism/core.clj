@@ -40,7 +40,9 @@
   (apply set-flags args)
   (let [graph (collect-essays)]
     (if (if (flag :enable-v2)
-            (validate-graph-v2 schema-v2 (graph-to-v2 graph))
-            (validate-graph schema graph))
-      (generate-output graph)
+            (validate-graph-v2 schema (graph-to-v2 graph))
+            (validate-graph schema-v1 graph))
+      (if (flag :enable-v2)
+        (println "Skipping graph generation")
+        (generate-output graph))
       (println "Graph fails validation!"))))

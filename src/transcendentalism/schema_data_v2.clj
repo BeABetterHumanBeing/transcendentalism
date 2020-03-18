@@ -1,19 +1,26 @@
 (ns transcendentalism.schema-data-v2)
 
+(use 'transcendentalism.constraint-v2)
+
 (defn- schematize-type
   "Expands a partial schema of a given type"
-  [type type-schema schema]
-  (let [full-type (str "/type" type)]
-    (assoc
-      (reduce-kv
-        (fn [result k v]
-          (assoc result
-            (str type k)
-            (assoc v
-              :range-type
-              (if (contains? v :range-type) (:range-type v) full-type))))
-        {} schema)
-      full-type type-schema)))
+  [type type-schema pred-schema]
+  (let [full-type (str "/type" type),
+        predicates (into #{} (map #(str type %) (keys pred-schema))),
+        triple-schema (reduce-kv
+          (fn [result k v]
+            (assoc result
+              (str type k)
+              (assoc v
+                :range-type
+                (if (contains? v :range-type) (:range-type v) full-type))))
+          {} pred-schema),
+        full-schema
+          {full-type (merge type-schema
+                            {:predicates triple-schema,
+                             :constraints [
+                               (valid-pred-constraint (conj predicates full-type))]})}]
+    full-schema))
 
 (def event-schema
   (schematize-type "/event"
@@ -439,7 +446,11 @@
     }))
 
 (def schema-data
-  (merge essay-schema event-schema image-schema quote-schema inline-item-schema
-    poem-schema segment-schema big-emoji-schema item-schema q-and-a-schema
-    bullet-list-schema contact-schema definition-schema table-schema
-    raw-html-schema thesis-schema))
+  (let [types-schema
+          (merge
+            essay-schema event-schema image-schema quote-schema inline-item-schema
+            poem-schema segment-schema big-emoji-schema item-schema q-and-a-schema
+            bullet-list-schema contact-schema definition-schema table-schema
+            raw-html-schema thesis-schema)]
+    {:types types-schema,
+     :constraints [(valid-type-constraint (into #{} (keys types-schema)))]}))

@@ -465,4 +465,4 @@
     (doall (map println errors))
     (empty? errors)))
 
-(def schema (create-schema schema-data))
+(def schema-v1 (create-schema schema-data))
