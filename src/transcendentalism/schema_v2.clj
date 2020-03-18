@@ -27,7 +27,7 @@
     (doall
       (map
         (fn [[sub triples]]
-          (let [a-type (subs (:pred (first (filter #(is-type? (:pred %)) triples))) 0 5),
+          (let [a-type (subs (:pred (first (filter #(is-type? (:pred %)) triples))) 5),
                 popv (reduce-kv
                        (fn [result pred triples]
                          (assoc result pred (triples-to-opv triples)))

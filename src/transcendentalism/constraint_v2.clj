@@ -259,14 +259,3 @@
               result
               (conj result (str type " is not an allowed type"))))
         #{} (get-all-types graph)))))
-
-(defn valid-pred-constraint
-  [valid-preds]
-  (reify Constraint
-    (validate [constraint graph node]
-      (reduce
-        (fn [result pred]
-          (if (contains? valid-preds pred)
-              result
-              (conj result (str pred " is not an allowed pred"))))
-        #{} (get-preds node)))))

@@ -16,10 +16,7 @@
                 (if (contains? v :range-type) (:range-type v) full-type))))
           {} pred-schema),
         full-schema
-          {full-type (merge type-schema
-                            {:predicates triple-schema,
-                             :constraints [
-                               (valid-pred-constraint (conj predicates full-type))]})}]
+          {full-type (merge type-schema {:predicates triple-schema})}]
     full-schema))
 
 (def event-schema
