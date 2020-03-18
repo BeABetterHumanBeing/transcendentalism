@@ -42,39 +42,6 @@
         result
         (assoc result p (set/union (result p #{}) opvs)))))
 
-(defn- convert-to-pvs
-  [pvs]
-  "Converts {\"/prop\" val} to {\"/prop\" #{(->V val)}}.
-   Converts {\"/prop\" #{val}} to {\"/prop\" #{(->V val)}}.
-   Converts {\"/prop\" #{val1 val2 ...}} to {\"/prop\" #{(->V val1) (->V val2) ...}}.
-   Converts {\"/prop\" #{#{v1 v2 ...}}} to {\"/prop\" #{(->V #{v1 v2 ...})}}."
-  (reduce-kv
-    (fn [result p vs]
-      (assoc result p (into #{} (map ->V (if (set? vs) vs #{vs})))))
-    {} pvs))
-
-(defn- convert-to-popvs
-  [popvs]
-  "Converts {\"/pred\" obj}
-     to {\"/pred\" #{(->OPV obj {})}}
-   Converts {\"/pred\" [obj property-builder-or-data]}
-     to {\"/pred\" #{(->OPV obj p-vs)}}
-   Converts {\"/pred\" [[o1 o2 ...]]}
-     to {\"/pred\" #{(->OPV [o1 o2 ...] {})}}
-   Converts {\"/pred\" #{obj1 [obj2 property-builder-or-data] ...}}
-     to {\"/pred\" #{(->OPV obj1 {}) (->OPV obj2 p-vs) ...}}
-   Where convert-to-pvs is used to convert property-builder-or-data to p-vs."
-  (let [to-opv (fn [opv] (if (vector? opv)
-                             (case (count opv)
-                               1 (->OPV (first opv) {})
-                               2 (->OPV (first opv) (convert-to-pvs (second opv)))
-                               (assert (str "Cannot parse " opv " to ->OPV")))
-                             (->OPV opv {})))]
-    (reduce-kv
-      (fn [result p opvs]
-        (assoc result p (into #{} (map to-opv (if (set? opvs) opvs #{opvs})))))
-      {} popvs)))
-
 (defprotocol Property
   (get-val [property])
   (to-v [property]))
@@ -151,6 +118,41 @@
   (build-property [builder prop val])
   (get-built-properties [builder]))
 
+(defn- convert-to-pvs
+  [pvs]
+  "Converts {\"/prop\" val} to {\"/prop\" #{(->V val)}}.
+   Converts {\"/prop\" #{val}} to {\"/prop\" #{(->V val)}}.
+   Converts {\"/prop\" #{val1 val2 ...}} to {\"/prop\" #{(->V val1) (->V val2) ...}}.
+   Converts {\"/prop\" #{#{v1 v2 ...}}} to {\"/prop\" #{(->V #{v1 v2 ...})}}."
+  (if (satisfies? PropertyBuilder pvs)
+      (get-built-properties pvs)
+      (reduce-kv
+        (fn [result p vs]
+          (assoc result p (into #{} (map ->V (if (set? vs) vs #{vs})))))
+        {} pvs)))
+
+(defn- convert-to-popvs
+  [popvs]
+  "Converts {\"/pred\" obj}
+     to {\"/pred\" #{(->OPV obj {})}}
+   Converts {\"/pred\" [obj property-builder-or-data]}
+     to {\"/pred\" #{(->OPV obj p-vs)}}
+   Converts {\"/pred\" [[o1 o2 ...]]}
+     to {\"/pred\" #{(->OPV [o1 o2 ...] {})}}
+   Converts {\"/pred\" #{obj1 [obj2 property-builder-or-data] ...}}
+     to {\"/pred\" #{(->OPV obj1 {}) (->OPV obj2 p-vs) ...}}
+   Where convert-to-pvs is used to convert property-builder-or-data to p-vs."
+  (let [to-opv (fn [opv] (if (vector? opv)
+                             (case (count opv)
+                               1 (->OPV (first opv) {})
+                               2 (->OPV (first opv) (convert-to-pvs (second opv)))
+                               (assert (str "Cannot parse " opv " to ->OPV")))
+                             (->OPV opv {})))]
+    (reduce-kv
+      (fn [result p opvs]
+        (assoc result p (into #{} (map to-opv (if (set? opvs) opvs #{opvs})))))
+      {} popvs)))
+
 (defn create-property-builder
   []
   (let [my-properties (atom {})]
@@ -166,9 +168,7 @@
   (let [my-triples (atom {})]
     (reify TripleBuilder
       (build-triple [builder pred obj property-builder-or-data]
-        (let [properties (if (satisfies? PropertyBuilder property-builder-or-data)
-                             (get-built-properties property-builder-or-data)
-                             (convert-to-pvs property-builder-or-data))]
+        (let [properties (convert-to-pvs property-builder-or-data)]
           (reset! my-triples
             (assoc @my-triples
               pred (conj (@my-triples pred #{}) (->OPV obj properties))))))
@@ -212,3 +212,128 @@
                        (apply assoc-all result (:s spopv) types)))
                    {} spopvs)]
         (->G s-popvs t-ss)))))
+
+; Graph Queries provide regex support for graph traversals. Call your query
+; using gq.
+
+(defn q-pred
+  "Query that expands a group of Nodes to Triples along a given pred. If a
+   function is provided, calls with the Triple the query moved over, as well as
+   the tablet metadata. Updates metadata with function result, or terminates
+   path if result is nil."
+  ([pred] (q-pred pred (fn [triple data] data)))
+  ([pred f]
+   (fn [graph tablet]
+     {:pre [(every? #(satisfies? Node %) (keys tablet))]}
+     (apply merge
+       (map
+         (fn [node]
+           (let [prev-data (tablet node),
+                 triples (get-triples node pred)]
+             (reduce
+               (fn [result triple]
+                 (let [new-data (f triple prev-data)]
+                   (if (nil? new-data)
+                       result
+                       (assoc result triple new-data))))
+               {} triples)))
+         (keys tablet))))))
+
+(defn q-prop
+  "Query that expands a group of Triples to Properties along a given prop. If a
+   function is provided, calls with the Property the query moved over, as well
+   as the tablet metadata. Updates metadata with function result, or terminates
+   path if result is nil."
+   ([prop] (q-prop prop (fn [property data] data)))
+   ([prop f]
+    (fn [graph tablet]
+      {:pre [(every? #(satisfies? Triple %) (keys tablet))]}
+      (apply merge
+        (map
+          (fn [triple]
+            (let [prev-data (tablet triple),
+                  properties (get-properties triple prop)]
+              (reduce
+                (fn [result property]
+                  (let [new-data (f property prev-data)]
+                    (if (nil? new-data)
+                        result
+                        (assoc result property new-data))))
+                {} properties)))
+          (keys tablet))))))
+
+(defn q-node
+  "Query that cross-references the objects of a group of Triples to their
+   corresponding Nodes. Terminates paths that do not correspond to nodes. If a
+   function is provided, calls with the Node the query moved to, as well as the
+   tablet metadata. Updates metadata with function result, or terminates path
+   if result is nil."
+  ([] (q-node (fn [node data] data)))
+  ([f]
+   (fn [graph tablet]
+     {:pre [(every? #(satisfies? Triple %) (keys tablet))]}
+     (apply merge
+       (map
+         (fn [triple]
+           (let [prev-data (tablet triple),
+                 node (get-node graph (get-obj triple))]
+             (if (nil? node)
+                 {}
+                 (let [new-data (f node prev-data)]
+                   (if (nil? new-data)
+                       {}
+                       {node new-data})))))
+         (keys tablet))))))
+
+(defn q-chain
+  "Query that chains together some number of other {q-pred q-chain q-star q-or}
+   queries, which may optionally have q-nodes interspersed between them. Passes
+   metadata along through the queries, creating implicit q-nodes as necessary."
+  [& queries]
+  (fn [graph tablet]
+    {:pre [(every? #(satisfies? Node %) (keys tablet))]}
+    (if (empty? tablet)
+      {} ; Early return optimization
+      (reduce
+        (fn [result query]
+          (query graph result))
+        tablet queries))))
+
+(defn q-or
+  "Query that ORs together other queries, so that any path can be taken"
+  [& queries]
+  (fn [graph tablet]
+    (if (empty? tablet)
+      {} ; Early return optimization
+      (apply merge (map #(% graph tablet) queries)))))
+
+(defn q-star
+  "Query that applies the kleene-star to another query"
+  ([query] (q-star (fn [node data i] data) query))
+  ([f query]
+    (fn [graph tablet]
+      {:pre [(every? #(satisfies? Node %) (keys tablet))]}
+      (let [process (fn [data i]
+                      (reduce-kv
+                        (fn [result k v]
+                          (assoc result k (f k v i)))
+                       {} data))]
+        (loop [result (process tablet 0),
+               unprocessed result,
+               iteration 1]
+          (if (empty? unprocessed)
+            result
+            (let [next-tablet (process (query graph unprocessed) iteration)]
+              (recur (merge result next-tablet)
+                     (reduce-kv
+                       (fn [result k v]
+                         (if (contains? result k)
+                           result
+                           (assoc result k v)))
+                       {} next-tablet)
+                     (inc iteration)))))))))
+
+(defn gq
+  "Executes a metadata-sensitive graph query"
+  [graph query node]
+  (query graph {node {}}))

@@ -14,6 +14,10 @@
   [properties]
   (into #{} (map to-v properties)))
 
+(defn- graph-from-node-builder
+  [node-builder]
+  (create-graph (get-built-graph (create-graph-builder) node-builder)))
+
 (deftest empty-graph-test
   (let [graph (create-graph (get-built-graph (create-graph-builder)
                                              (create-node-builder)))]
@@ -25,7 +29,7 @@
     (build-node node-builder "/a" :a1 {})
     (build-node node-builder "/a" :a2 {})
     (build-node node-builder "/b" :b1 {})
-    (let [graph (create-graph (get-built-graph (create-graph-builder) node-builder)),
+    (let [graph (graph-from-node-builder node-builder),
           expected-a1 (->SPOPV :a1 {"/type/a" #{nil}}),
           expected-a2 (->SPOPV :a2 {"/type/a" #{nil}}),
           expected-b1 (->SPOPV :b1 {"/type/b" #{nil}})]
@@ -55,7 +59,7 @@
       (build-triple triple-builder "/foo" "foo2" {})
       (build-triple triple-builder "/bar" "bar1" {})
       (build-node node-builder "/a" :a3 triple-builder))
-    (let [graph (create-graph (get-built-graph (create-graph-builder) node-builder)),
+    (let [graph (graph-from-node-builder node-builder),
           expected-foo1 (->OPV "foo1" {}),
           expected-foo2 (->OPV "foo2" {}),
           expected-bar1 (->OPV "bar1" {}),
@@ -111,7 +115,7 @@
       (build-property prop-builder "/re" 333)
       (build-triple pred-builder "/foo" "foo2" prop-builder)
       (build-node node-builder "/a" :a3 pred-builder))
-    (let [graph (create-graph (get-built-graph (create-graph-builder) node-builder)),
+    (let [graph (graph-from-node-builder node-builder),
           expected-do (->V 111),
           expected-re1 (->V 222),
           expected-re2 (->V 333),
@@ -174,3 +178,167 @@
             (is (= expected-do (to-v (first do-props-a3-foo2))))
             (is (= expected-re1 (to-v (first prop-a3-foo2-re1))))
             (is (= expected-re2 (to-v (first prop-a3-foo2-re2))))))))))
+
+(deftest graph-builder-shorthand-test
+  (testing "GraphBuilder shorthands"
+    (let [triple-builder-1 (create-triple-builder),
+          property-builder (create-property-builder),
+          triple-builder-2 (create-triple-builder)]
+      (build-property property-builder "/my_prop" 111)
+      (build-triple triple-builder-1 "/my_pred" "My Obj" property-builder)
+      (build-triple triple-builder-2 "/my_pred" "My Obj" {"/my_prop" 111})
+      (is (= (get-built-triples triple-builder-1)
+             (get-built-triples triple-builder-2))))
+    (let [triple-builder-1 (create-triple-builder),
+          property-builder (create-property-builder),
+          triple-builder-2 (create-triple-builder)]
+      (build-property property-builder "/my_prop" 111)
+      (build-triple triple-builder-1 "/my_pred" "My Obj" property-builder)
+      (build-triple triple-builder-2 "/my_pred" "My Obj" {"/my_prop" #{111}})
+      (is (= (get-built-triples triple-builder-1)
+             (get-built-triples triple-builder-2))))
+    (let [triple-builder-1 (create-triple-builder),
+          property-builder (create-property-builder),
+          triple-builder-2 (create-triple-builder)]
+      (build-property property-builder "/my_prop" 111)
+      (build-property property-builder "/my_prop" 222)
+      (build-property property-builder "/my_prop" 333)
+      (build-triple triple-builder-1 "/my_pred" "My Obj" property-builder)
+      (build-triple triple-builder-2 "/my_pred" "My Obj" {"/my_prop" #{111 222 333}})
+      (is (= (get-built-triples triple-builder-1)
+             (get-built-triples triple-builder-2))))
+    (let [triple-builder-1 (create-triple-builder),
+          property-builder (create-property-builder),
+          triple-builder-2 (create-triple-builder)]
+      (build-property property-builder "/my_prop" #{111 222 333})
+      (build-triple triple-builder-1 "/my_pred" "My Obj" property-builder)
+      (build-triple triple-builder-2 "/my_pred" "My Obj" {"/my_prop" #{#{111 222 333}}})
+      (is (= (get-built-triples triple-builder-1)
+             (get-built-triples triple-builder-2))))
+    (let [node-builder-1 (create-node-builder),
+          triple-builder (create-triple-builder),
+          node-builder-2 (create-node-builder)]
+      (build-triple triple-builder "/my_pred" 111 {})
+      (build-node node-builder-1 "/type/a" :n1 triple-builder)
+      (build-node node-builder-2 "/type/a" :n1 {"/my_pred" 111})
+      (is (= (get-built-nodes node-builder-1)
+             (get-built-nodes node-builder-2))))
+    (let [node-builder-1 (create-node-builder),
+          triple-builder (create-triple-builder),
+          node-builder-2 (create-node-builder),
+          property-builder (create-property-builder)]
+      (build-property property-builder "/my_prop" "My Val")
+      (build-triple triple-builder "/my_pred" 111 property-builder)
+      (build-node node-builder-1 "/type/a" :n1 triple-builder)
+      (build-node node-builder-2 "/type/a" :n1 {"/my_pred" [111 property-builder]})
+      (is (= (get-built-nodes node-builder-1)
+             (get-built-nodes node-builder-2))))
+    (let [node-builder-1 (create-node-builder),
+          triple-builder (create-triple-builder),
+          node-builder-2 (create-node-builder)]
+      (build-triple triple-builder "/my_pred" [111 222 333] {})
+      (build-node node-builder-1 "/type/a" :n1 triple-builder)
+      (build-node node-builder-2 "/type/a" :n1 {"/my_pred" [[111 222 333]]})
+      (is (= (get-built-nodes node-builder-1)
+             (get-built-nodes node-builder-2))))
+    (let [node-builder-1 (create-node-builder),
+          triple-builder (create-triple-builder),
+          node-builder-2 (create-node-builder),
+          property-builder (create-property-builder)]
+      (build-triple triple-builder "/my_pred" 111 {})
+      (build-property property-builder "/my_prop" "My Val")
+      (build-triple triple-builder "/my_pred" 222 property-builder)
+      (build-node node-builder-1 "/type/a" :n1 triple-builder)
+      (build-node node-builder-2 "/type/a" :n1 {"/my_pred" #{111 [222 property-builder]}})
+      (is (= (get-built-nodes node-builder-1)
+             (get-built-nodes node-builder-2))))))
+
+(deftest graph-query-test
+  (let [node-builder (create-node-builder)]
+    (build-node node-builder "/type/person" :bob
+      {"/name" "Bob",
+       "/sex" :male,
+       "/lives_at" :home,
+       "/works_at" [:smithy {"/occupation" :smith}],
+       "/relative" #{[:alice {"/relationship" :spouse}]
+                     [:chad {"/relationship" :enemy}]}})
+    (build-node node-builder "/type/person" :alice
+      {"/name" "Alice",
+       "/sex" :female,
+       "/lives_at" :home,
+       "/relative" #{[:bob {"/relationship" :spouse}]
+                     [:wilma {"/relationship" :parent}]}})
+    (build-node node-builder "/type/person" :wilma
+      {"/name" "Wilma",
+       "/sex" :female,
+       "/lives_at" :home,
+       "/works_at" [:church {"/occupation" :priest}],
+       "/relative" #{[:alice {"/relationship" :child}]
+                     [:greg {"/relationship" :child}]}})
+    (build-node node-builder "/type/person" :chad
+      {"/name" "Chad",
+       "/sex" :male,
+       "/lives_at" :forest,
+       "/works_at" [:smithy {"/occupation" :smith}],
+       "/relative" #{[:wilma {"/relationship" :enemy}]
+                     [:greg {"/relationship" :enemy}]}})
+    (build-node node-builder "/type/person" :greg
+      {"/name" "Greg",
+       "/sex" :male,
+       "/works_at" [:storehouse {"/occupation" :merchant}]
+       "/relative" [:wilma {"/relationship" :parent}]})
+    (build-node node-builder "/type/place" :church
+      {"/name" "Church",
+       "/climate" ["indoors" {"/is_dry" true,
+                              "/is_warm" false}],
+       "/nearby" :home})
+    (build-node node-builder "/type/place" :home
+      {"/name" "Home",
+       "/climate" ["indoors" {"/is_dry" true,
+                              "/is_warm" true}],
+       "/nearby" #{:church :smithy}})
+    (build-node node-builder "/type/place" :smithy
+      {"/name" "Smithy",
+       "/climate" ["indoors" {"/is_dry" true,
+                              "/is_warm" true}],
+       "/nearby" #{:home :forest}})
+    (build-node node-builder "/type/place" :forest
+      {"/name" "Forest",
+       "/climate" ["indoors" {"/is_dry" false,
+                              "/is_warm" false}],
+       "/nearby" #{:smithy :storehouse}})
+    (build-node node-builder "/type/place" :storehouse
+      {"/name" "Storehouse",
+       "/climate" ["indoors" {"/is_dry" true,
+                              "/is_warm" false}],
+       "/nearby" :forest})
+    (let [graph (graph-from-node-builder node-builder)]
+      (testing "Graph queries"
+        (let [query (q-chain (q-pred "/climate") (q-prop "/is_dry"))]
+          ; Is the forest dry?
+          (is (= false (get-val (first (keys (gq graph query (get-node graph :forest)))))))
+          ; Is the smithy dry?
+          (is (= true (get-val (first (keys (gq graph query (get-node graph :smithy)))))))
+          ; Is Alice dry?
+          (is (empty? (gq graph query (get-node graph :alice)))))
+        (let [query (q-chain (q-pred "/works_at") (q-prop "/occupation"))]
+          ; What is Greg's occupation?
+          (is (= :merchant (get-val (first (keys (gq graph query (get-node graph :greg)))))))
+          ; What is Chad's occupation?
+          (is (= :smith (get-val (first (keys (gq graph query (get-node graph :chad)))))))
+          ; What is the Church's occupation?
+          (is (empty? (gq graph query (get-node graph :church)))))
+        (let [query (q-chain (q-pred "/relative" (fn [triple data]
+                                                   (let [relationships (get-properties triple "/relationship")]
+                                                     (if (or (empty? relationships)
+                                                             (not (= :spouse (get-val (first relationships)))))
+                                                         nil
+                                                         data))))
+                             (q-node) (q-pred "/name"))]
+          ; What is Bob's spouse's name?
+          (is (= #{"Alice"} (into #{} (map get-obj (keys (gq graph query (get-node graph :bob)))))))
+          ; What is Alice's spouse's name?
+          (is (= #{"Bob"} (into #{} (map get-obj (keys (gq graph query (get-node graph :alice)))))))
+          ; What is Greg's spouse's name?
+          (is (= #{} (into #{} (map get-obj (keys (gq graph query (get-node graph :greg))))))))
+        ))))
