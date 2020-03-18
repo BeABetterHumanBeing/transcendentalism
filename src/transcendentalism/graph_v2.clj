@@ -313,24 +313,36 @@
   ([f query]
     (fn [graph tablet]
       {:pre [(every? #(satisfies? Node %) (keys tablet))]}
-      (let [process (fn [data i]
+      (let [key-of (fn [node] (to-spopv node)),
+            tablet-to-process (fn [tablet]
+                                (reduce-kv
+                                  (fn [result k v]
+                                    (assoc result (key-of k) [k v]))
+                                  {} tablet)),
+            process-to-tablet (fn [result]
+                                (reduce-kv
+                                  (fn [result k v]
+                                    (assoc result (first v) (second v)))
+                                  {} result)),
+            process (fn [tablet i]
                       (reduce-kv
                         (fn [result k v]
-                          (assoc result k (f k v i)))
-                       {} data))]
-        (loop [result (process tablet 0),
-               unprocessed result,
+                          (assoc result k [(first v) (f (first v) (second v) i)]))
+                       {} (tablet-to-process tablet)))]
+        (loop [final-result (process tablet 0),
+               unprocessed final-result,
                iteration 1]
           (if (empty? unprocessed)
-            result
-            (let [next-tablet (process (query graph unprocessed) iteration)]
-              (recur (merge result next-tablet)
+            (process-to-tablet final-result)
+            (let [next-result (process (query graph (process-to-tablet unprocessed))
+                                       iteration)]
+              (recur (merge final-result next-result)
                      (reduce-kv
                        (fn [result k v]
-                         (if (contains? result k)
+                         (if (contains? final-result k)
                            result
                            (assoc result k v)))
-                       {} next-tablet)
+                       {} next-result)
                      (inc iteration)))))))))
 
 (defprotocol GraphQuerier
@@ -355,3 +367,7 @@
             objectified-result)))
     (gq-with-meta [querier query thing]
       (query graph {(if (keyword? thing) (get-node graph thing) thing) {}}))))
+
+(defn prune-unless
+  [f]
+  (fn [datum data] (if (f datum) data nil)))

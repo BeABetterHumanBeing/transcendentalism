@@ -333,13 +333,15 @@
           (is (= :smith (gq querier query :chad)))
           ; What is the Church's occupation?
           (is (empty? (gq querier query :church))))
-        (let [query-relationships (with-meta (q-prop "/relationship") {:get-val true})
+        (let [query-relationships (with-meta (q-prop "/relationship")
+                                             {:get-val true, :unique true})
               query (with-meta (q-chain (q-pred "/relative"
-                                                (fn [triple data]
-                                                  (if (= #{:spouse} (gq querier query-relationships triple))
-                                                      data
-                                                      nil)))
-                                        (q-node) (q-pred "/name"))
+                                                (prune-unless
+                                                  #(= :spouse
+                                                      (gq querier
+                                                          query-relationships
+                                                          %)))) (q-node)
+                                        (q-pred "/name"))
                                {:get-obj true})]
           ; What is Bob's spouse's name?
           (is (= #{"Alice"} (gq querier query :bob)))
@@ -347,4 +349,26 @@
           (is (= #{"Bob"} (gq querier query :alice)))
           ; What is Greg's spouse's name?
           (is (= #{} (gq querier query :greg))))
+        (let [query-enemy (q-pred "/relative"
+                                  (prune-unless
+                                    #(= :enemy
+                                        (gq querier
+                                            (with-meta (q-prop "/relationship")
+                                                       {:get-val true,
+                                                        :unique true})
+                                            %)))),
+              query (with-meta (q-chain query-enemy (q-node)
+                                        query-enemy (q-node)
+                                        (q-pred "/works_at") (q-node)
+                                        (q-pred "/name"))
+                               {:get-obj true})]
+          ; What are Bob's enemy's enemy's workplaces?
+          (is (= #{"Church" "Storehouse"} (gq querier query :bob))))
+        (let [query (with-meta (q-chain (q-pred "/nearby") (q-node)
+                                        (q-star (q-chain (q-pred "/nearby") (q-node)))
+                                        (q-pred "/name"))
+                               {:get-obj true})]
+          ; What places are transitively near the Church?
+          (is (= #{"Church" "Home" "Smithy" "Forest" "Storehouse"}
+                 (gq querier query :church))))
         ))))
