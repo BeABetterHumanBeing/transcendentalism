@@ -16,6 +16,9 @@
   (reify Constraint
     (validate [constraint graph data] #{})))
 
+(defprotocol Directive
+  (direct [directive graph data] "The set of SPOPV additions to the graph"))
+
 (defprotocol SchemaAccessor
   (get-translator [accessor] "Returns the inner translator")
   (builtin-constraints [accessor])
@@ -97,6 +100,10 @@
           (if (empty? builtin-checks)
               (check-custom-constraints accessor graph data)
               builtin-checks)))
+      Directive
+      (direct [accessor graph data]
+        ; TODO - implement.
+        [])
       )))
 
 (defn- range-type-constraint

@@ -61,7 +61,8 @@
   (get-all-types [graph])
   (get-node [graph node])
   (get-nodes [graph type])
-  (has-type? [graph node type]))
+  (has-type? [graph node type])
+  (to-spopvs [graph]))
 
 (defn create-property
   [v]
@@ -103,10 +104,16 @@
     (get-nodes [graph type]
       (into #{} (map #(create-node (->SPOPV % ((:s-popvs g) %)))
                      ((:t-ss g) type #{}))))
-    (has-type? [graph sub type] (contains? ((:t-ss g) type #{}) sub))))
+    (has-type? [graph sub type] (contains? ((:t-ss g) type #{}) sub))
+    (to-spopvs [graph]
+      (reduce-kv
+        (fn [result s popv]
+          (conj result (->SPOPV s popv)))
+        [] (:s-popvs g)))))
 
 (defprotocol GraphBuilder
-  (get-built-graph [builder node-builder]))
+  (get-built-graph [builder node-builder])
+  (build-graph [builder spopvs]))
 (defprotocol NodeBuilder
   (build-node [builder type sub triple-builder-or-data]
     "Adds a node. triple-builder-or-data can be either a TripleBuilder, or a
@@ -204,8 +211,9 @@
   []
   (reify GraphBuilder
     (get-built-graph [builder node-builder]
-      (let [spopvs (get-built-nodes node-builder),
-            s-popvs (reduce
+      (build-graph builder (get-built-nodes node-builder)))
+    (build-graph [builder spopvs]
+      (let [s-popvs (reduce
                       (fn [result spopv]
                         (assoc result (:s spopv) (:p-opvs spopv)))
                       {} spopvs)
@@ -316,11 +324,10 @@
   ([f query]
     (fn [graph tablet]
       {:pre [(every? #(satisfies? Node %) (keys tablet))]}
-      (let [key-of (fn [node] (to-spopv node)),
-            tablet-to-process (fn [tablet]
+      (let [tablet-to-process (fn [tablet]
                                 (reduce-kv
                                   (fn [result k v]
-                                    (assoc result (key-of k) [k v]))
+                                    (assoc result (to-spopv k) [k v]))
                                   {} tablet)),
             process-to-tablet (fn [result]
                                 (reduce-kv

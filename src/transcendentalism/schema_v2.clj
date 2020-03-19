@@ -62,7 +62,9 @@
 (defn direct-graph
   "Augments graph by the products of any directives in the schema"
   [graph-accessor graph]
-  ; TODO - collect directive results, and merge them back into graph.
-  graph)
+  (let [spopv-additions (direct graph-accessor graph graph),
+        augmented-graph (build-graph (create-graph-builder)
+                                     (concat (to-spopvs graph) spopv-additions))]
+    (create-graph augmented-graph)))
 
 (def schema (create-graph-accessor schema-data))
