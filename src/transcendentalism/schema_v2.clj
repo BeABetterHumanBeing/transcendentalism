@@ -36,11 +36,33 @@
         triples-by-sub))
     (create-graph (get-built-graph (create-graph-builder) node-builder))))
 
+(defn graph-to-v1
+  [new-graph]
+  (construct-graph
+    (reduce-all result []
+                [[node (get-all-nodes new-graph)]
+                 [pred (get-preds node)]
+                 [triple (get-triples node pred)]]
+      (let [properties (reduce
+                         (fn [result prop]
+                           ; Based on assumption that all properties in the old
+                           ; graph are unique.
+                           (assoc result
+                             prop (get-val (first (get-properties triple prop)))))
+                         {} (get-props triple))]
+        (conj result (->Triple (get-sub node) pred (get-obj triple) properties))))))
+
 (defn validate-graph-v2
   "Validates that a given graph conforms to a given schema."
-  [graph-constraints graph]
-  (let [errors (validate graph-constraints graph graph)]
+  [graph-accessor graph]
+  (let [errors (validate graph-accessor graph graph)]
     (doall (map println errors))
     (empty? errors)))
+
+(defn direct-graph
+  "Augments graph by the products of any directives in the schema"
+  [graph-accessor graph]
+  ; TODO - collect directive results, and merge them back into graph.
+  graph)
 
 (def schema (create-graph-accessor schema-data))

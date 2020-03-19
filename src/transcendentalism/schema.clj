@@ -13,14 +13,12 @@
 ; The Schema protocal is the interface through which the schema data above is
 ; accessed.
 (defprotocol Schema
-  (is-type? [schema pred] "Whether the given predicate is a type")
   (is-abstract? [schema type] "Whether the given type is abstract")
   (get-supertypes [schema type] "Returns the set of supertypes of a given type"))
 
 (defn create-schema
   [schema-data]
   (reify Schema
-    (is-type? [schema pred] (str/starts-with? pred "/type"))
     (is-abstract? [schema type] ((schema-data type) :abstract false))
     (get-supertypes [schema type]
       (loop [supertypes #{},
@@ -70,15 +68,6 @@
          ; Assumes questions, answers, and points are single-blocked.
          (q-pred-v1 "/segment/flow/inline"))
        (q-pred-v1 "/segment/contains"))))
-
-(defn- pred-counts
-  "Returns a map associating predicates with the number of times they appear"
-  [preds]
-  (reduce
-    (fn [result pred]
-      (assoc result pred (if (contains? result pred) (inc (result pred)) 1)))
-    {}
-    preds))
 
 ; Code validation. The purpose of validation is to check the assumptions that
 ; are made by code generation.
@@ -133,7 +122,7 @@
             (str sub "'s /essay/flow/home does not lead to :monad"))))
       #{} sinks)))
 
-(defn validate-graph
+(defn validate-graph-v1
   "Validates that a given graph conforms to a given schema."
   [schema graph]
   (let

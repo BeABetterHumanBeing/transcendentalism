@@ -38,10 +38,15 @@
   "Validates the website's graph, and generates its files"
   [& args]
   (apply set-flags args)
-  (let [graph (collect-essays)]
-    (if (and (validate-graph-v2 schema (graph-to-v2 graph))
-             (validate-graph schema-v1 graph))
+  (let [graph-v1 (collect-essays),
+        ; Translation must be done into v2 for apply directives.
+        graph-v2 (graph-to-v2 graph-v1),
+        graph-final-v2 (direct-graph schema graph-v2),
+        ; But back to v1 for sxs validation comparison and rendering.
+        graph-final-v1 (graph-to-v1 graph-final-v2)]
+    (if (and (validate-graph-v2 schema graph-final-v2)
+             (validate-graph-v1 schema-v1 graph-final-v1))
       (if (flag :enable-v2)
         (println "Skipping graph generation")
-        (generate-output graph))
+        (generate-output graph-final-v1))
       (println "Graph fails validation!"))))
