@@ -259,3 +259,32 @@
               result
               (conj result (str type " is not an allowed type"))))
         #{} (get-all-types graph)))))
+
+(defn- valid-order-constraint
+  [pred]
+  (reify Constraint
+    (validate [constraint graph node]
+      (let [ordinals
+              (into []
+                (map get-val
+                  (map #(first (get-properties % "/order"))
+                       (get-triples node pred))))]
+        (if (or (empty? ordinals)
+                (apply distinct? ordinals))
+            #{}
+            #{(str "/orders " ordinals " on " pred " are not distinct")})))))
+
+(defn with-order
+  [pred schema]
+  (assoc schema
+    :properties (assoc
+      (schema :properties {})
+      "/order" {
+        :range-type :number,
+        :required true,
+        :unique true,
+      })
+    :meta-constraints (conj
+      (schema :meta-constraints [])
+      (valid-order-constraint pred))
+    ))

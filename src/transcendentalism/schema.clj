@@ -15,9 +15,7 @@
 (defprotocol Schema
   (is-type? [schema pred] "Whether the given predicate is a type")
   (is-abstract? [schema type] "Whether the given type is abstract")
-  (get-supertypes [schema type] "Returns the set of supertypes of a given type")
-  (get-preds-with-property [schema property]
-    "Returns all preds that accept the given property"))
+  (get-supertypes [schema type] "Returns the set of supertypes of a given type"))
 
 (defn create-schema
   [schema-data]
@@ -40,14 +38,7 @@
             ; graph has cycles.
             (recur
               (set/union supertypes super-types)
-              (set/difference (set/union untested-types super-types) #{t}))))))
-    (get-preds-with-property [schema property]
-      (reduce-kv
-        (fn [result k v]
-          (if (contains? (v :properties {}) property)
-            (conj result k)
-            result))
-        #{} schema-data))))
+              (set/difference (set/union untested-types super-types) #{t}))))))))
 
 (defn types
   "Given a sub and list of types (without \"type\" prefix), returns the corresponding type triples."
@@ -110,36 +101,6 @@
             (str sub " has types " types " which require supertypes " supertypes)))))
     #{}
     (all-nodes graph)))
-
-(defn- order-conforms-pred?
-  "Validates that all preds that have order are correctly ordered"
-  [schema graph pred]
-  (let [relation (get-relation graph pred)]
-    (reduce
-      (fn [result sub]
-        (let [ordinals (map #(property % "/order" 0) (all-triples graph sub pred)),
-              ordinal-errors
-                (reduce
-                  (fn [result ordinal]
-                    (if (number? ordinal)
-                      result
-                      (conj result
-                        (str sub " has ordinal " ordinal ", but it's not a number"))))
-                  #{} ordinals)]
-          (if (empty? ordinal-errors)
-            (if (or (empty? ordinals) (apply distinct? ordinals))
-              result
-              (conj result (str sub " has non-distict ordinals: " ordinals)))
-            (set/union result ordinal-errors))))
-      #{} (participant-nodes relation))))
-
-(defn- order-conforms?
-  "Checks that all preds that have property /order are correctly ordered"
-  [schema graph]
-  (reduce
-    (fn [result pred]
-      (set/union result (order-conforms-pred? schema graph pred)))
-    #{} (get-preds-with-property schema "/order")))
 
 (defn- events-obey-causality?
   "Validates that events' timestamps are strickly before their leads_to"
@@ -217,7 +178,7 @@
       (fn [result validation-check]
         (set/union result (validation-check schema graph)))
       #{}
-      [required-supertypes-exist? order-conforms? events-occur-in-past?
+      [required-supertypes-exist? events-occur-in-past?
        events-obey-causality? home-is-monad-rooted-dag? no-abstract-subs?]),
      ; nil ends up in the set, and ought to be weeded out.
      ; TODO - weed out nil. (conj #{} nil) adds nil to the set.

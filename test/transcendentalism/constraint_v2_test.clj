@@ -42,27 +42,9 @@
           :required true,
           :unique true,
         },
-        "/favorite_thing" {
+        "/favorite_thing" (with-order "/favorite_thing" {
           :range-type "/type/thing",
-          :properties {
-            "/order" {
-              :range-type :number,
-              :required true,
-              :unique true,
-            },
-          },
-          :meta-constraints [
-            (reify Constraint
-              (validate [constraint graph node]
-                (let [fave-things (get-triples node "/favorite_thing"),
-                      fave-orders (map #(first (get-properties % "/order")) fave-things),
-                      fave-ordinals (into [] (map get-val fave-orders))]
-                  (if (or (empty? fave-ordinals)
-                          (apply distinct? fave-ordinals))
-                      #{}
-                      #{(str "/orders " fave-ordinals " are not distinct")}))))
-          ],
-        },
+        }),
       },
       :constraints [
         (reify Constraint
@@ -309,7 +291,7 @@
       (is (= #{"/kind_of_softness requires that /texture be :soft"
                "/kind_of_hardness requires that /texture be :hard"
                "People over 20 can't like hard things"
-               "/orders [1 1] are not distinct"}
+               "/orders [1 1] on /favorite_thing are not distinct"}
              (do-validate node-builder))))))
 
 (deftest whole-graph-custom-constraints-test

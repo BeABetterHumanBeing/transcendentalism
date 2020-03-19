@@ -6,6 +6,7 @@
   "Expands a partial schema of a given type"
   [type type-schema pred-schema]
   (let [full-type (str "/type" type),
+        ; TODO - Remove type name from being a pred prefix.
         predicates (into #{} (map #(str type %) (keys pred-schema))),
         triple-schema (reduce-kv
           (fn [result k v]
@@ -239,19 +240,12 @@
       :super-type "/type/item",
     }
     {
-      "/line" {
+      "/line" (with-order "/item/poem/line" {
         :description
           "A line that appears in the poem, uses :order property to sort",
         :range-type :string,
         :required true,
-        :properties {
-          "/order" {
-            :description "The ordinal of this line in the poem",
-            :range-type :number,
-            :required true,
-          },
-        },
-      },
+      }),
     }))
 
 (def big-emoji-schema
@@ -301,19 +295,12 @@
         :description "What appears above the list to introduce it",
         :range-type "/type/segment",
         :unique true,
-      },
-      "/point" {
+      }
+      "/point" (with-order "/item/bullet_list/point" {
         :description "A bullet-pointed item. Uses :order property to sort",
         :range-type "/type/segment",
         :required true,
-        :properties {
-          "/order" {
-            :description "The ordinal of this point in the bullet list",
-            :range-type :number,
-            :required true,
-          },
-        },
-      },
+      }),
       "/is_ordered" {
         :description "Whether the list should be ordered, or bullet-pointed",
         :range-type :bool,
@@ -356,18 +343,11 @@
         :unique true,
         :required true,
       },
-      "/definition" {
+      "/definition" (with-order "/item/definition/definition" {
         :description "A definition of the word",
         :range-type :string,
         :required true,
-        :properties {
-          "/order" {
-            :description "The ordinal of this definition among others",
-            :range-type :number,
-            :required true,
-          },
-        },
-      },
+      }),
     }))
 
 (def table-schema
