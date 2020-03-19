@@ -57,6 +57,7 @@
   (get-triples [node pred])
   (to-spopv [node]))
 (defprotocol Graph
+  (get-all-nodes [graph])
   (get-all-types [graph])
   (get-node [graph node])
   (get-nodes [graph type])
@@ -91,6 +92,8 @@
 (defn create-graph
   [g]
   (reify Graph
+    (get-all-nodes [graph]
+      (map #(create-node (->SPOPV (first %) (second %))) (:s-popvs g)))
     (get-all-types [graph] (into #{} (keys (:t-ss g))))
     (get-node [graph sub]
       (let [popv ((:s-popvs g) sub nil)]

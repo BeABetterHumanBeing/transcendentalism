@@ -6,10 +6,8 @@
 (use 'transcendentalism.graph-v2
      'transcendentalism.time)
 
-(def test-schema {
-  :types {
+(def types-schema {
     "/type/person" {
-      :super-type "/type/thing",
       :predicates {
         "/name" {
           :range-type :string,
@@ -170,13 +168,24 @@
       :abstract true,
     },
     "/type/non_vacuous" {},
-  },
-  :constraints [
-    (valid-type-constraint #{"/type/person" "/type/place" "/type/thing"
-                             "/type/vacuous" "/type/non_vacuous"})
-    (abstract-type-constraint #{"/type/vacuous"})
-  ],
-})
+    "/type/base_type" {},
+    "/type/derived_type" {
+      :super-type "/type/base_type",
+    },
+    "/type/sub_derived_type" {
+      :super-type "/type/derived_type",
+    },
+  })
+
+(def test-schema
+  {
+    :types types-schema,
+    :constraints [
+      (valid-type-constraint types-schema)
+      (abstract-type-constraint types-schema)
+      (required-supertypes-constraint types-schema)
+    ],
+  })
 
 (def graph-constraints (create-graph-constraints test-schema))
 
@@ -326,4 +335,17 @@
     (build-node node-builder "/vacuous" :v2 {"/type/non_vacuous" nil})
     (testing "Validate abstract nodes are caught"
       (is (= #{":v1 only has abstract types #{\"/type/vacuous\"}"}
+             (do-validate node-builder))))))
+
+(deftest supertype-test
+  (let [node-builder (create-node-builder)]
+    (build-node node-builder "/derived_type" :d1 {}) ; Missing required supertype.
+    (build-node node-builder "/sub_derived_type" :d2
+      {"/type/derived_type" nil}) ; Missing supertype's supertype.
+    (build-node node-builder "/derived_type" :d3 {"/type/base_type" nil})
+    (build-node node-builder "/sub_derived_type" :d4
+      {"/type/derived_type" nil, "/type/base_type" nil})
+    (testing "Validate supertype exceptions are caught"
+      (is (= #{":d1 is missing required supertypes #{\"/type/base_type\"}"
+               ":d2 is missing required supertypes #{\"/type/base_type\"}"}
              (do-validate node-builder))))))

@@ -83,25 +83,6 @@
 ; Code validation. The purpose of validation is to check the assumptions that
 ; are made by code generation.
 
-(defn- required-supertypes-exist?
-  "Validates that required supertypes exist"
-  [schema graph]
-  (reduce
-    (fn [result sub]
-      (conj result
-        (let [types (set (filter #(is-type? schema %)
-                                 (map :pred (all-triples graph sub)))),
-              supertypes (reduce
-                (fn [result type]
-                  (set/union result (get-supertypes schema type)))
-                #{}
-                types)]
-          (if (set/subset? supertypes types)
-            nil
-            (str sub " has types " types " which require supertypes " supertypes)))))
-    #{}
-    (all-nodes graph)))
-
 (defn- events-obey-causality?
   "Validates that events' timestamps are strickly before their leads_to"
   [schema graph]
@@ -160,8 +141,7 @@
       (fn [result validation-check]
         (set/union result (validation-check schema graph)))
       #{}
-      [required-supertypes-exist? events-occur-in-past?
-       events-obey-causality? home-is-monad-rooted-dag?]),
+      [events-occur-in-past? events-obey-causality? home-is-monad-rooted-dag?]),
      ; nil ends up in the set, and ought to be weeded out.
      ; TODO - weed out nil. (conj #{} nil) adds nil to the set.
      errors (set/difference validation-errors #{nil})]

@@ -250,15 +250,16 @@
               builtin-checks))))))
 
 (defn valid-type-constraint
-  [valid-types]
-  (reify Constraint
-    (validate [constraint _ graph]
-      (reduce
-        (fn [result type]
-          (if (contains? valid-types type)
-              result
-              (conj result (str type " is not an allowed type"))))
-        #{} (get-all-types graph)))))
+  [types-schema]
+  (let [valid-types (into #{} (keys types-schema))]
+    (reify Constraint
+      (validate [constraint _ graph]
+        (reduce
+          (fn [result type]
+            (if (contains? valid-types type)
+                result
+                (conj result (str type " is not an allowed type"))))
+          #{} (get-all-types graph))))))
 
 (defn- valid-order-constraint
   [pred]
@@ -290,18 +291,66 @@
     ))
 
 (defn abstract-type-constraint
-  [abstract-types]
-  (reify Constraint
-    (validate [constraint _ graph]
-      (reduce
-        (fn [result type]
-          (let [maybe-abstract-nodes (get-nodes graph type)]
-            (reduce
-              (fn [result node]
-                (let [types (get-types node)]
-                  (if (nil? (some #(not (contains? abstract-types %)) types))
-                      (conj result
-                            (str (get-sub node) " only has abstract types " types))
-                      result)))
-              result maybe-abstract-nodes)))
-        #{} abstract-types))))
+  [types-schema]
+  (let [abstract-types (reduce-kv
+                         (fn [result type schema]
+                           (if (schema :abstract false)
+                               (conj result type)
+                               result))
+                         #{} types-schema)]
+    (reify Constraint
+      (validate [constraint _ graph]
+        (reduce
+          (fn [result type]
+            (let [maybe-abstract-nodes (get-nodes graph type)]
+              (reduce
+                (fn [result node]
+                  (let [types (get-types node)]
+                    (if (nil? (some #(not (contains? abstract-types %)) types))
+                        (conj result
+                              (str (get-sub node) " only has abstract types "
+                                   types))
+                        result)))
+                result maybe-abstract-nodes)))
+          #{} abstract-types)))))
+
+(defn required-supertypes-constraint
+  [types-schema]
+  (let [immediate-supertypes (reduce-kv
+                               (fn [result type schema]
+                                 (let [supertypes (schema :super-type #{})]
+                                   (assoc result
+                                     type (if (set? supertypes)
+                                              supertypes
+                                              #{supertypes}))))
+                               {} types-schema),
+        expand-type-collection (fn [types expansion-mapping]
+                                 (reduce
+                                   (fn [result type]
+                                     (conj (set/union result
+                                             (expansion-mapping type))
+                                           type))
+                                   #{} types))
+        all-supertypes
+          (loop [result immediate-supertypes]
+            (let [next (reduce-kv
+                         (fn [result type supertypes]
+                           (assoc result type
+                             (expand-type-collection supertypes immediate-supertypes)
+                             ))
+                         {} result)]
+              (if (= next result)
+                  result
+                  (recur next))))]
+    (reify Constraint
+      (validate [constraint _ graph]
+        (reduce
+          (fn [result node]
+            (let [types (get-types node),
+                  required-types (expand-type-collection types all-supertypes)]
+              (if (= types required-types)
+                  result
+                  (conj result
+                    (str (get-sub node) " is missing required supertypes "
+                         (set/difference required-types types))))))
+          #{} (get-all-nodes graph))))))
