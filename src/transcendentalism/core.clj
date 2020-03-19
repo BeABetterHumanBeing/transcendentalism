@@ -1,7 +1,8 @@
 (ns transcendentalism.core
   (:require [clojure.string :as str]))
 
-(use 'transcendentalism.directive
+(use 'transcendentalism.constraint-v2
+     'transcendentalism.directive
      'transcendentalism.essay
      'transcendentalism.essays.consciousness
      'transcendentalism.essays.epistemology

@@ -23,8 +23,6 @@
          "and the point to which all things return."])
       "Daniel Gierl")
 
-    ; The monad is the only segment whose home is reflexive.
-    (add-home :monad)
     ^{:no-block true} (fn [t]
       (add-triples t
        (fn [triples]

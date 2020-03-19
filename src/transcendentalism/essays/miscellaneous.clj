@@ -100,8 +100,6 @@
       "your new laundry machine would just be a shim. When you drop your laundry"
       "in the new machine, it would actually get washed by the old machine, but"
       "you wouldn't be able to tell."))
-
-    (add-home :monad)
   )))
 
 (defn singularity
@@ -232,8 +230,6 @@
       "elbow, and nothing but elbow.")
 
     (text "How's your singularity going? Can't complain about mine."))
-
-    (add-home :monad)
   ))
 
 (defn scale-of-humanity
@@ -288,8 +284,6 @@
                                        "background-color:#fff"
                                        (str "left:" (rand-int 1000) "px")
                                        (str "top:" (rand-int height) "px")])}))))
-
-    (add-home :monad)
   ))
 
 (defn miscellaneous-essays

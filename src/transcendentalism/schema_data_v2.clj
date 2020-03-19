@@ -56,6 +56,7 @@
         :description "Relation to the 'parent' essay",
         :required true,
         :unique true,
+        :default :monad,
         :properties {
           "/label" {
             :description "Metadata about the home",

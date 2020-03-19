@@ -167,7 +167,14 @@
     "/type/vacuous" {
       :abstract true,
     },
-    "/type/non_vacuous" {},
+    "/type/non_vacuous" {
+      :predicates {
+        "/language" {
+          :range-type :string,
+          :default "English",
+        },
+      },
+    },
     "/type/base_type" {},
     "/type/derived_type" {
       :super-type "/type/base_type",
@@ -187,12 +194,16 @@
     ],
   })
 
-(def graph-constraints (create-graph-accessor test-schema))
+(def graph-accessor (create-graph-accessor test-schema))
+
+(defn node-to-graph
+  [node-builder]
+  (create-graph (get-built-graph (create-graph-builder) node-builder)))
 
 (defn do-validate
   [node-builder]
-  (let [graph (create-graph (get-built-graph (create-graph-builder) node-builder))]
-    (validate graph-constraints graph graph)))
+  (let [graph (node-to-graph node-builder)]
+    (validate graph-accessor graph graph)))
 
 (deftest simple-graph-test
   (let [node-builder (create-node-builder)]
@@ -349,3 +360,16 @@
       (is (= #{":d1 is missing required supertypes #{\"/type/base_type\"}"
                ":d2 is missing required supertypes #{\"/type/base_type\"}"}
              (do-validate node-builder))))))
+
+(defn- do-direct
+  [node-builder]
+  (direct-graph graph-accessor (node-to-graph node-builder)))
+
+(deftest default-directive-test
+  (let [node-builder (create-node-builder),
+        expected-node-builder (create-node-builder)]
+    (build-node node-builder "/non_vacuous" :a1 {})
+    (build-node expected-node-builder "/non_vacuous" :a1 {"/language" "English"})
+    (testing "Check that default values are correctly added"
+      (is (= (to-spopvs (node-to-graph expected-node-builder))
+             (to-spopvs (do-direct node-builder)))))))

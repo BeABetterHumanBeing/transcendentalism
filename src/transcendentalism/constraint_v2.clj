@@ -204,16 +204,25 @@
               #{}
               #{(str tpp " excludes " exclusions ", but found " overlap)}))))))
 
+(defn- default-value-directive
+  [tpp value translator]
+  (reify Directive
+    (direct [directive graph data]
+      (if (contains? ((get-child-keys translator) data) tpp)
+          []
+          [(->SPOPV ((get-inner-data translator) data) (convert-to-popvs {tpp value}))]
+      ))))
+
 (defn- create-property-interpreter
   [translator]
   (reify BuiltinInterpreter
     (builtin-rule-to-constraint [interpreter key value]
       (case key
-        :range-type (range-type-constraint translator value false)
+        :range-type (range-type-constraint translator value false),
         nil))
     (builtin-meta-rule-to-constraint [interpreter s key value] nil)
     (builtin-rule-to-directive [interpreter key value] nil)
-    (builtin-meta-rule-to-directive [interpreter s key vale] nil)))
+    (builtin-meta-rule-to-directive [interpreter s key value] nil)))
 
 (defn- create-triple-interpreter
   [translator]
@@ -224,14 +233,14 @@
         nil))
     (builtin-meta-rule-to-constraint [interpreter s key value]
       (case key
-        :required (if value (required-constraint s translator) nil)
-        :unique (if value (unique-constraint s translator) nil)
+        :required (if value (required-constraint s translator) nil),
+        :unique (if value (unique-constraint s translator) nil),
         :exclusive (if (empty? value)
                        nil
-                       (exclusive-constraint s translator value))
+                       (exclusive-constraint s translator value)),
         nil))
     (builtin-rule-to-directive [interpreter key value] nil)
-    (builtin-meta-rule-to-directive [interpreter s key vale] nil)))
+    (builtin-meta-rule-to-directive [interpreter s key value] nil)))
 
 (defn- create-node-interpreter
   [translator]
@@ -239,14 +248,17 @@
     (builtin-rule-to-constraint [interpreter key value] nil)
     (builtin-meta-rule-to-constraint [interpreter s key value]
       (case key
-        :required (if value (required-constraint s translator) nil)
-        :unique (if value (unique-constraint s translator) nil)
+        :required (if value (required-constraint s translator) nil),
+        :unique (if value (unique-constraint s translator) nil),
         :exclusive (if (empty? value)
                        nil
-                       (exclusive-constraint s translator value))
+                       (exclusive-constraint s translator value)),
         nil))
     (builtin-rule-to-directive [interpreter key value] nil)
-    (builtin-meta-rule-to-directive [interpreter s key vale] nil)))
+    (builtin-meta-rule-to-directive [interpreter s key value]
+      (case key
+        :default (default-value-directive s value translator),
+        nil))))
 
 (defn- create-graph-interpreter
   []
@@ -254,7 +266,7 @@
     (builtin-rule-to-constraint [interpreter key value] nil)
     (builtin-meta-rule-to-constraint [interpreter s key value] nil)
     (builtin-rule-to-directive [interpreter key value] nil)
-    (builtin-meta-rule-to-directive [interpreter s key vale] nil)))
+    (builtin-meta-rule-to-directive [interpreter s key value] nil)))
 
 (defn- create-property-accessor
   [schema]
@@ -404,3 +416,12 @@
                     (str (get-sub node) " is missing required supertypes "
                          (set/difference required-types types))))))
           #{} (get-all-nodes graph))))))
+
+(defn direct-graph
+  "Augments graph by the products of any directives in the schema"
+  [graph-accessor graph]
+  (let [spopv-additions (direct graph-accessor graph graph),
+        augmented-graph (build-graph (create-graph-builder)
+                                     (merge-spopvs (concat
+                                        (to-spopvs graph) spopv-additions)))]
+    (create-graph augmented-graph)))

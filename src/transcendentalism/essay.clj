@@ -439,5 +439,4 @@
                 ((footnote (glossary-sub k)
                    (apply definition k (:pos v) (:defs v))) t)))
       [] glossary))
-    (add-home :monad)
     ))

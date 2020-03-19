@@ -42,6 +42,14 @@
         result
         (assoc result p (set/union (result p #{}) opvs)))))
 
+(defn merge-spopvs
+  [spopvs]
+  (let [s-spopvs (group-by :s spopvs)]
+    (reduce-kv
+      (fn [result s spopvs]
+        (conj result (->SPOPV s (apply merge-popvs (map :p-opvs spopvs)))))
+      [] s-spopvs)))
+
 (defprotocol Property
   (get-val [property])
   (to-v [property]))
@@ -141,7 +149,7 @@
           (assoc result p (into #{} (map ->V (if (set? vs) vs #{vs})))))
         {} pvs)))
 
-(defn- convert-to-popvs
+(defn convert-to-popvs
   [popvs]
   "Converts {\"/pred\" obj}
      to {\"/pred\" #{(->OPV obj {})}}
