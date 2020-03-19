@@ -8,25 +8,39 @@
   (validate [constraint graph data] "The set of validation error strings"))
 
 (defn- and-constraint
-  [graph data & constraints]
+  [graph data constraints]
   (apply set/union (map #(validate % graph data) constraints)))
 
-(defn- nil-constraint
-  [name]
-  (reify Constraint
-    (validate [constraint graph data] #{})))
-
 (defprotocol Directive
-  (direct [directive graph data] "The set of SPOPV additions to the graph"))
+  (direct [directive graph data] "The vector of SPOPV additions to the graph"))
+
+(defn- and-directive
+  [graph data directives]
+  (reduce
+    (fn [result directive]
+      (into result (direct directive graph data)))
+    [] directives))
+
+(defn- nil-accessor
+  []
+  (reify
+    Constraint
+    (validate [constraint graph data] #{})
+    Directive
+    (direct [directive graph data] [])))
 
 (defprotocol SchemaAccessor
-  (get-translator [accessor] "Returns the inner translator")
+  (get-translator [accessor])
   (builtin-constraints [accessor])
   (custom-constraints [accessor])
   (builtin-meta-constraints [accessor])
-  (custom-meta-constraints [accessor] "Returns custom meta-constraints")
+  (custom-meta-constraints [accessor])
   (check-child-constraints [accessor graph data])
-  (check-custom-constraints [accessor graph data]))
+  (builtin-directives [accessor])
+  (custom-directives [accessor])
+  (builtin-meta-directives [accessor])
+  (custom-meta-directives [accessor])
+  (apply-child-directives [accessor graph data]))
 
 (defprotocol SchemaTranslator
   (child-keyword [translator] "Returns the keyword that keys child schema")
@@ -40,15 +54,19 @@
   (builtin-rule-to-constraint [interpreter key value]
     "Converts a schema rule to its equivalent constraint, or nil")
   (builtin-meta-rule-to-constraint [interpreter s key value]
-    "Converts a schema meta-rule to its equivalent constraint, or nil"))
+    "Converts a schema meta-rule to its equivalent constraint, or nil")
+  (builtin-rule-to-directive [interpreter key value]
+    "Converts a schema rule to its equivalent directive, or nil")
+  (builtin-meta-rule-to-directive [interpreter s key value]
+    "Converts a schema meta-rule to its equivalent directive, or nil"))
 
 (defn create-schema-accessor
-  [schema child-constraint-creator translator interpreter]
-  (let [child-constraints
+  [schema child-accessor-creator translator interpreter]
+  (let [child-accessors
           (reduce-kv
             (fn [result s child-schema]
               (assoc result
-                s (child-constraint-creator child-schema)))
+                s (child-accessor-creator child-schema)))
             {} (schema (child-keyword translator) {}))]
     (reify
       SchemaAccessor
@@ -78,33 +96,62 @@
       (check-child-constraints [accessor graph data]
         (reduce
           (fn [result s]
-            (let [constraint (child-constraints s (nil-constraint s))]
+            (let [accessor (child-accessors s (nil-accessor))]
               (reduce
                 (fn [result v]
-                  (set/union result (validate constraint graph v)))
+                  (set/union result (validate accessor graph v)))
                 result ((get-children translator) data s))))
           #{} ((get-child-keys translator) data)))
-      (check-custom-constraints [accessor graph data]
-        (set/union
-          (apply set/union (map #(validate % graph data)
-                                (custom-meta-constraints accessor)))
-          (apply and-constraint graph data (custom-constraints accessor))))
+      (builtin-directives [accessor]
+        (reduce-kv
+          (fn [result k v]
+            (let [directive (builtin-rule-to-directive interpreter k v)]
+              (if (nil? directive)
+                result
+                (conj result directive))))
+          [] schema))
+      (custom-directives [accessor] (schema :directives []))
+      (builtin-meta-directives [accessor]
+        (reduce-all result []
+                    [[s child-schema (schema (child-keyword translator) {})]
+                     [k v child-schema]]
+          (let [directive (builtin-meta-rule-to-directive interpreter s k v)]
+            (if (nil? directive)
+                result
+            (conj result directive)))))
+      (custom-meta-directives [accessor]
+        (reduce-kv
+          (fn [result _ child-schema]
+            (concat result (child-schema :meta-directives [])))
+          [] (schema (child-keyword translator) {})))
+      (apply-child-directives [accessor graph data]
+        (reduce
+          (fn [result s]
+            (let [accessor (child-accessors s (nil-accessor))]
+              (reduce
+                (fn [result v]
+                  (into result (direct accessor graph v)))
+                result ((get-children translator) data s))))
+          [] ((get-child-keys translator) data)))
       Constraint
       (validate [accessor graph data]
         (let [builtin-checks
                (set/union
                  (check-child-constraints accessor graph data)
-                 (apply set/union (map #(validate % graph data)
-                                       (builtin-meta-constraints accessor)))
-                 (apply and-constraint graph data (builtin-constraints accessor)))]
+                 (and-constraint graph data (builtin-meta-constraints accessor))
+                 (and-constraint graph data (builtin-constraints accessor)))]
           (if (empty? builtin-checks)
-              (check-custom-constraints accessor graph data)
+              (set/union
+                (and-constraint graph data (custom-meta-constraints accessor))
+                (and-constraint graph data (custom-constraints accessor)))
               builtin-checks)))
       Directive
       (direct [accessor graph data]
-        ; TODO - implement.
-        [])
-      )))
+        (concat (apply-child-directives accessor graph data)
+                (and-directive graph data (builtin-meta-directives accessor))
+                (and-directive graph data (builtin-directives accessor))
+                (and-directive graph data (custom-meta-directives accessor))
+                (and-directive graph data (custom-directives accessor)))))))
 
 (defn- range-type-constraint
   [translator range-type allow-nodes]
@@ -164,7 +211,9 @@
       (case key
         :range-type (range-type-constraint translator value false)
         nil))
-    (builtin-meta-rule-to-constraint [interpreter s key value] nil)))
+    (builtin-meta-rule-to-constraint [interpreter s key value] nil)
+    (builtin-rule-to-directive [interpreter key value] nil)
+    (builtin-meta-rule-to-directive [interpreter s key vale] nil)))
 
 (defn- create-triple-interpreter
   [translator]
@@ -180,7 +229,9 @@
         :exclusive (if (empty? value)
                        nil
                        (exclusive-constraint s translator value))
-        nil))))
+        nil))
+    (builtin-rule-to-directive [interpreter key value] nil)
+    (builtin-meta-rule-to-directive [interpreter s key vale] nil)))
 
 (defn- create-node-interpreter
   [translator]
@@ -193,13 +244,17 @@
         :exclusive (if (empty? value)
                        nil
                        (exclusive-constraint s translator value))
-        nil))))
+        nil))
+    (builtin-rule-to-directive [interpreter key value] nil)
+    (builtin-meta-rule-to-directive [interpreter s key vale] nil)))
 
 (defn- create-graph-interpreter
   []
   (reify BuiltinInterpreter
     (builtin-rule-to-constraint [interpreter key value] nil)
-    (builtin-meta-rule-to-constraint [interpreter s key value] nil)))
+    (builtin-meta-rule-to-constraint [interpreter s key value] nil)
+    (builtin-rule-to-directive [interpreter key value] nil)
+    (builtin-meta-rule-to-directive [interpreter s key vale] nil)))
 
 (defn- create-property-accessor
   [schema]
@@ -241,7 +296,7 @@
       (child-keyword [translator] :types)
       (get-child-keys [translator] get-all-types)
       (get-children [translator] get-nodes)
-      (get-inner-data [translator] nil))
+      (get-inner-data [translator] (fn [_] "<Graph>")))
     (create-graph-interpreter)))
 
 (defn valid-type-constraint
