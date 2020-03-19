@@ -430,4 +430,11 @@
             bullet-list-schema contact-schema definition-schema table-schema
             raw-html-schema thesis-schema)]
     {:types types-schema,
-     :constraints [(valid-type-constraint (into #{} (keys types-schema)))]}))
+     :constraints [(valid-type-constraint (into #{} (keys types-schema))),
+                   (abstract-type-constraint
+                     (reduce-kv
+                       (fn [result type schema]
+                         (if (schema :abstract false)
+                             (conj result type)
+                             result))
+                       #{} types-schema))]}))

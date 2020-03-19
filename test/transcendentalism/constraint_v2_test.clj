@@ -166,9 +166,15 @@
         },
       },
     },
+    "/type/vacuous" {
+      :abstract true,
+    },
+    "/type/non_vacuous" {},
   },
   :constraints [
-    (valid-type-constraint #{"/type/person" "/type/place" "/type/thing"})
+    (valid-type-constraint #{"/type/person" "/type/place" "/type/thing"
+                             "/type/vacuous" "/type/non_vacuous"})
+    (abstract-type-constraint #{"/type/vacuous"})
   ],
 })
 
@@ -312,4 +318,12 @@
       {"/coords" ["coords-A" {"/lat" 45, "/lng" 90}]})
     (testing "Validate custom whole-graph constraints"
       (is (= #{"Found parentage cycle with #{:mr-green :ms-peacock :ms-white}"}
+             (do-validate node-builder))))))
+
+(deftest abstract-type-test
+  (let [node-builder (create-node-builder)]
+    (build-node node-builder "/vacuous" :v1 {})
+    (build-node node-builder "/vacuous" :v2 {"/type/non_vacuous" nil})
+    (testing "Validate abstract nodes are caught"
+      (is (= #{":v1 only has abstract types #{\"/type/vacuous\"}"}
              (do-validate node-builder))))))

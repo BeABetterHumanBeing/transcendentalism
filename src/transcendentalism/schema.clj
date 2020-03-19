@@ -152,24 +152,6 @@
             (str sub "'s /essay/flow/home does not lead to :monad"))))
       #{} sinks)))
 
-(defn- no-abstract-subs?
-  "Validates that subs with abstract types have a non-abstract sub-type"
-  [schema graph]
-  (reduce
-    (fn [result sub]
-      (let [types (get-types-v1 (get-node-v1 graph sub)),
-            abstract-types (filter #(is-abstract? schema %) types)]
-        (reduce
-          (fn [result abstract-type]
-            (if (nil? (some #(contains? (get-supertypes schema %) abstract-type)
-                            types))
-              (conj result
-                (str sub " has abstract type " abstract-type
-                     " but no concrete sub-type"))
-              result))
-          result abstract-types)))
-    #{} (all-nodes graph)))
-
 (defn validate-graph
   "Validates that a given graph conforms to a given schema."
   [schema graph]
@@ -179,7 +161,7 @@
         (set/union result (validation-check schema graph)))
       #{}
       [required-supertypes-exist? events-occur-in-past?
-       events-obey-causality? home-is-monad-rooted-dag? no-abstract-subs?]),
+       events-obey-causality? home-is-monad-rooted-dag?]),
      ; nil ends up in the set, and ought to be weeded out.
      ; TODO - weed out nil. (conj #{} nil) adds nil to the set.
      errors (set/difference validation-errors #{nil})]

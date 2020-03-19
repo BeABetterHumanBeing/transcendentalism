@@ -288,3 +288,20 @@
       (schema :meta-constraints [])
       (valid-order-constraint pred))
     ))
+
+(defn abstract-type-constraint
+  [abstract-types]
+  (reify Constraint
+    (validate [constraint _ graph]
+      (reduce
+        (fn [result type]
+          (let [maybe-abstract-nodes (get-nodes graph type)]
+            (reduce
+              (fn [result node]
+                (let [types (get-types node)]
+                  (if (nil? (some #(not (contains? abstract-types %)) types))
+                      (conj result
+                            (str (get-sub node) " only has abstract types " types))
+                      result)))
+              result maybe-abstract-nodes)))
+        #{} abstract-types))))
