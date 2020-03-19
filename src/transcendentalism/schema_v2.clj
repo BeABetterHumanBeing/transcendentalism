@@ -39,8 +39,8 @@
 (defn validate-graph-v2
   "Validates that a given graph conforms to a given schema."
   [graph-constraints graph]
-  (let [errors (validate graph-constraints nil graph)]
+  (let [errors (validate graph-constraints graph graph)]
     (doall (map println errors))
     (empty? errors)))
 
-(def schema (create-graph-constraints schema-data))
+(def schema (create-graph-accessor schema-data))

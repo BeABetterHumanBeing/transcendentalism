@@ -187,12 +187,12 @@
     ],
   })
 
-(def graph-constraints (create-graph-constraints test-schema))
+(def graph-constraints (create-graph-accessor test-schema))
 
 (defn do-validate
   [node-builder]
-  (validate graph-constraints nil
-            (create-graph (get-built-graph (create-graph-builder) node-builder))))
+  (let [graph (create-graph (get-built-graph (create-graph-builder) node-builder))]
+    (validate graph-constraints graph graph)))
 
 (deftest simple-graph-test
   (let [node-builder (create-node-builder)]

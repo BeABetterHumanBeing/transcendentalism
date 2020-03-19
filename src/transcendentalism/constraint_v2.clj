@@ -5,7 +5,7 @@
      'transcendentalism.time)
 
 (defprotocol Constraint
-  (validate [constraint graph data]))
+  (validate [constraint graph data] "The set of validation error strings"))
 
 (defn- and-constraint
   [graph data & constraints]
@@ -16,42 +16,94 @@
   (reify Constraint
     (validate [constraint graph data] #{})))
 
-(defn- child-keyword
-  [level]
-  (case level
-    :triple :properties
-    :node :predicates
-    :graph :types
-    nil))
+(defprotocol SchemaAccessor
+  (get-translator [accessor] "Returns the inner translator")
+  (builtin-constraints [accessor])
+  (custom-constraints [accessor])
+  (builtin-meta-constraints [accessor])
+  (custom-meta-constraints [accessor] "Returns custom meta-constraints")
+  (check-child-constraints [accessor graph data])
+  (check-custom-constraints [accessor graph data]))
 
-(defn- get-child-keys
-  [level]
-  (case level
-    :triple get-props
-    :node get-preds
-    :graph get-all-types
-    nil))
+(defprotocol SchemaTranslator
+  (child-keyword [translator] "Returns the keyword that keys child schema")
+  (get-child-keys [translator]
+    "Returns the function that can be used to access a child's keys")
+  (get-children [translator] "Returns the function that gets the children")
+  (get-inner-data [translator]
+    "Returns the function that gets the info stored on the child"))
 
-(defn- get-children
-  [level]
-  (case level
-    :triple get-properties
-    :node get-triples
-    :graph get-nodes
-    nil))
+(defprotocol BuiltinInterpreter
+  (builtin-rule-to-constraint [interpreter key value]
+    "Converts a schema rule to its equivalent constraint, or nil")
+  (builtin-meta-rule-to-constraint [interpreter s key value]
+    "Converts a schema meta-rule to its equivalent constraint, or nil"))
 
-(defn- get-inner-data
-  [level]
-  (case level
-    :property get-val
-    :triple get-obj
-    nil))
+(defn create-schema-accessor
+  [schema child-constraint-creator translator interpreter]
+  (let [child-constraints
+          (reduce-kv
+            (fn [result s child-schema]
+              (assoc result
+                s (child-constraint-creator child-schema)))
+            {} (schema (child-keyword translator) {}))]
+    (reify
+      SchemaAccessor
+      (get-translator [accessor] translator)
+      (builtin-constraints [accessor]
+        (reduce-kv
+          (fn [result k v]
+            (let [constraint (builtin-rule-to-constraint interpreter k v)]
+              (if (nil? constraint)
+                result
+                (conj result constraint))))
+          [] schema))
+      (custom-constraints [accessor] (schema :constraints []))
+      (builtin-meta-constraints [accessor]
+        (reduce-all result []
+                    [[s child-schema (schema (child-keyword translator) {})]
+                     [k v child-schema]]
+          (let [constraint (builtin-meta-rule-to-constraint interpreter s k v)]
+            (if (nil? constraint)
+                result
+            (conj result constraint)))))
+      (custom-meta-constraints [accessor]
+        (reduce-kv
+          (fn [result _ child-schema]
+            (concat result (child-schema :meta-constraints [])))
+          [] (schema (child-keyword translator) {})))
+      (check-child-constraints [accessor graph data]
+        (reduce
+          (fn [result s]
+            (let [constraint (child-constraints s (nil-constraint s))]
+              (reduce
+                (fn [result v]
+                  (set/union result (validate constraint graph v)))
+                result ((get-children translator) data s))))
+          #{} ((get-child-keys translator) data)))
+      (check-custom-constraints [accessor graph data]
+        (set/union
+          (apply set/union (map #(validate % graph data)
+                                (custom-meta-constraints accessor)))
+          (apply and-constraint graph data (custom-constraints accessor))))
+      Constraint
+      (validate [accessor graph data]
+        (let [builtin-checks
+               (set/union
+                 (check-child-constraints accessor graph data)
+                 (apply set/union (map #(validate % graph data)
+                                       (builtin-meta-constraints accessor)))
+                 (apply and-constraint graph data (builtin-constraints accessor)))]
+          (if (empty? builtin-checks)
+              (check-custom-constraints accessor graph data)
+              builtin-checks)))
+      )))
 
 (defn- range-type-constraint
-  [level range-type allow-nodes]
+  [translator range-type allow-nodes]
   (reify Constraint
     (validate [constraint graph wrapped-data]
-      (let [data ((get-inner-data level) wrapped-data)]
+      (let [data ((get-inner-data translator) wrapped-data)]
         (if (or (nil? range-type)
               (and (= range-type :string)
                    (string? data))
@@ -70,184 +122,120 @@
           #{(str data " does not match range type " range-type)})))))
 
 (defn- required-constraint
-  [tpp level]
+  [tpp translator]
   (reify Constraint
     (validate [constraint graph data]
-      (if (contains? (into #{} ((get-child-keys level) data)) tpp)
+      (if (contains? (into #{} ((get-child-keys translator) data)) tpp)
           #{}
           #{(str tpp " is required")}))))
 
 (defn- unique-constraint
-  [tpp level]
+  [tpp translator]
   (reify Constraint
     (validate [constraint graph data]
-      (let [child-count (count ((get-children level) data tpp))]
+      (let [child-count (count ((get-children translator) data tpp))]
         (if (> child-count 1)
             #{(str tpp " is unique, but found " child-count)}
             #{})))))
 
 (defn- exclusive-constraint
-  [tpp level exclusions]
+  [tpp translator exclusions]
   (reify Constraint
     (validate [constraint graph data]
-      (if (empty? ((get-children level) data tpp))
+      (if (empty? ((get-children translator) data tpp))
           #{}
           (let [overlap (set/intersection exclusions
-                                          (into #{} ((get-child-keys level) data)))]
+                                          (into #{} ((get-child-keys translator) data)))]
           (if (empty? overlap)
               #{}
               #{(str tpp " excludes " exclusions ", but found " overlap)}))))))
 
-(defn- builtin-constraints-from-schema
-  "f takes two args: the key and value from schema"
-  [schema f]
-  (reduce-kv
-    (fn [result k v]
-      (let [constraint (f k v)]
-        (if (nil? constraint)
-          result
-          (conj result constraint))))
-    [] schema))
+(defn- create-property-interpreter
+  [translator]
+  (reify BuiltinInterpreter
+    (builtin-rule-to-constraint [interpreter key value]
+      (case key
+        :range-type (range-type-constraint translator value false)
+        nil))
+    (builtin-meta-rule-to-constraint [interpreter s key value] nil)))
 
-(defn- custom-constraints-from-schema
-  "f takes two args: the key and value from schema"
+(defn- create-triple-interpreter
+  [translator]
+  (reify BuiltinInterpreter
+    (builtin-rule-to-constraint [interpreter key value]
+      (case key
+        :range-type (range-type-constraint translator value true)
+        nil))
+    (builtin-meta-rule-to-constraint [interpreter s key value]
+      (case key
+        :required (if value (required-constraint s translator) nil)
+        :unique (if value (unique-constraint s translator) nil)
+        :exclusive (if (empty? value)
+                       nil
+                       (exclusive-constraint s translator value))
+        nil))))
+
+(defn- create-node-interpreter
+  [translator]
+  (reify BuiltinInterpreter
+    (builtin-rule-to-constraint [interpreter key value] nil)
+    (builtin-meta-rule-to-constraint [interpreter s key value]
+      (case key
+        :required (if value (required-constraint s translator) nil)
+        :unique (if value (unique-constraint s translator) nil)
+        :exclusive (if (empty? value)
+                       nil
+                       (exclusive-constraint s translator value))
+        nil))))
+
+(defn- create-graph-interpreter
+  []
+  (reify BuiltinInterpreter
+    (builtin-rule-to-constraint [interpreter key value] nil)
+    (builtin-meta-rule-to-constraint [interpreter s key value] nil)))
+
+(defn- create-property-accessor
   [schema]
-  (schema :constraints []))
+  (let [translator (reify SchemaTranslator
+                     (child-keyword [translator] nil)
+                     (get-child-keys [translator] (fn [_] #{}))
+                     (get-children [translator] (fn [_ _] #{}))
+                     (get-inner-data [translator] get-val))]
+    (create-schema-accessor
+      schema (fn [_] nil) translator (create-property-interpreter translator))))
 
-(defn- builtin-meta-constraints-from-schema
-  "f takes three args: the child's key, and the key and value from child schema"
-  [schema level f]
-  (reduce-all result []
-              [[prop child-schema (schema (child-keyword level) {})]
-               [k v child-schema]]
-    (let [constraint (f prop k v)]
-      (if (nil? constraint)
-          result
-          (conj result constraint)))))
+(defn- create-triple-accessor
+  [schema]
+  (let [translator (reify SchemaTranslator
+                     (child-keyword [translator] :properties)
+                     (get-child-keys [translator] get-props)
+                     (get-children [translator] get-properties)
+                     (get-inner-data [translator] get-obj))]
+    (create-schema-accessor
+      schema create-property-accessor translator
+      (create-triple-interpreter translator))))
 
-(defn- custom-meta-constraints-from-schema
-  "f takes three args: the child's key, and the key and value from child schema"
-  [schema level]
-  (reduce-kv
-    (fn [result _ child-schema]
-      (concat result (child-schema :meta-constraints [])))
-    [] (schema (child-keyword level) {})))
+(defn- create-node-accessor
+  [schema]
+  (let [translator (reify SchemaTranslator
+                     (child-keyword [translator] :predicates)
+                     (get-child-keys [translator] get-preds)
+                     (get-children [translator] get-triples)
+                     (get-inner-data [translator] get-sub))]
+    (create-schema-accessor
+      schema create-triple-accessor translator
+      (create-node-interpreter translator))))
 
-(defn- child-constraints
-  [schema level constraint-f]
-  (reduce-kv
-    (fn [result s child-schema]
-      (assoc result
-        s (constraint-f child-schema)))
-    {} (schema (child-keyword level) {})))
-
-(defn- check-child-constraints
-  [graph data level constraints]
-  (reduce
-    (fn [result s]
-      (let [constraint (constraints s (nil-constraint s))]
-        (reduce
-          (fn [result v]
-            (set/union result (validate constraint graph v)))
-          result ((get-children level) data s))))
-    #{} ((get-child-keys level) data)))
-
-(defn- create-property-constraints
-  [prop-schema]
-  (let [builtin-constraints
-         (builtin-constraints-from-schema prop-schema
-           #(case %1
-             :range-type (range-type-constraint :property %2 false)
-             nil)),
-        custom-constraints (custom-constraints-from-schema prop-schema)]
-    (reify Constraint
-      (validate [constraint graph property]
-        (let [builtin-checks
-                (apply and-constraint graph property builtin-constraints)]
-          (if (empty? builtin-checks)
-              (apply and-constraint graph property custom-constraints)
-              builtin-checks))))))
-
-(defn- create-triple-constraints
-  [pred-schema]
-  (let [prop-constraints
-          (child-constraints pred-schema :triple create-property-constraints),
-        builtin-prop-meta-constraints
-          (builtin-meta-constraints-from-schema pred-schema :triple
-            #(case %2
-              :required (if %3 (required-constraint %1 :triple) nil)
-              :unique (if %3 (unique-constraint %1 :triple) nil)
-              :exclusive (if (empty? %3) nil (exclusive-constraint %1 :triple %3))
-              nil)),
-        builtin-triple-constraints
-          (builtin-constraints-from-schema pred-schema
-             #(case %1
-               :range-type (range-type-constraint :triple %2 true)
-               nil)),
-        custom-prop-meta-constraints
-          (custom-meta-constraints-from-schema pred-schema :triple),
-        custom-triple-constraints (custom-constraints-from-schema pred-schema)]
-    (reify Constraint
-      (validate [constraint graph triple]
-        (let [builtin-checks
-               (set/union
-                 (check-child-constraints graph triple :triple prop-constraints)
-                 (apply set/union (map #(validate % graph triple)
-                                       builtin-prop-meta-constraints))
-                 (apply and-constraint graph triple builtin-triple-constraints))]
-          (if (empty? builtin-checks)
-              (set/union
-                (check-child-constraints graph triple :triple prop-constraints)
-                (apply set/union (map #(validate % graph triple)
-                                      custom-prop-meta-constraints))
-                (apply and-constraint graph triple custom-triple-constraints))
-              builtin-checks))))))
-
-(defn- create-node-constraints
-  [type-schema]
-  (let [pred-constraints
-          (child-constraints type-schema :node create-triple-constraints),
-        builtin-pred-meta-constraints
-          (builtin-meta-constraints-from-schema type-schema :node
-            #(case %2
-              :required (if %3 (required-constraint %1 :node) nil)
-              :unique (if %3 (unique-constraint %1 :node) nil)
-              :exclusive (if (empty? %3) nil (exclusive-constraint %1 :node %3))
-              nil)),
-        custom-pred-meta-constraints
-          (custom-meta-constraints-from-schema type-schema :node),
-        custom-node-constraints (custom-constraints-from-schema type-schema)]
-    (reify Constraint
-      (validate [constraint graph node]
-        (let [builtin-checks
-               (set/union
-                 (check-child-constraints graph node :node pred-constraints)
-                 (apply set/union (map #(validate % graph node)
-                                       builtin-pred-meta-constraints)))]
-          (if (empty? builtin-checks)
-              (set/union
-                (apply set/union (map #(validate % graph node)
-                                      custom-pred-meta-constraints))
-                (apply and-constraint graph node custom-node-constraints))
-              builtin-checks))))))
-
-(defn create-graph-constraints
-  [graph-schema]
-  (let [type-constraints
-          (child-constraints graph-schema :graph create-node-constraints),
-        custom-type-meta-constraints
-          (custom-meta-constraints-from-schema graph-schema :graph),
-        custom-graph-constraints (custom-constraints-from-schema graph-schema)]
-    (reify Constraint
-      (validate [constraint _ graph]
-        (let [builtin-checks
-               (check-child-constraints graph graph :graph type-constraints)]
-          (if (empty? builtin-checks)
-              (set/union
-                (apply set/union (map #(validate % graph graph)
-                                      custom-type-meta-constraints))
-                (apply and-constraint graph graph custom-graph-constraints))
-              builtin-checks))))))
+(defn create-graph-accessor
+  [schema]
+  (create-schema-accessor
+    schema create-node-accessor
+    (reify SchemaTranslator
+      (child-keyword [translator] :types)
+      (get-child-keys [translator] get-all-types)
+      (get-children [translator] get-nodes)
+      (get-inner-data [translator] nil))
+    (create-graph-interpreter)))
 
 (defn valid-type-constraint
   [types-schema]
