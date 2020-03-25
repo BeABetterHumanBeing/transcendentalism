@@ -3,14 +3,13 @@
             [transcendentalism.graph-v3 :refer :all]))
 
 (deftest graph-read-write-test
-  (let [graph (-> (create-graph-v3 "test")
+  (let [graph (-> (create-graph-v3)
                   (write-v :a 7)
                   (write-v :b 8)
                   (write-o :a "/foo" "lol")
                   (write-o :a "/foo" "kek")
                   (write-o :a "/bar" 21))]
     (testing "Test reading and writing to the graph"
-      (is (= "test" (get-graph-name graph)))
       (is (= #{:a :b} (read-ss graph)))
       (is (= 7 (read-v graph :a)))
       (is (= 8 (read-v graph :b)))
@@ -26,19 +25,19 @@
       (is (empty? (read-os graph :a #"/\d*"))))))
 
 (deftest graph-overlay-test
-  (let [base-graph (-> (create-graph-v3 "test-base")
+  (let [base-graph (-> (create-graph-v3)
                        (write-v :a 7)
                        (write-v :b 8)
                        (write-v :c 9)
                        (write-o :a "/foo" "lol")
                        (write-o :a "/bar" "kek")),
-        graph (-> (create-graph-v3 "test-overlay" {} base-graph)
+        graph (-> (create-graph-v3 {} base-graph)
                   (write-v :a 10)
                   (write-o :a "/bar" "eke")
                   (write-o :b "/foo" "nom")
                   (write-o :d "/baz" "hah"))]
     (testing "Test reading and writing to an overlay graph"
-      (is (= "test-overlay" (get-graph-name graph)))
+      ; (is (= "test-overlay" (get-graph-name graph)))
       (is (= #{:a :b :c :d} (read-ss graph)))
       (is (= 10 (read-v graph :a)))
       (is (= 8 (read-v graph :b)))
@@ -53,52 +52,27 @@
       (is (= #{"nom"} (read-os graph :b "/foo")))
       (is (= #{"hah"} (read-os graph :d "/baz"))))))
 
-(deftest graph-registry-test
-  (let [graph-a (-> (create-graph-v3 "graph-a")
-                    (write-v :a 1)),
-        graph-b (-> (create-graph-v3 "graph-b")
-                    (write-v :b 2)),
-        base-registry (create-graph-registry
-                        (graphs-to-registry-data graph-a graph-b) nil),
-        init-registry (create-graph-registry base-registry),
-        final-registry (-> init-registry
-                         (update-graph "graph-a"
-                           (-> (get-graph init-registry "graph-a")
-                               (write-o :a "/foo" "lol")))
-                         (update-graph "graph-b"
-                           (-> (get-graph init-registry "graph-b")
-                               (write-v :b 3))))]
-    (testing "Test updating graphs through a registry"
-      (is (= #{"graph-a" "graph-b"} (get-graph-names final-registry)))
-      (let [graph (get-graph final-registry "graph-a")]
-        (is (= 1 (read-v graph :a)))
-        (is (= #{"/foo"} (read-ps graph :a))))
-      (let [graph (get-graph final-registry "graph-b")]
-        (is (= 3 (read-v graph :b)))))))
-
 (deftest tablet-test
-  (let [graph-a (-> (create-graph-v3 "graph-a")
-                    (write-v :a1 7)
-                    (write-v :a2 8)
-                    (write-o :a1 "/foo" "blah")
-                    (write-o :a2 "/foo" "yack")),
-        graph-b (-> (create-graph-v3 "graph-b")
-                    (write-v :b1 1)
-                    (write-v :b2 2)
-                    (write-o :b1 "/bar" "blue")
-                    (write-o :b2 "/bar" "yellow")),
-        registry (create-graph-registry {"graph-a" graph-a,
-                                         "graph-b" graph-b}
-                                        nil)
-        tablet-a (-> (create-read-write-tablet {} {:c 100, :d 200} registry)
-                     (add-entry :a1 "graph-a" {:my-meta "cat"})
-                     (add-entry :a2 "graph-a" {:my-meta "dog"})
+  (let [graph (-> (create-graph-v3)
+                  (write-v :a1 7)
+                  (write-v :a2 8)
+                  (write-o :a1 "/foo" "blah")
+                  (write-o :a2 "/foo" "yack")
+                  (write-v :b1 1)
+                  (write-v :b2 2)
+                  (write-o :b1 "/bar" "blue")
+                  (write-o :b2 "/bar" "yellow")),
+        tablet-a (-> (create-read-write-tablet
+                       {} {:c 100, :d 200} (create-graph-v3 {} graph))
+                     (add-entry :a1 {:my-meta "cat"})
+                     (add-entry :a2 {:my-meta "dog"})
                      (write-v :a1 701)
                      (write-v :a2 801)),
-        tablet-b (-> (create-read-write-tablet {} {:e 300} registry)
-                     (add-entry :b1 "graph-b" {:my-meta "mouse"})
-                     (add-entry :b2 "graph-b" {:my-meta "rat"})
-                     (update-entry :b1 :b3 "graph-b" {:my-meta "cow"})
+        tablet-b (-> (create-read-write-tablet
+                       {} {:e 300} (create-graph-v3 {} graph))
+                     (add-entry :b1 {:my-meta "mouse"})
+                     (add-entry :b2 {:my-meta "rat"})
+                     (update-entry :b1 :b3 {:my-meta "cow"})
                      (write-o :b2 "/baz" "paper")
                      (write-o :b3 "/baz" "scissors")),
         tablet-ab (-> (merge-tablet tablet-a tablet-b
@@ -109,12 +83,10 @@
     (testing "Test reading and writing to a tablet"
       (is (= (get-bindings tablet-a) (get-bindings tablet-ab)))
       (is (= #{:a1 :a2 :b2 :b3} (read-ss tablet-ab)))
-      (is (= {:graph-name "graph-a" :my-meta "cat"} (get-metadata tablet-ab :a1)))
-      (is (= {:graph-name "graph-a" :my-meta "dog"} (get-metadata tablet-ab :a2)))
-      (is (= {:graph-name "graph-b" :merge-info true :my-meta "rat"}
-             (get-metadata tablet-ab :b2)))
-      (is (= {:graph-name "graph-b" :merge-info true :my-meta "cow"}
-             (get-metadata tablet-ab :b3)))
+      (is (= {:my-meta "cat"} (get-metadata tablet-ab :a1)))
+      (is (= {:my-meta "dog"} (get-metadata tablet-ab :a2)))
+      (is (= {:merge-info true :my-meta "rat"} (get-metadata tablet-ab :b2)))
+      (is (= {:merge-info true :my-meta "cow"} (get-metadata tablet-ab :b3)))
       (is (= 701 (read-v tablet-ab :a1)))
       (is (= 801 (read-v tablet-ab :a2)))
       (is (= 2 (read-v tablet-ab :b2)))
