@@ -76,8 +76,37 @@
                            (conj (p-os pred #{}) obj))))
            base-graph))))))
 
+(defprotocol GraphRegistry
+  (get-graph-names [registry] "Returns the set of all names in the registry")
+  (get-graph [registry name] "Returns the graph with the given name")
+  (update-graph [registry name graph] "Returns a new registry with updated graph"))
+
+(defn graphs-to-registry-data
+  [& graphs]
+  (reduce
+    (fn [result graph]
+      (let [graph-name (get-graph-name graph)]
+        (assoc result
+          graph-name (create-graph-v3 graph-name {} graph))))
+    {} graphs))
+
+(defn create-graph-registry
+  ([base] (create-graph-registry {} base))
+  ([data base]
+    (reify
+      GraphRegistry
+      (get-graph-names [registry] (into #{} (keys data)))
+      (get-graph [registry name]
+        (let [graph (data name)]
+          (if (nil? graph)
+              (get-graph base name) ; Intentionally crash if non-existent
+              graph)))
+      (update-graph [registry name graph]
+        (create-graph-registry (assoc data name graph) base)))))
+
 (defprotocol Tablet
-  (add-entry [tablet sub graph metadata]
+  (add-entry [tablet sub graph-name metadata]
+             [tablet sub graph-name metadata registry]
     "Returns a new tablet with an added entry")
   (update-entry [tablet sub new-sub new-graph new-metadata]
     "Returns a new tablet with an updated entry")
@@ -85,43 +114,65 @@
   (merge-tablet [tablet other] [tablet other f]
     "Returns a new tablet with entries in the other tablet overwriting it. If f
      is provided, uses it to update merged metadata with (f other metadata).")
-  (get-graph [tablet sub] "Returns the underlying graph the sub is a part of")
+  (get-target-graph [tablet sub]
+    "Returns the underlying graph the sub is a part of")
   (get-metadata [tablet sub])
   (get-bindings [tablet] "Returns the bindings"))
 
 (defn create-read-write-tablet
-  [data bindings]
+  [data bindings registry]
   (reify
     Tablet
-    (add-entry [tablet sub graph metadata]
-      (create-read-write-tablet (assoc data sub [graph metadata]) bindings))
+    (add-entry [tablet sub graph-name metadata]
+      (add-entry tablet sub graph-name metadata registry))
+    (add-entry [tablet sub graph-name metadata registry]
+      (create-read-write-tablet
+        (assoc data sub
+                    (assoc metadata :graph-name graph-name))
+                    bindings
+                    registry))
     (update-entry [tablet sub new-sub new-graph new-metadata]
-      (add-entry
-        (remove-entry tablet sub)
-        new-sub new-graph new-metadata))
+      (add-entry (remove-entry tablet sub)
+                 new-sub new-graph new-metadata))
     (remove-entry [tablet sub]
-      (create-read-write-tablet (dissoc data sub) bindings))
+      (create-read-write-tablet (dissoc data sub) bindings registry))
     (merge-tablet [tablet other]
-      (merge-tablet tablet other (fn [_ metadata] metadata)))
+      (merge-tablet tablet other (fn [metadata] metadata)))
     (merge-tablet [tablet other f]
       (reduce
         (fn [result sub]
-          (add-entry result
-            sub (get-graph other sub) (f other (get-metadata other sub))))
+          (let [other-graph (get-target-graph other sub),
+                graph-name (get-graph-name other-graph)]
+            (add-entry result sub
+                              graph-name
+                              (f (get-metadata other sub))
+                              (update-graph registry
+                                graph-name
+                                (merge-graph (get-graph registry graph-name)
+                                             other-graph)))))
         tablet (read-ss other)))
-    (get-graph [tablet sub] (first (data sub [(create-graph-v3 "temp")])))
-    (get-metadata [tablet sub] (second (data sub [nil {}])))
+    (get-target-graph [tablet sub] (get-graph registry (:graph-name (data sub))))
+    (get-metadata [tablet sub] (data sub))
     (get-bindings [tablet] bindings)
     ReadGraph
     (read-ss [tablet] (into #{} (keys data)))
-    (read-v [tablet sub] (read-v (get-graph tablet sub) sub))
-    (read-ps [tablet sub] (read-ps (get-graph tablet sub) sub))
-    (read-os [tablet sub pred] (read-os (get-graph tablet sub) sub pred))
+    (read-v [tablet sub] (read-v (get-target-graph tablet sub) sub))
+    (read-ps [tablet sub] (read-ps (get-target-graph tablet sub) sub))
+    (read-os [tablet sub pred] (read-os (get-target-graph tablet sub) sub pred))
     WriteGraph
     (write-v [tablet sub val]
-      (add-entry tablet
-        sub (write-v (get-graph tablet sub) sub val) (get-metadata tablet sub)))
+      (let [old-graph (get-target-graph tablet sub),
+            graph-name (get-graph-name old-graph)]
+        (add-entry tablet sub
+                          graph-name
+                          (data sub)
+                          (update-graph registry
+                            graph-name (write-v old-graph sub val)))))
     (write-o [tablet sub pred obj]
-      (add-entry tablet sub
-                        (write-o (get-graph tablet sub) sub pred obj)
-                        (get-metadata tablet sub)))))
+      (let [old-graph (get-target-graph tablet sub),
+            graph-name (get-graph-name old-graph)]
+        (add-entry tablet sub
+                          graph-name
+                          (data sub)
+                          (update-graph registry
+                            graph-name (write-o old-graph sub pred obj)))))))
