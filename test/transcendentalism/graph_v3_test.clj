@@ -102,3 +102,70 @@
       (is (= #{"paper"} (read-os tablet-ab :b2 "/baz")))
       (is (= #{"hola"} (read-os tablet-ab :b2 "/snu")))
       (is (= #{"scissors"} (read-os tablet-ab :b3 "/baz"))))))
+
+(deftest graph-path-test
+  (let [graph (create-graph-v3),
+        ret-1 (fn [_] 1), ; Some closure
+        ret-a3 (fn [_] :a3), ; A virtual sub
+        tablet (follow-all (create-read-write-tablet {:a1 {}}
+                                              {:binding-1 10, :binding-2 20}
+                                              graph)
+                           (write-obj "/foo" :a2) (read-pred "/foo")
+                           (write-val ret-1)
+                           (write-obj "/foo" ret-a3) (read-pred "/foo")
+                           (write-val 2)
+                           (write-obj "/baz" 9)
+                           (write-obj "/foo" :a1) (read-pred "/foo")
+                           (write-obj "/baz" :b1) (read-pred "/baz")
+                           (write-val :binding-1)
+                           (write-obj "/bar" :binding-2)
+                           (write-obj "/bar" 4)),
+        read-tablet (create-read-write-tablet {:a1 {}} {}
+                                              (get-target-graph tablet))]
+    (testing "Test graph path components"
+      (is (= #{:a2}
+             (get-results (follow-all read-tablet
+                                      (read-pred "/foo")))))
+      (is (= #{1}
+             (get-results (follow-all read-tablet
+                                      (read-pred "/foo")
+                                      (read-self)))))
+      (is (= #{20 4}
+             (get-results (follow-all read-tablet
+                                      (path-chain
+                                        (read-pred "/baz")
+                                        (read-pred "/bar"))))))
+      (is (= #{9 10}
+             (get-results (follow-all read-tablet
+                                      (path-chain
+                                        (path-all
+                                          [(path-chain
+                                             (read-pred "/foo")
+                                             (read-pred "/foo"))
+                                           (path-nil)])
+                                        (read-pred "/baz")
+                                        (read-self)
+                                        )))))
+      (is (= #{:b1 9}
+             (get-results (follow-all read-tablet
+                                      (path-chain
+                                        (read-star
+                                          (read-pred "/foo"))
+                                        (read-pred "/baz"))))))
+      (is (= {:a3 {:o :a2},
+              4 {:o :b1}}
+             (get-results (follow-all read-tablet
+                                      (path-chain
+                                        (read-pred #".*")
+                                        (path-nil
+                                          (fn [tablet sub metadata]
+                                            (assoc metadata :o sub)))
+                                        (read-pred #".*")
+                                        (path-nil
+                                          (fn [tablet sub metadata]
+                                            (if (and (number? sub) (> sub 10))
+                                                nil
+                                                metadata)))))
+                          {}
+                          (fn [result sub metadata]
+                            (assoc result sub metadata))))))))
