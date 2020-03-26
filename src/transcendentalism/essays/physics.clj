@@ -835,14 +835,6 @@
     (add-home :modeling)
     ))
 
-(defn perspective-as-glasses
-  []
-  (essay :perspective-as-glasses "Perspective as Glasses"
-    (text "TODO")
-
-    (add-home :modeling)
-    ))
-
 ; ### Anthropomorphization
 
 ; Perhaps the single most ubiquitous model that's used is the self. Our own being,
@@ -905,47 +897,84 @@
 ;     to give the illusion of not moving. Some phenomena, like seizures, can also
 ;     be thought of as static waves.
 
-; ### Perspective as Glasses
+(defn perspective-as-glasses
+  []
+  (essay :perspective-as-glasses "Perspective as Glasses"
+    (paragraph
+      (text "A model and metaphor that I've found useful is to think about"
+            "perspective as though it were ")
+      (tangent (f 1) "a pair of glasses")
+      (text ". Like glasses, perspectives intercede between reality and your"
+            "perception of it. As information comes in, it gets distorted by"
+            "the perspectives that it passes through, yielding a warped but"
+            "functional understanding of the world."))
 
-; Your perspective can be modeled as though it were a pair of glasses that you
-; wear. Perspectives intercede between reality and your perception of it. As
-; information comes in, it gets distorted by the perspectives that it passes
-; through, yielding a warped but functional understanding of the world.
+    ; TODO - A drawing of a globe with glasses overlaid on it. Each one shows
+    ; the world in a different light.
 
-; NOTE: Unlike real glasses, you might wear a variety of perspectives all at once.
-; They may work to cancel out each other, or they may work to exaggerate each
-; other. Also unlike real glasses, perspectives are hard to remove, and crucially
-; you cannot remove them all. There really is no such thing as having a perfectly
-; undistorted view of the world. Because they cannot be removed, and because they
-; intercede between reality and all your perceptions of it, many people fall into
-; thinking that they have a clear view of the world.
+    (footnote (f 1)
+      (paragraph
+        (text
+          "Unlike real glasses, you might wear a variety of perspectives all at"
+          "once. They may work to cancel out each other, or they may work to"
+          "exaggerate each other (i.e. constructive or destructive interference)."
+          "Also unlike real glasses, perspectives are hard to remove, and"
+          "crucially you cannot remove them all. There really is no such thing"
+          "as ")
+        (tangent (f 2) "having a perfectly undistorted view of the world")
+        (text ". Because they cannot be removed, and because they intercede"
+              "between reality and all your perceptions of it, many people fall"
+              "into thinking that they have a clear, undistorted view of the"
+              "world, since they don't have an undistorted baseline to compare"
+              "against.")))
 
-; Some aspects of the world are only visible under certain perspectives, and
-; differing perspectives may even lead to almost-contradictory understandings.
-; Much misunderstanding and ideological differences come simply from differences
-; in perspective; two people could be looking at exactly the same thing and reach
-; entirely opposite conclusions.
+    (footnote (f 2)
+      (paragraph
+        (text "I will immediately eat my hat to point out that ")
+        (see-also :holy-mountain "psychic clarity")
+        (text " is technically a completely undistorted view of the world. Not"
+              "many people can attain that, so I'm not going to explore that"
+              "here.")))
 
-; The *privileged* perspective is the closest one gets to having a totally
-; undistorted perspective of the world. Contrary to expectations, this isn't the
-; result of having no perspectives whatsoever (which would be more akin to
-; blindness), it can be thought of as the limit for having all perspectives
-; simultaneously. Two perspectives can interfere in ways that reveal more than
-; either one alone, and so being able to entertain all perspectives at once yields
-; the maximum amount of information.
+    (text
+      "Some aspects of the world are only visible under certain perspectives,"
+      "and differing perspectives may even lead to almost-contradictory"
+      "understandings. Much misunderstanding and ideological difference comes"
+      "simply from differences in perspective; two people could be looking at"
+      "exactly the same thing and reach entirely opposite conclusions.")
 
-; When perspectives clash with each other, they create *dissonance*. Because
-; dissonance is jarring, and results in apparent contradictions, people tend to
-; accumulate perspectives that have high *coherence* with each other, where
-; coherent views produce little dissonance. Rationalism holds that objective
-; truth would be the joint perspective with no dissonance.
+    (paragraph
+      (text
+        "The " (i "privileged") " perspective is the one that is reached as the"
+        "limit of having all perspectives simultaneously. Two perspectives can"
+        "interfere in ways that reveal more than either one alone, and so ")
+      (tangent (f 4) "being able to entertain all perspectives at once")
+      (text " yields the maximum amount of information."))
 
-; NOTE: This perspective-as-glasses model can be over-extended in a variety of
-; ways. One would be to ask about the "strength" of a prescription on these
-; glasses. While a person can be more or less heavily reliant on a perspective,
-; glasses of different strength have different distortions, which is not the same
-; thing. Another would be to ask what these glasses are made of; perspectives are
-; not material things.
+    (footnote (f 4)
+      (text "A distinct mark of wisdom, it might be noted."))
+
+    (paragraph
+      (text
+        "When perspectives clash with each other, they create " (i "dissonance")
+        ". Because dissonance is jarring, and results in apparent contradictions,"
+        "people tend to accumulate perspectives that have high " (i "coherence")
+        " with each other, where coherent views produce little dissonance."
+        "Rationalism holds that objective truth would be the joint perspective"
+        "with no dissonance."))
+
+    (paragraph (tangent (f 3) "Note"))
+
+    (footnote (f 3)
+      (text
+        "This perspective-as-glasses model can be over-extended in a variety"
+        "of ways. One would be to ask about the \"strength\" of a prescription"
+        "on these glasses. While a person can be more or less heavily reliant"
+        "on a perspective, glasses of different strength have different"
+        "distortions, which is not the same thing. Another would be to ask"
+        "what these glasses are made of; perspectives are not material things."))
+
+    (add-home :modeling)))
 
 (defn three-sciences
   []
@@ -1602,7 +1631,7 @@
    (essay-series [:modeling :analogy])
    (directive-under-construction
      :phenomenological-science :phenomenological-science-example
-     :anthropomorphization :brain-as-recursive-filter :perspective-as-glasses)
+     :anthropomorphization :brain-as-recursive-filter)
    (materialism) (universal-model) (universal-order) (universal-shape)
    (speed-limits) (three-sciences) (analytical-science) (analytical-science-example)
    (empirical-science) (empirical-science-example) (phenomenological-science)
