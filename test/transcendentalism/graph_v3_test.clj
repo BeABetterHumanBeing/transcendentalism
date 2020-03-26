@@ -1,6 +1,7 @@
 (ns transcendentalism.graph-v3-test
   (:require [clojure.test :refer :all]
-            [transcendentalism.graph-v3 :refer :all]))
+            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.toolbox :refer :all]))
 
 (deftest graph-read-write-test
   (let [graph (-> (create-graph-v3)
@@ -139,10 +140,10 @@
              (get-results (follow-all read-tablet
                                       (path-chain
                                         (path-all
-                                          [(path-chain
-                                             (read-pred "/foo")
-                                             (read-pred "/foo"))
-                                           (path-nil)])
+                                          (path-chain
+                                            (read-pred "/foo")
+                                            (read-pred "/foo"))
+                                          (path-nil))
                                         (read-pred "/baz")
                                         (read-self)
                                         )))))
@@ -166,6 +167,53 @@
                                             (if (and (number? sub) (> sub 10))
                                                 nil
                                                 metadata)))))
-                          {}
-                          (fn [result sub metadata]
-                            (assoc result sub metadata))))))))
+                          (fn [data] data)))))))
+
+(deftest simplified-graph-path-test
+  (let [footnoter (fn [sub] (keyword (str (name sub) "-f"))),
+        graph (write-path (create-graph-v3) #{:a1} {:no-val "X"}
+                [:no-val {"/foo" :a2,
+                          "/bar" :a5}
+                 #{["/foo" :no-val {"/f" footnoter,
+                                    "/foo" :a3}
+                    #{["/f" 2]
+                      ["/foo" "A" {"/foo" :a4,
+                                   "/bar" :a6}
+                       #{["/foo" "B" {"/f" footnoter,
+                                      "/bar" :a7}
+                          #{["/f" 5]
+                            ["/bar" :no-val {"/f" footnoter}
+                             "/f" 6]}]
+                         ["/bar" "C" {"/f" footnoter,
+                                      "/bar" :a9}
+                          #{["/f" 3]
+                            ["/bar" :no-val {"/bar" :a10}
+                             "/bar" "D" {"/f" footnoter}
+                             "/f" 4]}]}]}]
+                   ["/bar" :no-val {"/bar" :a8}
+                    "/bar" :no-val {"/f" footnoter,
+                                    "/epsilon" #{:a2 :a9}}
+                    "/f" 1]}])]
+    (testing "Test using simplified graph paths, and metadata-based reads"
+      (is (= [1 2 3 4 5 6]
+             (get-results (follow-all
+                            (create-read-write-tablet {:a1 {}} {} graph)
+                            (build-path
+                              [(p* ["/foo" (p! (fn [tablet sub metadata]
+                                                 (assoc metadata :foo
+                                                   (inc (metadata :foo 0)))))])
+                               (p* ["/bar" (p! (fn [tablet sub metadata]
+                                                 (assoc metadata :bar
+                                                   (inc (metadata :bar 0)))))])
+                               "/f" "/"
+                              ]))
+                          (fn [data]
+                            (sort (compare-by-priority data :foo :bar)
+                                  (keys data))))))
+      (is (= #{"A" "B" "C" "D"}
+             (read-path graph #{:a1}
+               [#{"/foo" "/bar"}
+                #{"/foo" "/bar"}
+                #{"/epsilon" ""}
+                #{"/foo" "/bar"}
+                "/"]))))))

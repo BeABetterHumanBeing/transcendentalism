@@ -1,5 +1,6 @@
 (ns transcendentalism.graph-v3
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [transcendentalism.toolbox :refer :all]))
 
 ; A graph is a map from :sub to Graphlet. v is some value (possibly nil), and
 ; p-os is a map from predicate to set of :objs that have that predicate.
@@ -87,9 +88,9 @@
   (get-target-graph [tablet] "Returns the underlying graph")
   (get-metadata [tablet sub])
   (get-bindings [tablet] "Returns the bindings")
-  (get-results [tablet] [tablet result f]
-    "Returns the set of final results, discarding metadata. If given an f, uses
-     it to reduce-kv into result over sub-metadata pairs."))
+  (get-results [tablet] [tablet f]
+    "Returns the set of final results, discarding metadata. If given an f, calls
+     (f data) with the internal map from sub->metadata"))
 
 (defn create-read-write-tablet
   [data bindings graph]
@@ -121,8 +122,11 @@
     (get-metadata [tablet sub] (data sub))
     (get-bindings [tablet] bindings)
     (get-results [tablet]
-      (get-results tablet #{} (fn [result sub metadata] (conj result sub))))
-    (get-results [tablet result f] (reduce-kv f result data))
+      (reduce-kv
+        (fn [result sub metadata]
+          (conj result sub))
+        #{} data))
+    (get-results [tablet f] (f data))
     ReadGraph
     (read-ss [tablet] (into #{} (keys data)))
     (read-v [tablet sub] (read-v graph sub))
@@ -165,6 +169,7 @@
                  (remove-entry result sub)
                  (update-entry result sub sub new-metadata))))
          tablet (read-ss tablet))))))
+(def p! path-nil) ; An alias
 
 (defn path-chain
   [& paths]
@@ -176,7 +181,7 @@
         tablet paths))))
 
 (defn path-all
-  ([paths]
+  ([& paths]
    (reify GraphPath
      (follow-path [path tablet]
        ; Tablets' orders are reversed so that if a sub appears in multiple
@@ -213,20 +218,10 @@
            (reduce
              (fn [result obj]
                (add-entry result obj (get-metadata tablet sub)))
-             (remove-entry result sub) (read-os tablet sub pred)))
-         tablet (read-ss tablet))))))
-
-(defn read-star
-  ([inner-path]
-   (reify GraphPath
-     (follow-path [path tablet]
-       (loop [final-result tablet,
-              unprocessed final-result]
-         (if (empty? (read-ss unprocessed))
-             final-result
-             (let [next-result (follow-path inner-path unprocessed)]
-               (recur (merge-tablet final-result next-result)
-                      (diff-tablet next-result final-result)))))))))
+             result (read-os tablet sub pred)))
+         (create-read-write-tablet
+           {} (get-bindings tablet) (get-target-graph tablet))
+         (read-ss tablet))))))
 
 (defn write-val
   [val]
@@ -239,6 +234,7 @@
                       (keyword? val) (val (get-bindings tablet) val)
                       :else val)))
         tablet (read-ss tablet)))))
+(def v write-val) ; An alias
 
 (defn write-obj
   [pred val]
@@ -251,3 +247,60 @@
                            (keyword? val) (val (get-bindings tablet) val)
                            :else val)))
         tablet (read-ss tablet)))))
+
+(defn build-path
+  [pathable]
+  (cond
+    (satisfies? GraphPath pathable) pathable,
+    (= "" pathable) (path-nil),
+    (= "/" pathable) (read-self),
+    (and (string? pathable)
+         (= (.charAt pathable 0) \/)) (read-pred pathable),
+    (vector? pathable) (apply path-chain (map build-path pathable)),
+    (set? pathable) (apply path-all (map build-path pathable)),
+    (map? pathable) (apply path-chain
+                      (reduce-all result []
+                                  [[pred objs pathable]
+                                   [obj (if (set? objs) objs #{objs})]]
+                        (conj result (write-obj pred obj))))
+    :else (write-val pathable)))
+
+(defn read-star
+  ([pathable]
+   (let [inner-path (build-path pathable)]
+     (reify GraphPath
+       (follow-path [path tablet]
+         (loop [final-result tablet,
+                unprocessed final-result]
+           (if (empty? (read-ss unprocessed))
+               final-result
+               (let [next-result (follow-path inner-path unprocessed)]
+                 (recur (merge-tablet final-result next-result)
+                        (diff-tablet next-result final-result))))))))))
+(def p* read-star) ; An alias
+
+(defn read-path
+  "Simplified function for most paths without write steps"
+  [graph subs & pathables]
+  (get-results (apply follow-all
+                      (create-read-write-tablet
+                        (reduce
+                          (fn [result sub]
+                            (assoc result sub {}))
+                          {} subs)
+                        {} ; Bindings
+                        graph)
+                      (map build-path pathables))))
+
+(defn write-path
+  "Simplified function for most paths with write steps"
+  [graph subs bindings & pathables]
+  (get-target-graph (apply follow-all
+                           (create-read-write-tablet
+                             (reduce
+                               (fn [result sub]
+                                 (assoc result sub {}))
+                               {} subs)
+                             bindings
+                             (create-graph-v3 {} graph))
+                           (map build-path pathables))))

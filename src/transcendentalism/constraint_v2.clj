@@ -1,5 +1,6 @@
 (ns transcendentalism.constraint-v2
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [transcendentalism.toolbox :refer :all]))
 
 (use 'transcendentalism.graph-v2
      'transcendentalism.time)

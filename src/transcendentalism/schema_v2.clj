@@ -1,4 +1,5 @@
-(ns transcendentalism.schema-v2)
+(ns transcendentalism.schema-v2
+  (:require [transcendentalism.toolbox :refer :all]))
 
 (use 'transcendentalism.constraint-v2
      'transcendentalism.graph ; For conversion

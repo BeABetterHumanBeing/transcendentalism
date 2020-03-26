@@ -1,6 +1,7 @@
 (ns transcendentalism.generate
   (:require [clojure.java.io :as io]
-    [clojure.string :as str]))
+            [clojure.string :as str]
+            [transcendentalism.toolbox :refer :all]))
 
 (use 'transcendentalism.css
      'transcendentalism.encoding
@@ -301,21 +302,6 @@
                              (js-str (:id (footnote-map tangent))))}
             (str text " "
               (render-footnote-idx (:ancestry (footnote-map tangent))))))))))
-
-(defn- compare-by-priority
-  "Returns a comparator that examines data in a tablet in a given order of
-   priorities. Missing data is assumed to be 0."
-  [tablet & priorities]
-  (fn [a b]
-    (let [a-data (tablet a),
-          b-data (tablet b)]
-      (loop [k (first priorities),
-             etc (rest priorities)]
-        (let [a-val (k a-data 0),
-              b-val (k b-data 0)]
-          (if (and (= a-val b-val) (not (empty? etc)))
-            (recur (first etc) (rest etc))
-            (< a-val b-val)))))))
 
 (defn- collect-block-definitions
   "Follows a sequence of inline segments, collecting their definitions"

@@ -1,6 +1,7 @@
 (ns transcendentalism.graph-v2
   (:require [clojure.set :as set]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [transcendentalism.toolbox :refer :all]))
 
 (defrecord V [v]) ; TODO - remove this pointless wrapper.
 (defrecord OPV [o p-vs])
@@ -10,28 +11,6 @@
 (defn is-type?
   [pred]
   (str/starts-with? pred "/type"))
-
-(defmacro reduce-all
-  "bingings => [inner-binding ...]
-   inner-binding => [name coll]
-                 => [name1 name2 map]
-
-   Creates a nested tower of reductions, using reduce if inner-binding has two
-   values, or reduce-kv if it has three. The same accumulator is passed through
-   the entire tower."
-  [result initial-value bindings & body]
-  (cond
-    (= (count bindings) 0) `(do ~@body)
-    (= (count (bindings 0)) 2) `(reduce
-                                  (fn [~result ~((bindings 0) 0)]
-                                    (reduce-all ~result ~result ~(subvec bindings 1) ~@body))
-                                  ~initial-value ~((bindings 0) 1))
-    (= (count (bindings 0)) 3) `(reduce-kv
-                                  (fn [~result ~((bindings 0) 0) ~((bindings 0) 1)]
-                                    (reduce-all ~result ~result ~(subvec bindings 1) ~@body))
-                                  ~initial-value ~((bindings 0) 2))
-    :else (throw (IllegalArgumentException.
-                   "reduce-all only does reduce or reduce-kv"))))
 
 (defn- merge-popvs
   [& popvs]
