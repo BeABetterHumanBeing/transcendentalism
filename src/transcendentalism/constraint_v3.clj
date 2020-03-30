@@ -4,21 +4,25 @@
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.time :refer :all]))
 
+(defprotocol TypeRoot
+  (get-type-name [root] "Returns the name of the type"))
+
 (defprotocol TypeAspect
-  (get-types [aspect]))
+  (get-types [aspect] "Returns the set of all types"))
 
 (defn create-type-aspect
   [graph sub]
   (reify TypeAspect
     (get-types [aspect]
       (cond
-        (keyword? sub) (let [types (read-path graph #{sub}
-                                     "/type"
-                                     #{(p* "/supertype")
-                                       "/cotype"} "/")]
-                         (if (empty? types)
+        (keyword? sub) (let [type-roots (read-path graph #{sub}
+                                          "/type"
+                                          #{(p* "/supertype")
+                                            "/cotype"} "/"),
+                             type-names (into #{} (map get-type-name type-roots))]
+                         (if (empty? type-names)
                              #{sub}
-                             types))
+                             type-names))
         (string? sub) #{:string}
         (number? sub) #{:number}
         (instance? Boolean sub) #{:bool}

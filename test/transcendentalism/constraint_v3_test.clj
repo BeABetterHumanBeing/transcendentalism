@@ -13,6 +13,8 @@
         range-enum (range-type-constraint #{:foo :bar}),
         range-nil (range-type-constraint nil),
         t (get-hours-ago 20),
+        type-root (reify TypeRoot
+                    (get-type-name [root] "/range_type"))
         graph (write-path (create-graph-v3) #{:a} {}
                           {"/num" 7,
                            "/str" "blah",
@@ -21,8 +23,7 @@
                            "/relation" :b,
                            "/enum" :bar}
                           "/relation" {"/type" :t}
-                          "/type" (fn [_] "/range_type") {"/type" :type}
-                          "/type" (fn [_] "/type") ),
+                          "/type" type-root {"/type" :type}),
         read-num (first (read-path graph #{:a} "/num")),
         read-str (first (read-path graph #{:a} "/str")),
         read-time (first (read-path graph #{:a} "/time")),
@@ -31,86 +32,86 @@
         read-enum (first (read-path graph #{:a} "/enum"))]
     (testing "Test range constraint"
       (is (= [#{} graph]
-             (check-constraint range-number graph read-num nil)))
+             (check-constraint range-number graph read-num)))
       (is (= [#{"blah does not match range type :number"} graph]
-             (check-constraint range-number graph read-str nil)))
+             (check-constraint range-number graph read-str)))
       (is (= [#{(str t " does not match range type :number")} graph]
-             (check-constraint range-number graph read-time nil)))
+             (check-constraint range-number graph read-time)))
       (is (= [#{"false does not match range type :number"} graph]
-             (check-constraint range-number graph read-bool nil)))
+             (check-constraint range-number graph read-bool)))
       (is (= [#{":b does not match range type :number"} graph]
-             (check-constraint range-number graph read-relation nil)))
+             (check-constraint range-number graph read-relation)))
       (is (= [#{":bar does not match range type :number"} graph]
-             (check-constraint range-number graph read-enum nil)))
+             (check-constraint range-number graph read-enum)))
       (is (= [#{"7 does not match range type :string"} graph]
-             (check-constraint range-string graph read-num nil)))
+             (check-constraint range-string graph read-num)))
       (is (= [#{} graph]
-             (check-constraint range-string graph read-str nil)))
+             (check-constraint range-string graph read-str)))
       (is (= [#{(str t " does not match range type :string")} graph]
-             (check-constraint range-string graph read-time nil)))
+             (check-constraint range-string graph read-time)))
       (is (= [#{"false does not match range type :string"} graph]
-             (check-constraint range-string graph read-bool nil)))
+             (check-constraint range-string graph read-bool)))
       (is (= [#{":b does not match range type :string"} graph]
-             (check-constraint range-string graph read-relation nil)))
+             (check-constraint range-string graph read-relation)))
       (is (= [#{":bar does not match range type :string"} graph]
-             (check-constraint range-string graph read-enum nil)))
+             (check-constraint range-string graph read-enum)))
       (is (= [#{"7 does not match range type :time"} graph]
-             (check-constraint range-time graph read-num nil)))
+             (check-constraint range-time graph read-num)))
       (is (= [#{"blah does not match range type :time"} graph]
-             (check-constraint range-time graph read-str nil)))
+             (check-constraint range-time graph read-str)))
       (is (= [#{} graph]
-             (check-constraint range-time graph read-time nil)))
+             (check-constraint range-time graph read-time)))
       (is (= [#{"false does not match range type :time"} graph]
-             (check-constraint range-time graph read-bool nil)))
+             (check-constraint range-time graph read-bool)))
       (is (= [#{":b does not match range type :time"} graph]
-             (check-constraint range-time graph read-relation nil)))
+             (check-constraint range-time graph read-relation)))
       (is (= [#{":bar does not match range type :time"} graph]
-             (check-constraint range-time graph read-enum nil)))
+             (check-constraint range-time graph read-enum)))
       (is (= [#{"7 does not match range type :bool"} graph]
-             (check-constraint range-bool graph read-num nil)))
+             (check-constraint range-bool graph read-num)))
       (is (= [#{"blah does not match range type :bool"} graph]
-             (check-constraint range-bool graph read-str nil)))
+             (check-constraint range-bool graph read-str)))
       (is (= [#{(str t " does not match range type :bool")} graph]
-             (check-constraint range-bool graph read-time nil)))
+             (check-constraint range-bool graph read-time)))
       (is (= [#{} graph]
-             (check-constraint range-bool graph read-bool nil)))
+             (check-constraint range-bool graph read-bool)))
       (is (= [#{":b does not match range type :bool"} graph]
-             (check-constraint range-bool graph read-relation nil)))
+             (check-constraint range-bool graph read-relation)))
       (is (= [#{":bar does not match range type :bool"} graph]
-             (check-constraint range-bool graph read-enum nil)))
+             (check-constraint range-bool graph read-enum)))
       (is (= [#{"7 does not match range type /range_type"} graph]
-             (check-constraint range-type graph read-num nil)))
+             (check-constraint range-type graph read-num)))
       (is (= [#{"blah does not match range type /range_type"} graph]
-             (check-constraint range-type graph read-str nil)))
+             (check-constraint range-type graph read-str)))
       (is (= [#{(str t " does not match range type /range_type")} graph]
-             (check-constraint range-type graph read-time nil)))
+             (check-constraint range-type graph read-time)))
       (is (= [#{"false does not match range type /range_type"} graph]
-             (check-constraint range-type graph read-bool nil)))
+             (check-constraint range-type graph read-bool)))
       (is (= [#{} graph]
-             (check-constraint range-type graph read-relation nil)))
+             (check-constraint range-type graph read-relation)))
       (is (= [#{":bar does not match range type /range_type"} graph]
-             (check-constraint range-type graph read-enum nil)))
+             (check-constraint range-type graph read-enum)))
       (is (= [#{"7 does not match range type #{:bar :foo}"} graph]
-             (check-constraint range-enum graph read-num nil)))
+             (check-constraint range-enum graph read-num)))
       (is (= [#{"blah does not match range type #{:bar :foo}"} graph]
-             (check-constraint range-enum graph read-str nil)))
+             (check-constraint range-enum graph read-str)))
       (is (= [#{(str t " does not match range type #{:bar :foo}")} graph]
-             (check-constraint range-enum graph read-time nil)))
+             (check-constraint range-enum graph read-time)))
       (is (= [#{"false does not match range type #{:bar :foo}"} graph]
-             (check-constraint range-enum graph read-bool nil)))
+             (check-constraint range-enum graph read-bool)))
       (is (= [#{":b does not match range type #{:bar :foo}"} graph]
-             (check-constraint range-enum graph read-relation nil)))
+             (check-constraint range-enum graph read-relation)))
       (is (= [#{} graph]
-             (check-constraint range-enum graph read-enum nil)))
+             (check-constraint range-enum graph read-enum)))
       (is (= [#{} graph]
-             (check-constraint range-nil graph read-num nil)))
+             (check-constraint range-nil graph read-num)))
       (is (= [#{} graph]
-             (check-constraint range-nil graph read-str nil)))
+             (check-constraint range-nil graph read-str)))
       (is (= [#{} graph]
-             (check-constraint range-nil graph read-time nil)))
+             (check-constraint range-nil graph read-time)))
       (is (= [#{} graph]
-             (check-constraint range-nil graph read-bool nil)))
+             (check-constraint range-nil graph read-bool)))
       (is (= [#{} graph]
-             (check-constraint range-nil graph read-relation nil)))
+             (check-constraint range-nil graph read-relation)))
       (is (= [#{} graph]
-             (check-constraint range-nil graph read-enum nil))))))
+             (check-constraint range-nil graph read-enum))))))
