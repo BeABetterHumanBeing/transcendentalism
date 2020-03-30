@@ -10,7 +10,7 @@
         range-time (range-type-constraint :time),
         range-bool (range-type-constraint :bool),
         range-type (range-type-constraint "/range_type"),
-        range-enum (range-type-constraint [:foo :bar]),
+        range-enum (range-type-constraint #{:foo :bar}),
         range-nil (range-type-constraint nil),
         t (get-hours-ago 20),
         graph (write-path (create-graph-v3) #{:a} {}
@@ -90,15 +90,15 @@
              (check-constraint range-type graph read-relation nil)))
       (is (= [#{":bar does not match range type /range_type"} graph]
              (check-constraint range-type graph read-enum nil)))
-      (is (= [#{"7 does not match range type [:foo :bar]"} graph]
+      (is (= [#{"7 does not match range type #{:bar :foo}"} graph]
              (check-constraint range-enum graph read-num nil)))
-      (is (= [#{"blah does not match range type [:foo :bar]"} graph]
+      (is (= [#{"blah does not match range type #{:bar :foo}"} graph]
              (check-constraint range-enum graph read-str nil)))
-      (is (= [#{(str t " does not match range type [:foo :bar]")} graph]
+      (is (= [#{(str t " does not match range type #{:bar :foo}")} graph]
              (check-constraint range-enum graph read-time nil)))
-      (is (= [#{"false does not match range type [:foo :bar]"} graph]
+      (is (= [#{"false does not match range type #{:bar :foo}"} graph]
              (check-constraint range-enum graph read-bool nil)))
-      (is (= [#{":b does not match range type [:foo :bar]"} graph]
+      (is (= [#{":b does not match range type #{:bar :foo}"} graph]
              (check-constraint range-enum graph read-relation nil)))
       (is (= [#{} graph]
              (check-constraint range-enum graph read-enum nil)))
@@ -113,5 +113,4 @@
       (is (= [#{} graph]
              (check-constraint range-nil graph read-relation nil)))
       (is (= [#{} graph]
-             (check-constraint range-nil graph read-enum nil)))
-      )))
+             (check-constraint range-nil graph read-enum nil))))))
