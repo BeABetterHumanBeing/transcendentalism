@@ -824,17 +824,6 @@
   (essay :anthropomorphization "Anthropomorphization"
     (text "TODO")
 
-    (add-home :modeling)
-    ))
-
-(defn brain-as-recursive-filter
-  []
-  (essay :brain-as-recursive-filter "The Brain as a Recursive Filter"
-    (text "TODO")
-
-    (add-home :modeling)
-    ))
-
 ; ### Anthropomorphization
 
 ; Perhaps the single most ubiquitous model that's used is the self. Our own being,
@@ -864,38 +853,54 @@
 ;         capabilities, especially in light of their relative simplicity, make
 ;         stereotypes remarkably *efficient* models.
 
-; ### Brain as a Recursive Filter
+    (add-home :modeling)
+    ))
 
-; Since the brain is the seat of how humans think about the world, it makes sense
-; to have a fairly robust model for how the brain itself works. This gooey,
-; white-and-gray mass is incredibly complicated, so needless to say most models of
-; its function are gross simplifications.
+(defn brain-as-recursive-filter
+  []
+  (essay :brain-as-recursive-filter "The Brain as a Recursive Filter"
+    (paragraph
+      (text
+        "The human brain, being as complicated as it is, does not readily lend"
+        "itself to be modeled by anything less than gross over-simplification."
+        "Nevertheless, one model that I've found particularly useful is to think"
+        "of the brain as a " (b "recursive filter") ". It receives input from the"
+        "the outside world in the form of signals that arrive through ")
+      (tangent (f 1) "its various input nerves")
+      (text
+        ". These signals then get processed as they pass through the brain,"
+        "gradually working their way up through higher levels of semantic"
+        "abstraction until they break through into conscious awareness."))
 
-; One model that I've found particularly useful is to think of the brain as a
-; recursive filter. It receives input from the outside world in the form of
-; signals that arrive through its various input nerves (the main one being the
-; brain stem, but some senses arrive via their own conduit, esp. the eyes, ears,
-; and nose). Thes signals then get processed as they pass through the brain,
-; gradually working their way up through higher levels of semantic abstraction
-; until they break through into conscious awareness.
+    (footnote (f 1)
+      (text "The principal one being the brain stem, but some senses arrive via"
+            "their own conduit, esp. the eyes, ears, and nose."))
 
-; The key construction to note, however, is that this filter is recursive: some
-; (most) of its inputs derive from within itself. If the brain were discretized as
-; a state machine moving from one state to the next, the greater contribution to
-; its next state comes from its previous ones, rather than from whatever stimuli
-; arrive between the two states.
+    ; TODO - Series of drawings showing a bowl of fruit emerge from visual input.
+    ; TODO - First a bunch of 'pixels'
+    ; TODO - Second edge & gradient detection
+    ; TODO - Third object segmentation
+    ; TODO - Fourth, semantic interpretation "yum"
 
-; Some variations on this perspective are:
+    (text
+      "The key construction to note, however, is that this filter is recursive:"
+      "some (most) of its inputs derive from within itself. If the brain were"
+      "discretized as a state machine moving from one state to the next, the"
+      "greater contribution to its next state comes from its previous ones,"
+      "rather than from whatever stimuli arrive between the two states.")
 
-; *   To model thinking as a literal wave (a brainwave) that passes through the
-;     filter. EEGs and the like prove that much of the brain's computation does
-;     actually take place in the form of a variety of waves that fluxuate at
-;     different frequencies in the brain.
-; *   To model static perceptual phenomena (like the state of the world when
-;     inputs are held close to constant) as being standing waves; they are in
-;     constant motion, however each one passes close enough to its previous state
-;     to give the illusion of not moving. Some phenomena, like seizures, can also
-;     be thought of as static waves.
+    (paragraph
+      (tangent (f 2) "Static perceptual phenomena")
+      (text
+        " can be modeled in this context as standing waves; they are in constant"
+        "motion, however each one passes close enough to its previous state to"
+        "give the illusion of not moving at all."))
+
+    (footnote (f 2)
+      (text "Including thoughts, objects, feelings, as well as less pleasant"
+            "sensations like migraines, obsessions, and seizures."))
+
+    (add-home :modeling)))
 
 (defn perspective-as-glasses
   []
