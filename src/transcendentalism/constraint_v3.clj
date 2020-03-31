@@ -66,12 +66,21 @@
        (let [objs (read-os graph sub required-pred)]
          (if (empty? objs)
              (if (nil? default)
-                 [#{(str required-pred " is required on " sub
-                    ", but not present")}
+                 [#{(str required-pred " is required on " sub ", but not present")}
                   graph]
                  [#{}
                   (write-o graph sub required-pred default)])
              [#{} graph]))))))
+
+(defn unique-pred-constraint
+  [unique-pred]
+  (reify ConstraintV3
+    (check-constraint [constraint graph sub]
+      (let [objs (read-os graph sub unique-pred)]
+        (if (> (count objs) 1)
+            [#{(str unique-pred " is unique on " sub ", but multiple present")}
+             graph]
+            [#{} graph])))))
 
 ; TODO - Test
 (defn validate

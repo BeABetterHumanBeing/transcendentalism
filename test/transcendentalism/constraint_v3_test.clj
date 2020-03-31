@@ -127,7 +127,7 @@
         noncompliant-graph (write-v (create-graph-v3) :a 3),
         compliant-graph (write-path noncompliant-graph #{:a} {} {"/foo" 2,
                                                                  "/bar" 3}),
-        fixed-graph (write-path noncompliant-graph #{:a} {} {"/bar" 5})]
+        fixed-graph (write-o noncompliant-graph :a "/bar" 5)]
     (testing "Test required constraint"
       (is (= [#{} compliant-graph]
              (check-constraint req-no-default compliant-graph :a)))
@@ -137,3 +137,16 @@
              (check-constraint req-no-default noncompliant-graph :a)))
       (is (= [#{} (get-raw-data fixed-graph)]
              (check-constraint-raw-data req-w-default noncompliant-graph :a))))))
+
+(deftest test-unique-constraint
+  (let [unique (unique-pred-constraint "/foo"),
+        zero-graph (write-v (create-graph-v3) :a 3),
+        one-graph (write-o zero-graph :a "/foo" 1),
+        multi-graph (write-o one-graph :a "/foo" 2)]
+    (testing "Test unique constraint"
+      (is (= [#{} zero-graph]
+             (check-constraint unique zero-graph :a)))
+      (is (= [#{} one-graph]
+             (check-constraint unique one-graph :a)))
+      (is (= [#{"/foo is unique on :a, but multiple present"} multi-graph]
+             (check-constraint unique multi-graph :a))))))
