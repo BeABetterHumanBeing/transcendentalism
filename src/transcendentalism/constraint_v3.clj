@@ -34,16 +34,58 @@
     "Checks whether checked-sub conforms to the given constraint. Returns
      [#{errors} graph]"))
 
-(defn gen-sub [sub] (keyword (str (name sub) "-" (gen-key 3))))
+(defn and-constraint
+  [constraints]
+  (reify ConstraintV3
+    (check-constraint [constraint graph sub]
+      (reduce
+        (fn [result constraint]
+          (let [[errors new-graph] (check-constraint constraint
+                                                     (second result) sub)]
+            [(set/union (first result) errors),
+             (merge-graph (second result) new-graph)]))
+        [#{} graph] constraints))))
 
 (defn range-type-constraint
   [range-type]
   (reify ConstraintV3
-    (check-constraint [constraint graph checked-sub]
+    (check-constraint [constraint graph sub]
       (if (or (nil? range-type)
-              (let [types (get-types (create-type-aspect graph checked-sub))]
+              (let [types (get-types (create-type-aspect graph sub))]
                 (if (set? range-type)
                     (not (empty? (set/intersection range-type types)))
                     (contains? types range-type))))
           [#{} graph]
-          [#{(str checked-sub " does not match range type " range-type)} graph]))))
+          [#{(str sub " does not match range type " range-type)} graph]))))
+
+(defn required-pred-constraint
+  ([required-pred] (required-pred-constraint required-pred nil))
+  ([required-pred default]
+   (reify ConstraintV3
+     (check-constraint [constraint graph sub]
+       (let [objs (read-os graph sub required-pred)]
+         (if (empty? objs)
+             (if (nil? default)
+                 [#{(str required-pred " is required on " sub
+                    ", but not present")}
+                  graph]
+                 [#{}
+                  (write-o graph sub required-pred default)])
+             [#{} graph]))))))
+
+; TODO - Test
+(defn validate
+  "Validates a graph, returning [#{errors} graph]"
+  [graph]
+  (reduce
+    (fn [result sub]
+      (check-constraint
+        (and-constraint
+          (reduce
+            (fn [result type]
+              (if (satisfies? ConstraintV3 type)
+                  (conj result type)
+                  result))
+            [] (get-types (create-type-aspect graph sub))))
+        graph sub))
+    [#{} graph] (read-ss graph)))

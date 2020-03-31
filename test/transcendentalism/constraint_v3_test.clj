@@ -115,3 +115,25 @@
              (check-constraint range-nil graph read-relation)))
       (is (= [#{} graph]
              (check-constraint range-nil graph read-enum))))))
+
+(defn check-constraint-raw-data
+  [constraint graph sub]
+  (let [[errors new-graph] (check-constraint constraint graph sub)]
+    [errors (get-raw-data new-graph)]))
+
+(deftest test-required-constraint
+  (let [req-no-default (required-pred-constraint "/foo"),
+        req-w-default (required-pred-constraint "/bar" 5),
+        noncompliant-graph (write-v (create-graph-v3) :a 3),
+        compliant-graph (write-path noncompliant-graph #{:a} {} {"/foo" 2,
+                                                                 "/bar" 3}),
+        fixed-graph (write-path noncompliant-graph #{:a} {} {"/bar" 5})]
+    (testing "Test required constraint"
+      (is (= [#{} compliant-graph]
+             (check-constraint req-no-default compliant-graph :a)))
+      (is (= [#{} compliant-graph]
+             (check-constraint req-w-default compliant-graph :a)))
+      (is (= [#{"/foo is required on :a, but not present"} noncompliant-graph]
+             (check-constraint req-no-default noncompliant-graph :a)))
+      (is (= [#{} (get-raw-data fixed-graph)]
+             (check-constraint-raw-data req-w-default noncompliant-graph :a))))))
