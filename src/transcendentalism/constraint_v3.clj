@@ -82,6 +82,27 @@
              graph]
             [#{} graph])))))
 
+(defn exclusive-pred-constraint
+  ([mutually-exclusive-preds]
+   (reify ConstraintV3
+     (check-constraint [constraint graph sub]
+       (let [preds (read-ps graph sub),
+             offenders (set/intersection preds mutually-exclusive-preds)]
+         (if (> (count offenders) 1)
+             [#{(str offenders " on " sub " are mutually exclusive")} graph]
+             [#{} graph])))))
+  ([excluding-pred excluded-preds]
+   (reify ConstraintV3
+     (check-constraint [constraint graph sub]
+       (let [preds (read-ps graph sub)]
+         (if (contains? preds excluding-pred)
+             (let [offenders (set/intersection preds excluded-preds)]
+               (if (empty? offenders)
+                   [#{} graph]
+                   [#{(str excluding-pred " on " sub " excludes " offenders)}
+                    graph]))
+             [#{} graph]))))))
+
 ; TODO - Test
 (defn validate
   "Validates a graph, returning [#{errors} graph]"

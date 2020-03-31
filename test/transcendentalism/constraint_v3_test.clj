@@ -150,3 +150,24 @@
              (check-constraint unique one-graph :a)))
       (is (= [#{"/foo is unique on :a, but multiple present"} multi-graph]
              (check-constraint unique multi-graph :a))))))
+
+(deftest test-excluding-constraint
+  (let [mutually-exclusive (exclusive-pred-constraint #{"/foo" "/bar"}),
+        singly-exclusive (exclusive-pred-constraint "/foo" #{"/bar"}),
+        foo-graph (write-o (create-graph-v3) :a "/foo" 1),
+        bar-graph (write-o (create-graph-v3) :a "/bar" 2),
+        foo-bar-graph (write-o foo-graph :a "/bar" 3)]
+    (testing "Test exclusive constraint"
+      (is (= [#{} foo-graph]
+             (check-constraint mutually-exclusive foo-graph :a)))
+      (is (= [#{} bar-graph]
+             (check-constraint mutually-exclusive bar-graph :a)))
+      (is (= [#{"#{\"/foo\" \"/bar\"} on :a are mutually exclusive"}
+              foo-bar-graph]
+             (check-constraint mutually-exclusive foo-bar-graph :a)))
+      (is (= [#{} foo-graph]
+             (check-constraint singly-exclusive foo-graph :a)))
+      (is (= [#{} bar-graph]
+             (check-constraint singly-exclusive bar-graph :a)))
+      (is (= [#{"/foo on :a excludes #{\"/bar\"}"} foo-bar-graph]
+             (check-constraint singly-exclusive foo-bar-graph :a))))))
