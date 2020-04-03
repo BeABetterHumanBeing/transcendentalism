@@ -300,7 +300,7 @@
                              (reduce
                                (fn [result sub]
                                  (assoc result sub {}))
-                               {} subs)
+                               {} (if (set? subs) subs #{subs}))
                              bindings
-                             (create-graph-v3 {} graph))
+                             graph)
                            (map build-path pathables))))

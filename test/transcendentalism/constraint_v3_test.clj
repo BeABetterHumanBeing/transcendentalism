@@ -8,7 +8,7 @@
   (let [t (get-hours-ago 20),
         type-root (reify TypeRoot
                     (get-type-name [root] "/range_type"))
-        graph (write-path (create-graph-v3) #{:a} {}
+        graph (write-path (create-graph-v3) :a {}
                           {"/num" 7,
                            "/str" "blah",
                            "/time" t,
@@ -100,7 +100,7 @@
   (let [req-no-default (required-pred-constraint "/foo"),
         req-w-default (required-pred-constraint "/bar" 5),
         noncompliant-graph (write-v (create-graph-v3) :a 3),
-        compliant-graph (write-path noncompliant-graph #{:a} {} {"/foo" 2,
+        compliant-graph (write-path noncompliant-graph :a {} {"/foo" 2,
                                                                  "/bar" 3}),
         fixed-graph (write-o noncompliant-graph :a "/bar" 5)]
     (testing "Test required constraint"
@@ -174,7 +174,7 @@
         },
         constraint (schema-to-constraint schema)]
     (testing "Test constraint generated from schema"
-      (let [graph (write-path (create-graph-v3) #{:a} {}
+      (let [graph (write-path (create-graph-v3) :a {}
                               "not a num" {"/bar" 7,
                                            "/baz" "not a number",
                                            "/fip" 9,
@@ -186,14 +186,75 @@
                   "not a num does not match value type :number"}
                 (get-raw-data (write-o graph :a "/foo" 12))]
                (check-constraint-raw-data constraint graph :a))))
-      (let [graph (write-path (create-graph-v3) #{:a} {}
+      (let [graph (write-path (create-graph-v3) :a {}
                               3 {"/foo" #{13 14}})]
         (is (= [#{"/foo is unique on :a, but multiple present"
                   "/baz is required on :a, but not present"}
                 (get-raw-data graph)]
                (check-constraint-raw-data constraint graph :a))))
-      (let [graph (write-path (create-graph-v3) #{:a} {}
+      (let [graph (write-path (create-graph-v3) :a {}
                               3 {"/baz" 8,
                                  "/fip" 9})]
         (is (= [#{} (get-raw-data (write-o graph :a "/foo" 12))]
                (check-constraint-raw-data constraint graph :a)))))))
+
+(deftest test-nested-schema-to-constraint
+  (let [schema {
+          :value-type :number,
+          :preds {
+            "/foo" {
+              :value-type "/range_type",
+              :unique true,
+              :preds {
+                "/bar" {
+                  :value-type "/other_range_type",
+                  :required true,
+                  :preds {
+                    "/baz" {
+                      :range-type :string,
+                      :required true,
+                      :default "default",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        constraint (schema-to-constraint schema),
+        range-type-root (reify TypeRoot
+                          (get-type-name [root] "/range_type")),
+        other-range-type-root (reify TypeRoot
+                                (get-type-name [root] "/other_range_type")),
+        base-graph (-> (create-graph-v3)
+                       (write-path :b {}
+                                   {"/type" :range-type}
+                                   "/type" range-type-root)
+                       (write-path :c {}
+                                   {"/type" :other-range-type}
+                                   "/type" other-range-type-root))]
+    (testing "Test nested constraint generated from schema"
+      (let [graph (write-path base-graph :a1 {}
+                              7 {"/foo" :a2}
+                              "/foo" :b {"/bar" :a3}
+                              "/bar" :c {"/baz" 100})]
+        (is (= [#{"100 does not match range type :string"} (get-raw-data graph)]
+               (check-constraint-raw-data constraint graph :a1))))
+      (let [graph (write-path base-graph :a1 {}
+                              7 {"/foo" :a2}
+                              "/foo" :c {"/bar" :a3}
+                              "/bar" :b)]
+        (is (= [#{":c does not match value type /range_type"
+                  ":b does not match value type /other_range_type"}
+                (get-raw-data (write-o graph :a3 "/baz" "default"))]
+               (check-constraint-raw-data constraint graph :a1))))
+      (let [graph (write-path base-graph :a1 {}
+                              "not a number" {"/foo" #{:a2 :a3}}
+                              "/foo" :b)]
+        (is (= [#{"not a number does not match value type :number"
+                  "/foo is unique on :a1, but multiple present"
+                  "/bar is required on :a2, but not present"
+                  "/bar is required on :a3, but not present"
+                  " does not match value type /range_type"}
+                (get-raw-data graph)]
+               (check-constraint-raw-data constraint graph :a1)))))))

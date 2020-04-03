@@ -46,26 +46,34 @@
                                                      (second result) sub)]
             [(set/union (first result) errors),
              (merge-graph (second result) new-graph)]))
-        [#{} graph] constraints))))
+        [#{} graph] (if (nil? constraints) [] constraints)))))
+
+(defn multiply-pred-constraint
+  "Returns a new constraint that results from applying the provided constraint
+   to all objs with the given pred"
+  [pred pred-constraint]
+  (reify ConstraintV3
+    (check-constraint [constraint graph sub]
+      (reduce
+        (fn [[errors graph] obj]
+          (let [[new-errors new-graph] (check-constraint pred-constraint graph obj)]
+            [(set/union errors new-errors) new-graph]))
+        [#{} graph] (read-os graph sub pred)))))
 
 (defn range-type-constraint
   [pred range-type]
-  (reify ConstraintV3
-    (check-constraint [constraint graph sub]
-      (if (nil? range-type)
+  (multiply-pred-constraint pred
+    (reify ConstraintV3
+      (check-constraint [constraint graph obj]
+        (if (nil? range-type)
           [#{} graph]
-          (let [objs (read-os graph sub pred)]
-            [(reduce
-               (fn [result obj]
-                 (let [types (get-types (create-type-aspect graph obj))]
-                   (if (if (set? range-type)
-                           (not (empty? (set/intersection range-type types)))
-                           (contains? types range-type))
-                       result
-                       (conj result
-                             (str obj " does not match range type " range-type)))))
-              #{} objs)
-             graph])))))
+          [(let [types (get-types (create-type-aspect graph obj))]
+             (if (if (set? range-type)
+                     (not (empty? (set/intersection range-type types)))
+                     (contains? types range-type))
+                 #{}
+                 #{(str obj " does not match range type " range-type)}))
+           graph])))))
 
 (defn value-type-constraint
   [range-type]
@@ -134,16 +142,22 @@
         (case k
           :value-type (conj result (value-type-constraint v)),
           :mutually-exclusive (conj result (exclusive-pred-constraint v)),
-          :preds (reduce-all result result
-                             [[pred sub-schema v]
-                              [k v sub-schema]]
-                   (case k
-                     :range-type (conj result (range-type-constraint pred v)),
-                     :required (conj result (required-pred-constraint pred
-                                              (:default sub-schema nil))),
-                     :unique (conj result (unique-pred-constraint pred)),
-                     :excludes (conj result (exclusive-pred-constraint pred v)),
-                     result)),
+          :preds (reduce-kv
+                   (fn [result pred sub-schema]
+                     (reduce-kv
+                       (fn [result k v]
+                         (case k
+                           :range-type (conj result (range-type-constraint pred v)),
+                           :required (conj result (required-pred-constraint pred
+                                                    (:default sub-schema nil))),
+                           :unique (conj result (unique-pred-constraint pred)),
+                           :excludes (conj result (exclusive-pred-constraint pred v)),
+                           result))
+                       (conj result
+                             (multiply-pred-constraint
+                               pred (schema-to-constraint sub-schema)))
+                       sub-schema))
+                   result v),
           result))
       [] schema)))
 
