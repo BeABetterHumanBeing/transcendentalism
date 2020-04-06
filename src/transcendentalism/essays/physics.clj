@@ -770,8 +770,6 @@
       (paragraph
         (text
           "It's actually a really good analogy. For some other analogies, see ")
-        (see-also :anthropomorphization "anthropomorphization")
-        (text ", ")
         (see-also :brain-as-recursive-filter "the brain as a recursive filter")
         (text ", and ")
         (see-also :perspective-as-glasses "perspective as glasses") dot))
@@ -818,43 +816,6 @@
         "the state should have stockpiled all the resources it will consume"
         "until the next year."))
   ))
-
-(defn anthropomorphization
-  []
-  (essay :anthropomorphization "Anthropomorphization"
-    (text "TODO")
-
-; ### Anthropomorphization
-
-; Perhaps the single most ubiquitous model that's used is the self. Our own being,
-; our bodies, or thoughts and feeling and lives,.. these are the things that are
-; most familiar to us, most readily available to us. Our self accompanies us into
-; this world, and it follows us until we leave it as well.
-
-; It's only natural that this self should then be used, in bits and pieces, as one
-; of the foundational models through which other models are constructed by
-; projecting ourself onto them. I observe this effect nearly everywhere:
-
-; *   Understanding other people's internal emotional state requires understanding
-;     their emotions to work in a similar way to yours. Reconstructing within
-;     yourself the emotions that others feel is empathy.
-; *   Animals are often anthropomorphized, giving them human thoughts and
-;     feelings. Stories that involve talking animals is the most obvious example
-;     of this.
-;     *   Note that mammals, because they have a limbic system, have the
-;         capability of communicating their emotional state across species. It is
-;         perhaps the singular most useful trait that mammalia has, and the one
-;         that allows us our close communication with e.g. dogs and cats.
-; *   Large groups of people are often characterized as though they were a single,
-;     person-like entity. This stereotype (because that is what it is) is composed
-;     of common threads that run through its base population.
-;     *   Using such stereotypes as a predictive model has relatively low
-;         accuracy, however the usefulness derived from their descriptive
-;         capabilities, especially in light of their relative simplicity, make
-;         stereotypes remarkably *efficient* models.
-
-    (add-home :modeling)
-    ))
 
 (defn brain-as-recursive-filter
   []
@@ -1635,10 +1596,9 @@
    (essay-series [:three-sciences :phenomenological-science :phenomenological-science-example])
    (essay-series [:modeling :analogy])
    (directive-under-construction
-     :phenomenological-science :phenomenological-science-example
-     :anthropomorphization :brain-as-recursive-filter)
+     :phenomenological-science :phenomenological-science-example)
    (materialism) (universal-model) (universal-order) (universal-shape)
    (speed-limits) (three-sciences) (analytical-science) (analytical-science-example)
    (empirical-science) (empirical-science-example) (phenomenological-science)
-   (phenomenological-science-example) (modeling) (analogy) (anthropomorphization)
-   (brain-as-recursive-filter) (perspective-as-glasses)])
+   (phenomenological-science-example) (modeling) (analogy) (brain-as-recursive-filter)
+   (perspective-as-glasses)])
