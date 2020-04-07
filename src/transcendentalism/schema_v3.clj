@@ -21,6 +21,7 @@
       :preds {
         "/leads_to" {
           :description "Relation from one event to its subsequent impacts",
+          :range-type :event-type,
         },
         "/time" {
           :description "When an event happened",
@@ -31,217 +32,221 @@
       },
     }))
 
-; (def essay-schema
-;   (schematize-type "/essay"
-;     {
-;       :description "Nodes that are externally link-able",
-;     }
-;     {
-;       "/title" {
-;         :description "The text that appears centered at the top of an essay",
-;         :range-type :string,
-;         :required true,
-;         :unique true,
-;       },
-;       "/flow/next" {
-;         :description "Relation to the next essay",
-;       },
-;       "/flow/home" {
-;         :description "Relation to the 'parent' essay",
-;         :required true,
-;         :unique true,
-;         :default :monad,
-;         :properties {
-;           "/label" {
-;             :description "Metadata about the home",
-;             :range-type [
-;               :menu ; If the essay belongs to a menu,
-;             ],
-;           },
-;         },
-;       },
-;       "/flow/see_also" {
-;         :description "Internal link to another essay",
-;       },
-;       "/flow/menu" {
-;         :description "Internal link to an essay menu",
-;         :properties {
-;           "/title" {
-;             :description "The title of the menu",
-;             :range-type :string,
-;             :required true,
-;           },
-;         },
-;       },
-;       "/flow/random" {
-;         :description "Relation to a random essay",
-;         ; TODO - range ought to be a set of essays
-;         :range-type nil,
-;       },
-;       "/contains" {
-;         :description "Relation from an essay to the segment it contains",
-;         :range-type "/type/segment",
-;         :unique true,
-;         :required true,
-;       },
-;       "/label" {
-;         :description "Symbol label that ascribes a metadata to the essay",
-;         :range-type [
-;           ; Content is not rendered.
-;           :invisible
-;           ; Content is under construction.
-;           :under-construction
-;           ; Content is religious.
-;           :religion
-;           ; Content is political.
-;           :politics]
-;       },
-;     }))
+(defn essay-type
+  [graph]
+  (build-type-graph graph :essay-type #{}
+    {
+      :description "Nodes that are externally link-able",
+      :preds {
+        "/title" {
+          :description "The text that appears centered at the top of an essay",
+          :range-type :string,
+          :required true,
+          :unique true,
+        },
+        "/flow/next" {
+          :description "Relation to the next essay",
+          :range-type :essay-type,
+        },
+        "/flow/home" {
+          :description "Relation to the 'parent' essay",
+          :range-type :essay-type,
+          :required true,
+          :unique true,
+          :default :monad,
+          :preds {
+            "/label" {
+              :description "Metadata about the home",
+              :range-type [
+                :menu ; If the essay belongs to a menu,
+              ],
+            },
+          },
+        },
+        "/flow/see_also" {
+          :description "Internal link to another essay",
+          :range-type :essay-type,
+        },
+        "/flow/menu" {
+          :description "Internal link to an essay menu",
+          :range-type :essay-type,
+          :preds {
+            ; Note that this check is redundant with the /title above, unless
+            ; range-type were made an intermediate sub whose value-type is an
+            ; :essay-type
+            "/title" {
+              :description "The title of the menu",
+              :range-type :string,
+              :required true,
+            },
+          },
+        },
+        "/flow/random" {
+          :description "Relation to a random essay",
+          ; TODO - range ought to be a set of essays
+          :range-type nil,
+        },
+        "/contains" {
+          :description "Relation from an essay to the segment it contains",
+          :range-type :segment-type,
+          :unique true,
+          :required true,
+        },
+        "/label" {
+          :description "Symbol label that ascribes a metadata to the essay",
+          :range-type #{
+            ; Content is not rendered.
+            :invisible
+            ; Content is under construction.
+            :under-construction
+            ; Content is religious.
+            :religion
+            ; Content is political.
+            :politics}
+        },
+      },
+    }))
 
-; (def segment-schema
-;   (schematize-type "/segment"
-;     {
-;       :description "Nodes that are internally linkable",
-;     }
-;     {
-;       "/flow/block" {
-;         :description "Relation to the next block segment",
-;         :unique true,
-;       },
-;       "/flow/inline" {
-;         :description "Relation to the second inline segment",
-;         :range-type "/type/segment"
-;         :unique true,
-;       },
-;       "/contains" {
-;         :description "Relation from a segment to the item it contains",
-;         :range-type "/type/item",
-;         :unique true,
-;         :required true,
-;       },
-;       "/author" {
-;         :description "Who wrote the segment",
-;         :range-type :string,
-;       },
-;     }))
+(defn segment-type
+ [graph]
+ (build-type-graph graph :segment-type #{}
+   {
+     :description "Nodes that are internally linkable",
+     :preds {
+       "/flow/block" {
+         :description "Relation to the next block segment",
+         :range-type :segment-type,
+         :unique true,
+       },
+       "/flow/inline" {
+         :description "Relation to the second inline segment",
+         :range-type :segment-type,
+         :unique true,
+       },
+       "/contains" {
+         :description "Relation from a segment to the item it contains",
+         :range-type :item-type,
+         :unique true,
+         :required true,
+       },
+       "/author" {
+         :description "Who wrote the segment",
+         :range-type :string,
+       },
+      },
+    }))
 
-; (def item-schema
-;  (schematize-type "/item"
-;   {
-;     :description "A piece of content",
-;     :abstract true,
-;   }
-;   {}))
+(defn item-type
+  [graph]
+  (build-type-graph graph :item-type #{}
+    {
+      :description "A piece of content",
+      :abstract true,
+    }))
 
-; (def inline-item-schema
-;   (schematize-type "/item/inline"
-;     {
-;       :description "Content that can be inlined",
-;       :super-type "/type/item",
-;     }
-;     {
-;       "/text" {
-;         :description "The text that appears inline",
-;         :range-type :string,
-;         :required true,
-;         :unique true,
-;       },
-;       "/tangent" {
-;         :description "The item which clicking on this toggles",
-;         :range-type "/type/segment",
-;         :exclusive #{"/item/inline/url", "/item/inline/see_also",
-;                      "/item/inline/definition"},
-;         :unique true,
-;       },
-;       "/url" {
-;         :description "The external URL to which the text is linked",
-;         :range-type :string,
-;         :exclusive #{"/item/inline/tangent", "/item/inline/see_also",
-;                      "/item/inline/definition"},
-;         :unique true,
-;       },
-;       "/see_also" {
-;         :description "Another essay which is relevant",
-;         :range-type "/type/essay",
-;         :exclusive #{"/item/inline/url", "/item/inline/tangent",
-;                      "/item/inline/definition"},
-;         :unique true,
-;       },
-;       "/definition" {
-;         :description "A definition which clicking on this toggles",
-;         :range-type "/type/segment",
-;         :exclusive #{"/item/inline/tangent", "/item/inline/url",
-;                      "/item/inline/see_also"},
-;         :unique true,
-;       },
-;     },
-;   ))
+(defn inline-item-type
+  [graph]
+  (build-type-graph graph :inline-item-type #{:item-type}
+    {
+      :description "Content that can be inlined",
+      :mutually-exclusive #{"/tangent" "/url" "/see_also" "/definition"},
+      :preds {
+        "/text" {
+          :description "The text that appears inline",
+          :range-type :string,
+          :required true,
+          :unique true,
+        },
+        "/tangent" {
+          :description "The item which clicking on this toggles",
+          :range-type :segment-type,
+          :unique true,
+        },
+        "/url" {
+          :description "The external URL to which the text is linked",
+          :range-type :string,
+          :unique true,
+        },
+        "/see_also" {
+          :description "Another essay which is relevant",
+          :range-type :essay-type,
+          :unique true,
+        },
+        "/definition" {
+          :description "A definition which clicking on this toggles",
+          :range-type :segment-type,
+          :unique true,
+        },
+      },
+    }))
 
-; (def image-schema
-;   (schematize-type "/item/image"
-;     {
-;       :description "Image content",
-;       :super-type "/type/item",
-;     }
-;     {
-;       "/url" {
-;         :description "URL of image",
-;         :range-type :string,
-;         :required true,
-;         :unique true,
-;       },
-;       "/alt_text" {
-;         :description "Alt text of image",
-;         :range-type :string,
-;         :required true,
-;         :unique true,
-;       },
-;       "/width" {
-;         :description "The width to render the image",
-;         :range-type :number,
-;         :unique true,
-;       },
-;       "/height" {
-;         :description "The height to render the image",
-;         :range-type :number,
-;         :unique true,
-;       },
-;     }))
+(defn image-type
+  [graph]
+  (build-type-graph graph :image-type #{:item-type}
+    {
+      :description "Image content",
+      :preds {
+        "/url" {
+          :description "URL of image",
+          :range-type :string,
+          :required true,
+          :unique true,
+        },
+        "/alt_text" {
+          :description "Alt text of image",
+          :range-type :string,
+          :required true,
+          :unique true,
+        },
+        "/width" {
+          :description "The width to render the image",
+          :range-type :number,
+          :unique true,
+        },
+        "/height" {
+          :description "The height to render the image",
+          :range-type :number,
+          :unique true,
+        },
+      },
+    }))
 
-; (def quote-schema
-;   (schematize-type "/item/quote"
-;     {
-;       :description "A quote",
-;       :super-type "/type/item",
-;     }
-;     {
-;       "/text" {
-;         :description "The text contents of the quote",
-;         :range-type :string,
-;         :required true,
-;         :unique true,
-;       },
-;       "/author" {
-;         :description "To whom the quote is attributed",
-;         :range-type :string,
-;         :unique true,
-;       },
-;     }))
+(defn quote-type
+  [graph]
+  (build-type-graph graph :quote-type #{:item-type}
+    {
+      :description "A quote",
+      :preds {
+        "/text" {
+          :description "The text contents of the quote",
+          :range-type :string,
+          :required true,
+          :unique true,
+        },
+        "/author" {
+          :description "To whom the quote is attributed",
+          :range-type :string,
+          :unique true,
+        },
+      },
+    }))
 
-; (def poem-schema
-;   (schematize-type "/item/poem"
-;     {
-;       :description "A poem",
-;       :super-type "/type/item",
-;     }
-;     {
-;       "/line" (with-order "/item/poem/line" {
-;         :description
-;           "A line that appears in the poem, uses :order property to sort",
-;         :range-type :string,
-;         :required true,
-;       }),
-;     }))
+(defn poem-type
+  [graph]
+  (build-type-graph graph :poem-type #{:item-type}
+    {
+      :description "A poem",
+      ; TODO implement ordered. May be possible to remove with-order below, and
+      ; check that internally. Would be ideal.
+      :ordered #{"/line"},
+      :preds {
+        "/line" (with-order {
+          :description "A line that appears in the poem",
+          :range-type :string,
+          :required true,
+        }),
+      },
+    }))
 
 ; (def big-emoji-schema
 ;   (schematize-type "/item/big_emoji"
@@ -419,10 +424,12 @@
 
 (def type-graph
   (reduce #(merge-graph %1 (%2 %1))
-    [event-type]))
+    (create-graph-v3)
+    [event-type essay-type segment-type item-type inline-item-type image-type
+     quote-type poem-type]))
 
 (defn validate-graph-v3
   [graph]
-  (let [[errors final-graph] (validate graph)]
+  (let [[errors final-graph] (validate (merge-graph graph type-graph))]
     (doall (map #(println %) errors))
     (empty? errors)))

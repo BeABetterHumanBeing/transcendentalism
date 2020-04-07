@@ -154,6 +154,18 @@
             [#{} graph]
             [#{(str sub " has no non-abstract type")} graph])))))
 
+; TODO - Add order validation
+(defn with-order
+  [schema]
+  (assoc schema
+    :preds (assoc
+      (schema :preds {})
+      "/order" {
+        :range-type :number,
+        :required true,
+        :unique true,
+      })))
+
 (defn schema-to-constraint
   "Creates a single constraint combining all the constraints of a given schema"
   [schema]
