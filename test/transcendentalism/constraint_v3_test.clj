@@ -6,17 +6,15 @@
 
 (deftest test-range-constraint
   (let [t (get-hours-ago 20),
-        type-root (reify TypeRoot
-                    (get-type-name [root] "/range_type"))
-        graph (write-path (create-graph-v3) :a {}
+        graph (write-path (build-type-graph (create-graph-v3) :t #{} {})
+                          :a {}
                           {"/num" 7,
                            "/str" "blah",
                            "/time" t,
                            "/bool" false,
                            "/relation" :b,
                            "/enum" :bar}
-                          "/relation" {"/type" :t}
-                          "/type" type-root {"/type" :type})]
+                          "/relation" {"/type" :t})]
     (testing "Test range constraint"
       (is (= [#{} graph]
              (check-constraint (range-type-constraint "/num" :number) graph :a)))
@@ -66,18 +64,18 @@
              (check-constraint (range-type-constraint "/relation" :bool) graph :a)))
       (is (= [#{":bar does not match range type :bool"} graph]
              (check-constraint (range-type-constraint "/enum" :bool) graph :a)))
-      (is (= [#{"7 does not match range type /range_type"} graph]
-             (check-constraint (range-type-constraint "/num" "/range_type") graph :a)))
-      (is (= [#{"blah does not match range type /range_type"} graph]
-             (check-constraint (range-type-constraint "/str" "/range_type") graph :a)))
-      (is (= [#{(str t " does not match range type /range_type")} graph]
-             (check-constraint (range-type-constraint "/time" "/range_type") graph :a)))
-      (is (= [#{"false does not match range type /range_type"} graph]
-             (check-constraint (range-type-constraint "/bool" "/range_type") graph :a)))
+      (is (= [#{"7 does not match range type :t"} graph]
+             (check-constraint (range-type-constraint "/num" :t) graph :a)))
+      (is (= [#{"blah does not match range type :t"} graph]
+             (check-constraint (range-type-constraint "/str" :t) graph :a)))
+      (is (= [#{(str t " does not match range type :t")} graph]
+             (check-constraint (range-type-constraint "/time" :t) graph :a)))
+      (is (= [#{"false does not match range type :t"} graph]
+             (check-constraint (range-type-constraint "/bool" :t) graph :a)))
       (is (= [#{} graph]
-             (check-constraint (range-type-constraint "/relation" "/range_type") graph :a)))
-      (is (= [#{":bar does not match range type /range_type"} graph]
-             (check-constraint (range-type-constraint "/enum" "/range_type") graph :a)))
+             (check-constraint (range-type-constraint "/relation" :t) graph :a)))
+      (is (= [#{":bar does not match range type :t"} graph]
+             (check-constraint (range-type-constraint "/enum" :t) graph :a)))
       (is (= [#{"7 does not match range type #{:bar :foo}"} graph]
              (check-constraint (range-type-constraint "/num" #{:foo :bar}) graph :a)))
       (is (= [#{"blah does not match range type #{:bar :foo}"} graph]
@@ -96,12 +94,17 @@
   (let [[errors new-graph] (check-constraint constraint graph sub)]
     [errors (get-raw-data new-graph)]))
 
+(defn validate-raw-data
+  [graph]
+  (let [[errors new-graph] (validate graph)]
+    [errors (get-raw-data new-graph)]))
+
 (deftest test-required-constraint
   (let [req-no-default (required-pred-constraint "/foo"),
         req-w-default (required-pred-constraint "/bar" 5),
         noncompliant-graph (write-v (create-graph-v3) :a 3),
         compliant-graph (write-path noncompliant-graph :a {} {"/foo" 2,
-                                                                 "/bar" 3}),
+                                                              "/bar" 3}),
         fixed-graph (write-o noncompliant-graph :a "/bar" 5)]
     (testing "Test required constraint"
       (is (= [#{} compliant-graph]
@@ -203,11 +206,11 @@
           :value-type :number,
           :preds {
             "/foo" {
-              :value-type "/range_type",
+              :value-type :range-type,
               :unique true,
               :preds {
                 "/bar" {
-                  :value-type "/other_range_type",
+                  :value-type :other-range-type,
                   :required true,
                   :preds {
                     "/baz" {
@@ -223,9 +226,9 @@
         },
         constraint (schema-to-constraint schema),
         range-type-root (reify TypeRoot
-                          (get-type-name [root] "/range_type")),
+                          (get-constraint [root] constraint)),
         other-range-type-root (reify TypeRoot
-                                (get-type-name [root] "/other_range_type")),
+                                (get-constraint [root] nil)),
         base-graph (-> (create-graph-v3)
                        (write-path :b {}
                                    {"/type" :range-type}
@@ -244,8 +247,8 @@
                               7 {"/foo" :a2}
                               "/foo" :c {"/bar" :a3}
                               "/bar" :b)]
-        (is (= [#{":c does not match value type /range_type"
-                  ":b does not match value type /other_range_type"}
+        (is (= [#{":c does not match value type :range-type"
+                  ":b does not match value type :other-range-type"}
                 (get-raw-data (write-o graph :a3 "/baz" "default"))]
                (check-constraint-raw-data constraint graph :a1))))
       (let [graph (write-path base-graph :a1 {}
@@ -255,6 +258,74 @@
                   "/foo is unique on :a1, but multiple present"
                   "/bar is required on :a2, but not present"
                   "/bar is required on :a3, but not present"
-                  " does not match value type /range_type"}
+                  " does not match value type :range-type"}
                 (get-raw-data graph)]
                (check-constraint-raw-data constraint graph :a1)))))))
+
+(deftest test-schema-validation
+  (let [type-graph
+          (-> (create-graph-v3)
+              (build-type-graph :type-building #{}
+                                {
+                                  :abstract true,
+                                  :preds {
+                                    "/size" {
+                                      :range-type :number,
+                                      :required true,
+                                      :unique true,
+                                    },
+                                  },
+                                })
+              (build-type-graph :type-fabrick #{:type-building}
+                                {
+                                  :value-type :string,
+                                  :preds {
+                                    "/input" {
+                                      :required true,
+                                      :unique true,
+                                      :preds {
+                                        "/iron" {
+                                          :range-type :number,
+                                          :required true,
+                                          :unique true,
+                                        },
+                                        "/coal" {
+                                          :range-type :number,
+                                          :required true,
+                                          :unique true,
+                                        },
+                                      },
+                                    },
+                                    "/output" {
+                                      :required true,
+                                      :unique true,
+                                      :preds {
+                                        "/steel" {
+                                          :range-type :number,
+                                          :required true,
+                                          :unique true,
+                                        },
+                                      },
+                                    },
+                                  },
+                                })
+              (build-type-graph :type-slot #{}
+                                {
+                                  :value-type #{:water :land :rock},
+                                  :preds {
+                                    "/contains" {
+                                      :range-type :type-building,
+                                    },
+                                  },
+                                })),
+        ]
+    (testing "Test schema validation"
+      (let [graph (write-path type-graph :my-slot {}
+                              :land {"/type" :type-slot,
+                                     "/contains" :my-building}
+                              "/contains" "An Abstract Building" {"/size" 100})]
+        ; TODO - Add abstract type constraint.
+        (is (= [#{} (get-raw-data graph)]
+               (validate-raw-data graph))))
+        ; TODO - Add more comprehensive tests.
+        )))

@@ -6,7 +6,7 @@
             [transcendentalism.toolbox :refer :all]))
 
 (defprotocol TypeRoot
-  (get-type-name [root] "Returns the name of the type"))
+  (get-constraint [root] "Returns the type's constraint"))
 
 (defprotocol TypeAspect
   (get-types [aspect] "Returns the set of all types"))
@@ -19,11 +19,10 @@
         (keyword? sub) (let [type-roots (read-path graph #{sub}
                                           "/type"
                                           #{(p* "/supertype")
-                                            "/cotype"} "/"),
-                             type-names (into #{} (map get-type-name type-roots))]
-                         (if (empty? type-names)
+                                            "/cotype"})]
+                         (if (empty? type-roots)
                              #{sub}
-                             type-names))
+                             type-roots))
         (fn? sub) #{:fn}
         (string? sub) #{:string}
         (number? sub) #{:number}
@@ -148,9 +147,13 @@
                        (fn [result k v]
                          (case k
                            :range-type (conj result (range-type-constraint pred v)),
-                           :required (conj result (required-pred-constraint pred
-                                                    (:default sub-schema nil))),
-                           :unique (conj result (unique-pred-constraint pred)),
+                           :required (if v
+                                         (conj result (required-pred-constraint pred
+                                                        (:default sub-schema nil)))
+                                         result),
+                           :unique (if v
+                                       (conj result (unique-pred-constraint pred))
+                                       result),
                            :excludes (conj result (exclusive-pred-constraint pred v)),
                            result))
                        (conj result
@@ -161,7 +164,17 @@
           result))
       [] schema)))
 
-; TODO - Test
+(defn build-type-graph
+  "Returns a sub-graph implementing a given type"
+  [graph sub supertypes schema]
+  (write-path graph sub {}
+              (reify TypeRoot
+                (get-constraint [root] (schema-to-constraint schema)))
+              (merge {"/type" :type}
+                     (if (empty? supertypes)
+                         {}
+                         {"/supertype" supertypes}))))
+
 (defn validate
   "Validates a graph, returning [#{errors} graph]"
   [graph]

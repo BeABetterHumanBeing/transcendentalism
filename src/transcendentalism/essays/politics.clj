@@ -303,7 +303,7 @@
 
     (bullet-list
       (paragraph
-        (text (heading "A White War") "is a ")
+        (text (heading "A White War") " is a ")
         (tangent (f 1) "selfless")
         (text " war. It is undertaken at expense to the belligerent party for"
               "the purpose of rectifying some evil or wrongdoing. Examples include:"))
