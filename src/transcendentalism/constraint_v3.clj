@@ -6,7 +6,8 @@
             [transcendentalism.toolbox :refer :all]))
 
 (defprotocol TypeRoot
-  (get-constraint [root] "Returns the type's constraint"))
+  (get-constraint [root] "Returns the type's constraint")
+  (is-abstract [root] "Whether this type is abstract"))
 
 (defprotocol TypeAspect
   (get-types [aspect] "Returns the set of all types"))
@@ -35,16 +36,19 @@
     "Checks whether checked-sub conforms to the given constraint. Returns
      [#{errors} graph]"))
 
+(defn accumulate-constraint
+  [[errors graph] [new-errors new-graph]]
+  [(set/union errors new-errors) new-graph])
+
 (defn and-constraint
   [constraints]
   (reify ConstraintV3
     (check-constraint [constraint graph sub]
       (reduce
         (fn [result constraint]
-          (let [[errors new-graph] (check-constraint constraint
-                                                     (second result) sub)]
-            [(set/union (first result) errors),
-             (merge-graph (second result) new-graph)]))
+          (accumulate-constraint result
+                                 (check-constraint constraint
+                                                   (second result) sub)))
         [#{} graph] (if (nil? constraints) [] constraints)))))
 
 (defn multiply-pred-constraint
@@ -54,9 +58,9 @@
   (reify ConstraintV3
     (check-constraint [constraint graph sub]
       (reduce
-        (fn [[errors graph] obj]
-          (let [[new-errors new-graph] (check-constraint pred-constraint graph obj)]
-            [(set/union errors new-errors) new-graph]))
+        (fn [result obj]
+          (accumulate-constraint result
+                                 (check-constraint pred-constraint graph obj)))
         [#{} graph] (read-os graph sub pred)))))
 
 (defn range-type-constraint
@@ -132,6 +136,24 @@
                     graph]))
              [#{} graph]))))))
 
+(defn abstract-type-constraint
+  []
+  (reify ConstraintV3
+    (check-constraint [constraint graph sub]
+      (let [types (get-types (create-type-aspect graph sub)),
+            has-concrete-type (reduce
+                                (fn [result type]
+                                  (if result
+                                      result
+                                      (let [type-root (read-v graph type)]
+                                        (if (satisfies? TypeRoot type-root)
+                                            (not (is-abstract type-root))
+                                            true))))
+                                false types)]
+        (if has-concrete-type
+            [#{} graph]
+            [#{(str sub " has no non-abstract type")} graph])))))
+
 (defn schema-to-constraint
   "Creates a single constraint combining all the constraints of a given schema"
   [schema]
@@ -141,6 +163,9 @@
         (case k
           :value-type (conj result (value-type-constraint v)),
           :mutually-exclusive (conj result (exclusive-pred-constraint v)),
+          :abstract (if v
+                        (conj result (abstract-type-constraint))
+                        result),
           :preds (reduce-kv
                    (fn [result pred sub-schema]
                      (reduce-kv
@@ -169,7 +194,8 @@
   [graph sub supertypes schema]
   (write-path graph sub {}
               (reify TypeRoot
-                (get-constraint [root] (schema-to-constraint schema)))
+                (get-constraint [root] (schema-to-constraint schema))
+                (is-abstract [root] (:abstract schema false)))
               (merge {"/type" :type}
                      (if (empty? supertypes)
                          {}
@@ -180,13 +206,16 @@
   [graph]
   (reduce
     (fn [result sub]
-      (check-constraint
-        (and-constraint
-          (reduce
-            (fn [result type]
-              (if (satisfies? ConstraintV3 type)
-                  (conj result type)
-                  result))
-            [] (get-types (create-type-aspect graph sub))))
-        graph sub))
+      (accumulate-constraint
+        result
+        (check-constraint
+          (and-constraint
+            (reduce
+              (fn [result type]
+                (let [type-root (read-v graph type)]
+                  (if (satisfies? TypeRoot type-root)
+                      (conj result (get-constraint type-root))
+                      result)))
+              [] (get-types (create-type-aspect graph sub))))
+          graph sub)))
     [#{} graph] (read-ss graph)))

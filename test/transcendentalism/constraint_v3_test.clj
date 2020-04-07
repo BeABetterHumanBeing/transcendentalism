@@ -226,9 +226,11 @@
         },
         constraint (schema-to-constraint schema),
         range-type-root (reify TypeRoot
-                          (get-constraint [root] constraint)),
+                          (get-constraint [root] constraint)
+                          (is-abstract [root] false)),
         other-range-type-root (reify TypeRoot
-                                (get-constraint [root] nil)),
+                                (get-constraint [root] nil)
+                                (is-abstract [root] false)),
         base-graph (-> (create-graph-v3)
                        (write-path :b {}
                                    {"/type" :range-type}
@@ -265,7 +267,7 @@
 (deftest test-schema-validation
   (let [type-graph
           (-> (create-graph-v3)
-              (build-type-graph :type-building #{}
+              (build-type-graph :building-type #{}
                                 {
                                   :abstract true,
                                   :preds {
@@ -276,7 +278,7 @@
                                     },
                                   },
                                 })
-              (build-type-graph :type-fabrick #{:type-building}
+              (build-type-graph :fabrick-type #{:building-type}
                                 {
                                   :value-type :string,
                                   :preds {
@@ -309,23 +311,22 @@
                                     },
                                   },
                                 })
-              (build-type-graph :type-slot #{}
+              (build-type-graph :slot-type #{}
                                 {
                                   :value-type #{:water :land :rock},
                                   :preds {
                                     "/contains" {
-                                      :range-type :type-building,
+                                      :range-type :building-type,
                                     },
                                   },
-                                })),
-        ]
+                                }))]
     (testing "Test schema validation"
       (let [graph (write-path type-graph :my-slot {}
-                              :land {"/type" :type-slot,
+                              :land {"/type" :slot-type,
                                      "/contains" :my-building}
-                              "/contains" "An Abstract Building" {"/size" 100})]
-        ; TODO - Add abstract type constraint.
-        (is (= [#{} (get-raw-data graph)]
+                              "/contains" "A Building" {"/type" :building-type,
+                                                        "/size" 100})]
+        (is (= [#{":my-building has no non-abstract type"} (get-raw-data graph)]
                (validate-raw-data graph))))
         ; TODO - Add more comprehensive tests.
         )))
