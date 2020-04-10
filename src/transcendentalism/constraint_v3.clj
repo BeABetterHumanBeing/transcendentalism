@@ -9,6 +9,7 @@
   (get-constraint [root] "Returns the type's constraint")
   (is-abstract [root] "Whether this type is abstract"))
 
+; TODO - remove type aspect abstraction, reducing it to just a get-types call.
 (defprotocol TypeAspect
   (get-types [aspect] "Returns the set of all types"))
 
@@ -154,7 +155,26 @@
             [#{} graph]
             [#{(str sub " has no non-abstract type")} graph])))))
 
-; TODO - Add order validation
+(defn ordered-constraint
+  [preds]
+  (reify ConstraintV3
+    (check-constraint [constraint graph sub]
+      (reduce
+        (fn [result pred]
+          (let [objs (read-os graph sub pred),
+                ordinals (into []
+                           (map #(let [raw-ordinals (read-os graph % "/order")]
+                                  (if (empty? raw-ordinals)
+                                      0
+                                      (first raw-ordinals)))
+                                objs))]
+            (if (apply distinct? ordinals)
+                result
+                (accumulate-constraint result
+                  [#{(str sub " " pred " has non-distinct ordinals " (sort ordinals))}
+                   graph]))))
+        [#{} graph] preds))))
+
 (defn with-order
   [schema]
   (assoc schema
@@ -166,6 +186,21 @@
         :unique true,
       })))
 
+(defn expand-schema
+  [schema]
+  (let [ordered-preds (reduce-kv
+                        (fn [result pred pred-schema]
+                          (if (:ordered pred-schema false)
+                              (conj result pred)
+                              result))
+                        #{} (:preds schema {})),
+        aug-schema (if (empty? ordered-preds)
+                       schema
+                       (assoc schema :check-order ordered-preds))]
+    (if (:ordered aug-schema false)
+        (with-order aug-schema)
+        aug-schema)))
+
 (defn schema-to-constraint
   "Creates a single constraint combining all the constraints of a given schema"
   [schema]
@@ -175,22 +210,20 @@
         (case k
           :value-type (conj result (value-type-constraint v)),
           :mutually-exclusive (conj result (exclusive-pred-constraint v)),
-          :abstract (if v
-                        (conj result (abstract-type-constraint))
-                        result),
+          :abstract (if v (conj result (abstract-type-constraint))
+                          result),
+          :check-order (conj result (ordered-constraint v)),
           :preds (reduce-kv
                    (fn [result pred sub-schema]
                      (reduce-kv
                        (fn [result k v]
                          (case k
                            :range-type (conj result (range-type-constraint pred v)),
-                           :required (if v
-                                         (conj result (required-pred-constraint pred
-                                                        (:default sub-schema nil)))
+                           :required (if v (conj result (required-pred-constraint pred
+                                                          (:default sub-schema nil)))
+                                           result),
+                           :unique (if v (conj result (unique-pred-constraint pred))
                                          result),
-                           :unique (if v
-                                       (conj result (unique-pred-constraint pred))
-                                       result),
                            :excludes (conj result (exclusive-pred-constraint pred v)),
                            result))
                        (conj result
@@ -199,7 +232,7 @@
                        sub-schema))
                    result v),
           result))
-      [] schema)))
+      [] (expand-schema schema))))
 
 (defn build-type-graph
   "Returns a sub-graph implementing a given type"

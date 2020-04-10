@@ -236,15 +236,13 @@
   (build-type-graph graph :poem-type #{:item-type}
     {
       :description "A poem",
-      ; TODO implement ordered. May be possible to remove with-order below, and
-      ; check that internally. Would be ideal.
-      :ordered #{"/line"},
       :preds {
-        "/line" (with-order {
+        "/line" {
           :description "A line that appears in the poem",
-          :range-type :string,
+          :value-type :string,
           :required true,
-        }),
+          :ordered true,
+        },
       },
     }))
 

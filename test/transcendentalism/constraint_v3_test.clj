@@ -264,6 +264,38 @@
                 (get-raw-data graph)]
                (check-constraint-raw-data constraint graph :a1)))))))
 
+(deftest test-ordered-schema
+  (let [constraint (schema-to-constraint {
+                       :preds {
+                          "/point" {
+                            :value-type :string,
+                            :ordered true,
+                          },
+                        },
+                     })]
+    (testing "Test order validation"
+      (let [graph (write-path (create-graph-v3) :a {}
+                              {"/point" :b1}
+                              "/point" "My String")]
+        (is (= [#{"/order is required on :b1, but not present"}
+                (get-raw-data graph)]
+               (check-constraint-raw-data constraint graph :a))))
+      (let [graph (-> (create-graph-v3)
+                      (write-path :a {} {"/point" #{:b1 :b2}})
+                      (write-path :b1 {} "One" {"/order" 2})
+                      (write-path :b2 {} "Two" {"/order" 2}))]
+        (is (= [#{":a /point has non-distinct ordinals (2 2)"}
+                (get-raw-data graph)]
+               (check-constraint-raw-data constraint graph :a))))
+      (let [graph (-> (create-graph-v3)
+                      (write-path :a {} {"/point" #{:b1 :b2 :b3}})
+                      (write-path :b1 {} "One" {"/order" 1})
+                      (write-path :b2 {} "Two" {"/order" 2})
+                      (write-path :b3 {} "Thr" {"/order" 3}))]
+        (is (= [#{} (get-raw-data graph)]
+               (check-constraint-raw-data constraint graph :a))))
+      )))
+
 (deftest test-schema-validation
   (let [type-graph
           (-> (create-graph-v3)
