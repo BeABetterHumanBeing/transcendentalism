@@ -1,17 +1,59 @@
 (ns transcendentalism.schema-v3
-  (:require [transcendentalism.constraint-v3 :refer :all]
+  (:require [clojure.string :as str]
+            [transcendentalism.constraint-v3 :refer :all]
+            [transcendentalism.encoding :refer :all]
+            [transcendentalism.graph :as g1]
             [transcendentalism.graph-v3 :refer :all]))
-
-; TODO - Finish translating V2 schema into V3 schema.
 
 ; TODO - Move all of the schema out of this file into components, ultimately
 ; removing it.
 
+(defn write-preds
+  [graph sub obj p-vs]
+  (reduce-kv
+    (fn [result pred val]
+      (write-o result sub pred val))
+    (write-v graph sub obj) p-vs))
+
+(defn convert-to-type
+  [pred]
+  (case pred
+    "/type/event" :event-type
+    "/type/essay" :essay-type
+    "/type/segment" :segment-type
+    "/type/item" :item-type
+    "/type/inline_item" :inline-item-type
+    "/type/image" :image-type
+    "/type/quote" :quote-type
+    "/type/poem" :poem-type
+    "/type/big_emoji" :big-emoji-type
+    "/type/q_and_a" :q-and-a-type
+    "/type/bullet_list" :bullet-list-type
+    "/type/contact" :contact-type
+    "/type/definition" :definition-type
+    "/type/table" :table-type
+    "/type/raw_html" :raw-html-type
+    "/type/thesis" :thesis-type
+    (assert (str pred " not supported"))))
+
+(defn strip-pred
+  [triple]
+  (str "/" (last (re-seq #"\w+" (:pred triple)))))
+
 (defn graph-to-v3
   "Converts V1 to V3 graph"
   [graph-v1]
-  ; TODO - Complete
-  (create-graph-v3))
+  (let [triples (g1/all-triples graph-v1)]
+    (reduce
+      (fn [graph triple]
+        (if (empty? (:p-vs triple))
+            (if (str/starts-with? (:pred triple) "/type")
+                (write-o graph (:sub triple) "/type" (convert-to-type (:pred triple)))
+                (write-o graph (:sub triple) (strip-pred triple) (:obj triple)))
+            (let [obj-sub (keyword (gen-key 10))]
+              (write-o (write-preds graph obj-sub (:obj triple) (:p-vs triple))
+                       (:sub triple) (strip-pred triple) obj-sub))))
+      (create-graph-v3) triples)))
 
 (defn event-type
   [graph]
@@ -269,13 +311,13 @@
       :preds {
         "/question" {
           :description "The question being asked",
-          :range-type "/type/segment",
+          :range-type :segment-type,
           :required true,
           :unique true,
         },
         "/answer" {
           :description "The answer being given",
-          :range-type "/type/segment",
+          :range-type :segment-type,
           :required true,
           :unique true,
         },
@@ -290,12 +332,12 @@
       :preds {
         "/header" {
           :description "What appears above the list to introduce it",
-          :range-type "/type/segment",
+          :range-type :segment-type,
           :unique true,
         }
         "/point" {
           :description "A bullet-pointed item. Uses :order property to sort",
-          :range-type "/type/segment",
+          :range-type :segment-type,
           :required true,
           :ordered true,
         },
@@ -358,7 +400,7 @@
       :preds {
         "/cell" {
           :description "A cell in the table",
-          :range-type "/type/segment",
+          :range-type :segment-type,
           :required true,
           :properties {
             "/column" {
@@ -375,7 +417,7 @@
         },
         "/label" {
           :description "A label for a column or row",
-          :range-type "/type/segment",
+          :range-type :segment-type,
           :mutually-exclusive #{"/row" "/column"},
           :properties {
             "/column" {
