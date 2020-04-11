@@ -523,7 +523,7 @@
     (create-graph-v3)
     [event-type essay-type segment-type item-type inline-item-type image-type
      quote-type poem-type big-emoji-type q-and-a-type bullet-list-type
-     definition-type table-type raw-html-type thesis-type]))
+     contact-type definition-type table-type raw-html-type thesis-type]))
 
 (defn validate-graph-v3
   [graph]

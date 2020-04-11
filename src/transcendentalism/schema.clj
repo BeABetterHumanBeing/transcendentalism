@@ -3,48 +3,7 @@
     [clojure.set :as set]))
 
 (use 'transcendentalism.graph
-     'transcendentalism.schema-data
      'transcendentalism.time)
-
-; Whether or not to do property validation on the graph.
-; TODO - move this to flags.
-(def enable-property-validation true)
-
-; The Schema protocal is the interface through which the schema data above is
-; accessed.
-(defprotocol Schema
-  (is-abstract? [schema type] "Whether the given type is abstract")
-  (get-supertypes [schema type] "Returns the set of supertypes of a given type"))
-
-(defn create-schema
-  [schema-data]
-  (reify Schema
-    (is-abstract? [schema type] ((schema-data type) :abstract false))
-    (get-supertypes [schema type]
-      (loop [supertypes #{},
-             untested-types #{type}]
-        (if (empty? untested-types)
-          supertypes
-          (let [t (first untested-types),
-                pred-data (schema-data t),
-                super-types (if (contains? pred-data :super-type)
-                  (if (set? (pred-data :super-type))
-                    (pred-data :super-type)
-                    #{(pred-data :super-type)})
-                  #{})]
-            ; Note that this logic will recur indefinitely if the supertype
-            ; graph has cycles.
-            (recur
-              (set/union supertypes super-types)
-              (set/difference (set/union untested-types super-types) #{t}))))))))
-
-(defn types
-  "Given a sub and list of types (without \"type\" prefix), returns the corresponding type triples."
-  [schema sub & type-suffixes]
-  (let [full-types (map #(str "/type" %) type-suffixes),
-        inferred-types (apply set/union (map #(get-supertypes schema %) full-types)),
-        all-types (set/union inferred-types full-types)]
-    (map #(->Triple sub % nil {}) all-types)))
 
 (def gq-segment-to-item
   "Returns a graph query that expands from /type/segment to all /type/item that
@@ -74,7 +33,7 @@
 
 (defn- events-obey-causality?
   "Validates that events' timestamps are strickly before their leads_to"
-  [schema graph]
+  [graph]
   (reduce
     (fn [result triple]
       (let [sub-time (get-time graph (:sub triple)),
@@ -89,7 +48,7 @@
 
 (defn- events-occur-in-past?
   "Validates that /event/leads_to goes from past to present"
-  [schema graph]
+  [graph]
   (let [relation (get-relation graph "/event/leads_to")]
     (set/union
       ; Check that the sources are in the past.
@@ -111,7 +70,7 @@
 
 (defn- home-is-monad-rooted-dag?
   "Validates that /essay/flow/home results in a monad-rooted DAG"
-  [schema graph]
+  [graph]
   (let [relation (get-relation graph "/essay/flow/home"),
         sinks (get-sinks relation)]
     (reduce
@@ -124,11 +83,11 @@
 
 (defn validate-graph-v1
   "Validates that a given graph conforms to a given schema."
-  [schema graph]
+  [graph]
   (let
     [validation-errors (reduce
       (fn [result validation-check]
-        (set/union result (validation-check schema graph)))
+        (set/union result (validation-check graph)))
       #{}
       [events-occur-in-past? events-obey-causality? home-is-monad-rooted-dag?]),
      ; nil ends up in the set, and ought to be weeded out.
@@ -136,5 +95,3 @@
      errors (set/difference validation-errors #{nil})]
     (doall (map println errors))
     (empty? errors)))
-
-(def schema-v1 (create-schema schema-data))
