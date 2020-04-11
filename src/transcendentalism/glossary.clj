@@ -2,8 +2,7 @@
   (:require [clojure.string :as str]))
 
 (use 'transcendentalism.graph
-     'transcendentalism.loom
-     'transcendentalism.schema)
+     'transcendentalism.loom)
 
 (defn definition
   [word part-of-speech & definitions]

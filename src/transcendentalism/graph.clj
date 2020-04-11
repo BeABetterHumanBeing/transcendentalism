@@ -43,15 +43,15 @@
     "Returns the obj of the unique triple on sub with pred, or nil if none exists")
   (get-time [graph sub]
     "Returns the time associated with the given sub, or nil if it has none")
-  (get-relation [graph pred] "Returns the subgraph defined by the given pred")
+  ; (get-relation [graph pred] "Returns the subgraph defined by the given pred")
   (get-node-v1 [graph sub] "Returns the subgraph defined by the given sub"))
 
 ; A Relation is the subgraph composed of only a single predicate.
-(defprotocol Relation
-  (participant-nodes [relation] "Returns all nodes in the relation")
-  (all-objs [relation sub] "Returns all the objects of a given sub's relationship")
-  (get-sources [relation] "Returns all subs that are not objects in the relation")
-  (get-sinks [relation] "Returns all subs that are not subjects in the relation"))
+; (defprotocol Relation
+;   (participant-nodes [relation] "Returns all nodes in the relation")
+;   (all-objs [relation sub] "Returns all the objects of a given sub's relationship")
+;   (get-sources [relation] "Returns all subs that are not objects in the relation")
+;   (get-sinks [relation] "Returns all subs that are not subjects in the relation"))
 
 ; A Node is the subgraph that shares a common sub.
 (defprotocol NodeV1
@@ -87,26 +87,26 @@
             (:obj (first selected)))))
       (get-triples-v1 [node] triples))))
 
-(defn- construct-relation
-  [relation-map]
-  (reify Relation
-    (participant-nodes [relation]
-      (keys relation-map))
-    (all-objs [relation sub]
-      (relation-map sub))
-    (get-sources [relation]
-      (let [subs (participant-nodes relation)]
-        (reduce
-          (fn [result sub]
-            (apply disj result (all-objs relation sub)))
-          (into #{} subs) subs)))
-    (get-sinks [relation]
-      (filter
-        (fn [sub]
-          (let [objs (all-objs relation sub)]
-            (or (empty? objs)
-                (= objs [sub]))))
-        (participant-nodes relation)))))
+; (defn- construct-relation
+;   [relation-map]
+;   (reify Relation
+;     (participant-nodes [relation]
+;       (keys relation-map))
+;     (all-objs [relation sub]
+;       (relation-map sub))
+;     (get-sources [relation]
+;       (let [subs (participant-nodes relation)]
+;         (reduce
+;           (fn [result sub]
+;             (apply disj result (all-objs relation sub)))
+;           (into #{} subs) subs)))
+;     (get-sinks [relation]
+;       (filter
+;         (fn [sub]
+;           (let [objs (all-objs relation sub)]
+;             (or (empty? objs)
+;                 (= objs [sub]))))
+;         (participant-nodes relation)))))
 
 (defn construct-graph
   "Constructs a graph from a set of triples"
@@ -145,20 +145,20 @@
       (get-time [graph sub]
         (let [value (get-unique graph sub "/event/time")]
           (if (nil? value) nil (to-time value))))
-      (get-relation [graph pred]
-        (construct-relation
-          (reduce
-            (fn [result triple]
-              (let [sub (:sub triple),
-                    obj (:obj triple)]
-                (assoc result
-                  sub (if (contains? result sub)
-                        (conj (result sub) obj)
-                        [obj])
-                  obj (if (contains? result obj)
-                        (result obj)
-                        []))))
-            {} (all-triples graph pred))))
+      ; (get-relation [graph pred]
+      ;   (construct-relation
+      ;     (reduce
+      ;       (fn [result triple]
+      ;         (let [sub (:sub triple),
+      ;               obj (:obj triple)]
+      ;           (assoc result
+      ;             sub (if (contains? result sub)
+      ;                   (conj (result sub) obj)
+      ;                   [obj])
+      ;             obj (if (contains? result obj)
+      ;                   (result obj)
+      ;                   []))))
+      ;       {} (all-triples graph pred))))
       (get-node-v1 [graph sub]
         (construct-node (sub graph-data))))))
 

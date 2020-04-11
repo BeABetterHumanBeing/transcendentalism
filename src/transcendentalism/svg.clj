@@ -6,7 +6,6 @@
 (use 'transcendentalism.color
      'transcendentalism.flags
      'transcendentalism.graph
-     'transcendentalism.schema
      'transcendentalism.time
      'transcendentalism.xml)
 

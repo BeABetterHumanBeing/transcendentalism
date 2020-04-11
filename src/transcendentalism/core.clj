@@ -19,7 +19,6 @@
      'transcendentalism.generate
      'transcendentalism.glossary
      'transcendentalism.graph
-     'transcendentalism.schema
      'transcendentalism.schema-v3)
 
 (def meta-directives

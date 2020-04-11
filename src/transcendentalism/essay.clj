@@ -6,8 +6,7 @@
      'transcendentalism.glossary
      'transcendentalism.graph
      'transcendentalism.html
-     'transcendentalism.loom
-     'transcendentalism.schema)
+     'transcendentalism.loom)
 
 (defn item-sub [sub] (sub-suffix sub "i"))
 
