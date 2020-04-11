@@ -304,7 +304,6 @@
       (map #(->Triple (subname "subject" %) "/event/time" "present" {})
         vertex-sequence)
      ])))]
-    (assert (validate-graph-v1 graph))
     graph))
 
 (defn svg-monad

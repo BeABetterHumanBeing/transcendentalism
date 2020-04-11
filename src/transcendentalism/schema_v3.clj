@@ -153,6 +153,16 @@
   (build-type-graph graph :essay-type #{}
     {
       :description "Nodes that are externally link-able",
+      :constraints [
+        ; Check that /essay/flow/home eventually leads to :monad.
+        (reify ConstraintV3
+          (check-constraint [constraint graph sub]
+            (let [homes (read-path graph sub (p* ["/essay/flow/home" "/"]))]
+              (if (or (contains? homes :monad) (contains? homes nil))
+                  [#{} graph]
+                  [#{(str sub " /essay/flow/home does not lead to :monad")}
+                   graph]))))
+      ],
       :preds {
         "/essay/title" {
           :description "The text that appears centered at the top of an essay",
@@ -169,7 +179,7 @@
           :value-type :essay-type,
           :required true,
           :unique true,
-          :default :monad,
+          :default :monad-shadow,
           :preds {
             "/label" {
               :description "Metadata about the home",
@@ -537,7 +547,7 @@
 
 (def type-graph
   (reduce #(merge-graph %1 (%2 %1))
-    (create-graph-v3)
+    (write-v (create-graph-v3) :monad-shadow :monad)
     [event-type essay-type segment-type item-type inline-item-type image-type
      quote-type poem-type big-emoji-type q-and-a-type bullet-list-type
      contact-type definition-type table-type raw-html-type thesis-type]))

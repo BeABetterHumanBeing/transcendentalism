@@ -1,9 +1,6 @@
-(ns transcendentalism.schema
-  (:require [clojure.string :as str]
-    [clojure.set :as set]))
+(ns transcendentalism.schema)
 
-(use 'transcendentalism.graph
-     'transcendentalism.time)
+(use 'transcendentalism.graph)
 
 (def gq-segment-to-item
   "Returns a graph query that expands from /type/segment to all /type/item that
@@ -27,34 +24,3 @@
          ; Assumes questions, answers, and points are single-blocked.
          (q-pred-v1 "/segment/flow/inline"))
        (q-pred-v1 "/segment/contains"))))
-
-; Code validation. The purpose of validation is to check the assumptions that
-; are made by code generation.
-
-(defn- home-is-monad-rooted-dag?
-  "Validates that /essay/flow/home results in a monad-rooted DAG"
-  [graph]
-  (let [relation (get-relation graph "/essay/flow/home"),
-        sinks (get-sinks relation)]
-    (reduce
-      (fn [result sub]
-        (conj result
-          (if (= sub :monad)
-            nil
-            (str sub "'s /essay/flow/home does not lead to :monad"))))
-      #{} sinks)))
-
-(defn validate-graph-v1
-  "Validates that a given graph conforms to a given schema."
-  [graph]
-  (let
-    [validation-errors (reduce
-      (fn [result validation-check]
-        (set/union result (validation-check graph)))
-      #{}
-      [home-is-monad-rooted-dag?]),
-     ; nil ends up in the set, and ought to be weeded out.
-     ; TODO - weed out nil. (conj #{} nil) adds nil to the set.
-     errors (set/difference validation-errors #{nil})]
-    (doall (map println errors))
-    (empty? errors)))

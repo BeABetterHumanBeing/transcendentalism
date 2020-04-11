@@ -304,7 +304,7 @@
                         (reduce
                           (fn [result sub]
                             (assoc result sub {}))
-                          {} subs)
+                          {} (if (set? subs) subs #{subs}))
                         {} ; Bindings
                         graph)
                       (map build-path pathables))))
