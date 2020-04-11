@@ -22,7 +22,8 @@
     :static-html false,
     ; Whether to generate SVGs, or assume that they've already been generated.
     :generate-svg false,
-    :enable-v2 false,
+    ; Which port to start a server on. Does not start a server if 0.
+    :server 0,
   }))
 
 (defn set-flags

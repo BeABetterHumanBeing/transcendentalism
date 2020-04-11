@@ -10,7 +10,9 @@ Allowed boolean command flags: `debugging`, `static-html`, `generate-svg`.
 
 ## License
 
-Copyright © 2020 FIXME
+Copyright © 2020 Daniel Gierl, All rights reserved
+
+TODO - talk to a copyright lawyer to determine what license would be appropriate
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at
