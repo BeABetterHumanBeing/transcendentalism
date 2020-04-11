@@ -36,3 +36,11 @@
           (if (and (= a-val b-val) (not (empty? etc)))
             (recur (first etc) (rest etc))
             (< a-val b-val)))))))
+
+(defmacro time-msg
+  "Evaluates expr and prints the time it took.  Returns the value of expr."
+  [msg expr]
+  `(let [start# (. System (nanoTime))
+         ret# ~expr]
+     (println ~msg "time:" (/ (double (- (. System (nanoTime)) start#)) 1000000000.0) "secs")
+     ret#))
