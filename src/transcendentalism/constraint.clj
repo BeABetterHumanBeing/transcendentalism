@@ -246,19 +246,13 @@
 
 (defn validate
   "Validates a graph, returning [#{errors} graph]"
-  [graph]
-  (reduce
-    (fn [result sub]
-      (accumulate-constraint
-        result
-        (check-constraint
-          (and-constraint
-            (reduce
-              (fn [result type]
-                (let [type-root (read-v graph type)]
-                  (if (satisfies? TypeRoot type-root)
-                      (conj result (get-constraint type-root))
-                      result)))
-              [] (get-types graph sub)))
-          graph sub)))
-    [#{} graph] (read-ss graph)))
+  [base-graph]
+  (let [graph (create-graph-v3 {} base-graph)]
+    (reduce-all result [#{} graph]
+                [[sub (read-ss graph)]
+                 [type (get-types graph sub)]]
+      (let [type-root (read-v graph type)]
+        (if (satisfies? TypeRoot type-root)
+            (accumulate-constraint result
+              (check-constraint (get-constraint type-root) graph sub))
+            result)))))
