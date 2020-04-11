@@ -9,28 +9,22 @@
   (get-constraint [root] "Returns the type's constraint")
   (is-abstract [root] "Whether this type is abstract"))
 
-; TODO - remove type aspect abstraction, reducing it to just a get-types call.
-(defprotocol TypeAspect
-  (get-types [aspect] "Returns the set of all types"))
-
-(defn create-type-aspect
+(defn get-types
   [graph sub]
-  (reify TypeAspect
-    (get-types [aspect]
-      (cond
-        (keyword? sub) (let [type-roots (read-path graph #{sub}
-                                          "/type"
-                                          #{(p* "/supertype")
-                                            "/cotype"})]
-                         (if (empty? type-roots)
-                             #{sub}
-                             type-roots))
-        (fn? sub) #{:fn}
-        (string? sub) #{:string}
-        (number? sub) #{:number}
-        (instance? Boolean sub) #{:bool}
-        (is-valid-time sub) #{:time}
-        :else #{}))))
+  (cond
+    (keyword? sub) (let [type-roots (read-path graph #{sub}
+                                      "/type"
+                                      #{(p* "/supertype")
+                                        "/cotype"})]
+                     (if (empty? type-roots)
+                         #{sub}
+                         type-roots))
+    (fn? sub) #{:fn}
+    (string? sub) #{:string}
+    (number? sub) #{:number}
+    (instance? Boolean sub) #{:bool}
+    (is-valid-time sub) #{:time}
+    :else #{}))
 
 (defprotocol ConstraintV3
   (check-constraint [constraint graph checked-sub]
@@ -74,7 +68,7 @@
       (check-constraint [constraint graph obj]
         (if (nil? range-type)
           [#{} graph]
-          [(let [types (get-types (create-type-aspect graph obj))]
+          [(let [types (get-types graph obj)]
              (if (if (set? range-type)
                      (not (empty? (set/intersection range-type types)))
                      (contains? types range-type))
@@ -88,7 +82,7 @@
     (check-constraint [constraint graph sub]
       (let [val (read-v graph sub)]
         (if (or (nil? range-type)
-                (let [types (get-types (create-type-aspect graph val))]
+                (let [types (get-types graph val)]
                   (if (set? range-type)
                       (not (empty? (set/intersection range-type types)))
                       (contains? types range-type))))
@@ -144,7 +138,7 @@
   []
   (reify ConstraintV3
     (check-constraint [constraint graph sub]
-      (let [types (get-types (create-type-aspect graph sub)),
+      (let [types (get-types graph sub),
             has-concrete-type (reduce
                                 (fn [result type]
                                   (if result
@@ -265,6 +259,6 @@
                   (if (satisfies? TypeRoot type-root)
                       (conj result (get-constraint type-root))
                       result)))
-              [] (get-types (create-type-aspect graph sub))))
+              [] (get-types graph sub)))
           graph sub)))
     [#{} graph] (read-ss graph)))
