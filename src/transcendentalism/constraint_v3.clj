@@ -39,7 +39,10 @@
 
 (defn accumulate-constraint
   [[errors graph] [new-errors new-graph]]
-  [(set/union errors new-errors) new-graph])
+  [(set/union errors new-errors)
+   (if (= graph new-graph)
+       graph
+       (merge-graph graph new-graph))])
 
 (defn and-constraint
   [constraints]

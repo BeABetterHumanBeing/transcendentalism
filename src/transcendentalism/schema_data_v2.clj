@@ -61,6 +61,7 @@
           "/label" {
             :description "Metadata about the home",
             :range-type [
+              :none ; Hack (see schema_v3)
               :menu ; If the essay belongs to a menu,
             ],
           },

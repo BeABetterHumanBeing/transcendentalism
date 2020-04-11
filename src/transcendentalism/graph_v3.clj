@@ -41,7 +41,17 @@
              graphlet)))
      (get-raw-data [graph] raw-data)
      (merge-graph [graph other]
-       (create-graph-v3 (merge raw-data (get-raw-data other)) base-graph))
+       (create-graph-v3
+         (reduce-kv
+           (fn [result sub graphlet]
+             (if (= (sub result) graphlet)
+                 result
+                 (assoc result
+                   sub (->Graphlet (:v graphlet)
+                                   (merge (:p-os (sub result))
+                                          (:p-os graphlet))))))
+           raw-data (get-raw-data other))
+         base-graph))
      ReadGraph
      (read-ss [graph]
        (let [my-subs (into #{} (keys raw-data))]

@@ -1,5 +1,6 @@
 (ns transcendentalism.schema-v3
-  (:require [clojure.string :as str]
+  (:require [clojure.set :as set]
+            [clojure.string :as str]
             [transcendentalism.constraint-v3 :refer :all]
             [transcendentalism.encoding :refer :all]
             [transcendentalism.graph :as g1]
@@ -8,37 +9,71 @@
 ; TODO - Move all of the schema out of this file into components, ultimately
 ; removing it.
 
-(defn write-preds
+(defn- write-preds
   [graph sub obj p-vs]
   (reduce-kv
     (fn [result pred val]
       (write-o result sub pred val))
     (write-v graph sub obj) p-vs))
 
-(defn convert-to-type
+(defn- read-preds
+  [graph obj]
+  (reduce
+    (fn [result pred]
+      (reduce
+        (fn [result obj]
+          ; Assumes V1 properties are unique.
+          (assoc result pred obj))
+        result (read-os graph obj pred)))
+    {} (read-ps graph obj)))
+
+(defn- convert-to-type
   [pred]
   (case pred
     "/type/event" :event-type
     "/type/essay" :essay-type
     "/type/segment" :segment-type
     "/type/item" :item-type
-    "/type/inline_item" :inline-item-type
-    "/type/image" :image-type
-    "/type/quote" :quote-type
-    "/type/poem" :poem-type
-    "/type/big_emoji" :big-emoji-type
-    "/type/q_and_a" :q-and-a-type
-    "/type/bullet_list" :bullet-list-type
-    "/type/contact" :contact-type
-    "/type/definition" :definition-type
-    "/type/table" :table-type
-    "/type/raw_html" :raw-html-type
-    "/type/thesis" :thesis-type
-    (assert (str pred " not supported"))))
+    "/type/item/inline" :inline-item-type
+    "/type/item/image" :image-type
+    "/type/item/quote" :quote-type
+    "/type/item/poem" :poem-type
+    "/type/item/big_emoji" :big-emoji-type
+    "/type/item/q_and_a" :q-and-a-type
+    "/type/item/bullet_list" :bullet-list-type
+    "/type/item/contact" :contact-type
+    "/type/item/definition" :definition-type
+    "/type/item/table" :table-type
+    "/type/item/raw_html" :raw-html-type
+    "/type/item/thesis" :thesis-type
+    (assert false (str pred " not supported"))))
 
-(defn strip-pred
-  [triple]
-  (str "/" (last (re-seq #"\w+" (:pred triple)))))
+(defn- convert-from-type
+  [sub objs]
+  (let [obj (if (= (count objs) 1)
+                (first objs)
+                (first (set/difference objs #{:item-type})))]
+    (g1/->Triple sub
+                 (case obj
+                   :type "/type"
+                   :event-type "/type/event"
+                   :essay-type "/type/essay"
+                   :segment-type "/type/segment"
+                   :item-type "/type/item"
+                   :inline-item-type "/type/item/inline"
+                   :image-type "/type/item/image"
+                   :quote-type "/type/item/quote"
+                   :poem-type "/type/item/poem"
+                   :big-emoji-type "/type/item/big_emoji"
+                   :q-and-a-type "/type/item/q_and_a"
+                   :bullet-list-type "/type/item/bullet_list"
+                   :contact-type "/type/item/contact"
+                   :definition-type "/type/item/definition"
+                   :table-type "/type/item/table"
+                   :raw-html-type "/type/item/raw_html"
+                   :thesis-type "/type/item/thesis"
+                   (assert false (str obj " not supported")))
+                 nil {})))
 
 (defn graph-to-v3
   "Converts V1 to V3 graph"
@@ -49,11 +84,33 @@
         (if (empty? (:p-vs triple))
             (if (str/starts-with? (:pred triple) "/type")
                 (write-o graph (:sub triple) "/type" (convert-to-type (:pred triple)))
-                (write-o graph (:sub triple) (strip-pred triple) (:obj triple)))
+                (write-o graph (:sub triple) (:pred triple) (:obj triple)))
             (let [obj-sub (keyword (gen-key 10))]
               (write-o (write-preds graph obj-sub (:obj triple) (:p-vs triple))
-                       (:sub triple) (strip-pred triple) obj-sub))))
+                       (:sub triple) (:pred triple) obj-sub))))
       (create-graph-v3) triples)))
+
+(defn graph-to-v1
+  [graph-v3]
+  (g1/construct-graph
+    (reduce
+      (fn [result sub]
+        (if (nil? (read-v graph-v3 sub))
+            (reduce
+              (fn [result pred]
+                (if (= pred "/type")
+                    (conj result (convert-from-type sub (read-os graph-v3 sub pred)))
+                    (reduce
+                      (fn [result obj]
+                        (if (or (not (keyword? obj))
+                                (nil? (read-v graph-v3 obj)))
+                            (conj result (g1/->Triple sub pred obj {}))
+                            (conj result (g1/->Triple sub pred (read-v graph-v3 obj)
+                                                               (read-preds graph-v3 obj)))))
+                      result (read-os graph-v3 sub pred))))
+              result (read-ps graph-v3 sub))
+            result))
+      [] (read-ss graph-v3))))
 
 (defn event-type
   [graph]
@@ -61,11 +118,11 @@
     {
       :description "An event",
       :preds {
-        "/leads_to" {
+        "/event/leads_to" {
           :description "Relation from one event to its subsequent impacts",
           :range-type :event-type,
         },
-        "/time" {
+        "/event/time" {
           :description "When an event happened",
           :range-type :time,
           :required true,
@@ -80,42 +137,40 @@
     {
       :description "Nodes that are externally link-able",
       :preds {
-        "/title" {
+        "/essay/title" {
           :description "The text that appears centered at the top of an essay",
           :range-type :string,
           :required true,
           :unique true,
         },
-        "/flow/next" {
+        "/essay/flow/next" {
           :description "Relation to the next essay",
           :range-type :essay-type,
         },
-        "/flow/home" {
+        "/essay/flow/home" {
           :description "Relation to the 'parent' essay",
-          :range-type :essay-type,
+          :value-type :essay-type,
           :required true,
           :unique true,
           :default :monad,
           :preds {
             "/label" {
               :description "Metadata about the home",
-              :range-type [
+              :range-type #{
+                :none ; Hack to ensure that V1->V3 conversion uses pred-aware path.
                 :menu ; If the essay belongs to a menu,
-              ],
+              },
             },
           },
         },
-        "/flow/see_also" {
+        "/essay/flow/see_also" {
           :description "Internal link to another essay",
           :range-type :essay-type,
         },
-        "/flow/menu" {
+        "/essay/flow/menu" {
           :description "Internal link to an essay menu",
-          :range-type :essay-type,
+          :value-type :essay-type,
           :preds {
-            ; Note that this check is redundant with the /title above, unless
-            ; range-type were made an intermediate sub whose value-type is an
-            ; :essay-type
             "/title" {
               :description "The title of the menu",
               :range-type :string,
@@ -123,18 +178,18 @@
             },
           },
         },
-        "/flow/random" {
+        "/essay/flow/random" {
           :description "Relation to a random essay",
           ; TODO - range ought to be a set of essays
           :range-type nil,
         },
-        "/contains" {
+        "/essay/contains" {
           :description "Relation from an essay to the segment it contains",
           :range-type :segment-type,
           :unique true,
           :required true,
         },
-        "/label" {
+        "/essay/label" {
           :description "Symbol label that ascribes a metadata to the essay",
           :range-type #{
             ; Content is not rendered.
@@ -155,23 +210,23 @@
    {
      :description "Nodes that are internally linkable",
      :preds {
-       "/flow/block" {
+       "/segment/flow/block" {
          :description "Relation to the next block segment",
          :range-type :segment-type,
          :unique true,
        },
-       "/flow/inline" {
+       "/segment/flow/inline" {
          :description "Relation to the second inline segment",
          :range-type :segment-type,
          :unique true,
        },
-       "/contains" {
+       "/segment/contains" {
          :description "Relation from a segment to the item it contains",
          :range-type :item-type,
          :unique true,
          :required true,
        },
-       "/author" {
+       "/segment/author" {
          :description "Who wrote the segment",
          :range-type :string,
        },
@@ -193,28 +248,28 @@
       :description "Content that can be inlined",
       :mutually-exclusive #{"/tangent" "/url" "/see_also" "/definition"},
       :preds {
-        "/text" {
+        "/item/inline/text" {
           :description "The text that appears inline",
           :range-type :string,
           :required true,
           :unique true,
         },
-        "/tangent" {
+        "/item/inline/tangent" {
           :description "The item which clicking on this toggles",
           :range-type :segment-type,
           :unique true,
         },
-        "/url" {
+        "/item/inline/url" {
           :description "The external URL to which the text is linked",
           :range-type :string,
           :unique true,
         },
-        "/see_also" {
+        "/item/inline/see_also" {
           :description "Another essay which is relevant",
           :range-type :essay-type,
           :unique true,
         },
-        "/definition" {
+        "/item/inline/definition" {
           :description "A definition which clicking on this toggles",
           :range-type :segment-type,
           :unique true,
@@ -228,24 +283,24 @@
     {
       :description "Image content",
       :preds {
-        "/url" {
+        "/item/image/url" {
           :description "URL of image",
           :range-type :string,
           :required true,
           :unique true,
         },
-        "/alt_text" {
+        "/item/image/alt_text" {
           :description "Alt text of image",
           :range-type :string,
           :required true,
           :unique true,
         },
-        "/width" {
+        "/item/image/width" {
           :description "The width to render the image",
           :range-type :number,
           :unique true,
         },
-        "/height" {
+        "/item/image/height" {
           :description "The height to render the image",
           :range-type :number,
           :unique true,
@@ -259,13 +314,13 @@
     {
       :description "A quote",
       :preds {
-        "/text" {
+        "/item/quote/text" {
           :description "The text contents of the quote",
           :range-type :string,
           :required true,
           :unique true,
         },
-        "/author" {
+        "/item/quote/author" {
           :description "To whom the quote is attributed",
           :range-type :string,
           :unique true,
@@ -279,7 +334,7 @@
     {
       :description "A poem",
       :preds {
-        "/line" {
+        "/item/poem/line" {
           :description "A line that appears in the poem",
           :value-type :string,
           :required true,
@@ -294,7 +349,7 @@
     {
       :description "A series of big emoji",
       :preds {
-        "/emoji" {
+        "/item/big_emoji/emoji" {
           :description "The sequence of emoji to render",
           :range-type :string,
           :required true,
@@ -309,13 +364,13 @@
     {
       :description "A question and answer",
       :preds {
-        "/question" {
+        "/item/q_and_a/question" {
           :description "The question being asked",
           :range-type :segment-type,
           :required true,
           :unique true,
         },
-        "/answer" {
+        "/item/q_and_a/answer" {
           :description "The answer being given",
           :range-type :segment-type,
           :required true,
@@ -330,18 +385,18 @@
     {
       :description "A list with bullet points",
       :preds {
-        "/header" {
+        "/item/bullet_list/header" {
           :description "What appears above the list to introduce it",
           :range-type :segment-type,
           :unique true,
         }
-        "/point" {
+        "/item/bullet_list/point" {
           :description "A bullet-pointed item. Uses :order property to sort",
-          :range-type :segment-type,
+          :value-type :segment-type,
           :required true,
           :ordered true,
         },
-        "/is_ordered" {
+        "/item/bullet_list/is_ordered" {
           :description "Whether the list should be ordered, or bullet-pointed",
           :range-type :bool,
           :unique true,
@@ -356,7 +411,7 @@
     {
       :description "Provides contact information",
       :preds {
-        "/email" {
+        "/item/contact/email" {
           :description "An email address that can be mailed to",
           :range-type :string,
           :unique true,
@@ -371,21 +426,21 @@
     {
       :description "Provides a definition for a word",
       :preds {
-        "/word" {
+        "/item/definition/word" {
           :description "The word",
           :range-type :string,
           :unique true,
           :required true,
         },
-        "/part_of_speech" {
+        "/item/definition/part_of_speech" {
           :description "The part of speech the word belongs to",
           :range-type #{:noun :adjective},
           :unique true,
           :required true,
         },
-        "/definition" {
+        "/item/definition/definition" {
           :description "A definition of the word",
-          :range-type :string,
+          :value-type :string,
           :required true,
           :ordered true,
         },
@@ -398,9 +453,9 @@
     {
       :description "A 2D table of items",
       :preds {
-        "/cell" {
+        "/item/table/cell" {
           :description "A cell in the table",
-          :range-type :segment-type,
+          :value-type :segment-type,
           :required true,
           :properties {
             "/column" {
@@ -415,9 +470,9 @@
             },
           }
         },
-        "/label" {
+        "/item/table/label" {
           :description "A label for a column or row",
-          :range-type :segment-type,
+          :value-type :segment-type,
           :mutually-exclusive #{"/row" "/column"},
           :properties {
             "/column" {
@@ -439,7 +494,7 @@
     {
       :description "Raw HTML, bypassing the schema. Use with caution.",
       :preds {
-        "/contains" {
+        "/item/raw_html/contains" {
           :description "The HTML content as a string",
           :range-type :string,
           :unique true,
@@ -454,7 +509,7 @@
     {
       :description "A thesis, key point, or other information to call out",
       :preds {
-        "/contains" {
+        "/item/thesis/contains" {
           :description "The thesis",
           :range-type :string,
           :unique true,
@@ -474,4 +529,4 @@
   [graph]
   (let [[errors final-graph] (validate (merge-graph graph type-graph))]
     (doall (map #(println %) errors))
-    (empty? errors)))
+    [errors final-graph]))

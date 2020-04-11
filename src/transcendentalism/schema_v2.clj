@@ -37,21 +37,21 @@
         triples-by-sub))
     (create-graph (get-built-graph (create-graph-builder) node-builder))))
 
-(defn graph-to-v1
-  [new-graph]
-  (construct-graph
-    (reduce-all result []
-                [[node (get-all-nodes new-graph)]
-                 [pred (get-preds node)]
-                 [triple (get-triples node pred)]]
-      (let [properties (reduce
-                         (fn [result prop]
-                           ; Based on assumption that all properties in the old
-                           ; graph are unique.
-                           (assoc result
-                             prop (get-val (first (get-properties triple prop)))))
-                         {} (get-props triple))]
-        (conj result (->Triple (get-sub node) pred (get-obj triple) properties))))))
+; (defn graph-to-v1
+;   [new-graph]
+;   (construct-graph
+;     (reduce-all result []
+;                 [[node (get-all-nodes new-graph)]
+;                  [pred (get-preds node)]
+;                  [triple (get-triples node pred)]]
+;       (let [properties (reduce
+;                          (fn [result prop]
+;                            ; Based on assumption that all properties in the old
+;                            ; graph are unique.
+;                            (assoc result
+;                              prop (get-val (first (get-properties triple prop)))))
+;                          {} (get-props triple))]
+;         (conj result (->Triple (get-sub node) pred (get-obj triple) properties))))))
 
 (defn validate-graph-v2
   "Validates that a given graph conforms to a given schema."

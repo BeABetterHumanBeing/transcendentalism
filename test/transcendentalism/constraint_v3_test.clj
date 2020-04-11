@@ -4,6 +4,11 @@
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.time :refer :all]))
 
+(defn check-constraint-raw-data
+  [constraint graph sub]
+  (let [[errors new-graph] (check-constraint constraint graph sub)]
+    [errors (get-raw-data new-graph)]))
+
 (deftest test-range-constraint
   (let [t (get-hours-ago 20),
         graph (write-path (build-type-graph (create-graph-v3) :t #{} {})
@@ -16,83 +21,78 @@
                            "/enum" :bar}
                           "/relation" {"/type" :t})]
     (testing "Test range constraint"
-      (is (= [#{} graph]
-             (check-constraint (range-type-constraint "/num" :number) graph :a)))
-      (is (= [#{"blah does not match range type :number"} graph]
-             (check-constraint (range-type-constraint "/str" :number) graph :a)))
-      (is (= [#{(str t " does not match range type :number")} graph]
-             (check-constraint (range-type-constraint "/time" :number) graph :a)))
-      (is (= [#{"false does not match range type :number"} graph]
-             (check-constraint (range-type-constraint "/bool" :number) graph :a)))
-      (is (= [#{":b does not match range type :number"} graph]
-             (check-constraint (range-type-constraint "/relation" :number) graph :a)))
-      (is (= [#{":bar does not match range type :number"} graph]
-             (check-constraint (range-type-constraint "/enum" :number) graph :a)))
-      (is (= [#{"7 does not match range type :string"} graph]
-             (check-constraint (range-type-constraint "/num" :string) graph :a)))
-      (is (= [#{} graph]
-             (check-constraint (range-type-constraint "/str" :string) graph :a)))
-      (is (= [#{(str t " does not match range type :string")} graph]
-             (check-constraint (range-type-constraint "/time" :string) graph :a)))
-      (is (= [#{"false does not match range type :string"} graph]
-             (check-constraint (range-type-constraint "/bool" :string) graph :a)))
-      (is (= [#{":b does not match range type :string"} graph]
-             (check-constraint (range-type-constraint "/relation" :string) graph :a)))
-      (is (= [#{":bar does not match range type :string"} graph]
-             (check-constraint (range-type-constraint "/enum" :string) graph :a)))
-      (is (= [#{"7 does not match range type :time"} graph]
-             (check-constraint (range-type-constraint "/num" :time) graph :a)))
-      (is (= [#{"blah does not match range type :time"} graph]
-             (check-constraint (range-type-constraint "/str" :time) graph :a)))
-      (is (= [#{} graph]
-             (check-constraint (range-type-constraint "/time" :time) graph :a)))
-      (is (= [#{"false does not match range type :time"} graph]
-             (check-constraint (range-type-constraint "/bool" :time) graph :a)))
-      (is (= [#{":b does not match range type :time"} graph]
-             (check-constraint (range-type-constraint "/relation" :time) graph :a)))
-      (is (= [#{":bar does not match range type :time"} graph]
-             (check-constraint (range-type-constraint "/enum" :time) graph :a)))
-      (is (= [#{"7 does not match range type :bool"} graph]
-             (check-constraint (range-type-constraint "/num" :bool) graph :a)))
-      (is (= [#{"blah does not match range type :bool"} graph]
-             (check-constraint (range-type-constraint "/str" :bool) graph :a)))
-      (is (= [#{(str t " does not match range type :bool")} graph]
-             (check-constraint (range-type-constraint "/time" :bool) graph :a)))
-      (is (= [#{} graph]
-             (check-constraint (range-type-constraint "/bool" :bool) graph :a)))
-      (is (= [#{":b does not match range type :bool"} graph]
-             (check-constraint (range-type-constraint "/relation" :bool) graph :a)))
-      (is (= [#{":bar does not match range type :bool"} graph]
-             (check-constraint (range-type-constraint "/enum" :bool) graph :a)))
-      (is (= [#{"7 does not match range type :t"} graph]
-             (check-constraint (range-type-constraint "/num" :t) graph :a)))
-      (is (= [#{"blah does not match range type :t"} graph]
-             (check-constraint (range-type-constraint "/str" :t) graph :a)))
-      (is (= [#{(str t " does not match range type :t")} graph]
-             (check-constraint (range-type-constraint "/time" :t) graph :a)))
-      (is (= [#{"false does not match range type :t"} graph]
-             (check-constraint (range-type-constraint "/bool" :t) graph :a)))
-      (is (= [#{} graph]
-             (check-constraint (range-type-constraint "/relation" :t) graph :a)))
-      (is (= [#{":bar does not match range type :t"} graph]
-             (check-constraint (range-type-constraint "/enum" :t) graph :a)))
-      (is (= [#{"7 does not match range type #{:bar :foo}"} graph]
-             (check-constraint (range-type-constraint "/num" #{:foo :bar}) graph :a)))
-      (is (= [#{"blah does not match range type #{:bar :foo}"} graph]
-             (check-constraint (range-type-constraint "/str" #{:foo :bar}) graph :a)))
-      (is (= [#{(str t " does not match range type #{:bar :foo}")} graph]
-             (check-constraint (range-type-constraint "/time" #{:foo :bar}) graph :a)))
-      (is (= [#{"false does not match range type #{:bar :foo}"} graph]
-             (check-constraint (range-type-constraint "/bool" #{:foo :bar}) graph :a)))
-      (is (= [#{":b does not match range type #{:bar :foo}"} graph]
-             (check-constraint (range-type-constraint "/relation" #{:foo :bar}) graph :a)))
-      (is (= [#{} graph]
-             (check-constraint (range-type-constraint "/enum" #{:foo :bar}) graph :a))))))
-
-(defn check-constraint-raw-data
-  [constraint graph sub]
-  (let [[errors new-graph] (check-constraint constraint graph sub)]
-    [errors (get-raw-data new-graph)]))
+      (is (= [#{} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/num" :number) graph :a)))
+      (is (= [#{"blah does not match range type :number"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/str" :number) graph :a)))
+      (is (= [#{(str t " does not match range type :number")} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/time" :number) graph :a)))
+      (is (= [#{"false does not match range type :number"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/bool" :number) graph :a)))
+      (is (= [#{":b does not match range type :number"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/relation" :number) graph :a)))
+      (is (= [#{":bar does not match range type :number"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/enum" :number) graph :a)))
+      (is (= [#{"7 does not match range type :string"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/num" :string) graph :a)))
+      (is (= [#{} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/str" :string) graph :a)))
+      (is (= [#{(str t " does not match range type :string")} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/time" :string) graph :a)))
+      (is (= [#{"false does not match range type :string"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/bool" :string) graph :a)))
+      (is (= [#{":b does not match range type :string"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/relation" :string) graph :a)))
+      (is (= [#{":bar does not match range type :string"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/enum" :string) graph :a)))
+      (is (= [#{"7 does not match range type :time"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/num" :time) graph :a)))
+      (is (= [#{"blah does not match range type :time"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/str" :time) graph :a)))
+      (is (= [#{} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/time" :time) graph :a)))
+      (is (= [#{"false does not match range type :time"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/bool" :time) graph :a)))
+      (is (= [#{":b does not match range type :time"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/relation" :time) graph :a)))
+      (is (= [#{":bar does not match range type :time"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/enum" :time) graph :a)))
+      (is (= [#{"7 does not match range type :bool"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/num" :bool) graph :a)))
+      (is (= [#{"blah does not match range type :bool"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/str" :bool) graph :a)))
+      (is (= [#{(str t " does not match range type :bool")} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/time" :bool) graph :a)))
+      (is (= [#{} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/bool" :bool) graph :a)))
+      (is (= [#{":b does not match range type :bool"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/relation" :bool) graph :a)))
+      (is (= [#{":bar does not match range type :bool"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/enum" :bool) graph :a)))
+      (is (= [#{"7 does not match range type :t"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/num" :t) graph :a)))
+      (is (= [#{"blah does not match range type :t"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/str" :t) graph :a)))
+      (is (= [#{(str t " does not match range type :t")} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/time" :t) graph :a)))
+      (is (= [#{"false does not match range type :t"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/bool" :t) graph :a)))
+      (is (= [#{} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/relation" :t) graph :a)))
+      (is (= [#{":bar does not match range type :t"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/enum" :t) graph :a)))
+      (is (= [#{"7 does not match range type #{:bar :foo}"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/num" #{:foo :bar}) graph :a)))
+      (is (= [#{"blah does not match range type #{:bar :foo}"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/str" #{:foo :bar}) graph :a)))
+      (is (= [#{(str t " does not match range type #{:bar :foo}")} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/time" #{:foo :bar}) graph :a)))
+      (is (= [#{"false does not match range type #{:bar :foo}"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/bool" #{:foo :bar}) graph :a)))
+      (is (= [#{":b does not match range type #{:bar :foo}"} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/relation" #{:foo :bar}) graph :a)))
+      (is (= [#{} (get-raw-data graph)]
+             (check-constraint-raw-data (range-type-constraint "/enum" #{:foo :bar}) graph :a))))))
 
 (defn validate-raw-data
   [graph]
@@ -293,8 +293,7 @@
                       (write-path :b2 {} "Two" {"/order" 2})
                       (write-path :b3 {} "Thr" {"/order" 3}))]
         (is (= [#{} (get-raw-data graph)]
-               (check-constraint-raw-data constraint graph :a))))
-      )))
+               (check-constraint-raw-data constraint graph :a)))))))
 
 (deftest test-schema-validation
   (let [type-graph
@@ -322,6 +321,7 @@
                                           :range-type :number,
                                           :required true,
                                           :unique true,
+                                          :default 3,
                                         },
                                         "/coal" {
                                           :range-type :number,
@@ -366,11 +366,11 @@
                               "/contains" "A steelworks" {"/type" :fabrick-type,
                                                           "/input" :i,
                                                           "/output" :o}
-                              #{["/input" {"/iron" 3}]
-                                ["/output" {"/steel" "three"}]})]
+                              ["/output" {"/steel" "three"}])]
         (is (= [#{"three does not match range type :number"
                   "/size is required on :my-building, but not present"
-                  "/coal is required on :i, but not present"} (get-raw-data graph)]
+                  "/coal is required on :i, but not present"}
+                (get-raw-data (write-o graph :i "/iron" 3))]
                (validate-raw-data graph))))
       (let [graph (write-path type-graph :my-slot {}
                               :water {"/type" :slot-type,

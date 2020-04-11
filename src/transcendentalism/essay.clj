@@ -79,7 +79,7 @@
            (->Triple (get-essay-sub loom) "/essay/flow/home" label {"/label" :menu})))
        (knot-add-home [loom sub]
          (add-triples loom
-           (->Triple (get-essay-sub loom) "/essay/flow/home" sub {})))
+           (->Triple (get-essay-sub loom) "/essay/flow/home" sub {"/label" :none})))
        (knot-footnote [loom virtual-sub fns]
          (add-triples loom
            (let [sub (if (fn? virtual-sub) (virtual-sub loom) virtual-sub)]
@@ -327,7 +327,8 @@
   [subs]
   (let [home (first subs)]
     (concat
-      (into [] (map #(->Triple % "/essay/flow/home" home {}) (rest subs)))
+      (into [] (map #(->Triple % "/essay/flow/home" home {"/label" :none})
+                    (rest subs)))
       (into [] (map #(->Triple
                       (get subs %) "/essay/flow/next" (get subs (inc %)) {})
                     (range (dec (count subs))))))))

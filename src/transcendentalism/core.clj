@@ -47,8 +47,9 @@
         graph-v3 (graph-to-v3 graph-v1),
         graph-final-v2 (direct-graph schema graph-v2),
         ; But back to v1 for sxs validation comparison and rendering.
-        graph-final-v1 (graph-to-v1 graph-final-v2)]
-    (if (and (validate-graph-v3 graph-v3)
+        [v3-errors graph-final-v3] (validate-graph-v3 graph-v3)
+        graph-final-v1 (graph-to-v1 graph-final-v3)]
+    (if (and (empty? v3-errors)
              (validate-graph-v2 schema graph-final-v2)
              (validate-graph-v1 schema-v1 graph-final-v1))
       (if (flag :enable-v2)
