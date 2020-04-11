@@ -1,4 +1,4 @@
-(ns transcendentalism.constraint-v3
+(ns transcendentalism.constraint
   (:require [clojure.set :as set]
             [transcendentalism.encoding :refer :all]
             [transcendentalism.graph-v3 :refer :all]
@@ -93,7 +93,7 @@
                       (not (empty? (set/intersection range-type types)))
                       (contains? types range-type))))
             [#{} graph]
-            (do (println sub val) [#{(str val " does not match value type " range-type)} graph]))))))
+            [#{(str val " does not match value type " range-type)} graph])))))
 
 (defn required-pred-constraint
   ([required-pred] (required-pred-constraint required-pred nil))

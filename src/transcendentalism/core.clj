@@ -19,7 +19,7 @@
      'transcendentalism.generate
      'transcendentalism.glossary
      'transcendentalism.graph
-     'transcendentalism.schema-v3)
+     'transcendentalism.schema)
 
 (def meta-directives
   [directive-label-menus

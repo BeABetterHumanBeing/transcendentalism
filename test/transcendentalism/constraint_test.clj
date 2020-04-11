@@ -1,6 +1,6 @@
-(ns transcendentalism.constraint-v3-test
+(ns transcendentalism.constraint-test
   (:require [clojure.test :refer :all]
-            [transcendentalism.constraint-v3 :refer :all]
+            [transcendentalism.constraint :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.time :refer :all]))
 

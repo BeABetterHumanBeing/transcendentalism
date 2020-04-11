@@ -1,7 +1,7 @@
-(ns transcendentalism.schema-v3
+(ns transcendentalism.schema
   (:require [clojure.set :as set]
             [clojure.string :as str]
-            [transcendentalism.constraint-v3 :refer :all]
+            [transcendentalism.constraint :refer :all]
             [transcendentalism.encoding :refer :all]
             [transcendentalism.graph :as g1]
             [transcendentalism.graph-v3 :refer :all]
