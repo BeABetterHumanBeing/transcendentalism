@@ -31,43 +31,6 @@
 ; Code validation. The purpose of validation is to check the assumptions that
 ; are made by code generation.
 
-(defn- events-obey-causality?
-  "Validates that events' timestamps are strickly before their leads_to"
-  [graph]
-  (reduce
-    (fn [result triple]
-      (let [sub-time (get-time graph (:sub triple)),
-            obj-time (get-time graph (:obj triple))]
-        (conj result
-          (if (before? sub-time obj-time)
-            nil
-            (str (:sub triple) " leads_to " (:obj triple)
-                 ", but doesn't occur before it")))))
-    #{}
-    (all-triples graph "/event/leads_to")))
-
-(defn- events-occur-in-past?
-  "Validates that /event/leads_to goes from past to present"
-  [graph]
-  (let [relation (get-relation graph "/event/leads_to")]
-    (set/union
-      ; Check that the sources are in the past.
-      (reduce
-        (fn [result sub]
-          (conj result
-            (if (= (at (get-time graph sub)) "past")
-              nil
-              (str sub " has no events leading to it, but does not occur at 'past'"))))
-        #{} (get-sources relation))
-      ; Check that the sinks are in the present.
-      (reduce
-        (fn [result sub]
-          (conj result
-            (if (= (at (get-time graph sub)) "present")
-              nil
-              (str sub " leads to no event, but does not occur at 'present'"))))
-        #{} (get-sinks relation)))))
-
 (defn- home-is-monad-rooted-dag?
   "Validates that /essay/flow/home results in a monad-rooted DAG"
   [graph]
@@ -89,7 +52,7 @@
       (fn [result validation-check]
         (set/union result (validation-check graph)))
       #{}
-      [events-occur-in-past? events-obey-causality? home-is-monad-rooted-dag?]),
+      [home-is-monad-rooted-dag?]),
      ; nil ends up in the set, and ought to be weeded out.
      ; TODO - weed out nil. (conj #{} nil) adds nil to the set.
      errors (set/difference validation-errors #{nil})]

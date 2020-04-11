@@ -83,6 +83,13 @@
                            (conj (p-os pred #{}) obj))))
            base-graph))))))
 
+(defn unique-or-nil
+  [graph sub pred]
+  (let [os (read-os graph sub pred)]
+    (if (empty? os)
+        nil
+        (first os))))
+
 (defprotocol Tablet
   (add-entry [tablet sub metadata]
              [tablet sub metadata graph]

@@ -234,6 +234,7 @@
                                pred (schema-to-constraint sub-schema)))
                        sub-schema))
                    result v),
+          :constraints (concat result v),
           result))
       [] (expand-schema schema))))
 

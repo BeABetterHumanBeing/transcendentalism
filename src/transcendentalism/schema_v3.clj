@@ -4,7 +4,8 @@
             [transcendentalism.constraint-v3 :refer :all]
             [transcendentalism.encoding :refer :all]
             [transcendentalism.graph :as g1]
-            [transcendentalism.graph-v3 :refer :all]))
+            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.time :refer :all]))
 
 ; TODO - Move all of the schema out of this file into components, ultimately
 ; removing it.
@@ -117,6 +118,22 @@
   (build-type-graph graph :event-type #{}
     {
       :description "An event",
+      :constraints [
+        ; Check that /event/leads_to goes strictly forward in time.
+        (reify ConstraintV3
+          (check-constraint [constraint graph sub]
+            (let [t (unique-or-nil graph sub "/event/time"),
+                  sub-ts (map #(unique-or-nil graph % "/event/time")
+                              (read-os graph sub "/event/leads_to"))]
+              [(reduce
+                 (fn [result sub-t]
+                   (if (before? (to-time t) (to-time sub-t))
+                       result
+                       (conj result
+                             (str t " /event/leads_to an earlier time " sub-t))))
+                 #{} sub-ts)
+               graph])))
+      ],
       :preds {
         "/event/leads_to" {
           :description "Relation from one event to its subsequent impacts",
