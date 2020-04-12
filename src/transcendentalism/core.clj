@@ -1,6 +1,7 @@
 (ns transcendentalism.core
   (:require [clojure.string :as str]
             [ring.adapter.jetty :as ring]
+            [transcendentalism.server :refer :all]
             [transcendentalism.toolbox :refer :all]))
 
 ; TODO - change use to :require
@@ -36,12 +37,6 @@
       (politics-essays) (consciousness-essays) (miscellaneous-essays)
       (love-essays))))
 
-(defn render-sub-handler
-  [request]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body "Hello World"})
-
 (defn -main
   "Validates the website's graph, and generates its files"
   [& args]
@@ -52,6 +47,7 @@
         graph-final-v1 (time-msg "V3->V1" (graph-to-v1 graph-final-v3))]
     (if (empty? v3-errors)
       (if (not (= 0 (flag :server)))
-        (ring/run-jetty render-sub-handler {:port (flag :server)})
+        (ring/run-jetty (render-sub-handler graph-final-v3)
+                        {:port (flag :server)})
         (time-msg "Generate" (generate-output graph-final-v1)))
       (println "Graph fails validation!"))))
