@@ -6,22 +6,18 @@
             [ring.middleware.not-modified :refer :all]
             [ring.middleware.params :refer :all]
             [transcendentalism.constraint :refer :all]
-            [transcendentalism.html :refer :all]))
+            [transcendentalism.html :refer :all]
+            [transcendentalism.render :refer :all]))
 
 (defn- uri-to-sub
   [uri]
-  (if (or (= uri "/index") (= uri "/") (= uri "/index.html"))
+  (if (contains? #{"/" "/index" "/index.html"} uri)
       :monad
       (let [v (-> uri
                   (str/replace #"%22" "\"")
                   (str/replace #"%20" " "))]
-        (edn/read-string (subs v 1)))))
-
-(defn- render-sub
-  [graph sub types]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body (str sub " /type " types)})
+        (try (edn/read-string (subs v 1))
+             (catch Exception e :monad)))))
 
 (defn- page-404
   [graph sub]
@@ -44,7 +40,7 @@
           types (get-types graph sub)]
       (if (empty? types)
           (page-404 graph sub)
-          (render-sub graph sub types)))))
+          (render-sub (:params request) graph sub types)))))
 
 (defn render-sub-handler
   [graph]
