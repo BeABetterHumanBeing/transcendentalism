@@ -5,7 +5,8 @@
             [ring.middleware.file :refer :all]
             [ring.middleware.not-modified :refer :all]
             [ring.middleware.params :refer :all]
-            [transcendentalism.constraint :refer :all]))
+            [transcendentalism.constraint :refer :all]
+            [transcendentalism.html :refer :all]))
 
 (defn- uri-to-sub
   [uri]
@@ -24,13 +25,16 @@
 
 (defn- page-404
   [graph sub]
-  (let [types (get-types graph :404)]
-    (println "checking 404 page" sub types (= types #{:404}))
-    (if (= types #{:404})
-        {:status 404
-         :headers {"Content-Type" "text/html"}
-         :body (str sub " does not exist")}
-        (render-sub graph :404 types))))
+  {:status 404
+   :headers {"Content-Type" "text/html"}
+   :body (div {"style" "text-align:center;"}
+           (h1 {"style" "margin:100px auto 0;"} "404")
+           ; TODO - Change out 404 image to something cute
+           (img {"src" "crown.jpeg"
+                 "style" "margin:0 auto;width:200px;height:200px;"})
+           (div {"style" "margin:0 auto;"}
+             (span {} (str "\"" sub "\" was not found in "))
+             (a {"href" "/"} "this universe")))})
 
 (defn- base-sub-handler
   [graph]
@@ -38,7 +42,7 @@
     [request]
     (let [sub (uri-to-sub (:uri request)),
           types (get-types graph sub)]
-      (if (or (empty? types) (= types #{:404}))
+      (if (empty? types)
           (page-404 graph sub)
           (render-sub graph sub types)))))
 
