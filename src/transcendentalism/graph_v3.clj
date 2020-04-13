@@ -26,7 +26,8 @@
   (get-graphlet [graph sub] "Returns the graphlet for the sub, or nil")
   (get-raw-data [graph] "Returns the raw map underlying the graph")
   (merge-graph [graph other]
-    "Returns a new graph created from merging another graph into this one"))
+    "Returns a new graph created from merging another graph into this one")
+  (flatten-graph [graph] "Returns an equivalent graph with no base-graph"))
 
 (defn create-graph-v3
   ([] (create-graph-v3 {}))
@@ -52,6 +53,11 @@
                                           (:p-os graphlet))))))
            raw-data (get-raw-data other))
          base-graph))
+     (flatten-graph [graph]
+       (if (nil? base-graph)
+           graph
+           (create-graph-v3 (merge (get-raw-data (flatten-graph base-graph))
+                                   raw-data))))
      ReadGraph
      (read-ss [graph]
        (let [my-subs (into #{} (keys raw-data))]

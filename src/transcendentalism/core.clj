@@ -1,6 +1,7 @@
 (ns transcendentalism.core
   (:require [clojure.string :as str]
             [ring.adapter.jetty :as ring]
+            [transcendentalism.graph-v3 :as g3]
             [transcendentalism.server :refer :all]
             [transcendentalism.toolbox :refer :all]))
 
@@ -47,7 +48,7 @@
         graph-final-v1 (time-msg "V3->V1" (graph-to-v1 graph-final-v3))]
     (if (empty? v3-errors)
       (if (not (= 0 (flag :server)))
-        (ring/run-jetty (render-sub-handler graph-final-v3)
+        (ring/run-jetty (render-sub-handler (g3/flatten-graph graph-final-v3))
                         {:port (flag :server)})
         (time-msg "Generate" (generate-output graph-final-v1)))
       (println "Graph fails validation!"))))

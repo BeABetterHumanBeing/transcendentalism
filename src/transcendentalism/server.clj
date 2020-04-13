@@ -23,8 +23,8 @@
   [graph sub]
   {:status 404
    :headers {"Content-Type" "text/html"}
-   :body (div {"style" "text-align:center;"}
-           (h1 {"style" "margin:100px auto 0;"} "404")
+   :body (div {"style" "text-align:center;padding-top:100px;"}
+           (h1 {"style" "margin:0 auto;"} "404")
            ; TODO - Change out 404 image to something cute
            (img {"src" "crown.jpeg"
                  "style" "margin:0 auto;width:200px;height:200px;"})
@@ -40,7 +40,7 @@
           types (get-types graph sub)]
       (if (empty? types)
           (page-404 graph sub)
-          (render-sub (:params request) graph sub types)))))
+          (param-aware-render-sub (:params request) graph sub types)))))
 
 (defn render-sub-handler
   [graph]
