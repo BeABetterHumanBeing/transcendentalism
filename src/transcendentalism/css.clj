@@ -64,7 +64,7 @@
 (defn- repeating-linear-gradient [& contents]
   (str "repeating-linear-gradient(" (str/join ",\n" contents) ");"))
 
-(defn- media
+(defn media
   [condition & contents]
   (str/join "\n"
     [(str "@media (" condition ") {") (str/join "\n" contents) "}"]))

@@ -7,6 +7,7 @@
             [transcendentalism.graph :as g1]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
+            [transcendentalism.js :refer :all]
             [transcendentalism.render :refer :all]
             [transcendentalism.time :refer :all]))
 
@@ -237,16 +238,42 @@
       (get-renderer-name [renderer] "essay")
       (get-priority [renderer] 10)
       (render-html [renderer params graph sub]
-        (div {}
-          (hr)
-          (let [title (unique-or-nil graph sub "/essay/title")]
-            (h1 {"class" "header"} title))
-          (let [content (unique-or-nil graph sub "/essay/contains")]
-            (param-aware-render-sub graph content))
-          (hr)))
+        (div {"id" sub,
+              "class" "essay"}
+          (div {} "") ; Empty divs occupy first cell in grid.
+          (div {}
+            (let [title (unique-or-nil graph sub "/essay/title")]
+              (h1 {"class" "header"} title))
+            (hr)
+            (let [content (unique-or-nil graph sub "/essay/contains")]
+              (param-aware-render-sub graph content))
+            (hr)
+            ; TODO - add connections here in the footer
+            ; (div {"id" (seg-id id "footer")}
+            ;   (let [cxns (sort-by-cxn-type (build-cxns graph encodings sub))]
+            ;     (str/join " " (map #(generate-link id %) cxns))))
+            (div {"id" (seg-id sub "buffer"),
+                  "class" "buffer"}))))
       (render-css [renderer]
-        (css "h1" {"class" "header"}
-          (text-align "center")))
+        (str/join "\n" [
+          (media "min-width: 1000px"
+            (css "div" {"class" "essay"}
+              (display "grid")
+              (grid-template-columns "auto" "800px" "auto")
+              (padding "50px" "0" "0" "0")))
+          (media "max-width: 1000px"
+            (css "div" {"class" "essay"}
+              (display "grid")
+              (grid-template-columns "100px" "auto" "100px")
+              (padding "50px" "0" "0" "0")))
+          (css "h1" {"class" "header"}
+            (text-align "center"))
+          (css "div" {"class" "buffer"}
+            (height "600px")
+            (background-image "url(\"../resources/crown.jpeg\")")
+            (background-position "center")
+            (background-repeat "no-repeat")
+            (background-size "150px" "150px"))]))
       (render-js [renderer] ""))))
 
 (defn segment-type
