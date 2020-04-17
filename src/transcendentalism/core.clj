@@ -1,7 +1,9 @@
 (ns transcendentalism.core
-  (:require [clojure.string :as str]
-            [ring.adapter.jetty :as ring]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [transcendentalism.generate :as gen]
             [transcendentalism.graph-v3 :as g3]
+            [transcendentalism.render :refer :all]
             [transcendentalism.server :refer :all]
             [transcendentalism.toolbox :refer :all]))
 
@@ -19,7 +21,6 @@
      'transcendentalism.essays.politics
      'transcendentalism.essays.religion
      'transcendentalism.flags
-     'transcendentalism.generate
      'transcendentalism.glossary
      'transcendentalism.graph
      'transcendentalism.schema)
@@ -38,6 +39,19 @@
       (politics-essays) (consciousness-essays) (miscellaneous-essays)
       (love-essays))))
 
+(defn- prep-output
+  "Collects all CSS and JS from the graph's renderers, and puts them in
+   styles.css and script.js respectively"
+  [graph]
+  (gen/clear-directory "resources/output")
+  (let [all-renderers (get-all-renderers graph)]
+    (spit "resources/output/styles.css"
+          (apply str/join "\n"
+                 [(filter #(not (empty? %)) (map render-css all-renderers))]))
+    (spit "resources/output/script.js"
+          (apply str/join "\n"
+                 (filter #(not (empty? %)) (map render-js all-renderers))))))
+
 (defn -main
   "Validates the website's graph, and generates its files"
   [& args]
@@ -48,7 +62,8 @@
         graph-final-v1 (time-msg "V3->V1" (graph-to-v1 graph-final-v3))]
     (if (empty? v3-errors)
       (if (not (= 0 (flag :server)))
-        (ring/run-jetty (render-sub-handler (g3/flatten-graph graph-final-v3))
-                        {:port (flag :server)})
-        (time-msg "Generate" (generate-output graph-final-v1)))
+        (let [flattened-graph (g3/flatten-graph graph-final-v3)]
+          (do (prep-output flattened-graph)
+              (launch-server flattened-graph)))
+        (time-msg "Generate" (gen/generate-output graph-final-v1)))
       (println "Graph fails validation!"))))

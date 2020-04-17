@@ -30,7 +30,7 @@
       all-homes
       (recur (conj all-homes (homes curr)) (homes curr)))))
 
-(defn- clear-directory
+(defn clear-directory
   [dirname]
   (doseq [file (.listFiles (io/as-file dirname))]
     (io/delete-file file)))

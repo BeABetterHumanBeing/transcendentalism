@@ -4,7 +4,7 @@
 (use 'transcendentalism.color
      'transcendentalism.xml)
 
-(defn- css
+(defn css
   [tagname attrs & contents]
   (let [selector
         (str (if (contains? attrs "class")

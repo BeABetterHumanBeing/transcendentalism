@@ -71,63 +71,83 @@
   (get-priority [renderer]
     "Returns the priority of this renderer. If no renderer is explicitly called
      for, the highest-priority wins.")
-  (render [renderer params graph sub] "Produces HTML rendering the given sub"))
+  (render-html [renderer params graph sub] "Produces HTML rendering the given sub")
+  (render-css [renderer] "Produces CSS required by the HTML")
+  (render-js [renderer] "Produces JS required by the HTML"))
 
 (def fn-renderer
   (reify Renderer
     (get-renderer-name [renderer] "fn")
     (get-priority [renderer] 2)
-    (render [renderer params graph sub] (render-fn sub))))
+    (render-html [renderer params graph sub] (render-fn sub))
+    (render-css [renderer] "")
+    (render-js [renderer] "")))
 
 (def bool-renderer
   (reify Renderer
     (get-renderer-name [renderer] "bool")
     (get-priority [renderer] 2)
-    (render [renderer params graph sub] (render-bool sub))))
+    (render-html [renderer params graph sub] (render-bool sub))
+    (render-css [renderer] "")
+    (render-js [renderer] "")))
 
 (def string-renderer
   (reify Renderer
     (get-renderer-name [renderer] "string")
     (get-priority [renderer] 2)
-    (render [renderer params graph sub] (render-string sub))))
+    (render-html [renderer params graph sub] (render-string sub))
+    (render-css [renderer] "")
+    (render-js [renderer] "")))
 
 (def number-renderer
   (reify Renderer
     (get-renderer-name [renderer] "number")
     (get-priority [renderer] 2)
-    (render [renderer params graph sub] (render-number))))
+    (render-html [renderer params graph sub] (render-number))
+    (render-css [renderer] "")
+    (render-js [renderer] "")))
 
 (def time-renderer
   (reify Renderer
     (get-renderer-name [renderer] "time")
     (get-priority [renderer] 2)
-    (render [renderer params graph sub] (render-time sub))))
+    (render-html [renderer params graph sub] (render-time sub))
+    (render-css [renderer] "")
+    (render-js [renderer] "")))
 
 (def enum-renderer
   (reify Renderer
     (get-renderer-name [renderer] "enum")
     (get-priority [renderer] 2)
-    (render [renderer params graph sub] (render-enum sub))))
+    (render-html [renderer params graph sub] (render-enum sub))
+    (render-css [renderer] "")
+    (render-js [renderer] "")))
 
 (def type-renderer
   (reify Renderer
     (get-renderer-name [renderer] "type")
     (get-priority [renderer] 2)
-    (render [renderer params graph sub] (render-default graph sub))))
+    (render-html [renderer params graph sub] (render-default graph sub))
+    (render-css [renderer] "")
+    (render-js [renderer] "")))
 
 (defn- invalid-renderer
   [name]
   (reify Renderer
     (get-renderer-name [renderer] "invalid")
     (get-priority [renderer] 0)
-    (render [renderer params graph sub]
-      (str sub " cannot be rendered as " name))))
+    (render-html [renderer params graph sub]
+      (str sub " cannot be rendered as " name))
+    (render-css [renderer] "")
+    (render-js [renderer] "")))
 
 (def default-renderer
   (reify Renderer
     (get-renderer-name [renderer] "default")
     (get-priority [renderer] 1)
-    (render [renderer params graph sub] (render-default graph sub))))
+    (render-html [renderer params graph sub] (render-default graph sub))
+    (render-css [renderer] "")
+    (render-js [renderer] "")))
 
 (defn- get-renderers
   [graph type]
@@ -157,4 +177,11 @@
                             (renderers name)
                             (invalid-renderer name)))
                       (apply max-key #(get-priority %) (vals renderers)))]
-     (render renderer params graph sub))))
+     (render-html renderer params graph sub))))
+
+(defn get-all-renderers
+  [graph]
+  (reduce
+    (fn [result sub]
+      (into result (read-os graph sub "/renderer")))
+    [] (read-ss graph)))

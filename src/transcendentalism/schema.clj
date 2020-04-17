@@ -2,6 +2,7 @@
   (:require [clojure.set :as set]
             [clojure.string :as str]
             [transcendentalism.constraint :refer :all]
+            [transcendentalism.css :refer :all]
             [transcendentalism.encoding :refer :all]
             [transcendentalism.graph :as g1]
             [transcendentalism.graph-v3 :refer :all]
@@ -235,14 +236,18 @@
     (reify Renderer
       (get-renderer-name [renderer] "essay")
       (get-priority [renderer] 10)
-      (render [renderer params graph sub]
+      (render-html [renderer params graph sub]
         (div {}
           (hr)
           (let [title (unique-or-nil graph sub "/essay/title")]
-            (h1 {} title))
+            (h1 {"class" "header"} title))
           (let [content (unique-or-nil graph sub "/essay/contains")]
             (param-aware-render-sub graph content))
-          (hr))))))
+          (hr)))
+      (render-css [renderer]
+        (css "h1" {"class" "header"}
+          (text-align "center")))
+      (render-js [renderer] ""))))
 
 (defn segment-type
  [graph]

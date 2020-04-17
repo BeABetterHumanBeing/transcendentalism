@@ -1,13 +1,16 @@
 (ns transcendentalism.server
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
+            [ring.adapter.jetty :as ring]
             [ring.middleware.content-type :refer :all]
             [ring.middleware.file :refer :all]
             [ring.middleware.not-modified :refer :all]
             [ring.middleware.params :refer :all]
             [transcendentalism.constraint :refer :all]
+            [transcendentalism.flags :refer :all]
             [transcendentalism.html :refer :all]
-            [transcendentalism.render :refer :all]))
+            [transcendentalism.render :refer :all]
+            [transcendentalism.xml :refer :all]))
 
 (defn- uri-to-sub
   [uri]
@@ -47,12 +50,26 @@
           types (get-types graph sub)]
       (if (empty? types)
           (page-404 graph sub)
-          (page-200 (param-aware-render-sub (:params request) graph sub types))))))
+          (page-200
+            (let [html (param-aware-render-sub (:params request) graph sub types)]
+              (if ((:params request) "html-only" false)
+                  html
+                  (str
+                    (xml-open "link" {"rel" "stylesheet",
+                                      "href" "output/styles.css"})
+                    ; Include JQuery from Google CDN.
+                    (xml-tag "script" {"src" "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"} "")
+                    (xml-tag "script" {"src" "output/script.js"} "")
+                    html))))))))
 
-(defn render-sub-handler
+(defn- render-sub-handler
   [graph]
   (-> (base-sub-handler graph)
       (wrap-params)
       (wrap-file "resources")
       (wrap-content-type)
       (wrap-not-modified)))
+
+(defn launch-server
+  [graph]
+  (ring/run-jetty (render-sub-handler graph) {:port (flag :server)}))
