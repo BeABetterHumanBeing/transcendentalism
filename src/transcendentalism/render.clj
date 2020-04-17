@@ -1,6 +1,7 @@
 (ns transcendentalism.render
   (:require [clojure.string :as str]
             [transcendentalism.color :refer :all]
+            [transcendentalism.constraint :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.time :refer :all]
@@ -137,22 +138,23 @@
     :number #{number-renderer}
     :time #{time-renderer}
     :type #{type-renderer}
-    (if (do (println type) (contains? (get-raw-data graph) type))
+    (if (contains? (get-raw-data graph) type)
         (conj (read-os graph type "/renderer") default-renderer)
         #{enum-renderer})))
 
 (defn param-aware-render-sub
-  [params graph sub types]
-  (let [renderers (reduce-all result {}
-                              [[type types]
-                               [renderer (get-renderers graph type)]]
-                    (assoc result (get-renderer-name renderer) renderer)),
-        renderer (if (contains? params "renderer")
-                     (let [name (params "renderer")]
-                       (if (contains? renderers name)
-                           (renderers name)
-                           (invalid-renderer name)))
-                     (apply max-key #(get-priority %) (vals renderers)))]
-    {:status 200
-     :headers {"Content-Type" "text/html"}
-     :body (render renderer params graph sub)}))
+  ([graph sub] (param-aware-render-sub {} graph sub))
+  ([params graph sub]
+   (param-aware-render-sub params graph sub (get-types graph sub)))
+  ([params graph sub types]
+   (let [renderers (reduce-all result {}
+                               [[type types]
+                                [renderer (get-renderers graph type)]]
+                     (assoc result (get-renderer-name renderer) renderer)),
+         renderer (if (contains? params "renderer")
+                      (let [name (params "renderer")]
+                        (if (contains? renderers name)
+                            (renderers name)
+                            (invalid-renderer name)))
+                      (apply max-key #(get-priority %) (vals renderers)))]
+     (render renderer params graph sub))))

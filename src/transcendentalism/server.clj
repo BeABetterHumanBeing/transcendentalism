@@ -32,6 +32,13 @@
              (span {} (str "\"" sub "\" was not found in "))
              (a {"href" "/"} "this universe")))})
 
+(defn- page-200
+  [content]
+  {:status 200
+   :headers {"Content-Type" "text/html"}
+   ; TODO - Add a wrapper that'll center the content to width 1000px
+   :body content})
+
 (defn- base-sub-handler
   [graph]
   (fn
@@ -40,7 +47,7 @@
           types (get-types graph sub)]
       (if (empty? types)
           (page-404 graph sub)
-          (param-aware-render-sub (:params request) graph sub types)))))
+          (page-200 (param-aware-render-sub (:params request) graph sub types))))))
 
 (defn render-sub-handler
   [graph]

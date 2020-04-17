@@ -234,15 +234,16 @@
 
 (defn build-type-graph
   "Returns a sub-graph implementing a given type"
-  [graph sub supertypes schema]
-  (write-path graph sub {}
-              (reify TypeRoot
-                (get-constraint [root] (schema-to-constraint schema))
-                (is-abstract [root] (:abstract schema false)))
-              (merge {"/type" :type}
-                     (if (empty? supertypes)
-                         {}
-                         {"/supertype" supertypes}))))
+  ([graph sub supertypes schema]
+   (build-type-graph graph sub supertypes schema nil))
+  ([graph sub supertypes schema renderer]
+   (write-path graph sub {}
+               (reify TypeRoot
+                 (get-constraint [root] (schema-to-constraint schema))
+                 (is-abstract [root] (:abstract schema false)))
+               (merge {"/type" :type}
+                      (if (empty? supertypes) {} {"/supertype" supertypes})
+                      (if (nil? renderer) {} {"/renderer" renderer})))))
 
 (defn validate
   "Validates a graph, returning [#{errors} graph]"

@@ -5,6 +5,8 @@
             [transcendentalism.encoding :refer :all]
             [transcendentalism.graph :as g1]
             [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.html :refer :all]
+            [transcendentalism.render :refer :all]
             [transcendentalism.time :refer :all]))
 
 ; TODO - Move all of the schema out of this file into components, ultimately
@@ -229,7 +231,18 @@
             :politics}
         },
       },
-    }))
+    }
+    (reify Renderer
+      (get-renderer-name [renderer] "essay")
+      (get-priority [renderer] 10)
+      (render [renderer params graph sub]
+        (div {}
+          (hr)
+          (let [title (unique-or-nil graph sub "/essay/title")]
+            (h1 {} title))
+          (let [content (unique-or-nil graph sub "/essay/contains")]
+            (param-aware-render-sub graph content))
+          (hr))))))
 
 (defn segment-type
  [graph]
