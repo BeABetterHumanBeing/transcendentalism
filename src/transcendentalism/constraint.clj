@@ -232,10 +232,10 @@
           result))
       [] (expand-schema schema))))
 
-(defn build-type-graph
+(defn build-component
   "Returns a sub-graph implementing a given type"
   ([graph sub supertypes schema]
-   (build-type-graph graph sub supertypes schema nil))
+   (build-component graph sub supertypes schema nil))
   ([graph sub supertypes schema renderer]
    (write-path graph sub {}
                (reify TypeRoot

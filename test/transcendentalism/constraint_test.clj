@@ -11,7 +11,7 @@
 
 (deftest test-range-constraint
   (let [t (get-hours-ago 20),
-        graph (write-path (build-type-graph (create-graph-v3) :t #{} {})
+        graph (write-path (build-component (create-graph-v3) :t #{} {})
                           :a {}
                           {"/num" 7,
                            "/str" "blah",
@@ -298,60 +298,60 @@
 (deftest test-schema-validation
   (let [type-graph
           (-> (create-graph-v3)
-              (build-type-graph :building-type #{}
-                                {
-                                  :abstract true,
-                                  :preds {
-                                    "/size" {
-                                      :range-type :number,
-                                      :required true,
-                                      :unique true,
-                                    },
-                                  },
-                                })
-              (build-type-graph :fabrick-type #{:building-type}
-                                {
-                                  :value-type :string,
-                                  :preds {
-                                    "/input" {
-                                      :required true,
-                                      :unique true,
-                                      :preds {
-                                        "/iron" {
-                                          :range-type :number,
-                                          :required true,
-                                          :unique true,
-                                          :default 3,
-                                        },
-                                        "/coal" {
-                                          :range-type :number,
-                                          :required true,
-                                          :unique true,
-                                        },
-                                      },
-                                    },
-                                    "/output" {
-                                      :required true,
-                                      :unique true,
-                                      :preds {
-                                        "/steel" {
-                                          :range-type :number,
-                                          :required true,
-                                          :unique true,
-                                        },
-                                      },
-                                    },
-                                  },
-                                })
-              (build-type-graph :slot-type #{}
-                                {
-                                  :value-type #{:water :land :rock},
-                                  :preds {
-                                    "/contains" {
-                                      :range-type :building-type,
-                                    },
-                                  },
-                                }))]
+              (build-component :building-type #{}
+                               {
+                                 :abstract true,
+                                 :preds {
+                                   "/size" {
+                                     :range-type :number,
+                                     :required true,
+                                     :unique true,
+                                   },
+                                 },
+                               })
+              (build-component :fabrick-type #{:building-type}
+                               {
+                                 :value-type :string,
+                                 :preds {
+                                   "/input" {
+                                     :required true,
+                                     :unique true,
+                                     :preds {
+                                       "/iron" {
+                                         :range-type :number,
+                                         :required true,
+                                         :unique true,
+                                         :default 3,
+                                       },
+                                       "/coal" {
+                                         :range-type :number,
+                                         :required true,
+                                         :unique true,
+                                       },
+                                     },
+                                   },
+                                   "/output" {
+                                     :required true,
+                                     :unique true,
+                                     :preds {
+                                       "/steel" {
+                                         :range-type :number,
+                                         :required true,
+                                         :unique true,
+                                       },
+                                     },
+                                   },
+                                 },
+                               })
+              (build-component :slot-type #{}
+                               {
+                                 :value-type #{:water :land :rock},
+                                 :preds {
+                                   "/contains" {
+                                     :range-type :building-type,
+                                   },
+                                 },
+                               }))]
     (testing "Test schema validation"
       (let [graph (write-path type-graph :my-slot {}
                               :land {"/type" :slot-type,
