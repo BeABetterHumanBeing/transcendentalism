@@ -61,7 +61,7 @@
 (contents-N " "
   border-style border-width padding margin background-size grid-template-columns)
 
-(defn- repeating-linear-gradient [& contents]
+(defn repeating-linear-gradient [& contents]
   (str "repeating-linear-gradient(" (str/join ",\n" contents) ");"))
 
 (defn media

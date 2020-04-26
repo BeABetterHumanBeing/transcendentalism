@@ -22,6 +22,26 @@
         all-homes
         (recur (conj all-homes next-home) next-home)))))
 
+(defn- maybe-add-home-div
+  [sub]
+  (if (= sub :monad)
+      "" ; No segments are inserted above the monad.
+      (div {"id" (seg-id (name sub) "above")})))
+
+(defn- maybe-load-homes
+  [params graph sub]
+  (let [id (name sub)]
+    (if (params "html-only" false)
+        ""
+        (xml-tag "script" {"type" "text/javascript"}
+          (call-js "segmentLoadedCallback"
+            (js-str id)
+            (js-str (unique-or-nil graph sub "/essay/title"))
+            (js-str id)
+            (js-array
+              (map #(js-str (name %))
+                   (find-transitive-homes graph sub))))))))
+
 (defrecord Cxn [dest name type])
 
 (defn- build-cxns
@@ -128,16 +148,14 @@
 (def segment-loaded-callback
   (js-fn "segmentLoadedCallback" ["origin" "origin_title" "sub" "homes"]
     (js-if "homes.length > 0"
-      [(log "'Loading home ' + homes[0]")
-       (c "loadWith" (jq (js-seg-id "sub" "above")) "':' + homes[0] + '?html-only=true'"
+      [(c "loadWith" (jq (js-seg-id "sub" "above")) "':' + homes[0] + '?html-only=true'"
           (js-anon-fn []
             (chain (jq (js-seg-id "homes[0]" "buffer")) (c "remove"))
             (c "maybeInsertDivider" "homes[0]" "sub")
             (c "segmentLoadedCallback"
               "origin" "origin_title" "homes[0]"
               (c "homes.slice" "1" "homes.length"))))]
-      [(log "'No homes'")
-       (c "centerViewOn" "origin" "origin_title" "true")])))
+      [(c "centerViewOn" "origin" "origin_title" "true")])))
 
 (def on-pop-state
   (js-assign
@@ -147,7 +165,6 @@
 
 (def open-segment
   (js-fn "openSegment" ["src" "dst" "title_to"]
-    (log "'Opening ' + dst + ' from ' + src")
     (js-if (chain (jq (js-seg-id "dst")) "length")
       [(c "centerViewOn" "dst" "title_to" "true")]
       [(chain (jq (js-seg-id "src")) (c "nextAll") (c "remove"))
@@ -167,6 +184,15 @@
     (js-assign "var idx" (c "Math.floor"
                             "Math.random() * possible_dests.length"))
     (c "openSegment" "src" "possible_dests[idx]" (js-str "Random"))))
+
+(defn- under-construction-splash
+  "Returns a div that shows that the segment is under construction"
+  []
+  (div {"class" "construction-back"}
+    (div {"class" "construction-front"}
+      (h2 {} "UNDER CONSTRUCTION")
+      (div {"class" "construction-separator"})
+      (p {} "Connect with me if you want me to expedite its work"))))
 
 (defn essay-component
   [graph]
@@ -256,34 +282,33 @@
       (render-html [renderer params graph sub]
         (let [id (name sub)]
           (str
-            (if (= sub :monad)
-              "" ; No segments are inserted above the monad.
-              (div {"id" (seg-id id "above")}))
+            (maybe-add-home-div sub)
             (div {"id" id,
                   "class" "essay"}
-              (div {} "") ; Empty divs occupy first cell in grid.
+              (div {} "") ; Empty div occupies first cell in grid.
               (div {}
-                (let [title (unique-or-nil graph sub "/essay/title")]
-                  (h1 {"class" "header"} title))
-                (hr)
-                (let [content (unique-or-nil graph sub "/essay/contains")]
-                  (param-aware-render-sub graph content))
+                (let [labels (read-os graph sub "/essay/label")]
+                  (str/join "\n" [
+                    (let [title (unique-or-nil graph sub "/essay/title")]
+                      (h1 {"class" "header"}
+                        (if (contains? labels :invisible)
+                            (str "[" title "]")
+                            title)))
+                    (if (contains? labels :invisible)
+                        ""
+                        (str/join "\n" [
+                          (hr)
+                          (if (contains? labels :under-construction)
+                            (under-construction-splash)
+                            (let [content (unique-or-nil graph sub "/essay/contains")]
+                              (param-aware-render-sub graph content)))]))]))
                 (hr)
                 (div {"id" (seg-id id "footer")}
                   (let [cxns (sort-by-cxn-type (build-cxns graph sub))]
                     (str/join " " (map #(generate-link sub %) cxns))))
                 (div {"id" (seg-id id "buffer"),
                       "class" "buffer"})))
-            (if (params "html-only" false)
-                ""
-                (xml-tag "script" {"type" "text/javascript"}
-                  (call-js "segmentLoadedCallback"
-                    (js-str id)
-                    (js-str (unique-or-nil graph sub "/essay/title"))
-                    (js-str id)
-                    (js-array
-                      (map #(js-str (name %))
-                           (find-transitive-homes graph sub)))))))))
+            (maybe-load-homes params graph sub))))
       (render-css [renderer]
         (str/join "\n" [
           (media "min-width: 1000px"
@@ -318,6 +343,39 @@
             (color "gray"))
           (css "button" {"selector" "hover"}
             (text-decoration "underline"))
+          (css "div" {"class" "construction-back"}
+            (let [yellow (to-css-color yellow),
+                  black (to-css-color black),
+                  white (to-css-color white)]
+              (background
+                (repeating-linear-gradient
+                  "45deg"
+                  black (str black " 20px")
+                  (str white " 20px") (str white " 25px")
+                  (str yellow " 25px") (str yellow " 45px")
+                  (str white " 45px") (str white " 50px"))))
+            (width "700px")
+            (height "300px")
+            (margin "50px" "50px")
+            (position "relative"))
+          (css "div" {"class" "construction-separator"}
+            (width "460px")
+            (margin "0" "0" "0" "70px")
+            (border-style "dashed")
+            (border-width "1px")
+            (border-color "gray"))
+          (css "div" {"class" "construction-front"}
+            (background-color (to-css-color white))
+            (width "600px")
+            (height "170px")
+            (position "absolute")
+            (top "50%")
+            (left "50%")
+            (margin "-100px" "0" "0" "-300px")
+            (padding "30px" "0" "0" "0")
+            (font-family "Arial Black" "Gadget" "sans-serif")
+            (font-weight "bold")
+            (text-align "center"))
           (css "div" {"class" "ellipsis"}
             (border-style "none" "dashed" "none" "none")
             (border-width "10px")
