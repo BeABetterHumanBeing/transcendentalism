@@ -1,11 +1,139 @@
 (ns transcendentalism.components.essay
   (:require [clojure.string :as str]
             [transcendentalism.css :refer :all]
+            [transcendentalism.color :refer :all]
             [transcendentalism.constraint :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.js :refer :all]
-            [transcendentalism.render :refer :all]))
+            [transcendentalism.render :refer :all]
+            [transcendentalism.xml :refer :all]))
+
+(defrecord Cxn [dest name type])
+
+(defn- build-cxns
+  "Determines the connections available from a given sub"
+  [graph sub]
+  (if (contains? (read-os graph sub "/essay/label") :under-construction)
+      [(->Cxn :connections "Connections" :across)]
+      (reduce
+        (fn [result pred]
+          (let [os (read-os graph sub pred)]
+            (if (= pred "/essay/flow/random")
+                (conj result (->Cxn os "Random" :random))
+                (into result
+                  (map
+                    (fn [o]
+                      (let [val (read-v graph o),
+                            target (if (nil? val) o val)]
+                        (let [title (unique-or-nil graph target "/essay/title")]
+                          (case pred
+                            "/essay/flow/home" (->Cxn target title :up)
+                            "/essay/flow/next" (->Cxn target title :down)
+                            "/essay/flow/see_also" (->Cxn target title :across)
+                            "/essay/flow/menu" (->Cxn target (str "[" title " Menu]") :menu)
+                            (assert false (str "ERROR - Type " pred " not supported")))))))
+                  os))))
+        [] (filter #(str/starts-with? % "/essay/flow") (read-ps graph sub)))))
+
+(defn- sort-by-cxn-type
+  "Sorts a group of cxns so that they go down, across, then up"
+  [cxns]
+  (let [cxns-by-type (group-by :type cxns)]
+    (concat (cxns-by-type :down [])
+            (cxns-by-type :menu [])
+            (cxns-by-type :across [])
+            (cxns-by-type :up [])
+            (cxns-by-type :random []))))
+
+(defn- to-css-class
+  [type]
+  (case type
+    :up "up"
+    :down "down"
+    :across "across"
+    :menu "menu"
+    :random "random"))
+
+(defn- generate-link
+  "Returns the HTML for a link in the footer"
+  [sub cxn]
+  (if (= (:type cxn) "random")
+      (button {"class" (str "link_segment " (to-css-class (:type cxn))),
+               "onclick" (call-js "openRandomSegment"
+                           (js-str (name sub))
+                           (js-array (map #(js-str (name %)) (:dest cxn))))}
+              "? Random")
+      (let [link-id (str (name sub) "-" (:dest cxn)),
+            full-name (str (case (:type cxn)
+                             :up "&#8593 ",
+                             :down "&#8595 ",
+                             :across "&#8594 ",
+                             "")
+                           (:name cxn))]
+        (button {"id" link-id,
+                 "class" (str "link_segment " (to-css-class (:type cxn))),
+                 "onclick" (call-js "openSegment"
+                             (js-str (name sub))
+                             (js-str (name (:dest cxn)))
+                             (js-str (:name cxn)))}
+                full-name))))
+
+(def load-with
+  (js-fn "loadWith" ["elem" "url" "callback"]
+    ; Courtesy Victor 'Chris' Cabral for original JS
+    (c "$.get" "url"
+      (js-anon-fn ["d"]
+        (c "elem.replaceWith" "d")
+        (c "callback")))))
+
+(def center-view-on
+  (js-fn "centerViewOn" ["sub" "title" "record_history"]
+    ; Change URL to new segment, caching old one in history.
+    (js-if "record_history"
+      [(c "window.history.pushState"
+         "{'sub':sub, 'title':title}"
+         (js-str "") "sub")])
+    (js-assign "document.title" "title")
+    (js-assign "window.history.scrollRestoration" (js-str "manual"))
+    ; Scroll to the newly focused segment after a tiny delay for the element to
+    ; get fetched.
+    (c "setTimeout"
+      (str "() => " (chain
+        (jq (js-seg-id "sub"))
+        "get(0)"
+        (c "scrollIntoView" "{behavior: 'smooth', block: 'start'}")))
+      "50")))
+
+
+(def on-pop-state
+  (js-assign
+    "window.onpopstate"
+    (js-anon-fn ["event"]
+      (c "centerViewOn" "event.state.sub" "event.state.title" "false"))))
+
+(def open-segment
+  (js-fn "openSegment" ["src" "dst" "title_to"]
+    (log "'Opening ' + dst + ' from ' + src")
+    (js-if (chain (jq (js-seg-id "dst")) "length")
+      [(c "centerViewOn" "dst" "title_to" "true")]
+      [(chain (jq (js-seg-id "src")) (c "nextAll") (c "remove"))
+       (chain
+         (jq (js-str (xml-tag "div" {"id" "insertion-pt"} "")))
+         (c "insertAfter"
+           (chain (jq (js-seg-id "src" "footer"))
+             ; Go up until it'll be inserted as a sibling to the current segment.
+             (c "parent") (c "parent"))))
+       (c "loadWith" (jq "'#insertion-pt'") "':' + dst + '?html-only=true'"
+         (js-anon-fn []
+           (chain (jq (js-seg-id "src" "buffer")) (c "remove"))
+           (c "centerViewOn" "dst" "title_to" "true")))])))
+
+(def open-random-segment
+  (js-fn "openRandomSegment" ["src" "possible_dests"]
+    (js-assign "var idx" (c "Math.floor"
+                            "Math.random() * possible_dests.length"))
+    (c "openSegment" "src" "possible_dests[idx]" (js-str "Random"))))
 
 (defn essay-component
   [graph]
@@ -93,7 +221,7 @@
       (get-renderer-name [renderer] "essay")
       (get-priority [renderer] 10)
       (render-html [renderer params graph sub]
-        (div {"id" sub,
+        (div {"id" (name sub),
               "class" "essay"}
           (div {} "") ; Empty divs occupy first cell in grid.
           (div {}
@@ -103,11 +231,10 @@
             (let [content (unique-or-nil graph sub "/essay/contains")]
               (param-aware-render-sub graph content))
             (hr)
-            ; TODO - add connections here in the footer
-            ; (div {"id" (seg-id id "footer")}
-            ;   (let [cxns (sort-by-cxn-type (build-cxns graph encodings sub))]
-            ;     (str/join " " (map #(generate-link id %) cxns))))
-            (div {"id" (seg-id sub "buffer"),
+            (div {"id" (seg-id (name sub) "footer")}
+              (let [cxns (sort-by-cxn-type (build-cxns graph sub))]
+                (str/join " " (map #(generate-link sub %) cxns))))
+            (div {"id" (seg-id (name sub) "buffer"),
                   "class" "buffer"}))))
       (render-css [renderer]
         (str/join "\n" [
@@ -128,5 +255,24 @@
             (background-image "url(\"../resources/crown.jpeg\")")
             (background-position "center")
             (background-repeat "no-repeat")
-            (background-size "150px" "150px"))]))
-      (render-js [renderer] ""))))
+            (background-size "150px" "150px"))
+          (css "button" {"class" "link_segment"}
+            (border "none")
+            (font-size "medium")
+            (margin "3px"))
+          (css "button" {"class" "up"}
+            (color (to-css-color purple)))
+          (css "button" {"class" "down"}
+            (color (to-css-color red)))
+          (css "button" {"class" "across"}
+            (color (to-css-color yellow)))
+          (css "button" {"class" "menu"}
+            (color "gray"))
+          (css "button" {"selector" "hover"}
+            (text-decoration "underline"))]))
+      (render-js [renderer]
+        (str/join "\n" [load-with
+                        center-view-on
+                        on-pop-state
+                        open-segment
+                        open-random-segment])))))

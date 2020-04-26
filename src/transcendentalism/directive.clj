@@ -45,6 +45,8 @@
   [& sub]
   (let [subs (into #{} sub)]
     (fn [triples]
+      ; TODO - re-do one V1 generation is gone s.t. this only adds the appropriate
+      ; label; connection filtering and see-also is done during V3 generation.
       (concat
         (filter #(or (not (contains? subs (:sub %)))
                      (not (str/starts-with? (:pred %) "/essay/flow"))

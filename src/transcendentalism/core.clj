@@ -50,7 +50,7 @@
                  [(filter #(not (empty? %)) (map render-css all-renderers))]))
     (spit "resources/output/script.js"
           (apply str/join "\n"
-                 (filter #(not (empty? %)) (map render-js all-renderers))))))
+                 [(filter #(not (empty? %)) (map render-js all-renderers))]))))
 
 (defn -main
   "Validates the website's graph, and generates its files"
