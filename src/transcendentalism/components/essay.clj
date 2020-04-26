@@ -9,6 +9,19 @@
             [transcendentalism.render :refer :all]
             [transcendentalism.xml :refer :all]))
 
+(defn- find-transitive-homes
+  "Returns the transitive closure of all homes of a sub"
+  [graph sub]
+  (loop [all-homes []
+         curr sub]
+    (let [o (unique-or-nil graph curr "/essay/flow/home"),
+          val (read-v graph o),
+          next-home (if (nil? val) o val)]
+      (if (= curr next-home)
+        ; At the ur-home, the monad.
+        all-homes
+        (recur (conj all-homes next-home) next-home)))))
+
 (defrecord Cxn [dest name type])
 
 (defn- build-cxns
@@ -64,7 +77,7 @@
                            (js-str (name sub))
                            (js-array (map #(js-str (name %)) (:dest cxn))))}
               "? Random")
-      (let [link-id (str (name sub) "-" (:dest cxn)),
+      (let [link-id (str (name sub) "-" (name (:dest cxn))),
             full-name (str (case (:type cxn)
                              :up "&#8593 ",
                              :down "&#8595 ",
@@ -92,8 +105,8 @@
     ; Change URL to new segment, caching old one in history.
     (js-if "record_history"
       [(c "window.history.pushState"
-         "{'sub':sub, 'title':title}"
-         (js-str "") "sub")])
+         "{'sub': ':' + sub, 'title':title}"
+         (js-str "") "':' + sub")])
     (js-assign "document.title" "title")
     (js-assign "window.history.scrollRestoration" (js-str "manual"))
     ; Scroll to the newly focused segment after a tiny delay for the element to
@@ -105,6 +118,26 @@
         (c "scrollIntoView" "{behavior: 'smooth', block: 'start'}")))
       "50")))
 
+(def maybe-insert-divider
+  (js-fn "maybeInsertDivider" ["a" "b"]
+    (js-if (c "!" (chain (jq "'#' + a + '-' + b") "length"))
+      [(chain
+         (jq (js-str (xml-tag "div" {"class" "ellipsis"} "")))
+         (c "insertAfter" (js-seg-id "a")))])))
+
+(def segment-loaded-callback
+  (js-fn "segmentLoadedCallback" ["origin" "origin_title" "sub" "homes"]
+    (js-if "homes.length > 0"
+      [(log "'Loading home ' + homes[0]")
+       (c "loadWith" (jq (js-seg-id "sub" "above")) "':' + homes[0] + '?html-only=true'"
+          (js-anon-fn []
+            (chain (jq (js-seg-id "homes[0]" "buffer")) (c "remove"))
+            (c "maybeInsertDivider" "homes[0]" "sub")
+            (c "segmentLoadedCallback"
+              "origin" "origin_title" "homes[0]"
+              (c "homes.slice" "1" "homes.length"))))]
+      [(log "'No homes'")
+       (c "centerViewOn" "origin" "origin_title" "true")])))
 
 (def on-pop-state
   (js-assign
@@ -221,21 +254,36 @@
       (get-renderer-name [renderer] "essay")
       (get-priority [renderer] 10)
       (render-html [renderer params graph sub]
-        (div {"id" (name sub),
-              "class" "essay"}
-          (div {} "") ; Empty divs occupy first cell in grid.
-          (div {}
-            (let [title (unique-or-nil graph sub "/essay/title")]
-              (h1 {"class" "header"} title))
-            (hr)
-            (let [content (unique-or-nil graph sub "/essay/contains")]
-              (param-aware-render-sub graph content))
-            (hr)
-            (div {"id" (seg-id (name sub) "footer")}
-              (let [cxns (sort-by-cxn-type (build-cxns graph sub))]
-                (str/join " " (map #(generate-link sub %) cxns))))
-            (div {"id" (seg-id (name sub) "buffer"),
-                  "class" "buffer"}))))
+        (let [id (name sub)]
+          (str
+            (if (= sub :monad)
+              "" ; No segments are inserted above the monad.
+              (div {"id" (seg-id id "above")}))
+            (div {"id" id,
+                  "class" "essay"}
+              (div {} "") ; Empty divs occupy first cell in grid.
+              (div {}
+                (let [title (unique-or-nil graph sub "/essay/title")]
+                  (h1 {"class" "header"} title))
+                (hr)
+                (let [content (unique-or-nil graph sub "/essay/contains")]
+                  (param-aware-render-sub graph content))
+                (hr)
+                (div {"id" (seg-id id "footer")}
+                  (let [cxns (sort-by-cxn-type (build-cxns graph sub))]
+                    (str/join " " (map #(generate-link sub %) cxns))))
+                (div {"id" (seg-id id "buffer"),
+                      "class" "buffer"})))
+            (if (params "html-only" false)
+                ""
+                (xml-tag "script" {"type" "text/javascript"}
+                  (call-js "segmentLoadedCallback"
+                    (js-str id)
+                    (js-str (unique-or-nil graph sub "/essay/title"))
+                    (js-str id)
+                    (js-array
+                      (map #(js-str (name %))
+                           (find-transitive-homes graph sub)))))))))
       (render-css [renderer]
         (str/join "\n" [
           (media "min-width: 1000px"
@@ -269,10 +317,19 @@
           (css "button" {"class" "menu"}
             (color "gray"))
           (css "button" {"selector" "hover"}
-            (text-decoration "underline"))]))
+            (text-decoration "underline"))
+          (css "div" {"class" "ellipsis"}
+            (border-style "none" "dashed" "none" "none")
+            (border-width "10px")
+            (border-color "black")
+            (height "150px")
+            (margin "80px" "auto" "30px")
+            (transform "translate(-50%, 0%)"))]))
       (render-js [renderer]
         (str/join "\n" [load-with
                         center-view-on
+                        maybe-insert-divider
+                        segment-loaded-callback
                         on-pop-state
                         open-segment
                         open-random-segment])))))
