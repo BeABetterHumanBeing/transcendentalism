@@ -9,6 +9,14 @@
             [transcendentalism.render :refer :all]
             [transcendentalism.toolbox :refer :all]))
 
+(defmacro assoc*
+  "Associates a key-value pair in a given dictionary only if the key is not
+   already present"
+  [dict k v]
+  `(if (contains? ~dict ~k)
+       ~dict
+       (assoc ~dict ~k ~v)))
+
 (defn- inc-meta
   [k]
   (p! (fn [_ _ metadata]
@@ -21,7 +29,8 @@
               val (if (empty? os) default (first os))]
           (assoc metadata k val)))))
 
-(def block-tangent-path
+(defn block-exploration-path
+  [final-pred]
   (build-path
     [(p* [(inc-meta :inline) "/segment/flow/inline"])
      "/segment/contains"
@@ -34,12 +43,15 @@
             ["/item/bullet_list/point" (prop-to-meta :order "/order" 0)]}
           (p* [(inc-meta :in-item-inline) "/segment/flow/inline"])
           "/segment/contains"])
-     "/item/inline/tangent"]))
+     final-pred]))
 
-(defn- collect-block-tangents
+(def tangent-path (block-exploration-path "/item/inline/tangent"))
+(def definition-path (block-exploration-path "/item/inline/definition"))
+
+(defn- collect-block-results
   "Follows a sequence of inline segments, collecting their tangents"
-  [graph sub]
-  (let [result-tablet (follow-path block-tangent-path
+  [path graph sub]
+  (let [result-tablet (follow-path path
                         (create-read-write-tablet {sub {}} {} graph)),
         result (get-results result-tablet (fn [data] data)),
         sorted-result
@@ -48,12 +60,34 @@
               (keys result))]
     (into [] sorted-result)))
 
+(defn- calculate-definition-map
+  "Returns a sub->{:id :root} map of all definitions under a given segment"
+  [graph sub]
+  (letfn
+    [(inner-definition-map [sub]
+       (let [definitions (collect-block-results definition-path graph sub),
+             next-block (unique-or-nil graph sub "/segment/flow/block"),
+             new-definitions (reduce
+               (fn [result definition]
+                 (assoc result
+                   definition
+                   {:id (gen-key 8),
+                    :root sub}))
+               {} definitions)]
+         (apply merge
+           new-definitions
+           (if (nil? next-block)
+             {}
+             (inner-definition-map next-block))
+           (map #(inner-definition-map %) definitions))))]
+    (inner-definition-map sub)))
+
 (defn- calculate-footnote-map
   "Returns a sub->{:ancestry :id :root} map of all footnotes under a given segment"
   [graph sub]
   (letfn
     [(inner-footnote-map [sub ancestry idx]
-       (let [tangents (collect-block-tangents graph sub),
+       (let [tangents (collect-block-results tangent-path graph sub),
              next-block (unique-or-nil graph sub "/segment/flow/block"),
              new-tangents (reduce
                (fn [result i]
@@ -139,11 +173,11 @@
        (get-priority [renderer] 10)
        (render-html [renderer params graph sub]
          (let [authors (read-os graph sub "/segment/author"),
-               new-params (if (contains? params "footnote-map")
-                              params
-                              (assoc params
-                                "footnote-map" (calculate-footnote-map graph sub))),
+               new-params (-> params
+                 (assoc* "footnote-map" (calculate-footnote-map graph sub))
+                 (assoc* "definition-map" (calculate-definition-map graph sub)))
                footnote-map (new-params "footnote-map" {}),
+               definition-map (new-params "definition-map" {}),
                inline-params (assoc new-params "no-foot" true),
                contents (str (param-aware-render-sub inline-params graph
                                (unique-or-nil graph sub "/segment/contains"))
@@ -151,10 +185,7 @@
                                (if (nil? inline)
                                    ""
                                    (param-aware-render-sub inline-params graph inline))))]
-           (maybe-wrap-footnote
-             footnote-map
-             (new-params "definition-map" {})
-             sub
+           (maybe-wrap-footnote footnote-map definition-map sub
              (str/join "\n" [
                (div {"class" "block"}
                  (maybe-add-footnote-anchor footnote-map sub)
@@ -168,7 +199,12 @@
                  (if (params "no-foot" false)
                      ""
                      (str
-                       ; TODO - any definitions come here
+                       (reduce-kv
+                         (fn [result k v]
+                           (if (= :root v) sub)
+                               (str result (param-aware-render-sub new-params graph k))
+                               result)
+                         "" definition-map)
                        (reduce-kv
                          (fn [result k v]
                            (if (= (:root v) sub)
