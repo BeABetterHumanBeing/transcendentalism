@@ -9,19 +9,6 @@
             [transcendentalism.render :refer :all]
             [transcendentalism.xml :refer :all]))
 
-(defn- find-transitive-homes
-  "Returns the transitive closure of all homes of a sub"
-  [graph sub]
-  (loop [all-homes []
-         curr sub]
-    (let [o (unique-or-nil graph curr "/essay/flow/home"),
-          val (read-v graph o),
-          next-home (if (nil? val) o val)]
-      (if (= curr next-home)
-        ; At the ur-home, the monad.
-        all-homes
-        (recur (conj all-homes next-home) next-home)))))
-
 (defn- maybe-add-home-div
   [sub]
   (if (= sub :monad)
@@ -40,7 +27,7 @@
             (js-str id)
             (js-array
               (map #(js-str (name %))
-                   (find-transitive-homes graph sub))))))))
+                   (transitive-closure graph sub "/essay/flow/home"))))))))
 
 (defrecord Cxn [dest name type])
 

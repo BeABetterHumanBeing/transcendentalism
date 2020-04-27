@@ -47,7 +47,7 @@
               sub
               (render-enum sub))))
 
-(defn- render-default
+(defn render-default
   [graph sub]
   (div {"id" sub,
         "style" "margin:0 auto;text-align:left;"}
@@ -60,10 +60,11 @@
         (fn [result pred]
           (conj result
             (apply div {} (render-pred pred) " "
-              (reduce
-                (fn [result obj]
-                  (conj result (render-primitive graph obj)))
-                [] (read-os graph sub pred)))))
+              (str/join ", "
+                (reduce
+                  (fn [result obj]
+                    (conj result (render-primitive graph obj)))
+                  [] (read-os graph sub pred))))))
         [] (read-ps graph sub)))))
 
 (defprotocol Renderer

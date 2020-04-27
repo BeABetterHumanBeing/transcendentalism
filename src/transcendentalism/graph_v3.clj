@@ -327,3 +327,14 @@
                              bindings
                              graph)
                            (map build-path pathables))))
+
+(defn transitive-closure
+  [graph sub pred]
+  (loop [result []
+         curr sub]
+    (let [o (unique-or-nil graph curr pred),
+          val (read-v graph o),
+          next (if (nil? val) o val)]
+      (if (or (= curr next) (nil? next))
+        result
+        (recur (conj result next) next)))))
