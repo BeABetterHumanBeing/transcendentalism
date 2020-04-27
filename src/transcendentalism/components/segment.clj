@@ -3,9 +3,108 @@
             [transcendentalism.color :refer :all]
             [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
+            [transcendentalism.encoding :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
-            [transcendentalism.render :refer :all]))
+            [transcendentalism.render :refer :all]
+            [transcendentalism.toolbox :refer :all]))
+
+(defn- inc-meta
+  [k]
+  (p! (fn [_ _ metadata]
+        (assoc metadata k (inc (k metadata 0))))))
+
+(defn- prop-to-meta
+  [k pred default]
+  (p! (fn [tablet sub metadata]
+        (let [os (read-os (get-target-graph tablet) sub pred),
+              val (if (empty? os) default (first os))]
+          (assoc metadata k val)))))
+
+(def block-tangent-path
+  (build-path
+    [(p* [(inc-meta :inline) "/segment/flow/inline"])
+     "/segment/contains"
+     (p* [(inc-meta :in-item)
+          #{"/item/q_and_a/question"
+            "/item/q_and_a/answer"
+            ["/item/table/cell" (prop-to-meta :row "/row" -1)
+                                (prop-to-meta :col "/col" -1)]
+            "/item/bullet_list/header"
+            ["/item/bullet_list/point" (prop-to-meta :order "/order" 0)]}
+          (p* [(inc-meta :in-item-inline) "/segment/flow/inline"])
+          "/segment/contains"])
+     "/item/inline/tangent"]))
+
+(defn- collect-block-tangents
+  "Follows a sequence of inline segments, collecting their tangents"
+  [graph sub]
+  (let [result-tablet (follow-path block-tangent-path
+                        (create-read-write-tablet {sub {}} {} graph)),
+        result (get-results result-tablet (fn [data] data)),
+        sorted-result
+        (sort (compare-by-priority result
+                :inline :in-item :order :row :col :in-item-inline)
+              (keys result))]
+    (into [] sorted-result)))
+
+(defn- calculate-footnote-map
+  "Returns a sub->{:ancestry :id :root} map of all footnotes under a given segment"
+  [graph sub]
+  (letfn
+    [(inner-footnote-map [sub ancestry idx]
+       (let [tangents (collect-block-tangents graph sub),
+             next-block (unique-or-nil graph sub "/segment/flow/block"),
+             new-tangents (reduce
+               (fn [result i]
+                 (assoc result
+                   (get tangents i)
+                   {:ancestry (conj ancestry (+ i idx)),
+                    :id (gen-key 8),
+                    :root sub}))
+               {} (range (count tangents)))]
+         (apply merge
+           new-tangents
+           (if (nil? next-block)
+             {}
+             (inner-footnote-map next-block ancestry (+ idx (count tangents))))
+           (map #(inner-footnote-map % (:ancestry (new-tangents %)) 1)
+                tangents))))]
+    (inner-footnote-map sub [] 1)))
+
+(defn- render-footnote-idx
+  [ancestry]
+  (if (empty? ancestry)
+    ""
+    (str "[" (str/join "-" ancestry) "]")))
+
+(defn- maybe-add-footnote-anchor
+  "If the given sub is a footnote, adds the anchor (e.g. [1-2-1])"
+  [footnote-map sub]
+  (if (contains? footnote-map sub)
+      (span {"class" "footnote-anchor"}
+        (span {"class" "footnote-chain",
+               "style" (str "width:" (+ (* (count (:ancestry (footnote-map sub)))
+                                           11)
+                                        5) "px")})
+        (render-footnote-idx (:ancestry (footnote-map sub))))
+      ""))
+
+(defn- maybe-wrap-footnote
+  "If the given sub is a footnote, wraps the provided content"
+  [footnote-map definition-map sub content]
+  (if (contains? footnote-map sub)
+    (div {"class" (if (= (count (:ancestry (footnote-map sub)))
+                         1)
+                      "topmost-footnote"
+                      "footnote"),
+          "id" (:id (footnote-map sub))}
+      content)
+    (if (contains? definition-map sub)
+      (div {"class" "glossary-definition",
+            "id" (:id (definition-map sub))}
+        content)
+      content)))
 
 (defn segment-component
   [graph]
@@ -40,32 +139,47 @@
        (get-priority [renderer] 10)
        (render-html [renderer params graph sub]
          (let [authors (read-os graph sub "/segment/author"),
-               new-params (assoc params "no-foot" true),
-               contents (str (param-aware-render-sub new-params graph
+               new-params (if (contains? params "footnote-map")
+                              params
+                              (assoc params
+                                "footnote-map" (calculate-footnote-map graph sub))),
+               footnote-map (new-params "footnote-map" {}),
+               inline-params (assoc new-params "no-foot" true),
+               contents (str (param-aware-render-sub inline-params graph
                                (unique-or-nil graph sub "/segment/contains"))
                              (let [inline (unique-or-nil graph sub "/segment/flow/inline")]
                                (if (nil? inline)
                                    ""
-                                   (param-aware-render-sub new-params graph inline))))]
-           (div {"class" "segment-block"}
-             (if (empty? authors)
-                 contents
-                 (div {"class" "authors-parent"}
-                   (div {"class" "authors"}
-                     (div {"class" "authors-chain"} "")
-                     (str/join ", " authors))
-                   contents))
-             (if (params "no-foot")
-                 ""
-                 (str
-                   ; TODO - any definitions come here
-                   ; TODO - any footnotes come here
-                   ))
-             (let [next-block (unique-or-nil graph sub "/segment/flow/block")]
-               (if (nil? next-block)
-                   ""
-                   (param-aware-render-sub graph next-block)))
-             )))
+                                   (param-aware-render-sub inline-params graph inline))))]
+           (maybe-wrap-footnote
+             footnote-map
+             (new-params "definition-map" {})
+             sub
+             (str/join "\n" [
+               (div {"class" "block"}
+                 (maybe-add-footnote-anchor footnote-map sub)
+                 (if (empty? authors)
+                     contents
+                     (div {"class" "authors-parent"}
+                       (div {"class" "authors"}
+                         (div {"class" "authors-chain"} "")
+                         (str/join ", " authors))
+                       contents))
+                 (if (params "no-foot" false)
+                     ""
+                     (str
+                       ; TODO - any definitions come here
+                       (reduce-kv
+                         (fn [result k v]
+                           (if (= (:root v) sub)
+                               (str result (param-aware-render-sub new-params graph k))
+                               result))
+                         "" footnote-map))))
+                 (let [next-block (unique-or-nil graph sub "/segment/flow/block")]
+                   (if (nil? next-block)
+                       ""
+                       (param-aware-render-sub new-params graph next-block)))
+               ]))))
        (render-css [renderer]
          (str/join "\n" [
            (css "div" {"class" "authors-parent"}
@@ -86,5 +200,33 @@
              (width "100px")
              (right "-130px")
              (bottom "0px")
-             (color (to-css-color orange)))]))
+             (color (to-css-color orange)))
+           (css "div" {"class" "footnote"}
+             (display "none")
+             (border-width "1px")
+             (border-style "solid")
+             (border-color (to-css-color yellow))
+             (margin "10px" "-15px" "0px"))
+           (css "div" {"class" "topmost-footnote"}
+             (display "none")
+             (border-width "1px")
+             (border-style "solid")
+             (border-color (to-css-color yellow))
+             (margin "10px" "-15px" "0px")
+             (position "relative"))
+           (css "span" {"class" "footnote-anchor"}
+             (position "absolute")
+             (width "100px")
+             (left "-110px")
+             (direction "rtl")
+             (color (to-css-color yellow)))
+           (css "span" {"class" "footnote-chain"}
+             (border-style "dashed")
+             (border-color (to-css-color yellow))
+             (border-width "1px" "0px" "0px" "0px")
+             (position "absolute")
+             (left "98px")
+             (top "9px"))
+           (css "div" {"class" "glossary-definition"}
+             (display "none"))]))
        (render-js [renderer] ""))))
