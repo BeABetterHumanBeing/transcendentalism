@@ -338,3 +338,13 @@
       (if (or (= curr next) (nil? next))
         result
         (recur (conj result next) next)))))
+
+(defn get-ordered-objs
+  [graph sub pred]
+  (let [objs (read-os graph sub pred),
+        ordinals (reduce
+                   (fn [result obj]
+                     (let [orders (read-os graph obj "/order")]
+                       (assoc result obj (if (empty? orders) 0 (first orders)))))
+                   {} objs)]
+    (sort-by ordinals objs)))

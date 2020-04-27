@@ -1,5 +1,10 @@
 (ns transcendentalism.components.poem
-  (:require [transcendentalism.constraint :refer :all]))
+  (:require [clojure.string :as str]
+            [transcendentalism.constraint :refer :all]
+            [transcendentalism.css :refer :all]
+            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.html :refer :all]
+            [transcendentalism.render :refer :all]))
 
 (defn poem-component
   [graph]
@@ -14,4 +19,19 @@
           :ordered true,
         },
       },
-    }))
+    }
+    (reify Renderer
+      (get-renderer-name [renderer] "poem")
+      (get-priority [renderer] 10)
+      (render-html [renderer params graph sub]
+        (div {"class" "poem"}
+          (str/join "\n"
+            (map #(p {"class" "poem-line"} (param-aware-render-sub graph %))
+                 (get-ordered-objs graph sub "/item/poem/line")))))
+      (render-css [renderer]
+        (str/join "\n" [
+          (css "div" {"class" "poem"}
+            (text-align "center"))
+          (css "p" {"class" "poem-line"}
+            (margin "5px" "0px"))]))
+      (render-js [renderer] ""))))
