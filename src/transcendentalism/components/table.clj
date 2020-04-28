@@ -1,5 +1,18 @@
 (ns transcendentalism.components.table
-  (:require [transcendentalism.constraint :refer :all]))
+  (:require [clojure.string :as str]
+            [transcendentalism.color :refer :all]
+            [transcendentalism.constraint :refer :all]
+            [transcendentalism.css :refer :all]
+            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.html :refer :all]
+            [transcendentalism.render :refer :all]))
+
+(defn- unique-or
+  [graph sub pred default]
+  (let [val (unique-or-nil graph sub pred)]
+    (if (nil? val)
+        default
+        val)))
 
 (defn table-component
   [graph]
@@ -40,4 +53,47 @@
           },
         },
       },
-    }))
+    }
+    (reify Renderer
+      (get-renderer-name [renderer] "table")
+      (get-priority [renderer] 10)
+      (render-html [renderer params graph sub]
+        (let [labels-n-cells
+                (read-os graph sub #"/item/table/label|/item/table/cell")
+              row-max (apply max (map #(unique-or graph % "/row" -1) labels-n-cells)),
+              col-max (apply max (map #(unique-or graph % "/column" -1) labels-n-cells)),
+              triples-by-row (group-by #(unique-or graph % "/row" -1) labels-n-cells)]
+          (table {"class" "t"}
+            (str/join "\n"
+              (map (fn [row]
+                     (let [triples-by-column
+                              (group-by #(unique-or graph % "/column" -1)
+                                        (triples-by-row row []))]
+                       (tr {}
+                         (str/join "\n"
+                           (map (fn [col]
+                                  (let [val (triples-by-column col nil),
+                                        class (if (or (= col -1) (= row -1))
+                                                  "label"
+                                                  "cell")]
+                                    (td {"class" class}
+                                        (if (nil? val)
+                                            ""
+                                            (param-aware-render-sub
+                                              params graph (first val))))))
+                                (range -1 (inc col-max)))))))
+                   (range -1 (inc row-max)))))))
+      (render-css [renderer]
+        (css "table" {"class" "t"}
+          (border-collapse "collapse")
+          (margin "0px" "auto"))
+        (css "td" {"class" "label"}
+          (font-style "italic")
+          (text-align "center")
+          (padding "5px"))
+        (css "td" {"class" "cell"}
+          (border-style "solid")
+          (border-width "1px")
+          (border-color (to-css-color light-gray))
+          (padding "5px")))
+      (render-js [renderer] ""))))
