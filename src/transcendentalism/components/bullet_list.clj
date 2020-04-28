@@ -1,5 +1,9 @@
 (ns transcendentalism.components.bullet-list
-  (:require [transcendentalism.constraint :refer :all]))
+  (:require [transcendentalism.constraint :refer :all]
+            [transcendentalism.css :refer :all]
+            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.html :refer :all]
+            [transcendentalism.render :refer :all]))
 
 (defn bullet-list-component
   [graph]
@@ -25,4 +29,27 @@
           :required true,
         },
       },
-    }))
+    }
+    (reify Renderer
+      (get-renderer-name [renderer] "list")
+      (get-priority [renderer] 10)
+      (render-html [renderer params graph sub]
+        (let [header-block-or-nil (unique-or-nil graph sub "/item/bullet_list/header"),
+              point-blocks (map #(read-v graph %)
+                                (get-ordered-objs graph sub "/item/bullet_list/point")),
+              is_ordered (unique-or-nil graph sub "/item/bullet_list/is_ordered")]
+          (div {}
+            (if (nil? header-block-or-nil)
+                ""
+                (div {}
+                  (param-aware-render-sub params graph header-block-or-nil)))
+            (apply
+              (if (or (nil? is_ordered) (not is_ordered)) ul ol)
+              {"class" "bullet_list"}
+              (into [] (map #(li {} (param-aware-render-sub params graph %))
+                            point-blocks))))))
+      (render-css [renderer]
+        (css "" {"class" "bullet_list"}
+          (margin-block-start "5px")
+          (margin-block-end "5px")))
+      (render-js [renderer] ""))))
