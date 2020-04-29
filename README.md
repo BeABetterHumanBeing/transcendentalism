@@ -4,9 +4,11 @@ A Clojure library that generates the Transcendental Metaphysics website.
 
 ## Usage
 
-lein run --server=<port>
+lein run
 
-Allowed boolean command flags: `debugging`, `static-html`, `generate-svg`.
+Allowed boolean command flags: `debugging`, `generate-svg`.
+
+Allowed integer command flags: `server` (to start at a port other than 8000).
 
 ## License
 

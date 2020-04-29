@@ -3,7 +3,7 @@
             [transcendentalism.color :refer :all]
             [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
-            [transcendentalism.generate :as gen]
+            [transcendentalism.generate :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.js :refer :all]
@@ -97,7 +97,7 @@
                    "onclick" (call-js "toggleFootnote"
                                (js-str (:id (footnote-map tangent))))}
               (str text " "
-                (gen/render-footnote-idx (:ancestry (footnote-map tangent))))))))
+                (render-footnote-idx (:ancestry (footnote-map tangent))))))))
       (render-css [renderer]
         (str/join "\n" [
           (css "span" {"class" "def-tangent"}

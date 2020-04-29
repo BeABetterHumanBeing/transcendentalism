@@ -1,7 +1,7 @@
 (ns transcendentalism.core
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [transcendentalism.generate :as gen]
+            [transcendentalism.generate :refer :all]
             [transcendentalism.graph-v3 :as g3]
             [transcendentalism.render :refer :all]
             [transcendentalism.server :refer :all]
@@ -43,7 +43,7 @@
   "Collects all CSS and JS from the graph's renderers, and puts them in
    styles.css and script.js respectively"
   [graph]
-  (gen/clear-directory "resources/output")
+  (clear-directory "resources/output")
   (let [all-renderers (get-all-renderers graph)]
     (spit "resources/output/styles.css"
           (apply str/join "\n"
@@ -58,12 +58,9 @@
   (apply set-flags args)
   (let [graph-v1 (time-msg "Construct Graph" (collect-essays)),
         graph-v3 (time-msg "V1->V3" (graph-to-v3 graph-v1)),
-        [v3-errors graph-final-v3] (time-msg "ValidateV3" (validate-graph-v3 graph-v3)),
-        graph-final-v1 (time-msg "V3->V1" (graph-to-v1 graph-final-v3))]
+        [v3-errors graph-final-v3] (time-msg "ValidateV3" (validate-graph-v3 graph-v3))]
     (if (empty? v3-errors)
-      (if (not (= 0 (flag :server)))
-        (let [flattened-graph (g3/flatten-graph graph-final-v3)]
-          (do (prep-output flattened-graph)
-              (launch-server flattened-graph)))
-        (time-msg "Generate" (gen/generate-output graph-final-v1)))
+      (let [flattened-graph (g3/flatten-graph graph-final-v3)]
+        (do (prep-output flattened-graph)
+            (launch-server flattened-graph)))
       (println "Graph fails validation!"))))

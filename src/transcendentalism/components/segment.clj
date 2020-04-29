@@ -4,7 +4,7 @@
             [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
             [transcendentalism.encoding :refer :all]
-            [transcendentalism.generate :as gen]
+            [transcendentalism.generate :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.render :refer :all]
@@ -116,7 +116,7 @@
                "style" (str "width:" (+ (* (count (:ancestry (footnote-map sub)))
                                            11)
                                         5) "px")})
-        (gen/render-footnote-idx (:ancestry (footnote-map sub))))
+        (render-footnote-idx (:ancestry (footnote-map sub))))
       ""))
 
 (defn- maybe-wrap-footnote
