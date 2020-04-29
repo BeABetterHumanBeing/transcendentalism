@@ -103,7 +103,7 @@
                              (js-str (:name cxn)))}
                 name)))))
 
-(defn- render-footnote-idx
+(defn render-footnote-idx
   [ancestry]
   (if (empty? ancestry)
     ""

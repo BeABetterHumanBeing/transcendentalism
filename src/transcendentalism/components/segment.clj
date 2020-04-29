@@ -4,6 +4,7 @@
             [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
             [transcendentalism.encoding :refer :all]
+            [transcendentalism.generate :as gen]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.render :refer :all]
@@ -106,12 +107,6 @@
                 tangents))))]
     (inner-footnote-map sub [] 1)))
 
-(defn- render-footnote-idx
-  [ancestry]
-  (if (empty? ancestry)
-    ""
-    (str "[" (str/join "-" ancestry) "]")))
-
 (defn- maybe-add-footnote-anchor
   "If the given sub is a footnote, adds the anchor (e.g. [1-2-1])"
   [footnote-map sub]
@@ -121,7 +116,7 @@
                "style" (str "width:" (+ (* (count (:ancestry (footnote-map sub)))
                                            11)
                                         5) "px")})
-        (render-footnote-idx (:ancestry (footnote-map sub))))
+        (gen/render-footnote-idx (:ancestry (footnote-map sub))))
       ""))
 
 (defn- maybe-wrap-footnote

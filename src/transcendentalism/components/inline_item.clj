@@ -1,5 +1,32 @@
 (ns transcendentalism.components.inline-item
-  (:require [transcendentalism.constraint :refer :all]))
+  (:require [clojure.string :as str]
+            [transcendentalism.color :refer :all]
+            [transcendentalism.constraint :refer :all]
+            [transcendentalism.css :refer :all]
+            [transcendentalism.generate :as gen]
+            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.html :refer :all]
+            [transcendentalism.js :refer :all]
+            [transcendentalism.render :refer :all]))
+
+(def see-also-segment
+  (js-fn "seeAlsoSegment" ["encoded_from" "encoded_to" "title_to"]
+    (js-if (chain (jq (js-seg-id "encoded_to")) "length")
+      [(c "centerViewOn" "encoded_to" "title_to" "true")]
+      [
+        (js-assign "var elem" (jq (str "'#' + encoded_from + '-' + encoded_to")))
+        (chain "elem"
+               "get(0)"
+               (c "scrollIntoView" "{behavior: 'smooth', block: 'nearest'}"))
+        (chain "elem" (c "addClass" (js-str "shake")))
+        (c "setTimeout"
+          (js-anon-fn [] (chain "elem" (c "removeClass" (js-str "shake"))))
+          "1500")
+      ])))
+
+(def toggle-footnote
+  (js-fn "toggleFootnote" ["encoded_id"]
+    (chain (jq (js-seg-id "encoded_id")) (c "toggle" "250" "'swing'"))))
 
 (defn inline-item-component
   [graph]
@@ -35,4 +62,52 @@
           :unique true,
         },
       },
-    }))
+    }
+    (reify Renderer
+      (get-renderer-name [renderer] "inline")
+      (get-priority [renderer] 10)
+      (render-html [renderer params graph sub]
+        (let [text (unique-or-nil graph sub "/item/inline/text"),
+              tangent (unique-or-nil graph sub "/item/inline/tangent"),
+              see-also (unique-or-nil graph sub "/item/inline/see_also"),
+              link (unique-or-nil graph sub "/item/inline/url"),
+              definition (unique-or-nil graph sub "/item/inline/definition"),
+              footnote-map (params "footnote-map" {}),
+              definition-map (params "definition-map" {})]
+          (if (nil? tangent)
+            (if (nil? see-also)
+              (if (nil? link)
+                (if (nil? definition)
+                  (span {} text)
+                  (span {"class" "def-tangent",
+                         "onclick" (call-js "toggleFootnote"
+                                     (js-str (:id (definition-map definition))))}
+                    text))
+                (a {"href" link,
+                    "target" "_blank"}
+                  (str text " &#11016")))
+              
+              (span {"class" "see-also",
+                     "onclick" (call-js "seeAlsoSegment"
+                                 (js-str sub)
+                                 (js-str see-also)
+                                 (js-str (unique-or-nil graph see-also "/essay/title")))}
+                (str text " &#8594")))
+            (span {"class" "tangent",
+                   "onclick" (call-js "toggleFootnote"
+                               (js-str (:id (footnote-map tangent))))}
+              (str text " "
+                (gen/render-footnote-idx (:ancestry (footnote-map tangent))))))))
+      (render-css [renderer]
+        (str/join "\n" [
+          (css "span" {"class" "def-tangent"}
+            (color (to-css-color red))
+            (cursor "pointer"))
+          (css "span" {"class" "tangent"}
+            (color (to-css-color yellow))
+            (cursor "pointer"))
+          (css "span" {"class" "see-also"}
+            (color (to-css-color yellow))
+            (cursor "pointer"))]))
+      (render-js [renderer] 
+        (str/join "\n" [toggle-footnote see-also-segment])))))
