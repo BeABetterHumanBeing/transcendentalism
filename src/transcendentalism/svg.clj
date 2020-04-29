@@ -354,8 +354,8 @@
 (defn svg-to-image
   "Writes a given SVG to an image with the given name"
   [image-name width height svg-fn]
-  (let [filename (str "resources/" image-name ".svg")]
+  (let [filename (str image-name ".svg")]
     (if (flag :generate-svg)
       (spit filename ((eval svg-fn) width height))
       (println "Skipping generating" filename))
-    (str "../" filename)))
+    filename))

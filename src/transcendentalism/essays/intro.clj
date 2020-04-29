@@ -107,9 +107,8 @@
       "My name's Daniel Gierl. I was a plump, healthy baby with a full head of"
       "hair, and I went home from the hospital wearing little yellow socks.")
 
-    (image
-      "../resources/yellow_socks.png"
-      "Drawing of yellow socks")
+    (image "yellow_socks.png"
+           "Drawing of yellow socks")
 
     (text
       "In life, we often overlook the smaller, sentimental details. A person is"

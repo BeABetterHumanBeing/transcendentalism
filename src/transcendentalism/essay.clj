@@ -171,7 +171,7 @@
          (knot-block-item loom
            (fn [sub]
              [(->Triple sub "/type/item/image" nil {})
-              (->Triple sub "/item/image/url" url {})
+              (->Triple sub "/item/image/url" (str "../" url) {})
               (->Triple sub "/item/image/alt_text" alt-text {})
               (if (nil? width)
                 []

@@ -253,7 +253,7 @@
               "natural units") dot))))
 
 (def light-rhombus
-  (image "../resources/light_rhombus.png"
+  (image "light_rhombus.png"
     (str/join " " [
       "Four points, A, B, C, and D, with rays of light connecting A and B,"
       "A and C, B and D, and C and D."
@@ -569,7 +569,7 @@
           "a vaccuum, the media through which it travels can be encoded in the"
           "contents of the matrix.")))
 
-    (image "../resources/speed_of_light.png"
+    (image "speed_of_light.png"
       (str/join " " [
         "Three examples of a particle traveling from X to Y, with light making"
         "the same journey. In the first, there is enough time for light to have"
@@ -776,7 +776,7 @@
 
     (footnote (f 2)
       (credit "reddit.com/r/neoliberal"
-      (image "../resources/ship_of_state.png"
+      (image "ship_of_state.png"
         (str/join " " [
           "An image of a ship, labeled \"the ship of state\", sailing between"
           "two rocks, only labeled \"revolution\", and the other \"reaction\"."
@@ -1569,7 +1569,7 @@
     (text "For your viewing pleasure, I have rendered the calendar year with all"
           "my friends' birthdays, delimiting it by month and zodiac sign.")
 
-    (image "../resources/zodiac.png"
+    (image "zodiac.png"
            (str/join " " [
               "A visual distribution of the collected data over a calendar year,"
               "delimited by months and zodiac signs."])
