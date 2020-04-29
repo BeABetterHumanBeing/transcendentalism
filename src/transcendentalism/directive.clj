@@ -82,37 +82,6 @@
                    see_alsos)))))
       triples essay-subs)))
 
-(defn directive-dedup-cxns
-  "De-dupes /essay/flow triples that have the same sub and obj"
-  [triples]
-  (let [cxns (filter #(str/starts-with? (:pred %) "/essay/flow") triples),
-        sub-to-cxns (index-by-sub cxns),
-        dupes
-        (into #{}
-          (reduce-kv
-            (fn [result sub cxns]
-              (let [obj-to-cxns (index-by-obj cxns)]
-                (set/union
-                  result
-                  (reduce-kv
-                    (fn [result obj cxns]
-                      (if (> (count cxns) 1)
-                        (let [cxn-preds (set (map :pred cxns)),
-                              highest-priority-pred
-                              (if (contains? cxn-preds "/essay/flow/home")
-                                "/essay/flow/home"
-                                (if (contains? cxn-preds "/essay/flow/menu")
-                                  "/essay/flow/menu"
-                                  "/essay/flow/next"))]
-                          (set/union
-                            result
-                            (filter #(not (= (:pred %) highest-priority-pred))
-                                    cxns)))
-                        result))
-                    #{} obj-to-cxns))))
-            #{} sub-to-cxns))]
-    (filter #(not (contains? dupes %)) triples)))
-
 (defn directive-label-menus
   "Generates menu essays for labels"
   [triples]

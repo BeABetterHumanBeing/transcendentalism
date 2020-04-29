@@ -27,8 +27,7 @@
 
 (def meta-directives
   [directive-label-menus
-   directive-see-also-inline-to-flow
-   directive-dedup-cxns])
+   directive-see-also-inline-to-flow])
 
 (defn collect-essays
   []
