@@ -1579,13 +1579,13 @@
 (defn phenomenological-science
   []
   (essay :phenomenological-science "Phenomenology"
-    (text "TODO")
+    (under-construction)
   ))
 
 (defn phenomenological-science-example
   []
   (essay :phenomenological-science-example "Phenomenology"
-    (text "TODO")
+    (under-construction)
   ))
 
 (defn physics-essays
@@ -1595,8 +1595,6 @@
    (essay-series [:three-sciences :empirical-science :empirical-science-example])
    (essay-series [:three-sciences :phenomenological-science :phenomenological-science-example])
    (essay-series [:modeling :analogy])
-   (directive-under-construction
-     :phenomenological-science :phenomenological-science-example)
    (materialism) (universal-model) (universal-order) (universal-shape)
    (speed-limits) (three-sciences) (analytical-science) (analytical-science-example)
    (empirical-science) (empirical-science-example) (phenomenological-science)

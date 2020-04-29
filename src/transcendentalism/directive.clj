@@ -40,20 +40,6 @@
       (fn [result directive] (directive result))
       triples directives)))
 
-(defn directive-under-construction
-  "Returns a directive that labels the given subs as under construction"
-  [& sub]
-  (let [subs (into #{} sub)]
-    (fn [triples]
-      ; TODO - re-do one V1 generation is gone s.t. this only adds the appropriate
-      ; label; connection filtering and see-also is done during V3 generation.
-      (concat
-        (filter #(or (not (contains? subs (:sub %)))
-                     (not (str/starts-with? (:pred %) "/essay/flow"))
-                     (= (:pred %) "/essay/flow/home")) triples)
-        (into [] (map #(->Triple % "/essay/label" :under-construction {}) subs))
-        (into [] (map #(->Triple % "/essay/flow/see_also" :connections {}) subs))))))
-
 (defn directive-see-also-inline-to-flow
   "For every /item/inline/see_also, adds an equivalent /essay/flow/see_also"
   [triples]

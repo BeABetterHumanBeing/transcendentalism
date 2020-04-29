@@ -118,5 +118,4 @@
 (defn epistemology-essays
   []
   [(essay-series [:the-truth])
-   (directive-under-construction)
    (the-truth)])

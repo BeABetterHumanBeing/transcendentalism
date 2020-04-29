@@ -9,7 +9,7 @@
 (defn dominant-theory
   []
   (essay :dominant-theory "Dominant Theory"
-    (text "TODO")
+    (under-construction)
 
     (root-menu :morality "Morality")
     (file-under :metaphysics)
@@ -18,5 +18,4 @@
 (defn morality-essays
   []
   [(essay-series [:dominant-theory])
-   (directive-under-construction :dominant-theory)
    (dominant-theory)])

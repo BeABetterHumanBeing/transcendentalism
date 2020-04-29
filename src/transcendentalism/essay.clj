@@ -298,7 +298,11 @@
                (fn [i]
                  (->Triple sub "/item/definition/definition" (nth definitions i)
                            {"/order" i}))
-               (range (count definitions)))])))))))
+               (range (count definitions)))])))
+       (knot-under-construction [loom]
+         (knot-text loom ["TODO"])
+         (add-triples loom
+           (->Triple essay-sub "/essay/label" :under-construction {})))))))
 
 (defn f
   "Returns a virtual sub that produces footnote names"
@@ -440,3 +444,7 @@
                    (apply definition k (:pos v) (:defs v))) t)))
       [] glossary))
     ))
+
+(defn under-construction
+  []
+  (fn [t] (knot-under-construction t)))
