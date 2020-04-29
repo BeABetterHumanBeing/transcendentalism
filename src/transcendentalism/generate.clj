@@ -566,5 +566,4 @@
             sub
             (str "\"" (unique-or-nil (get-node-v1 graph sub) "/essay/title") "\"")
             filename))))
-    (spit "output/styles.css" (stylesheet))
     (if (flag :static-html) nil (spit "output/script.js" (script)))))

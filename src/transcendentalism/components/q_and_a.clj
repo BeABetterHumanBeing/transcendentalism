@@ -1,5 +1,6 @@
 (ns transcendentalism.components.q-and-a
-  (:require [transcendentalism.constraint :refer :all]
+  (:require [clojure.string :as str]
+            [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
@@ -37,10 +38,11 @@
             (div {"class" "q_and_a_header"} "A:")
             (div {} (param-aware-render-sub params graph a-block)))))
       (render-css [renderer]
-        (css "div" {"class" "q_and_a"}
-          (display "grid")
-          (grid-template-columns "30px" "[qa_separator]" "auto")
-          (grid-row-gap "8px"))
-        (css "div" {"class" "q_and_a_header"}
-          (font-weight "bold")))
+        (str/join "\n" [
+          (css "div" {"class" "q_and_a"}
+            (display "grid")
+            (grid-template-columns "30px" "[qa_separator]" "auto")
+            (grid-row-gap "8px"))
+          (css "div" {"class" "q_and_a_header"}
+            (font-weight "bold"))]))
       (render-js [renderer] ""))))

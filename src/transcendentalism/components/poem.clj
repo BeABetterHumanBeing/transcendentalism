@@ -26,7 +26,7 @@
       (render-html [renderer params graph sub]
         (div {"class" "poem"}
           (str/join "\n"
-            (map #(p {"class" "poem-line"} (param-aware-render-sub graph %))
+            (map #(p {"class" "poem-line"} (read-v graph %))
                  (get-ordered-objs graph sub "/item/poem/line")))))
       (render-css [renderer]
         (str/join "\n" [

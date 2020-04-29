@@ -89,8 +89,8 @@
               
               (span {"class" "see-also",
                      "onclick" (call-js "seeAlsoSegment"
-                                 (js-str sub)
-                                 (js-str see-also)
+                                 (js-str (name (params "essay" :noessay)))
+                                 (js-str (name see-also))
                                  (js-str (unique-or-nil graph see-also "/essay/title")))}
                 (str text " &#8594")))
             (span {"class" "tangent",
@@ -108,6 +108,22 @@
             (cursor "pointer"))
           (css "span" {"class" "see-also"}
             (color (to-css-color yellow))
-            (cursor "pointer"))]))
+            (cursor "pointer"))
+          (css "span" {"class" "mono"}
+            (font-family "Monaco" "monospace")
+            (font-size "small")
+            (color (to-css-color light-blue)))
+          (css "span" {"class" "ex"}
+            (color (to-css-color green)))
+          (keyframes "shake"
+            (keyframe-points ["from" "to"]
+              (transform "translate3d(0, 0, 0)"))
+            (keyframe-points ["10%", "30%", "50%", "70%", "90%"]
+              (transform "translate3d(-10px, 0, 0)"))
+            (keyframe-points ["20%", "40%", "60%", "80%"]
+              (transform "translate3d(10px, 0, 0)")))
+          (css "" {"class" "shake"}
+            (animation-name "shake")
+            (animation-duration "1.5s"))]))
       (render-js [renderer] 
         (str/join "\n" [toggle-footnote see-also-segment])))))

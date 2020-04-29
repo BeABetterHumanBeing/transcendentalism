@@ -213,6 +213,8 @@
                ]))))
        (render-css [renderer]
          (str/join "\n" [
+           (css "div" {"class" "block"}
+             (padding "10px" "25px"))
            (css "div" {"class" "authors-parent"}
              (position "relative")
              (border-style "none" "solid" "none" "none")

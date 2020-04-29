@@ -288,7 +288,9 @@
                           (if (contains? labels :under-construction)
                             (under-construction-splash)
                             (let [content (unique-or-nil graph sub "/essay/contains")]
-                              (param-aware-render-sub graph content)))]))]))
+                              (param-aware-render-sub
+                                (assoc params "essay" sub)
+                                graph content)))]))]))
                 (hr)
                 (div {"id" (seg-id id "footer")}
                   (let [cxns (sort-by-cxn-type (build-cxns graph sub))]
@@ -310,6 +312,9 @@
               (padding "50px" "0" "0" "0")))
           (css "h1" {"class" "header"}
             (text-align "center"))
+          (css "h2" {"class" "header"}
+            (font-size "large")
+            (display "inline"))
           (css "div" {"class" "buffer"}
             (height "600px")
             (background-image "url(\"../resources/crown.jpeg\")")
