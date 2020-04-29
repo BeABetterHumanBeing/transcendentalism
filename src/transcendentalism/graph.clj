@@ -35,49 +35,11 @@
     "Returns a collection of all the triples in the graph [for a given [sub and pred]]")
   (all-nodes [graph] [graph type]
     "Returns a collection of all nodes in the graph [with a given type]")
-  (transitive-closure [graph sub pred]
-    "Returns the sub, and all other subs that can be transitively reached by
-     following pred")
   (has-type-v1? [graph sub type] "Returns whether the given sub has the given type.")
   (get-unique [graph sub pred]
     "Returns the obj of the unique triple on sub with pred, or nil if none exists")
   (get-time [graph sub]
-    "Returns the time associated with the given sub, or nil if it has none")
-  (get-node-v1 [graph sub] "Returns the subgraph defined by the given sub"))
-
-; A Node is the subgraph that shares a common sub.
-(defprotocol NodeV1
-  (get-types-v1 [node] "Returns all types asserted on the node")
-  (get-ordered-objs [node pred]
-    "Returns all objects with the given pred, in order")
-  (unique-or-nil [node pred]
-    "Returns the unique object of the given pred, or nil")
-  (get-triples-v1 [node] "Returns all triples asserted on the node"))
-
-(defn- construct-node
-  [triples]
-  (let [pred-to-triples
-        (reduce
-          (fn [result triple]
-            (let [pred (:pred triple)]
-              (if (contains? result pred)
-                (assoc result pred (conj (result pred) triple))
-                (assoc result pred [triple]))))
-          {} triples)]
-    (reify NodeV1
-      (get-types-v1 [node]
-        (map :pred (filter #(str/starts-with? (:pred %) "/type") triples)))
-      (get-ordered-objs [node pred]
-        (map :obj
-          (sort #(< (property %1 "/order" 0)
-                    (property %2 "/order" 0))
-                (pred-to-triples pred []))))
-      (unique-or-nil [node pred]
-        (let [selected (pred-to-triples pred [])]
-          (if (empty? selected)
-            nil
-            (:obj (first selected)))))
-      (get-triples-v1 [node] triples))))
+    "Returns the time associated with the given sub, or nil if it has none"))
 
 (defn construct-graph
   "Constructs a graph from a set of triples"
@@ -96,16 +58,6 @@
         (keys graph-data))
       (all-nodes [graph type]
         (filter #(has-type-v1? graph % type) (all-nodes graph)))
-      (transitive-closure [graph sub pred]
-        (loop [results [],
-               subs-to-process [sub]]
-          (if (empty? subs-to-process)
-            results
-            (recur (conj results (first subs-to-process))
-                   (concat (rest subs-to-process)
-                           (map :obj (all-triples graph
-                                                  (first subs-to-process)
-                                                  pred)))))))
       (has-type-v1? [graph sub type]
         (if (contains? graph-data sub)
           (not (nil? (some #(= (:pred %) type) (sub graph-data))))
@@ -115,9 +67,7 @@
           (if (empty? triples) nil (:obj (first triples)))))
       (get-time [graph sub]
         (let [value (get-unique graph sub "/event/time")]
-          (if (nil? value) nil (to-time value))))
-      (get-node-v1 [graph sub]
-        (construct-node (sub graph-data))))))
+          (if (nil? value) nil (to-time value)))))))
 
 ; Graph Queries provide regex support for graph traversals. Call your query
 ; using gq and using the meta-* versions of the queries if you want your call
