@@ -20,8 +20,7 @@
       (str/join " "
         ["The Monad is the symbol of unity."
          "It is the godhead, the point from which all things originate,"
-         "and the point to which all things return."])
-      "Daniel Gierl")
+         "and the point to which all things return."]))
 
     ^{:no-block true} (fn [t]
       (add-triples t
@@ -235,7 +234,7 @@
     (footnote (f 3)
       (text "I'm open to including things other people have written, with"
             "permission and (if desired) attribution. Think \"if the site had"
-            "comments and this was the editor's pick, not \"guest writer\"."))
+            "comments and this was the editor's pick\", not \"guest writer\"."))
     (footnote (f 5)
       (text "Tell me how something you read changed your view of the world."
             "That's the highest compliment I could receive, and the greatest"

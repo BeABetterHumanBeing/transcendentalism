@@ -41,7 +41,7 @@
             ["/item/table/cell" (prop-to-meta :row "/row" -1)
                                 (prop-to-meta :col "/col" -1)]
             "/item/bullet_list/header"
-            ["/item/bullet_list/point" (prop-to-meta :order "/order" 0)]}
+            ["/item/bullet_list/point" (prop-to-meta :order "/order" 0) "/"]}
           (p* [(inc-meta :in-item-inline) "/segment/flow/inline"])
           "/segment/contains"])
      final-pred]))
@@ -173,7 +173,7 @@
                  (assoc* "definition-map" (calculate-definition-map graph sub)))
                footnote-map (new-params "footnote-map" {}),
                definition-map (new-params "definition-map" {}),
-               inline-params (assoc new-params "no-foot" true),
+               inline-params (assoc new-params "no-block" true),
                contents (str (param-aware-render-sub inline-params graph
                                (unique-or-nil graph sub "/segment/contains"))
                              (let [inline (unique-or-nil graph sub "/segment/flow/inline")]
@@ -182,34 +182,38 @@
                                    (param-aware-render-sub inline-params graph inline))))]
            (maybe-wrap-footnote footnote-map definition-map sub
              (str/join "\n" [
-               (div {"class" "block"}
-                 (maybe-add-footnote-anchor footnote-map sub)
-                 (if (empty? authors)
-                     contents
-                     (div {"class" "authors-parent"}
-                       (div {"class" "authors"}
-                         (div {"class" "authors-chain"} "")
-                         (str/join ", " authors))
-                       contents))
-                 (if (params "no-foot" false)
-                     ""
-                     (str
+               (let [anchor (maybe-add-footnote-anchor footnote-map sub),
+                     authorized-contents (if (empty? authors)
+                                             contents
+                                             (div {"class" "authors-parent"}
+                                               (div {"class" "authors"}
+                                                 (div {"class" "authors-chain"} "")
+                                                 (str/join ", " authors))
+                                               contents))]
+                 (if (params "no-block" false)
+                     (str anchor
+                          authorized-contents)
+                     (div {"class" "block"}
+                       anchor
+                       authorized-contents
                        (reduce-kv
                          (fn [result k v]
                            (if (= :root v) sub)
-                               (str result (param-aware-render-sub new-params graph k))
+                               (str result
+                                    (param-aware-render-sub new-params graph k))
                                result)
                          "" definition-map)
                        (reduce-kv
                          (fn [result k v]
                            (if (= (:root v) sub)
-                               (str result (param-aware-render-sub new-params graph k))
+                               (str result
+                                    (param-aware-render-sub new-params graph k))
                                result))
                          "" footnote-map))))
-                 (let [next-block (unique-or-nil graph sub "/segment/flow/block")]
-                   (if (nil? next-block)
-                       ""
-                       (param-aware-render-sub new-params graph next-block)))
+               (let [next-block (unique-or-nil graph sub "/segment/flow/block")]
+                 (if (nil? next-block)
+                     ""
+                     (param-aware-render-sub new-params graph next-block)))
                ]))))
        (render-css [renderer]
          (str/join "\n" [
