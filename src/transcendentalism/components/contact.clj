@@ -1,5 +1,6 @@
 (ns transcendentalism.components.contact
-  (:require [transcendentalism.constraint :refer :all]
+  (:require [clojure.string :as str]
+            [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
             [transcendentalism.encoding :refer :all]
             [transcendentalism.graph-v3 :refer :all]
@@ -27,7 +28,7 @@
       (render-html [renderer params graph sub]
         (let [email-address (unique-or-nil graph sub "/item/contact/email"),
               elem_id (gen-key 8)]
-          (div {}
+          ;(div {}
             (div {"class" "contact-centered"}
               (input {"class" "contact",
                       "id" elem_id,
@@ -41,35 +42,36 @@
                    "Copy")
                 "/"
                 (a {"href" (str "mailto:" email-address),
-                    "target" "_top"} "Mail"))))))
+                    "target" "_top"} "Mail")))));)
       (render-css [renderer]
-        (css "div" {"class" "contact-centered"}
-          (width "150px")
-          (height "20px")
-          (margin "0" "auto")
-          (position "relative"))
-        (css "input" {"class" "contact"}
-          (border-style "none")
-          (font-size "large")
-          (height "20px")
-          (width "220px")
-          (position "absolute")
-          (top "50%")
-          (left "50%")
-          (margin "-10px" "0" "0" "-110px")
-          (text-align "center"))
-        (css "div" {"class" "contact-dash"}
-          (border-style "dashed" "none" "none" "none")
-          (border-color "gray")
-          (border-width "1px")
-          (width "30px")
-          (position "absolute")
-          (left "190px")
-          (top "10px"))
-        (css "div" {"class" "contact-buttons"}
-          (position "absolute")
-          (left "230px")
-          (width "100px")))
+        (str/join "\n" [
+          (css "div" {"class" "contact-centered"}
+            (width "150px")
+            (height "20px")
+            (margin "0" "auto")
+            (position "relative"))
+          (css "input" {"class" "contact"}
+            (border-style "none")
+            (font-size "large")
+            (height "20px")
+            (width "220px")
+            (position "absolute")
+            (top "50%")
+            (left "50%")
+            (margin "-10px" "0" "0" "-110px")
+            (text-align "center"))
+          (css "div" {"class" "contact-dash"}
+            (border-style "dashed" "none" "none" "none")
+            (border-color "gray")
+            (border-width "1px")
+            (width "30px")
+            (position "absolute")
+            (left "190px")
+            (top "10px"))
+          (css "div" {"class" "contact-buttons"}
+            (position "absolute")
+            (left "230px")
+            (width "100px"))]))
       (render-js [renderer]
         (js-fn "copyToClipboard" ["elem_id"]
           (js-assign "var copyText" (chain "document" (c "getElementById" "elem_id")))

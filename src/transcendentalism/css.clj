@@ -15,7 +15,7 @@
              (if (contains? attrs "selector")
                (str ":" (attrs "selector"))
                ""))]
-    (str/join "\n" [(str tagname selector) " {" (str/join "\n" contents) "}"])))
+    (str/join "\n" [(str tagname selector " {") (str/join "\n" contents) "}"])))
 
 (defn- style [name content] (str name ": " content ";"))
 
