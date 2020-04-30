@@ -28,21 +28,20 @@
       (render-html [renderer params graph sub]
         (let [email-address (unique-or-nil graph sub "/item/contact/email"),
               elem_id (gen-key 8)]
-          ;(div {}
-            (div {"class" "contact-centered"}
-              (input {"class" "contact",
-                      "id" elem_id,
-                      "type" "text",
-                      "value" email-address,
-                      "readonly" "readonly"})
-              (div {"class" "contact-dash"})
-              (div {"class" "contact-buttons"}
-                (a {"href" "javascript:void(0);",
-                    "onclick" (call-js "copyToClipboard" (js-str elem_id))}
-                   "Copy")
-                "/"
-                (a {"href" (str "mailto:" email-address),
-                    "target" "_top"} "Mail")))));)
+          (div {"class" "contact-centered"}
+            (input {"class" "contact",
+                    "id" elem_id,
+                    "type" "text",
+                    "value" email-address,
+                    "readonly" "readonly"})
+            (div {"class" "contact-dash"})
+            (div {"class" "contact-buttons"}
+              (a {"href" "javascript:void(0);",
+                  "onclick" (call-js "copyToClipboard" (js-str elem_id))}
+                 "Copy")
+              "/"
+              (a {"href" (str "mailto:" email-address),
+                  "target" "_top"} "Mail")))))
       (render-css [renderer]
         (str/join "\n" [
           (css "div" {"class" "contact-centered"}

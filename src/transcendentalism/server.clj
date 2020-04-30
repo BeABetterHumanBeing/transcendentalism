@@ -39,7 +39,6 @@
   [content]
   {:status 200
    :headers {"Content-Type" "text/html"}
-   ; TODO - Add a wrapper that'll center the content to width 1000px
    :body content})
 
 (defn- base-sub-handler

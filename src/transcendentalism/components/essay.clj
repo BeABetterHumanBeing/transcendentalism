@@ -89,7 +89,7 @@
 (defn- generate-link
   "Returns the HTML for a link in the footer"
   [sub cxn]
-  (if (= (:type cxn) "random")
+  (if (= (:type cxn) :random)
       (button {"class" (str "link_segment " (to-css-class (:type cxn))),
                "onclick" (call-js "openRandomSegment"
                            (js-str (name sub))

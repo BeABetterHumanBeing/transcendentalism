@@ -24,13 +24,13 @@
 
     ^{:no-block true} (fn [t]
       (add-triples t
-       (fn [triples]
-         (let [all-essays (into #{} (map :sub
-                                         (filter #(= (:pred %)
-                                                     "/type/essay")
-                                                 triples)))]
-           (conj triples
-             (->Triple (get-essay-sub t) "/essay/flow/random" all-essays {}))))))
+        [(fn [triples]
+          (let [all-essays (into #{} (map :sub
+                                          (filter #(= (:pred %)
+                                                      "/type/essay")
+                                                  triples)))]
+            (conj triples
+              (->Triple (get-essay-sub t) "/essay/flow/random" all-essays {}))))]))
     (root-menu :metaphysics "Metaphysics")
   ))
 
