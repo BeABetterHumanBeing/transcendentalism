@@ -7,6 +7,7 @@
             [transcendentalism.html :refer :all]
             [transcendentalism.js :refer :all]
             [transcendentalism.render :refer :all]
+            [transcendentalism.toolbox :refer :all]
             [transcendentalism.xml :refer :all]))
 
 (defn- maybe-add-home-div
@@ -31,30 +32,40 @@
 
 (defrecord Cxn [dest name type])
 
+(defn- priority-flow
+  [& a]
+  (apply max-key {"/essay/flow/home" 5,
+                  "/essay/flow/next" 4,
+                  "/essay/flow/menu" 3,
+                  "/essay/flow/see_also" 2,
+                  "/essay/flow/random" 1} a))
+
 (defn- build-cxns
   "Determines the connections available from a given sub"
   [graph sub]
   (if (contains? (read-os graph sub "/essay/label") :under-construction)
       [(->Cxn :connections "Connections" :across)]
-      (reduce
-        (fn [result pred]
-          (let [os (read-os graph sub pred)]
+      (let [flow-preds (filter #(str/starts-with? % "/essay/flow")
+                               (read-ps graph sub)),
+            flow-objs (reduce-all result {}
+                                  [[pred flow-preds]
+                                   [o (read-os graph sub pred)]]
+                        (assoc result o (priority-flow pred (result o pred))))]
+        (reduce-kv
+          (fn [result obj pred]
             (if (= pred "/essay/flow/random")
-                (conj result (->Cxn os "Random" :random))
-                (into result
-                  (map
-                    (fn [o]
-                      (let [val (read-v graph o),
-                            target (if (nil? val) o val)]
-                        (let [title (unique-or-nil graph target "/essay/title")]
-                          (case pred
-                            "/essay/flow/home" (->Cxn target title :up)
-                            "/essay/flow/next" (->Cxn target title :down)
-                            "/essay/flow/see_also" (->Cxn target title :across)
-                            "/essay/flow/menu" (->Cxn target (str "[" title " Menu]") :menu)
-                            (assert false (str "ERROR - Type " pred " not supported")))))))
-                  os))))
-        [] (filter #(str/starts-with? % "/essay/flow") (read-ps graph sub)))))
+                (conj result (->Cxn obj "Random" :random))
+                (conj result
+                  (let [val (read-v graph obj),
+                        target (if (nil? val) obj val)]
+                    (let [title (unique-or-nil graph target "/essay/title")]
+                      (case pred
+                        "/essay/flow/home" (->Cxn target title :up)
+                        "/essay/flow/next" (->Cxn target title :down)
+                        "/essay/flow/see_also" (->Cxn target title :across)
+                        "/essay/flow/menu" (->Cxn target (str "[" title " Menu]") :menu)
+                        (assert false (str "ERROR - Type " pred " not supported"))))))))
+          [] flow-objs))))
 
 (defn- sort-by-cxn-type
   "Sorts a group of cxns so that they go down, across, then up"
