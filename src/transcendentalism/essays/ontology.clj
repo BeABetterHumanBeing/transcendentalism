@@ -351,8 +351,145 @@
         "interstitial facts), but rather to where a single thought occurs in"
         "more than one body."))))
 
+(defn cosmology
+  []
+  (essay :cosmology "Cosmology"
+    (block-definition "Cosmology")
+
+    (paragraph
+      (text
+        "This series is about what I call " (b "cosmological thinking") ", or"
+        "the decomposition of reality into ")
+      (tangent (f 0) "neatly ordered sets")
+      (text ", relating to the origins of " (i "formal") ", " (i "conceptual")
+            " reality."))
+
+    (footnote (f 0)
+      (paragraph
+        (text "By this point in time, cosmology in the vernacular has mostly"
+              "been restricted to ")
+        (tangent (f 1)
+          "the study of the origins of the " (i "material") " universe")
+        (text ", through the tools provided by astronomy. This series isn't"
+              "about that kind of cosmology."))
+      (text
+        "Similarly, cosmology used to be the religious study of the origins of "
+        (i "transcendental") " reality, though the tools provided by theology."
+        "This series isn't about that kind of cosmology either."))
+
+    (footnote (f 1)
+      (paragraph
+        (text "Formerly, " (i "cosmogony") ". The general shift towards ")
+        (see-also :materialism "materialism")
+        (text " has lead for cosmogony to usurp the name of its predecessor.")))
+
+    (file-under :ontology)))
+
+(defn cosmos-0
+  []
+  (essay :cosmos-0 "0"
+    (text
+      "Nothingness, or the essential emptiness of reality. Emptiness, like zero,"
+      "is free and omnipresent; it can be introduced anywhere into the cosmic"
+      "equation without apology.")
+
+    (html-passthrough (div {"style" "width:400px;height:400px"} ""))
+
+    (text
+      "For this reason, all concepts exist in the midst of a sea of nothingness."
+      "Diagrammatically, the blank white background upon which order is drawn"
+      "represents this nothingness.")
+    ))
+
+(defn cosmos-1
+  []
+  (essay :cosmos-1 "1"
+    (paragraph
+      (text "Unity, or the totality of reality. Any concept can be considered"
+            "a discrete, unified entity, and its mere mention is sufficient"
+            "proof of its ")
+      (tangent (f 0) "existence") dot)
+
+    ; TODO - drawing of a dot
+
+    (footnote (f 0)
+      (text
+        "We are talking here about " (i "conceptual") " existence. Simply"
+        "mentioning \"a wizard\" materializes the " (i "concept") " of a wizard,"
+        "but (typically) doesn't materialize a physical wizard."))
+    ))
+
+(defn cosmos-2
+  []
+  (essay :cosmos-2 "2"
+    (bullet-list
+      (text
+        "Binary, or the decomposition of meaning into " (i "is") " and "
+        (i "not") ". Pretty much all meaning is constructed in binary opposition;"
+        "there's a reason why digital arithmetic is binary. Examples include:")
+      (text "Light v. dark")
+      (text "Hot v. cold")
+      (text "Friend v. enemy")
+      (text "Better v. worse")
+      (text "Po-tay-toe v. po-tah-toe"))
+
+    (text "The binary is formed by relating two unities. Relationships come in"
+          "two forms: symmetric and asymmetric.")
+
+    ; TODO - drawing of two indistinguishable dots
+
+    (text
+      "In a symmetric binary, the two halves are indistinguishable " (i "except")
+      " for the fact of their distinction. Symmetric binaries are relatively"
+      "uncommon (the only example I listed above of a symmetric binary is"
+      "\"po-tay-toe v. po-tah-toe\"), because they only happen when the"
+      "distinction being drawn is meaningless.")
+
+    ; TODO - drawing of two distinguishable dots
+
+    (paragraph
+      (text
+        "In an asymmetric binary, one of the two is treated as " (i "special")
+        ", or " (i "distinct") " among the two. In a binary relationship, either"
+        "can be treated as distinct, ")
+      (tangent (f 0) "the two merely being opposites of each other") dot)
+
+    (footnote (f 0)
+      (text
+        "Symmetric binaries can always be converted into asymmetric binaries"
+        "simply by selecting one. If the two were truly symmetric, this selection"
+        "is WLOG (without loss of generalization). This is also the principle"
+        "embedded in the axiom of choice. Note that the axiom only applies to"
+        "uncountably infinite sets; the whole of any finite portion of reality"
+        "is always chooseable, which is to say that from a mathematical"
+        "perspective it's given, and need not be assumed."))
+    ))
+
+(defn cosmos-3
+  []
+  (essay :cosmos-3 "3"
+    (under-construction)))
+
+(defn cosmos-4
+  []
+  (essay :cosmos-4 "4"
+    (under-construction)))
+
+(defn cosmos-5
+  []
+  (essay :cosmos-5 "5"
+    (under-construction)))
+
+(defn cosmos-n
+  []
+  (essay :cosmos-n "Higher Orders"
+    (under-construction)))
+
 (defn ontology-essays
   []
   [(essay-series [:it-is :tower-of-objectivity :tower-of-subjectivity :tower-of-unity])
+   (essay-series [:cosmology :cosmos-0 :cosmos-1 :cosmos-2 :cosmos-3 :cosmos-4
+                  :cosmos-5 :cosmos-n])
    (it-is) (tower-of-objectivity) (tower-of-subjectivity) (tower-of-unity)
-   (self-reflecting-mirror)])
+   (self-reflecting-mirror) (cosmology) (cosmos-0) (cosmos-1) (cosmos-2)
+   (cosmos-3) (cosmos-4) (cosmos-5) (cosmos-n)])

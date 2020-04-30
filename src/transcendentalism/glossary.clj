@@ -13,6 +13,11 @@
 (defn glossary-sub [word] (sub-suffix :def word))
 
 (def glossary {
+  "Cosmology" {
+    :pos :noun,
+    :defs [
+      (adef "The higher structure and order of reality.")],
+  },
   "Expert" {
     :pos :noun,
     :defs [

@@ -18,7 +18,8 @@
             [transcendentalism.constraint :refer :all]
             [transcendentalism.encoding :refer :all]
             [transcendentalism.graph :as g1]
-            [transcendentalism.graph-v3 :refer :all]))
+            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.render :refer :all]))
 
 (defn- write-preds
   [graph sub obj p-vs]
@@ -144,7 +145,14 @@
           :required true,
         },
       },
-    }))
+    }
+    (reify Renderer
+      (get-renderer-name [renderer] "html")
+      (get-priority [renderer] 10)
+      (render-html [renderer params graph sub]
+        (unique-or-nil graph sub "/item/raw_html/contains"))
+      (render-css [renderer] "")
+      (render-js [renderer] ""))))
 
 (def component-graph
   (reduce #(merge-graph %1 (%2 %1))
