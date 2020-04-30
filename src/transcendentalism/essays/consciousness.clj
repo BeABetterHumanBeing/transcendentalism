@@ -8,7 +8,7 @@
 (defn awareness-and-attention
   []
   (essay :awareness-and-attention "Awareness and Attention"
-    (text "TODO")
+    (under-construction)
 
     (root-menu :consciousness "Consciousness")
     (file-under :metaphysics)))
@@ -144,7 +144,17 @@
           (text "That people walk one step at a time, not by taking leaps into"
                 "the unknown. It is a very different thing to tell somebody"
                 "about a way of seeing the world than for them to see it that"
-                "way for themselves."))))
+                "way for themselves."))
+; TODO - complete
+;         *   Part of the reason why the scale begins and ends where it does is because
+;     levels 1 and 6 represent the boundaries of language. Level 1 is generally
+;     pre-verbal, and so descriptions are all "from the outside looking in". Level
+;     6 transitions towards post-verbal, at which point words stop being a useful
+;     way to convey meaning, even in descriptive form.
+; *   The levels above only capture "wakeful" thinking. Altered states of
+;     consciousness (the most common being sleep) are not described by this
+;     hierarchy.
+        ))
 
     (footnote (f 7)
       ; TODO see-also articles for things like helical-epistemology etc.
@@ -156,25 +166,71 @@
 (defn level-1-ego
   []
   (essay :level-1 "Reflexive Thinking"
-    (text "TODO")
+    (under-construction)
+
+; ### Level 1 - Reflexive Thinking
+
+; **Reflexive thinking** is characterized by automatic response to stimuli.
+; Coloquially, one might refer to is as "unthinking", though this is technically
+; a misnomer. Reflexive thinking typically demonstrates very little discriminative
+; power, with responses that are hard-coded in relation to the stimuli that
+; provoke them.
+
+; Reflexive thinking is widely dispersed (i.e. there's no single center or nucleus
+; for reflexive thinking), and localized  near the site of the stimuli to which
+; they respond.
+
+; Examples:
+
+; *   Mechanical reflexes
+; *   Physical pain
+; *   Sensory perception
+
   ))
 
 (defn level-2-ego
   []
   (essay :level-2 "Emotional Thinking"
-    (text "TODO")
+    (under-construction)
+
+; ### Level 2 - Emotional Thinking
+
+; **Emotional thinking** is characterized by feelings, intuitive understanding,
+; and immediate implications. One might describe much of what qualifies as
+; emotional thinking as happening "subconsciously". Nevertheless, unlike reflexive
+; thinking, people are active and conscious participants in their emotional
+; thinking (obs. "emotional self control").
+
+; Emotional thinking is rational, in the sense that it has clear causes and
+; effects, and its inner workings obey a fairly well-defined (though often
+; obscured) logic. Much of its actions are patterned or virtuous and viscious
+; cycles, by which emotions of similar disposition reinforce each other (i.e.
+; positive emotions beget more positive emotions, and negative emotions beget more
+; negative emotions). The accumulation of these patterns, and their tendency to
+; cycle around positive and negative strange attractors constitutes what we might
+; call "mood".
+
+; Examples:
+
+; *   Emotions: Anger, Sadness, Happiness
+; *   Acting impulsively
+
   ))
 
 (defn level-3-ego
   []
   (essay :level-3 "Social Thinking"
-    (text "TODO")
+    (under-construction)
+
+; *   Emotions: Envy, Jealousy, Empathetic responses
+; *   Sympathy / empathy
+
   ))
 
 (defn level-4-ego
   []
   (essay :level-4 "Rational Thinking"
-    (text "TODO")
+    (under-construction)
 
     ; TODO see-also 4.5
   ))
@@ -182,7 +238,7 @@
 (defn level-4-5-ego
   []
   (essay :level-4-5 "Post-Modern Thinking"
-    (text "TODO")
+    (under-construction)
 
     (add-home :ego-development-theory)
   ))
@@ -190,19 +246,19 @@
 (defn level-5-ego
   []
   (essay :level-5 "Systemic Thinking"
-    (text "TODO")
+    (under-construction)
   ))
 
 (defn level-6-ego
   []
   (essay :level-6 "Transcendental Thinking"
-    (text "TODO")
+    (under-construction)
   ))
 
 (defn mental-ladders
   []
   (essay :mental-ladders "Mental Ladders"
-    (text "TODO")
+    (under-construction)
 
     (file-under :consciousness)))
 
@@ -823,12 +879,17 @@
 
     (file-under :consciousness)))
 
+(defn drugs
+  []
+  (essay :drugs "Drugs"
+    (under-construction)
+
+    ))
+
 (defn consciousness-essays
   []
   [(essay-series [:ego-development-theory :level-1 :level-2 :level-3 :level-4
                   :level-5 :level-6])
-   (directive-under-construction :awareness-and-attention :level-1 :level-2
-     :level-3 :level-4 :level-4-5 :level-5 :level-6 :mental-ladders)
    (awareness-and-attention) (ego-development-theory) (level-1-ego) (level-2-ego)
    (level-3-ego) (level-4-ego) (level-4-5-ego) (level-5-ego) (level-6-ego)
-   (mental-ladders) (mental-traps)])
+   (mental-ladders) (mental-traps) (drugs)])

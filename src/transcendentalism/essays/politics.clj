@@ -437,12 +437,207 @@
           "spectrum, which explains (a) its attractive aesthetic power, and"
           "(b) the relative ease we have in distinguishing different shades of"
           "red from each other.")))
+    (file-under :politics)))
+
+(defn conservatism-101
+  []
+  (essay :conservatism-101 "Conservatism 101"
+    (paragraph
+      (text (b "IMPORTANT:") " The purpose of this essay collection is to introduce"
+            "the political philosophy of ")
+      (tangent (f 0) "conservatism")
+      (text ". It's a crash-course specifically designed for ")
+      (tangent (f 1) "people who aren't that familiar with it")
+      (text ", with the goal of showing why it's useful, and what niche it fills"
+            "in the political landscape."))
+
+    (footnote (f 0)
+      (text "Obligatory apology: conservatism means different things to different"
+            "people, and the version I'm laying out here is just the one that"
+            "I've found personally useful. As always, take what makes sense to"
+            "you, and let be that which doesn't."))
+
+    (footnote (f 1)
+      (text
+        "This includes people who have a strong negative opinion about it. Such"
+        "opinions are principally the result of mis-learning; they've heard a lot"
+        "about conservatism over the years, leading them to believe they"
+        "understand it, but all that they've learned has been negative, leading"
+        "them to a dramatically unbalanced understanding."))
+
+    (text
+      "In this collection, I will be presenting conservatism's positive aspects,"
+      "along with caveats to help you better understand its limitations and"
+      "weaknesses. To borrow from an aphorism: in order to not throw the baby"
+      "out with the bath-water, you gotta know what the baby looks like.")
+
+    (paragraph
+      (text
+        "The core idea that constitutes conservatism is " (i "keep what works")
+        ". Society is not politically ignorant; there's thousands of years of"
+        "history documenting political innovations and their impacts, and it's"
+        "incredibly useful to mine this knowledge for wisdom about how to"
+        "structure human affairs. While history does not repeat itself, it does"
+        "rhyme, and if you know the previous verses, it'll help you to understand"
+        "where in the rhythm and meter we are, the better to complete some"
+        "political poetry. ")
+      (tangent (f 2) "Caveat") dot)
+
+    (footnote (f 2)
+      (text
+        "Undergirding this is the assumption that politics is a product of human"
+        "nature, and human nature has not changed. Humans are ever-evolving, and"
+        "we are living during a period of tremendous evolutionary pressure; in"
+        "so far as evolution moves through periods of punctuated equilibrium,"
+        "we are in one of the punctuating moments. Evolution is surprisingly fast,"
+        "but it's still extremely slow compared to the development of political"
+        "institutions."))
+
+    ; TODO - drawing of "standing on the shoulders of giants". For every living
+    ; human today, there are 30 dead ancestors.
+
+    (file-under :politics)
+    (root-menu :conservatism "Conservatism")))
+
+(defn personal-responsibility
+  []
+  (essay :personal-responsibility "Personal Responsibility"
+    (paragraph
+      (text "Personal responsibility is one of the core aspects of ")
+      (see-also :conservatism "conservatism")
+      (text
+        ". The idea is relatively simple: society is the sum of a mass of"
+        "individual actors, of which you are exactly one, and the better each"
+        "actor takes care of their piece of society, the better society as a"
+        "whole can function."))
+
+    (numbered-list
+      (text "This political ideal is tempered by two realities:")
+      (text "Not everyone is able to handle all of their own responsibilities"
+            "all of the time.")
+      (text "Some of society's needs cannot be wholly accounted for by summing"
+            "individual responsibility."))
+
+    ; TODO - drawing of a crowd of people with their onverlapping spheres of
+    ; responsibility, and the gaps between them.
+
+    (numbered-list
+      (text "The responses to these are straight-forward:")
+      (text "A part of your own responsibilities is to watch those around you,"
+            "to look out for them, and to check that they're doing alright.")
+      (paragraph
+        (text "A part of your own responsibilities is to care about ")
+        (tangent (f 1) "the larger state of society") dot))
+
+    (footnote (f 1)
+      (text "Basically, " (i "not my monkeys, not my zoo") " has its limits."
+            "You live in the same zoo along with the other monkeys."))
+
+    (text "The tension that's created around personal responsibility is usually"
+          "around where to split responsibilities between different parties, and"
+          "where the 'personal' aspect dissolves into a larger collective"
+          "responsibility.")
+
+    (paragraph
+      (text "A classic case is that of ")
+      (tangent (f 2) (i "drug abuse")) dot)
+
+    (footnote (f 2)
+      (text
+        "I am specifically refering here to " (b "ab") "-use, where the use's"
+        "downsides clearly outweigh any upsides. Most drug abusers take their"
+        "drugs themselves, which would appear to place stopping squarely in the"
+        "sphere of their own personal responsibility.")
+      (paragraph
+        (text
+          "Where it gets tricky is that their abuse is typically co-morbid with"
+          "other factors and influences. They may live in an environment where"
+          "it is easy to procure the drug, or difficult to avoid its presence"
+          "in social situations. They may have friends or associates who enable"
+          "them. In this manner the responsibility expands to encompass ")
+        (tangent (f 3) "a larger group of individuals") dot))
+
+    (footnote (f 3)
+      (paragraph
+        (text
+          "Note that it is still clearly personal in the final analysis. Unless"
+          "you are being drugged against your will, a sufficient amount of"
+          "willpower can solve the problem for any given individual. That said,"
+          "drugs do tend to rob their users of this kind of willpower, either"
+          "directly through psychological or physiological dependence, or"
+          "indirectly, through degredation of their mental faculties. See ")
+        (see-also :drugs "drugs")
+        (text " for a more detailed consideration.")))
+
+    ; Laws exist to fill the gap between the total sum of personal responsibility
+    ; and the ideals to which they are being held.
+
+    ; Drugs
+    ; One ideal is that anyone can intentionally change their conscious state.
+    ; One ideal is that nobody should use chemicals to do so.
+
+    ; Both ideals can be satisfied: people change their own state at will, sans
+    ; chemicals.
+    ; (i.e. meditation)
+
+    ; But they don't, and drug control laws exist to try to fill that gap.
+
+    ; Abortion
+    ; One ideal is that nobody has to raise a child they do not want.
+    ; One ideal is that no innocent person is killed.
+
+    ; Both ideals can be satisfied: people get pregnant only when they intend to.
+    ; (i.e. abstinance)
+
+    ; But they don't, and abortion/contraception laws exist to try to fill them.
+
+    ; Guns
+    ; One ideal is that every citizen is sovereign.
+    ; One ideal is that no innocent person is killed.
+
+    ; Both ideals can be satisfied: don't shoot innocent people. (i.e. 2A)
+
+    ; The observation is that, with the i.e.s presented, all of these laws are
+    ; made necessary only by the lack of personal responsibility: to cultivate
+    ; your mind, tend to your body, and never injure your soul.
+
+    ; In the ideal conservative world, there would be no laws, because they
+    ; would be unnecessary. We do not live in that world, and that's why we have
+    ; those laws.
+
+    ; Conservatives get crap for passing laws that try to force you to apply
+    ; your willpower to take responsibility. Liberals get crap for passing laws
+    ; that try to eliminate the need for willpower and remove the rights that
+    ; come with that responsibility.
+
+    ; The less the people make use of these options, or get hampered by these
+    ; limitations, the closer we get to the ideal.
+
+
+
+
+    ; Trans Bathroom Rights
+    ; One ideal is that anyone can use whichever bathroom you want.
+    ; One ideal is that nobody has their privacy invaded.
+
+    ; Both ideals can be satisfied: single-occupancy rooms.
+
+    ; But they don't, and bathroom laws exist to try to fill that gap.
+
+    (file-under :conservatism)))
+
+(defn natural-aristocracies
+  []
+  (essay :natural-aristocracies "Natural Aristocracies"
+    (under-construction)
+
+; Wealth, Beauty, Intelligence, Popularity
 
     (file-under :politics)))
 
 (defn politics-essays
   []
   [(essay-series [:enlightened-centrism :tug-of-war :balance-beam :figure-skating])
-   (directive-under-construction)
    (enlightened-centrism) (tug-of-war) (balance-beam) (figure-skating)
-   (red-white-black)])
+   (red-white-black) (conservatism-101) (personal-responsibility)
+   (natural-aristocracies)])
