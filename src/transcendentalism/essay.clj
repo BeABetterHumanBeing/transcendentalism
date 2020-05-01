@@ -426,7 +426,14 @@
 (defn glossary-essay
   []
   (essay :glossary "Glossary"
-    (text "TODO - block-define all words alphabetically here")
+    ^{:no-block true} (fn [t]
+    (let [words (sort (keys glossary))]
+      (reduce
+        (fn [result word]
+          (push-block t)
+          ((block-definition word) t))
+        ((block-definition (first words)) t)
+        (rest words))))
 
     ^{:no-block true} (fn [t]
     (reduce-kv
@@ -434,8 +441,7 @@
         (concat result
                 ((footnote (glossary-sub k)
                    (apply definition k (:pos v) (:defs v))) t)))
-      [] glossary))
-    ))
+      [] glossary))))
 
 (defn under-construction
   []
