@@ -39,8 +39,10 @@
           #{"/item/q_and_a/question"
             "/item/q_and_a/answer"
             ["/item/table/cell" (prop-to-meta :row "/row" -1)
-                                (prop-to-meta :col "/col" -1)]
+                                (prop-to-meta :col "/col" -1) "/"]
             "/item/bullet_list/header"
+            ; TODO - nested bullet lists are not necessarily returned in the
+            ; correct order (I suspect they are clobbering each other)
             ["/item/bullet_list/point" (prop-to-meta :order "/order" 0) "/"]}
           (p* [(inc-meta :in-item-inline) "/segment/flow/inline"])
           "/segment/contains"])
@@ -61,6 +63,7 @@
               (keys result))]
     (into [] sorted-result)))
 
+; TODO - definition map calculation is not finding any definitions
 (defn- calculate-definition-map
   "Returns a sub->{:id :root} map of all definitions under a given segment"
   [graph sub]

@@ -75,25 +75,27 @@
                                   (let [val (triples-by-column col nil),
                                         class (if (or (= col -1) (= row -1))
                                                   "label"
-                                                  "cell")]
+                                                  "cell"),
+                                        target (read-v graph (first val))]
                                     (td {"class" class}
                                         (if (nil? val)
                                             ""
                                             (param-aware-render-sub
-                                              params graph (first val))))))
+                                              params graph target)))))
                                 (range -1 (inc col-max)))))))
                    (range -1 (inc row-max)))))))
       (render-css [renderer]
-        (css "table" {"class" "t"}
-          (border-collapse "collapse")
-          (margin "0px" "auto"))
-        (css "td" {"class" "label"}
-          (font-style "italic")
-          (text-align "center")
-          (padding "5px"))
-        (css "td" {"class" "cell"}
-          (border-style "solid")
-          (border-width "1px")
-          (border-color (to-css-color light-gray))
-          (padding "5px")))
+        (str/join "\n" [
+          (css "table" {"class" "t"}
+            (border-collapse "collapse")
+            (margin "0px" "auto"))
+          (css "td" {"class" "label"}
+            (font-style "italic")
+            (text-align "center")
+            (padding "5px"))
+          (css "td" {"class" "cell"}
+            (border-style "solid")
+            (border-width "1px")
+            (border-color (to-css-color light-gray))
+            (padding "5px"))]))
       (render-js [renderer] ""))))
