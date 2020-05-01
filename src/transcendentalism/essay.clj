@@ -140,17 +140,8 @@
            (add-triples loom
              (->Triple (item-sub k) "/item/inline/definition" sub {}))))
        (knot-credit [loom whom f]
-         ; TODO - BUG - Since functions are no longer returning triples, they
-         ; will not have the appropriate credit added. Will have to add "author"
-         ; as the creator on the loom, so that one can change it, stitch away,
-         ; and return to before.
-         (let [triples (flatten (f loom)),
-               subs (map :sub
-                         (filter #(= (:pred %) "/type/segment") triples))]
-           (add-triples loom
-             (concat
-               triples
-               (map #(->Triple % "/segment/author" whom {}) subs)))))
+         (add-triples loom (->Triple (major-key loom) "/segment/author" whom {}))
+         (f loom))
        (knot-block-item [loom f]
          (let [block-sub (major-key loom),
                item-sub (item-sub block-sub)]

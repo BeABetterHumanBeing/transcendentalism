@@ -224,6 +224,8 @@
              (border-style "none" "solid" "none" "none")
              (border-width "1px")
              (border-color (to-css-color orange)))
+           ; TODO - fix author CSS s.t. it's right-justified correctly in
+           ; nested blocks.
            (css "div" {"class" "authors-chain"}
              (position "relative")
              (width "30px")
