@@ -22,7 +22,7 @@
       (text "I'm using the word 'paradigm' in its original sense, something"
             "akin to \"the canonical example\""))
 
-    ; TODO - Image of a perfect mirror, in which is reflected a tree.
+    (image "tree_of_knowledge_1.png" "An image of a tree")
 
     (text
       T ", however, is inaccessible to us imperfect beings. Our understanding"
@@ -32,7 +32,7 @@
       T " is the only ideology, the only mirror, in which reality can be seen"
       "for exactly what it is.")
 
-    ; TODO - A finely shattered mirror, with a shattered reflection of the tree.
+    (image "tree_of_knowledge_6.png" "An image of a severely jumbled tree")
 
     (paragraph
       (text
@@ -50,8 +50,7 @@
         "Only " T " can show the full extent of an ideology, and we do not have"
         "access to " T "."))
 
-    ; TODO - A somewhat consistent, but still flawed, ideological mirror,
-    ; reflecting a tree. Not that parts of the tree are reflected upside-down.
+    (image "tree_of_knowledge_5.png" "An image of a significantly jumbled tree")
 
     (text
       "Any ideology worth its salt pretends to be " T ", because that is the"
@@ -73,8 +72,7 @@
       "is not sufficient to spread its shattered pieces among the people, but"
       "will break the glass of anything that reveals its limitations.")
 
-    ; TODO - image of two separate ideologies of the same mirror, with some
-    ; depiction of friction over their differences.
+    (image "tree_of_knowledge_4.png" "An image of a jumbled tree")
 
     (text
       "When a person lives within the limitations imposed by an ideology, they"
@@ -84,6 +82,8 @@
       "mirror, moves in perfect complement to reality. They are as surely"
       "enslaved to reality by means of " T " as an image in a mirror is to that"
       "which it reflects.")
+
+    (image "tree_of_knowledge_3.png" "An image of a slightly jumbled tree")
 
     (text
       "Friction and suffering are the result of passing over flaws and holes in"
@@ -95,8 +95,7 @@
       "to " (i "It") " leads to no suffering. This is another reason why it is"
       "the most perfect slavery.")
 
-    ; TODO - image of a person failing to pick fruit from the tree because they
-    ; cannot accurately see it.
+    (image "tree_of_knowledge_2.png" "An image of a tree that's almost correct")
 
     (text
       "When we are borne into reality, our being is illuminated by the light of"
@@ -106,8 +105,7 @@
       "desire to assemble those pieces again, so that we may once more look at"
       "ourselves as exactly who we are: flawless and perfect.")
 
-    ; TODO - image of a person trying to assemble pieces of the mirror together
-    ; as a jigsaw puzzle.
+    (image "tree_of_knowledge_1.png" "An image of a tree")
 
     (root-menu :epistemology "Epistemology")
     (file-under :metaphysics)
