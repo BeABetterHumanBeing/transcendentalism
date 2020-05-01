@@ -168,17 +168,20 @@
                     (->Triple sub "/item/poem/line" line {"/order" i})))
                 (range (count lines)))])))
        (knot-image [loom url alt-text width height]
-         (knot-block-item loom
-           (fn [sub]
-             [(->Triple sub "/type/item/image" nil {})
-              (->Triple sub "/item/image/url" (str "../" url) {})
-              (->Triple sub "/item/image/alt_text" alt-text {})
-              (if (nil? width)
-                []
-                (->Triple sub "/item/image/width" width {}))
-              (if (nil? height)
-                []
-                (->Triple sub "/item/image/height" height {}))])))
+         (let [image-url (if (str/starts-with? url "http")
+                             url
+                             (str "../" url))]
+           (knot-block-item loom
+             (fn [sub]
+               [(->Triple sub "/type/item/image" nil {})
+                (->Triple sub "/item/image/url" image-url {})
+                (->Triple sub "/item/image/alt_text" alt-text {})
+                (if (nil? width)
+                  []
+                  (->Triple sub "/item/image/width" width {}))
+                (if (nil? height)
+                  []
+                  (->Triple sub "/item/image/height" height {}))]))))
        (knot-quote [loom q author]
          (knot-block-item loom
            (fn [sub]

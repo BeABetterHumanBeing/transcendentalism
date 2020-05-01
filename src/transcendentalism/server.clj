@@ -59,6 +59,7 @@
                     ; Include JQuery from Google CDN.
                     (xml-tag "script" {"src" "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"} "")
                     (xml-tag "script" {"src" "output/script.js"} "")
+                    ; TODO - add a favicon
                     html))))))))
 
 (defn- render-sub-handler

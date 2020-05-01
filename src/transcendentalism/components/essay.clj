@@ -50,21 +50,25 @@
             flow-objs (reduce-all result {}
                                   [[pred flow-preds]
                                    [o (read-os graph sub pred)]]
-                        (assoc result o (priority-flow pred (result o pred))))]
+                        (if (set? o)
+                            (assoc result o pred)
+                            (let [val (read-v graph o),
+                                  target (if (nil? val) o val)]
+                              (assoc result
+                                     target
+                                     (priority-flow pred (result target pred))))))]
         (reduce-kv
           (fn [result obj pred]
             (if (= pred "/essay/flow/random")
                 (conj result (->Cxn obj "Random" :random))
                 (conj result
-                  (let [val (read-v graph obj),
-                        target (if (nil? val) obj val)]
-                    (let [title (unique-or-nil graph target "/essay/title")]
-                      (case pred
-                        "/essay/flow/home" (->Cxn target title :up)
-                        "/essay/flow/next" (->Cxn target title :down)
-                        "/essay/flow/see_also" (->Cxn target title :across)
-                        "/essay/flow/menu" (->Cxn target (str "[" title " Menu]") :menu)
-                        (assert false (str "ERROR - Type " pred " not supported"))))))))
+                  (let [title (unique-or-nil graph obj "/essay/title")]
+                    (case pred
+                      "/essay/flow/home" (->Cxn obj title :up)
+                      "/essay/flow/next" (->Cxn obj title :down)
+                      "/essay/flow/see_also" (->Cxn obj title :across)
+                      "/essay/flow/menu" (->Cxn obj (str "[" title " Menu]") :menu)
+                      (assert false (str "ERROR - Type " pred " not supported")))))))
           [] flow-objs))))
 
 (defn- sort-by-cxn-type
@@ -328,7 +332,7 @@
             (display "inline"))
           (css "div" {"class" "buffer"}
             (height "600px")
-            (background-image "url(\"../resources/crown.jpeg\")")
+            (background-image "url(\"../crown.jpeg\")")
             (background-position "center")
             (background-repeat "no-repeat")
             (background-size "150px" "150px"))
