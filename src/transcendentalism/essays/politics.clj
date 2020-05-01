@@ -1,9 +1,7 @@
 (ns transcendentalism.essays.politics
-  (:require [clojure.string :as str]))
-
-(use 'transcendentalism.directive
-     'transcendentalism.essay
-     'transcendentalism.html)
+  (:require [clojure.string :as str]
+            [transcendentalism.essay :refer :all]
+            [transcendentalism.html :refer :all]))
 
 ; Enlightened Centrism
 ; This essay serves as the entry point to all political essays.

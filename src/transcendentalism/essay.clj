@@ -1,12 +1,10 @@
 (ns transcendentalism.essay
-  (:require
-    [clojure.string :as str]))
-
-(use 'transcendentalism.encoding
-     'transcendentalism.glossary
-     'transcendentalism.graph
-     'transcendentalism.html
-     'transcendentalism.loom)
+  (:require [clojure.string :as str]
+            [transcendentalism.encoding :refer :all]
+            [transcendentalism.glossary :refer :all]
+            [transcendentalism.graph :refer :all]
+            [transcendentalism.html :refer :all]
+            [transcendentalism.loom :refer :all]))
 
 (defn item-sub [sub] (sub-suffix sub "i"))
 

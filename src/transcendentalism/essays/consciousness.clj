@@ -1,9 +1,7 @@
-(ns transcendentalism.essays.consciousness)
-
-(use 'transcendentalism.directive
-     'transcendentalism.essay
-     'transcendentalism.graph
-     'transcendentalism.html)
+(ns transcendentalism.essays.consciousness
+  (:require [transcendentalism.essay :refer :all]
+            [transcendentalism.graph :refer :all]
+            [transcendentalism.html :refer :all]))
 
 (defn awareness-and-attention
   []

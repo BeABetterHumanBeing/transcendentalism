@@ -1,8 +1,7 @@
 (ns transcendentalism.glossary
-  (:require [clojure.string :as str]))
-
-(use 'transcendentalism.graph
-     'transcendentalism.loom)
+  (:require [clojure.string :as str]
+            [transcendentalism.graph :refer :all]
+            [transcendentalism.loom :refer :all]))
 
 (defn definition
   [word part-of-speech & definitions]

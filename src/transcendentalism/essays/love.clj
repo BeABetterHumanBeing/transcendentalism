@@ -1,7 +1,5 @@
-(ns transcendentalism.essays.love)
-
-(use 'transcendentalism.directive
-     'transcendentalism.essay)
+(ns transcendentalism.essays.love
+  (:require [transcendentalism.essay :refer :all]))
 
 (defn transcendental-love
   []

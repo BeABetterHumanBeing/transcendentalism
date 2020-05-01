@@ -1,8 +1,6 @@
 (ns transcendentalism.essays.religion
-  (:require [transcendentalism.html :refer :all]))
-
-(use 'transcendentalism.directive
-     'transcendentalism.essay)
+  (:require [transcendentalism.essay :refer :all]
+            [transcendentalism.html :refer :all]))
 
 ; The Holy Mountain
 ; This essay serves as the entry point to all religious and/or esoteric essays.

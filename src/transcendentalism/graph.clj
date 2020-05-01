@@ -1,9 +1,7 @@
 (ns transcendentalism.graph
-  (:require
-    [clojure.set :as set]
-    [clojure.string :as str]))
-
-(use 'transcendentalism.time)
+  (:require [clojure.set :as set]
+            [clojure.string :as str]
+            [transcendentalism.time :refer :all]))
 
 ; The graph is composed of triples. Each triple relates a subject to an object
 ; by means of a predicate.

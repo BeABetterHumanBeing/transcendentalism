@@ -1,7 +1,6 @@
 (ns transcendentalism.js
-  (:require [clojure.string :as str]))
-
-(use 'transcendentalism.xml)
+  (:require [clojure.string :as str]
+            [transcendentalism.xml :refer :all]))
 
 (defn seg-id
   "Creates a segment-specific id"

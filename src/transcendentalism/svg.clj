@@ -1,13 +1,12 @@
 (ns transcendentalism.svg
   (:require [clojure.string :as str]
             [java-time :as jt]
-            [clojure.math.numeric-tower :as math]))
-
-(use 'transcendentalism.color
-     'transcendentalism.flags
-     'transcendentalism.graph
-     'transcendentalism.time
-     'transcendentalism.xml)
+            [clojure.math.numeric-tower :as math]
+            [transcendentalism.color :refer :all]
+            [transcendentalism.flags :refer :all]
+            [transcendentalism.graph :refer :all]
+            [transcendentalism.time :refer :all]
+            [transcendentalism.xml :refer :all]))
 
 ; Factor for converting from a TAU-based system to a PI-based one.
 (def TAU-2-PI (* Math/PI 2))

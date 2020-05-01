@@ -1,11 +1,9 @@
 (ns transcendentalism.essays.ontology
-  (:require [clojure.string :as str]))
-
-(use 'transcendentalism.directive
-     'transcendentalism.essay
-     'transcendentalism.glossary
-     'transcendentalism.graph
-     'transcendentalism.html)
+  (:require [clojure.string :as str]
+            [transcendentalism.essay :refer :all]
+            [transcendentalism.glossary :refer :all]
+            [transcendentalism.graph :refer :all]
+            [transcendentalism.html :refer :all]))
 
 ; Ontology
 ; This essay serves as the entry point to all ontological essays: those that

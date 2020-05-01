@@ -1,11 +1,9 @@
 (ns transcendentalism.directive
-  (:require
-    [clojure.set :as set]
-    [clojure.string :as str]))
-
-(use 'transcendentalism.essay
-     'transcendentalism.graph
-     'transcendentalism.loom)
+  (:require [clojure.set :as set]
+            [clojure.string :as str]
+            [transcendentalism.essay :refer :all]
+            [transcendentalism.graph :refer :all]
+            [transcendentalism.loom :refer :all]))
 
 (def gq-segment-to-item
   "Returns a graph query that expands from /type/segment to all /type/item that

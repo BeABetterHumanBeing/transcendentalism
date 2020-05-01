@@ -1,6 +1,6 @@
 (ns transcendentalism.encoding
   (:require [clojure.java.io :as io]
-    [clojure.set :as set]))
+            [clojure.set :as set]))
 
 (defn gen-key
   "Generates a random alphanumeric key of given length"

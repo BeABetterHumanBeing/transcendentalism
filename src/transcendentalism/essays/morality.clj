@@ -1,7 +1,5 @@
-(ns transcendentalism.essays.morality)
-
-(use 'transcendentalism.directive
-     'transcendentalism.essay)
+(ns transcendentalism.essays.morality
+  (:require [transcendentalism.essay :refer :all]))
 
 ; Dominant Theory
 ; This essay serves as the entry point to all ontological essays: those that

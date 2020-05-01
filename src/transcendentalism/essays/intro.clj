@@ -1,11 +1,10 @@
 (ns transcendentalism.essays.intro
-  (:require [clojure.string :as str]))
-
-(use 'transcendentalism.essay
-     'transcendentalism.graph
-     'transcendentalism.html
-     'transcendentalism.loom
-     'transcendentalism.svg)
+  (:require [clojure.string :as str]
+            [transcendentalism.essay :refer :all]
+            [transcendentalism.graph :refer :all]
+            [transcendentalism.html :refer :all]
+            [transcendentalism.loom :refer :all]
+            [transcendentalism.svg :refer :all]))
 
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.

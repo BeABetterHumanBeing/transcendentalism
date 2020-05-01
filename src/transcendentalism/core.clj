@@ -1,29 +1,27 @@
 (ns transcendentalism.core
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [transcendentalism.directive :refer :all]
+            [transcendentalism.essay :refer :all]
+            [transcendentalism.essays.consciousness :refer :all]
+            [transcendentalism.essays.epistemology :refer :all]
+            [transcendentalism.essays.intro :refer :all]
+            [transcendentalism.essays.love :refer :all]
+            [transcendentalism.essays.miscellaneous :refer :all]
+            [transcendentalism.essays.morality :refer :all]
+            [transcendentalism.essays.ontology :refer :all]
+            [transcendentalism.essays.physics :refer :all]
+            [transcendentalism.essays.politics :refer :all]
+            [transcendentalism.essays.religion :refer :all]
+            [transcendentalism.flags :refer :all]
             [transcendentalism.generate :refer :all]
+            [transcendentalism.glossary :refer :all]
+            [transcendentalism.graph :refer :all]
             [transcendentalism.graph-v3 :as g3]
             [transcendentalism.render :refer :all]
+            [transcendentalism.schema :refer :all]
             [transcendentalism.server :refer :all]
             [transcendentalism.toolbox :refer :all]))
-
-; TODO - change use to :require
-(use 'transcendentalism.directive
-     'transcendentalism.essay
-     'transcendentalism.essays.consciousness
-     'transcendentalism.essays.epistemology
-     'transcendentalism.essays.intro
-     'transcendentalism.essays.love
-     'transcendentalism.essays.miscellaneous
-     'transcendentalism.essays.morality
-     'transcendentalism.essays.ontology
-     'transcendentalism.essays.physics
-     'transcendentalism.essays.politics
-     'transcendentalism.essays.religion
-     'transcendentalism.flags
-     'transcendentalism.glossary
-     'transcendentalism.graph
-     'transcendentalism.schema)
 
 (def meta-directives
   [directive-label-menus

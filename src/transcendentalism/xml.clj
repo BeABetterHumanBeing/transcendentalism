@@ -1,7 +1,6 @@
 (ns transcendentalism.xml
-  (:require [clojure.string :as str]))
-
-(use 'transcendentalism.flags)
+  (:require [clojure.string :as str]
+            [transcendentalism.flags :refer :all]))
 
 (defn debug
   "Passes through content if in debugging-mode, otherwise nullifies it"

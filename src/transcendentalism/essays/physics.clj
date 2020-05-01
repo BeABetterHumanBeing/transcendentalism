@@ -1,11 +1,9 @@
 (ns transcendentalism.essays.physics
-  (:require [clojure.string :as str]))
-
-(use 'transcendentalism.directive
-     'transcendentalism.essay
-     'transcendentalism.glossary
-     'transcendentalism.graph
-     'transcendentalism.html)
+  (:require [clojure.string :as str]
+            [transcendentalism.essay :refer :all]
+            [transcendentalism.glossary :refer :all]
+            [transcendentalism.graph :refer :all]
+            [transcendentalism.html :refer :all]))
 
 ; Materialism
 ; This essay serves as the entry point to all physics- and material-world-

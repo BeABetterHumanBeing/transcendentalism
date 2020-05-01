@@ -1,8 +1,6 @@
 (ns transcendentalism.essays.epistemology
-  (:require [transcendentalism.html :refer :all]))
-
-(use 'transcendentalism.directive
-     'transcendentalism.essay)
+  (:require [transcendentalism.essay :refer :all]
+            [transcendentalism.html :refer :all]))
 
 ; Epistemology
 ; This essay serves as the entry point to all epistemological essays, about
