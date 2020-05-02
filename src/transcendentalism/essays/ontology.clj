@@ -64,7 +64,9 @@
           "of reality is all the \"stuff\" that's gotten between those two"
           "mirrors.")
 
-    ; TODO - you with your life, stuck between two mirrors
+    (image "two_mirrors.png"
+           (str "Image of two mirrors with objects between them, reflecting "
+                "back and forth"))
 
     (text
       "Where the nature of reality really departs from our metaphor of \"two"
@@ -76,8 +78,9 @@
       "mirrors. They are given substance by the apparent stability of the end"
       "result of this recursive process.")
 
-    ; TODO - sequence showing recursive unfolding of a red ball within a
-    ; circular mirror.
+    (image "self_separating_mirror.png"
+           (str "Image of a red ball emerging from a red dot, with reflective "
+                "echoes to either side"))
 
     (add-home :it-is)
     ))
@@ -391,7 +394,7 @@
       "is free and omnipresent; it can be introduced anywhere into the cosmic"
       "equation without apology.")
 
-    (html-passthrough (div {"style" "width:400px;height:400px"} ""))
+    (html-passthrough (div {"style" "width:200px;height:200px"} ""))
 
     (text
       "For this reason, all concepts exist in the midst of a sea of nothingness."
@@ -408,7 +411,7 @@
             "proof of its ")
       (tangent (f 0) "existence") dot)
 
-    ; TODO - drawing of a dot
+    (image "cosmos_1.png" "An image of a black dot")
 
     (footnote (f 0)
       (text
@@ -434,7 +437,7 @@
     (text "The binary is formed by relating two unities. Relationships come in"
           "two forms: symmetric and asymmetric.")
 
-    ; TODO - drawing of two indistinguishable dots
+    (image "cosmos_2_symmetric.png" "An image of two black dots")
 
     (text
       "In a symmetric binary, the two halves are indistinguishable " (i "except")
@@ -443,7 +446,7 @@
       "\"po-tay-toe v. po-tah-toe\"), because they only happen when the"
       "distinction being drawn is meaningless.")
 
-    ; TODO - drawing of two distinguishable dots
+    (image "cosmos_2_asymmetric.png" "An image of a black dot and a red dot")
 
     (paragraph
       (text
