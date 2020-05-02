@@ -84,8 +84,10 @@
         "resolutely stuck at one of the ends of the rope do so because they"
         "believe that is where they'll have the greatest impact."))
 
-    ; TODO - drawing of the left v. right tug-of-war, with (blue) left on left,
-    ; and (red) right on right. A white flag in the center.
+    (image "tug_of_war_1.png"
+           (str "An image of a tug-of-war game between a team of blue players "
+                "(on the left), and a team of red players (on the right). In "
+                "the center is one person watching both sides."))
 
     (text
       "In this model, the left and right are locked in a competition of strength"
@@ -145,8 +147,10 @@
       "makes them \"enlightened\" is a relative lack of artificial confinement:"
       "they are capable of making themselves at home on either end of the spectrum.")
 
-    ; TODO - drawing of a single rope with a centrist having just moved positions
-    ; along it.
+    (image "tug_of_war_2.png"
+           (str "Another image of a game of tug-of-war, except with the single "
+                "observer who was in the center moving from one side to the "
+                "other."))
 
     (text "Why would a centrist do this? Does it not seem self-defeating? The"
           "answer lies in sriking the right balance.")))
@@ -181,7 +185,9 @@
       (text "What happens when they do? The system degenerates into a monopolar"
             "state.")) 
 
-    ; TODO - drawing of a gymnast with left and right hanging off their arms.
+    (image "balance_beam.png"
+           (str "An image of a gymnast on a balance beam, where their right "
+                "foot is red, and their left foot is blue."))
 
     (bullet-list
       (text "Some key differences between the model and reality:")
@@ -225,7 +231,10 @@
       "to put a lot of effort into mastering their coordination between left"
       "and right, so that they can be integrated into a higher whole.")
 
-    ; TODO drawing of figure skater
+    (image "figure_skating.png"
+           (str "An image of a figure skater, where their right foot is red and "
+                "their left foot is blue, and they leave red-and-blue tracks "
+                "on the ice behind them."))
 
     (text
       "In this view, the enlightened centrist sees their jobs to play the role"

@@ -619,8 +619,6 @@
       (text
         (heading "Descriptive models") " merely seek to describe the some aspect"
         "of reality. The purpose of these models is to facilitate "
-        ; TODO - Consider making a glossary, so that these words can be defined
-        ; elsewhere, and auto-included here.
         (i "structuralization") ", the process of looking at the continuous"
         "flow of reality and separating or deconstructing it into parts. This"
         "process involves the following general steps:")
@@ -835,11 +833,13 @@
       (text "The principal one being the brain stem, but some senses arrive via"
             "their own conduit, esp. the eyes, ears, and nose."))
 
-    ; TODO - Series of drawings showing a bowl of fruit emerge from visual input.
-    ; TODO - First a bunch of 'pixels'
-    ; TODO - Second edge & gradient detection
-    ; TODO - Third object segmentation
-    ; TODO - Fourth, semantic interpretation "yum"
+    (image "bowl_of_fruit_1.png" "A pixelated image of bright colors")
+    (image "bowl_of_fruit_2.png"
+           "The same image, but with black outlines of some objects")
+    (image "bowl_of_fruit_3.png"
+           "The same image, segmented into some oranges, bananas, grapes, and a bowl")
+    (image "bowl_of_fruit_4.png"
+           "The same image; a bowl of delicious fruit")
 
     (text
       "The key construction to note, however, is that this filter is recursive:"
@@ -873,8 +873,9 @@
             "the perspectives that it passes through, yielding a warped but"
             "functional understanding of the world."))
 
-    ; TODO - A drawing of a globe with glasses overlaid on it. Each one shows
-    ; the world in a different light.
+    (image "perspective_glasses.png"
+           (str "A drawing of a globe with glasses overlaid on it. Each one "
+                "shows the world in a different light."))
 
     (footnote (f 1)
       (paragraph

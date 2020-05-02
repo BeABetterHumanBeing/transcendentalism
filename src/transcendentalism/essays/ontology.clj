@@ -26,7 +26,7 @@
             "point: it is. The simplest ontology is also the final answer. ")
       (tangent (f 1) "Done") dot)
 
-    ; TODO - drawing of a monad
+    (image "monad_1.png" "An image of a monad")
 
     (footnote (f 1)
       (paragraph
