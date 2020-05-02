@@ -171,19 +171,21 @@
        (get-priority [renderer] 10)
        (render-html [renderer params graph sub]
          (let [authors (read-os graph sub "/segment/author"),
+               old-definition-map (params "definition-map" {}),
                new-params (-> params
                  (assoc* "footnote-map" (calculate-footnote-map graph sub))
-                 (assoc* "definition-map" (calculate-definition-map graph sub)))
+                 (assoc "definition-map" (merge (calculate-definition-map graph sub)
+                                                (params "definition-map" {}))))
                footnote-map (new-params "footnote-map" {}),
                definition-map (new-params "definition-map" {}),
                inline-params (assoc new-params "no-block" true),
-               contents (str (param-aware-render-sub inline-params graph
+               contents (str (render-sub inline-params graph
                                (unique-or-nil graph sub "/segment/contains"))
                              (let [inline (unique-or-nil graph sub "/segment/flow/inline")]
                                (if (nil? inline)
                                    ""
-                                   (param-aware-render-sub inline-params graph inline))))]
-           (maybe-wrap-footnote footnote-map definition-map sub
+                                   (render-sub inline-params graph inline))))]
+           (maybe-wrap-footnote footnote-map old-definition-map sub
              (str/join "\n" [
                (let [anchor (maybe-add-footnote-anchor footnote-map sub),
                      authorized-contents (if (empty? authors)
@@ -201,22 +203,20 @@
                        authorized-contents
                        (reduce-kv
                          (fn [result k v]
-                           (if (= :root v) sub)
-                               (str result
-                                    (param-aware-render-sub new-params graph k))
-                               result)
+                           (if (= (:root v) sub)
+                               (str result (render-sub new-params graph k))
+                               result))
                          "" definition-map)
                        (reduce-kv
                          (fn [result k v]
                            (if (= (:root v) sub)
-                               (str result
-                                    (param-aware-render-sub new-params graph k))
+                               (str result (render-sub new-params graph k))
                                result))
                          "" footnote-map))))
                (let [next-block (unique-or-nil graph sub "/segment/flow/block")]
                  (if (nil? next-block)
                      ""
-                     (param-aware-render-sub new-params graph next-block)))
+                     (render-sub new-params graph next-block)))
                ]))))
        (render-css [renderer]
          (str/join "\n" [

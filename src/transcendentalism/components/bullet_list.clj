@@ -41,12 +41,11 @@
           (div {}
             (if (nil? header-block-or-nil)
                 ""
-                (div {}
-                  (param-aware-render-sub params graph header-block-or-nil)))
+                (div {} (render-sub params graph header-block-or-nil)))
             (apply
               (if (or (nil? is_ordered) (not is_ordered)) ul ol)
               {"class" "bullet_list"}
-              (into [] (map #(li {} (param-aware-render-sub params graph %))
+              (into [] (map #(li {} (render-sub params graph %))
                             point-blocks))))))
       (render-css [renderer]
         (css "" {"class" "bullet_list"}

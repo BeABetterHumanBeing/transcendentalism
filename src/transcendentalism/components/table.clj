@@ -80,8 +80,7 @@
                                     (td {"class" class}
                                         (if (nil? val)
                                             ""
-                                            (param-aware-render-sub
-                                              params graph target)))))
+                                            (render-sub params graph target)))))
                                 (range -1 (inc col-max)))))))
                    (range -1 (inc row-max)))))))
       (render-css [renderer]

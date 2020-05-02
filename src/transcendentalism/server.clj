@@ -50,7 +50,7 @@
       (if (empty? types)
           (page-404 graph sub)
           (page-200
-            (let [html (param-aware-render-sub (:params request) graph sub types)]
+            (let [html (render-sub (:params request) graph sub types)]
               (if ((:params request) "html-only" false)
                   html
                   (str

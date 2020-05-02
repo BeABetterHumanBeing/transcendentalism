@@ -163,10 +163,10 @@
         (conj (read-os graph type "/renderer") default-renderer)
         #{enum-renderer})))
 
-(defn param-aware-render-sub
-  ([graph sub] (param-aware-render-sub {} graph sub))
+(defn render-sub
+  ([graph sub] (render-sub {} graph sub))
   ([params graph sub]
-   (param-aware-render-sub params graph sub (get-types graph sub)))
+   (render-sub params graph sub (get-types graph sub)))
   ([params graph sub types]
    (let [renderers (reduce-all result {}
                                [[type types]

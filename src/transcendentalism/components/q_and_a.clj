@@ -34,9 +34,9 @@
               a-block (unique-or-nil graph sub "/item/q_and_a/answer")]
           (div {"class" "q_and_a"}
             (div {"class" "q_and_a_header"} "Q:")
-            (str "<i>" (param-aware-render-sub params graph q-block) "</i>")
+            (str "<i>" (render-sub params graph q-block) "</i>")
             (div {"class" "q_and_a_header"} "A:")
-            (div {} (param-aware-render-sub params graph a-block)))))
+            (div {} (render-sub params graph a-block)))))
       (render-css [renderer]
         (str/join "\n" [
           (css "div" {"class" "q_and_a"}

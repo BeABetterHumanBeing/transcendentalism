@@ -303,9 +303,8 @@
                           (if (contains? labels :under-construction)
                             (under-construction-splash)
                             (let [content (unique-or-nil graph sub "/essay/contains")]
-                              (param-aware-render-sub
-                                (assoc params "essay" sub)
-                                graph content)))]))]))
+                              (render-sub (assoc params "essay" sub)
+                                          graph content)))]))]))
                 (hr)
                 (div {"id" (seg-id id "footer")}
                   (let [cxns (sort-by-cxn-type (build-cxns graph sub))]
