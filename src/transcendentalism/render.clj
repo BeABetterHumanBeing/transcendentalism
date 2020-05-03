@@ -67,6 +67,12 @@
                   [] (read-os graph sub pred))))))
         [] (read-ps graph sub)))))
 
+(defn render-footnote-idx
+  [ancestry]
+  (if (empty? ancestry)
+    ""
+    (str "[" (str/join "-" ancestry) "]")))
+
 (defprotocol Renderer
   (get-renderer-name [renderer] "Returns the name of the renderer")
   (get-priority [renderer]

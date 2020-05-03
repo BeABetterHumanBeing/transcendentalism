@@ -4,7 +4,6 @@
             [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
             [transcendentalism.encoding :refer :all]
-            [transcendentalism.generate :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.render :refer :all]

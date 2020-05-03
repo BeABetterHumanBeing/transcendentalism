@@ -1,4 +1,5 @@
-(ns transcendentalism.toolbox)
+(ns transcendentalism.toolbox
+  (:require [clojure.java.io :as io]))
 
 (defmacro reduce-all
   "bingings => [inner-binding ...]
@@ -44,3 +45,8 @@
          ret# ~expr]
      (println ~msg "time:" (/ (double (- (. System (nanoTime)) start#)) 1000000000.0) "secs")
      ret#))
+
+(defn clear-directory
+  [dirname]
+  (doseq [file (.listFiles (io/as-file dirname))]
+    (io/delete-file file)))

@@ -3,7 +3,6 @@
             [transcendentalism.color :refer :all]
             [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
-            [transcendentalism.generate :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.js :refer :all]

@@ -14,7 +14,6 @@
             [transcendentalism.essays.politics :refer :all]
             [transcendentalism.essays.religion :refer :all]
             [transcendentalism.flags :refer :all]
-            [transcendentalism.generate :refer :all]
             [transcendentalism.glossary :refer :all]
             [transcendentalism.graph :refer :all]
             [transcendentalism.graph-v3 :as g3]
