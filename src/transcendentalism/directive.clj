@@ -1,32 +1,7 @@
 (ns transcendentalism.directive
-  (:require [clojure.set :as set]
-            [clojure.string :as str]
-            [transcendentalism.essay :refer :all]
+  (:require [transcendentalism.essay :refer :all]
             [transcendentalism.graph :refer :all]
             [transcendentalism.loom :refer :all]))
-
-(def gq-segment-to-item
-  "Returns a graph query that expands from /type/segment to all /type/item that
-   it directly contains through its flows"
-   (q-chain-v1
-     (q-kleene
-       (q-or-v1 (q-pred-v1 "/segment/flow/inline")
-                (q-pred-v1 "/segment/flow/block")))
-     (q-pred-v1 "/segment/contains")))
-
-(def gq-item-to-item
-  "Returns a graph query that expands from /type/item to other /type/items that
-   are nested within them"
-  (q-kleene
-     (q-chain-v1
-       (q-or-v1 (q-pred-v1 "/item/q_and_a/question")
-                (q-pred-v1 "/item/q_and_a/answer")
-                (q-pred-v1 "/item/bullet_list/header")
-                (q-pred-v1 "/item/bullet_list/point"))
-       (q-kleene
-         ; Assumes questions, answers, and points are single-blocked.
-         (q-pred-v1 "/segment/flow/inline"))
-       (q-pred-v1 "/segment/contains"))))
 
 (defn apply-directives
   "Processes collections of triples, applying any directives found therein"
@@ -37,34 +12,6 @@
     (reduce
       (fn [result directive] (directive result))
       triples directives)))
-
-(defn directive-see-also-inline-to-flow
-  "For every /item/inline/see_also, adds an equivalent /essay/flow/see_also"
-  [triples]
-  (let [graph (construct-graph triples),
-        essay-subs (all-nodes graph "/type/essay")]
-    (reduce
-      (fn [result essay-sub]
-        (let [see_alsos (keys
-              (gq-v1
-                graph
-                (q-chain-v1
-                  (q-pred-v1 "/essay/contains")
-                  gq-segment-to-item
-                  gq-item-to-item
-                  ; Because the see_also link may be buried in a tangent...
-                  (q-kleene
-                    (q-chain-v1
-                      (q-pred-v1 "/item/inline/tangent")
-                      gq-segment-to-item
-                      gq-item-to-item))
-                  (q-pred-v1 "/item/inline/see_also"))
-               essay-sub))]
-          (concat result
-            (into []
-              (map #(->Triple essay-sub "/essay/flow/see_also" % {})
-                   see_alsos)))))
-      triples essay-subs)))
 
 (defn directive-label-menus
   "Generates menu essays for labels"

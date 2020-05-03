@@ -24,8 +24,7 @@
             [transcendentalism.toolbox :refer :all]))
 
 (def meta-directives
-  [directive-label-menus
-   directive-see-also-inline-to-flow])
+  [directive-label-menus])
 
 (defn collect-essays
   []

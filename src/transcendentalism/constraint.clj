@@ -26,6 +26,7 @@
     (is-valid-time sub) #{:time}
     :else #{}))
 
+; TODO - rename to remove V3 suffix
 (defprotocol ConstraintV3
   (check-constraint [constraint graph checked-sub]
     "Checks whether checked-sub conforms to the given constraint. Returns

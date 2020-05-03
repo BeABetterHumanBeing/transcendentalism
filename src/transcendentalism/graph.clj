@@ -19,14 +19,6 @@
       (assoc result (:sub triple) (conj (result (:sub triple)) triple)))
     {} triples))
 
-(defn index-by-obj
-  "Indexes a collection of triples by their objects"
-  [triples]
-  (reduce
-    (fn [result triple]
-      (assoc result (:obj triple) (conj (result (:obj triple)) triple)))
-    {} triples))
-
 ; The Graph protocol is the interface through which a graph is accessed.
 (defprotocol GraphV1
   (all-triples [graph] [graph sub] [graph sub pred]
@@ -66,78 +58,3 @@
       (get-time [graph sub]
         (let [value (get-unique graph sub "/event/time")]
           (if (nil? value) nil (to-time value)))))))
-
-; Graph Queries provide regex support for graph traversals. Call your query
-; using gq and using the meta-* versions of the queries if you want your call
-; to be metadata-aware.
-
-(defn q-pred-v1
-  "Query that expands the path along a given pred. Moves tablet data from input
-   sub to output sub, optionally calling a provided fn to update the data."
-  ([pred] (q-pred-v1 (fn [sub data] data) pred))
-  ([f pred]
-   (fn [graph tablet]
-     (if (empty? tablet)
-       {} ; Early return optimization
-       (apply merge
-         (map
-           (fn [sub]
-             (let [prev-data (sub tablet),
-                   triples (all-triples graph sub pred)]
-               (reduce
-                 (fn [result triple]
-                   (let [obj (:obj triple),
-                         new-data (f triple prev-data)]
-                     (assoc result obj new-data)))
-                 {}
-                 triples)))
-           (keys tablet)))))))
-
-(defn q-chain-v1
-  "Query that chains together some number of other queries in sequence"
-  [& queries]
-  (fn [graph tablet]
-    (if (empty? tablet)
-      {} ; Early return optimization
-      (reduce
-        (fn [result query]
-          (query graph result))
-        tablet queries))))
-
-(defn q-or-v1
-  "Query that ORs together other queries, so that any path can be taken"
-  [& queries]
-  (fn [graph tablet]
-    (if (empty? tablet)
-      {} ; Early return optimization
-      (apply merge (map #(% graph tablet) queries)))))
-
-(defn q-kleene
-  "Query that applies the kleene-star to another query"
-  ([query] (q-kleene (fn [sub data i] data) query))
-  ([f query]
-    (fn [graph tablet]
-      (let [process (fn [data i]
-                      (reduce-kv
-                        (fn [result k v]
-                          (assoc result k (f k v i)))
-                       {} data))]
-        (loop [result (process tablet 0),
-               unprocessed result,
-               iteration 1]
-          (if (empty? unprocessed)
-            result
-            (let [next-tablet (process (query graph unprocessed) iteration)]
-              (recur (merge result next-tablet)
-                     (reduce-kv
-                       (fn [result k v]
-                         (if (contains? result k)
-                           result
-                           (assoc result k v)))
-                       {} next-tablet)
-                     (inc iteration)))))))))
-
-(defn gq-v1
-  "Executes a metadata-sensitive graph query"
-  [graph query sub]
-  (query graph {sub {}}))

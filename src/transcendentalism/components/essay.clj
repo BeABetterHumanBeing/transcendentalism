@@ -196,6 +196,34 @@
       (div {"class" "construction-separator"})
       (p {} "Connect with me if you want me to expedite its work"))))
 
+(def segment-to-item-pathable
+  "Returns a pathable that expands from /type/segment to all /type/item that
+   it directly contains through its flows"
+   [(p* #{"/segment/flow/inline"
+          "/segment/flow/block"})
+    "/segment/contains"])
+
+(def item-to-item-pathable
+  "Returns a graph query that expands from /type/item to other /type/items that
+   are nested within them"
+  (p* [#{"/item/q_and_a/question"
+         "/item/q_and_a/answer"
+         "/item/bullet_list/header"
+         ["/item/bullet_list/point" "/"]}
+       (p* ; Assumes questions, answers, and points are single-blocked.
+           "/segment/flow/inline")
+       "/segment/contains"]))
+
+(def essay-to-see-also-pathable
+  ["/essay/contains"
+   segment-to-item-pathable
+   item-to-item-pathable
+   ; Because the see_also link may be buried in a tangent...
+   (p* ["/item/inline/tangent"
+        segment-to-item-pathable
+        item-to-item-pathable])
+   "/item/inline/see_also"])
+
 (defn essay-component
   [graph]
   (build-component graph :essay-type #{}
@@ -209,7 +237,14 @@
               (if (or (contains? homes :monad) (contains? homes nil))
                   [#{} graph]
                   [#{(str sub " /essay/flow/home does not lead to :monad")}
-                   graph]))))
+                   graph])))),
+        (reify ConstraintV3
+          (check-constraint [constraint graph sub]
+            [#{}
+             (reduce
+               (fn [result see-also]
+                 (write-o result sub "/essay/flow/see_also" see-also))
+               graph (read-path graph sub essay-to-see-also-pathable))]))
       ],
       :preds {
         "/essay/title" {
