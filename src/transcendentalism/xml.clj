@@ -2,11 +2,6 @@
   (:require [clojure.string :as str]
             [transcendentalism.flags :refer :all]))
 
-(defn debug
-  "Passes through content if in debugging-mode, otherwise nullifies it"
-  [content]
-  (if (flag :debugging) content ""))
-
 (defn xml-open
   "Creates an open tag with attributes"
   [tagname attrs]

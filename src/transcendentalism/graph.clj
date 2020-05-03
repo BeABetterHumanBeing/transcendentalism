@@ -23,9 +23,6 @@
 (defprotocol GraphV1
   (all-triples [graph] [graph sub] [graph sub pred]
     "Returns a collection of all the triples in the graph [for a given [sub and pred]]")
-  (all-nodes [graph] [graph type]
-    "Returns a collection of all nodes in the graph [with a given type]")
-  (has-type-v1? [graph sub type] "Returns whether the given sub has the given type.")
   (get-unique [graph sub pred]
     "Returns the obj of the unique triple on sub with pred, or nil if none exists")
   (get-time [graph sub]
@@ -44,14 +41,6 @@
           (sub-or-pred graph-data)))
       (all-triples [graph sub pred]
         (filter #(= (:pred %) pred) (all-triples graph sub)))
-      (all-nodes [graph]
-        (keys graph-data))
-      (all-nodes [graph type]
-        (filter #(has-type-v1? graph % type) (all-nodes graph)))
-      (has-type-v1? [graph sub type]
-        (if (contains? graph-data sub)
-          (not (nil? (some #(= (:pred %) type) (sub graph-data))))
-          false))
       (get-unique [graph sub pred]
         (let [triples (all-triples graph sub pred)]
           (if (empty? triples) nil (:obj (first triples)))))

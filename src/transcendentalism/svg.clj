@@ -51,9 +51,18 @@
   (tau [monad sub] "Returns the tau-value of a given subject")
   (color [monad sub] "Returns the color-value of a given subject"))
 
+(defn- get-all-events
+  [graph]
+  (reduce
+    (fn [result triple]
+      (if (and (= (:pred triple) "/type") (= (:obj triple) "/type/event"))
+          (conj result (:sub triple))
+          result))
+    [] (all-triples graph)))
+
 (defn- monadic-canonicalization
   [graph dim k]
-  (let [events (all-nodes graph "/type/event"),
+  (let [events (get-all-events graph "/type/event"),
         r-values (reduce
           (fn [result sub]
             (assoc result sub (t-to-r dim k (get-time graph sub))))
@@ -284,77 +293,3 @@
       (fn [result pair]
         (assoc result (first pair) (second pair)))
       {} pairs)))
-
-(defn- monad-graph
-  "Returns the graph form of the monad"
-  []
-  (let [vertex-sequence [3 6 7 2 4 5 1],
-        vertex-map (seq-pairs vertex-sequence),
-        graph
-    (construct-graph (concat (flatten [
-      (->Triple :monad "/type/event" nil {})
-      (->Triple :monad "/event/time" "past" {})
-      (map #(->Triple :monad "/event/leads_to"
-             (subname "root" (first %) (second %)) {})
-        vertex-map)
-      (map #(interior-triples vertex-map %) vertex-sequence)
-      (map #(->Triple (subname "subject" %) "/type/event" nil {}) vertex-sequence)
-      (map #(->Triple (subname "subject" %) "/event/time" "present" {})
-        vertex-sequence)
-     ])))]
-    graph))
-
-(defn svg-monad
-  "Generates an svg of an artistic styretrix-monad"
-  [width height]
-  ; The monad will only generate a square size.
-  {:pre [(= width height)]}
-  (let [dim width,
-        k 1.2,
-        graph (monad-graph),
-        monad (monadic-canonicalization graph dim k),
-        leads-to-objs (get-objs graph (all-nodes graph) "/event/leads_to")]
-    (svg dim dim
-      (str/join "\n"
-       ["<style>"
-        ".dbg-txt { font: 8px sans-serif; }"
-        "</style>"])
-      (g {}
-        (str/join "\n"
-          (map
-            (fn [triple]
-              (let [sub (:sub triple),
-                    obj (:obj triple)]
-                (if (= sub :monad)
-                  ""
-                  (aesthetic-line obj dim
-                    (r monad sub) (tau monad sub) (r monad obj) (tau monad obj)))))
-            (all-triples graph "/event/leads_to")))
-        (str/join "\n"
-          (map
-            (fn [sub]
-              (aesthetic-circle dim {
-                "fill" (to-css-color (color monad sub)),
-              } sub (leads-to-objs sub) (r monad sub) (tau monad sub)))
-            (all-nodes graph)))
-        (debug
-          (str/join "\n"
-            (map
-              (fn [sub]
-                (let [coords (polar-to-cartesian dim dim (r monad sub) (tau monad sub))]
-                  (text {
-                    "x" (first coords),
-                    "y" (second coords),
-                    "class" "dbg-txt",
-                    } sub)))
-              (all-nodes graph))))
-        ))))
-
-(defn svg-to-image
-  "Writes a given SVG to an image with the given name"
-  [image-name width height svg-fn]
-  (let [filename (str image-name ".svg")]
-    (if (flag :generate-svg)
-      (spit filename ((eval svg-fn) width height))
-      (println "Skipping generating" filename))
-    filename))

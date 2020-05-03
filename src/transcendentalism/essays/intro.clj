@@ -3,17 +3,17 @@
             [transcendentalism.essay :refer :all]
             [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]
-            [transcendentalism.loom :refer :all]
-            [transcendentalism.svg :refer :all]))
+            [transcendentalism.loom :refer :all]))
 
 ; The monad
 ; This essay_segment serves as the default entry point into the graph.
 (defn monad
   []
   (essay :monad "Transcendental Metaphysics"
-    (image
-      (svg-to-image "monad" 800 800 svg-monad)
-      "Animation of the star flower, with changes cascading inwards to a central point")
+    (image "monad.svg"
+           (str "Animation of the star flower, with changes cascading inwards "
+                "to a central point")
+           800 800)
 
     (quote*
       (str/join " "
