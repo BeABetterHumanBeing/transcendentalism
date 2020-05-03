@@ -500,8 +500,9 @@
         "but it's still extremely slow compared to the development of political"
         "institutions."))
 
-    ; TODO - drawing of "standing on the shoulders of giants". For every living
-    ; human today, there are 30 dead ancestors.
+    (image "thirty_to_one.png"
+           (str "Image of a person on top of a pyramid of thirty people. For "
+                "every living human today, there are 30 dead ancestors"))
 
     (file-under :politics)
     (root-menu :conservatism "Conservatism")))
@@ -525,8 +526,9 @@
       (text "Some of society's needs cannot be wholly accounted for by summing"
             "individual responsibility."))
 
-    ; TODO - drawing of a crowd of people with their onverlapping spheres of
-    ; responsibility, and the gaps between them.
+    (image "overlapping_responsibilities.png"
+           (str "Drawing of a crowd of people with their onverlapping spheres "
+                "of responsibility, and gaps between them."))
 
     (numbered-list
       (text "The responses to these are straight-forward:")

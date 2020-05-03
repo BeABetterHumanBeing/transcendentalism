@@ -28,8 +28,7 @@
    :headers {"Content-Type" "text/html"}
    :body (div {"style" "text-align:center;padding-top:100px;"}
            (h1 {"style" "margin:0 auto;"} "404")
-           ; TODO - Change out 404 image to something cute
-           (img {"src" "crown.jpeg"
+           (img {"src" "void.png"
                  "style" "margin:0 auto;width:200px;height:200px;"})
            (div {"style" "margin:0 auto;"}
              (span {} (str "\"" sub "\" was not found in "))
@@ -59,7 +58,9 @@
                     ; Include JQuery from Google CDN.
                     (xml-tag "script" {"src" "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"} "")
                     (xml-tag "script" {"src" "output/script.js"} "")
-                    ; TODO - add a favicon
+                    (xml-open "link" {"rel" "icon",
+                                      "type" "image/png",
+                                      "href" "monad_icon_small.png"})
                     html))))))))
 
 (defn- render-sub-handler

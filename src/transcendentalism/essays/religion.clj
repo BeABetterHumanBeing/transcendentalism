@@ -460,7 +460,7 @@
         "now you know to just keep these odd coincidences in a little pile over"
         "in the corner."))
 
-    ; TODO - drawing of five dice all rolled as sixes.
+    (image "yahtzee.png" "Five dice, all sixes")
 
     (text
       "I sometimes see a \"miracle\" defined as a 1:1,000,000 event. By this"
