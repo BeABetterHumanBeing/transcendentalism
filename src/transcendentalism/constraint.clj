@@ -26,8 +26,7 @@
     (is-valid-time sub) #{:time}
     :else #{}))
 
-; TODO - rename to remove V3 suffix
-(defprotocol ConstraintV3
+(defprotocol Constraint
   (check-constraint [constraint graph checked-sub]
     "Checks whether checked-sub conforms to the given constraint. Returns
      [#{errors} graph]"))
@@ -41,7 +40,7 @@
 
 (defn and-constraint
   [constraints]
-  (reify ConstraintV3
+  (reify Constraint
     (check-constraint [constraint graph sub]
       (reduce
         (fn [result constraint]
@@ -54,7 +53,7 @@
   "Returns a new constraint that results from applying the provided constraint
    to all objs with the given pred"
   [pred pred-constraint]
-  (reify ConstraintV3
+  (reify Constraint
     (check-constraint [constraint graph sub]
       (reduce
         (fn [result obj]
@@ -65,7 +64,7 @@
 (defn range-type-constraint
   [pred range-type]
   (multiply-pred-constraint pred
-    (reify ConstraintV3
+    (reify Constraint
       (check-constraint [constraint graph obj]
         (if (nil? range-type)
           [#{} graph]
@@ -79,7 +78,7 @@
 
 (defn value-type-constraint
   [range-type]
-  (reify ConstraintV3
+  (reify Constraint
     (check-constraint [constraint graph sub]
       (let [val (read-v graph sub)]
         (if (or (nil? range-type)
@@ -93,7 +92,7 @@
 (defn required-pred-constraint
   ([required-pred] (required-pred-constraint required-pred nil))
   ([required-pred default]
-   (reify ConstraintV3
+   (reify Constraint
      (check-constraint [constraint graph sub]
        (let [objs (read-os graph sub required-pred)]
          (if (empty? objs)
@@ -106,7 +105,7 @@
 
 (defn unique-pred-constraint
   [unique-pred]
-  (reify ConstraintV3
+  (reify Constraint
     (check-constraint [constraint graph sub]
       (let [objs (read-os graph sub unique-pred)]
         (if (> (count objs) 1)
@@ -116,7 +115,7 @@
 
 (defn exclusive-pred-constraint
   ([mutually-exclusive-preds]
-   (reify ConstraintV3
+   (reify Constraint
      (check-constraint [constraint graph sub]
        (let [preds (read-ps graph sub),
              offenders (set/intersection preds mutually-exclusive-preds)]
@@ -124,7 +123,7 @@
              [#{(str offenders " on " sub " are mutually exclusive")} graph]
              [#{} graph])))))
   ([excluding-pred excluded-preds]
-   (reify ConstraintV3
+   (reify Constraint
      (check-constraint [constraint graph sub]
        (let [preds (read-ps graph sub)]
          (if (contains? preds excluding-pred)
@@ -137,7 +136,7 @@
 
 (defn abstract-type-constraint
   []
-  (reify ConstraintV3
+  (reify Constraint
     (check-constraint [constraint graph sub]
       (let [types (get-types graph sub),
             has-concrete-type (reduce
@@ -155,7 +154,7 @@
 
 (defn ordered-constraint
   [preds]
-  (reify ConstraintV3
+  (reify Constraint
     (check-constraint [constraint graph sub]
       (reduce
         (fn [result pred]

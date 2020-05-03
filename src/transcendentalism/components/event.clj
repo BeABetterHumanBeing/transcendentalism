@@ -10,7 +10,7 @@
       :description "An event",
       :constraints [
         ; Check that /event/leads_to goes strictly forward in time.
-        (reify ConstraintV3
+        (reify Constraint
           (check-constraint [constraint graph sub]
             (let [t (unique-or-nil graph sub "/event/time"),
                   sub-ts (map #(unique-or-nil graph % "/event/time")

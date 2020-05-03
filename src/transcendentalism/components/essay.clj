@@ -231,14 +231,14 @@
       :description "Nodes that are externally link-able",
       :constraints [
         ; Check that /essay/flow/home eventually leads to :monad.
-        (reify ConstraintV3
+        (reify Constraint
           (check-constraint [constraint graph sub]
             (let [homes (read-path graph sub (p* ["/essay/flow/home" "/"]))]
               (if (or (contains? homes :monad) (contains? homes nil))
                   [#{} graph]
                   [#{(str sub " /essay/flow/home does not lead to :monad")}
                    graph])))),
-        (reify ConstraintV3
+        (reify Constraint
           (check-constraint [constraint graph sub]
             [#{}
              (reduce
