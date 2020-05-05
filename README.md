@@ -11,7 +11,7 @@ OR
 lein uberjar
 (to create a standalone JAR file suitable for deployment)
 
-Allowed integer command flags: `server` (to start at a port other than 8000).
+Allowed integer command flags: `server` (to start at a port other than 80).
 
 ## License
 

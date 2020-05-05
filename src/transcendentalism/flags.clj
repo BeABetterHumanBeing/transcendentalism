@@ -18,8 +18,8 @@
 
 (defonce flags
   (atom {
-    ; Which port to start a server on. Does not start a server if 0.
-    :server 8000,
+    ; Which port to start a server on.
+    :server 5000,
   }))
 
 (defn set-flags

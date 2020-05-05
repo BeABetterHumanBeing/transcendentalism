@@ -41,12 +41,14 @@
   [graph]
   (clear-directory "resources/output")
   (let [all-renderers (get-all-renderers graph)]
-    (spit "resources/output/styles.css"
-          (apply str/join "\n"
-                 [(filter #(not (empty? %)) (map render-css all-renderers))]))
-    (spit "resources/output/script.js"
-          (apply str/join "\n"
-                 [(filter #(not (empty? %)) (map render-js all-renderers))]))))
+    (let [css-filename "resources/output/styles.css"]
+      (io/make-parents css-filename)
+      (spit css-filename
+            (apply str/join "\n"
+                   [(filter #(not (empty? %)) (map render-css all-renderers))]))
+      (spit "resources/output/script.js"
+            (apply str/join "\n"
+                   [(filter #(not (empty? %)) (map render-js all-renderers))])))))
 
 (defn -main
   "Validates the website's graph, and generates its files"
