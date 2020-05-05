@@ -8,5 +8,6 @@
                  [clojure.java-time "0.3.2"]
                  [ring/ring-core "1.8.0"]
                  [ring/ring-jetty-adapter "1.8.0"]]
-  :main ^:skip-aot transcendentalism.core
+  :main transcendentalism.core
+  :aot [transcendentalism.core]
   :repl-options {:init-ns transcendentalism.core})

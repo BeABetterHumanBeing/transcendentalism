@@ -20,7 +20,8 @@
             [transcendentalism.render :refer :all]
             [transcendentalism.schema :refer :all]
             [transcendentalism.server :refer :all]
-            [transcendentalism.toolbox :refer :all]))
+            [transcendentalism.toolbox :refer :all])
+  (:gen-class))
 
 (def meta-directives
   [directive-label-menus])

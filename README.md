@@ -6,6 +6,11 @@ A Clojure library that generates the Transcendental Metaphysics website.
 
 lein run
 
+OR
+
+lein uberjar
+(to create a standalone JAR file suitable for deployment)
+
 Allowed integer command flags: `server` (to start at a port other than 8000).
 
 ## License
