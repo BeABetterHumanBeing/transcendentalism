@@ -12,6 +12,8 @@ lein uberjar
 (to create a standalone JAR file suitable for deployment)
 
 Allowed integer command flags: `server` (to start at a port other than 80).
+If `sync` flag is set, will sync static resources (i.e. images) to the cloud
+instead of starting a server.
 
 ## License
 

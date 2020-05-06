@@ -1,6 +1,7 @@
 (ns transcendentalism.core
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [transcendentalism.amazon :refer :all]
             [transcendentalism.directive :refer :all]
             [transcendentalism.essay :refer :all]
             [transcendentalism.essays.consciousness :refer :all]
@@ -54,11 +55,14 @@
   "Validates the website's graph, and generates its files"
   [& args]
   (apply set-flags args)
-  (let [graph-v1 (time-msg "Construct Graph" (collect-essays)),
-        graph-v3 (time-msg "V1->V3" (graph-to-v3 graph-v1)),
-        [v3-errors graph-final-v3] (time-msg "ValidateV3" (validate-graph-v3 graph-v3))]
-    (if (empty? v3-errors)
-      (let [flattened-graph (g3/flatten-graph graph-final-v3)]
-        (do (prep-output flattened-graph)
-            (launch-server flattened-graph)))
-      (println "Graph fails validation!"))))
+  (if (flag :sync)
+      (sync-resources)
+      (let [graph-v1 (time-msg "Construct Graph" (collect-essays)),
+            graph-v3 (time-msg "V1->V3" (graph-to-v3 graph-v1)),
+            [v3-errors graph-final-v3] (time-msg "ValidateV3"
+                                                 (validate-graph-v3 graph-v3))]
+        (if (empty? v3-errors)
+          (let [flattened-graph (g3/flatten-graph graph-final-v3)]
+            (do (prep-output flattened-graph)
+                (launch-server flattened-graph)))
+          (println "Graph fails validation!")))))

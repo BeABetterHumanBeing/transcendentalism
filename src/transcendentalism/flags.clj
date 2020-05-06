@@ -12,7 +12,9 @@
                                     (filter #(not (empty? %))
                                             (str/split (first arg-parts)
                                                        #"(-)+")))),
-            arg-value (read-string (second arg-parts))]
+            arg-value (if (> (count arg-parts) 1)
+                          (read-string (second arg-parts))
+                          true)]
         (assoc result arg-keyword arg-value)))
     {} args))
 
@@ -20,6 +22,8 @@
   (atom {
     ; Which port to start a server on.
     :server 5000,
+    ; Whether the server is running on AWS.
+    :aws false,
   }))
 
 (defn set-flags
