@@ -12,7 +12,12 @@
                                                    com.amazonaws/amazon-kinesis-client
                                                    com.fasterxml.jackson.core/jackson-databind]]
                  [com.amazonaws/aws-java-sdk-core "1.11.775"]
-                 [com.amazonaws/aws-java-sdk-s3 "1.11.775"]]
+                 [com.amazonaws/aws-java-sdk-s3 "1.11.775"]
+                 [environ "1.2.0"]]
+  :plugins [[lein-environ "1.2.0"]]
   :main transcendentalism.core
   :aot [transcendentalism.core]
+  :env {:server 80}
+  :profiles {:uberjar {:env {:aws "true",
+                             :server 5000}}}
   :repl-options {:init-ns transcendentalism.core})

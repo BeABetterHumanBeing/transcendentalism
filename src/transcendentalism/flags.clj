@@ -1,5 +1,6 @@
 (ns transcendentalism.flags
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [environ.core :refer [env]]))
 
 (defn parse-flags
   "Parses command line flags into a hashmap"
@@ -18,13 +19,7 @@
         (assoc result arg-keyword arg-value)))
     {} args))
 
-(defonce flags
-  (atom {
-    ; Which port to start a server on.
-    :server 5000,
-    ; Whether the server is running on AWS.
-    :aws false,
-  }))
+(defonce flags (atom {}))
 
 (defn set-flags
   [& args]
@@ -33,4 +28,10 @@
 (defn flag
   "Returns the flag value, or nil, if no such flag exists"
   [name]
-  (@flags name nil))
+  (let [flag-val (@flags name nil)]
+    (if (nil? flag-val)
+        (let [env-val (env name)]
+          (if (nil? env-val)
+              nil
+              (read-string (env name))))
+        flag-val)))
