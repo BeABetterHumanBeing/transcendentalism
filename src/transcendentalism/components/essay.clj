@@ -253,6 +253,11 @@
           :required true,
           :unique true,
         },
+        "/essay/subtitle" {
+          :description "The text beneath the title",
+          :range-type :string,
+          :unique true,
+        },
         "/essay/flow/next" {
           :description "Relation to the next essay",
           :range-type :essay-type,
@@ -331,6 +336,10 @@
                         (if (contains? labels :invisible)
                             (str "[" title "]")
                             title)))
+                    (let [subtitle (unique-or-nil graph sub "/essay/subtitle")]
+                      (if (nil? subtitle)
+                          ""
+                          (h1 {"class" "subheader"} subtitle)))
                     (if (contains? labels :invisible)
                         ""
                         (str/join "\n" [
@@ -361,6 +370,11 @@
               (padding "50px" "0" "0" "0")))
           (css "h1" {"class" "header"}
             (text-align "center"))
+          (css "h1" {"class" "subheader"}
+            (text-align "center")
+            (font-style "italic")
+            (color (to-css-color gray))
+            (font-size "1.5em"))
           (css "h2" {"class" "header"}
             (font-size "large")
             (display "inline"))

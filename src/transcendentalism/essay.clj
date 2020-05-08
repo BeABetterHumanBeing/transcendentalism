@@ -58,13 +58,16 @@
        (major-key [loom] (prev-major-key key-gen))
        (minor-key [loom] (prev-minor-key key-gen))
        (knot-essay [loom sub title fns]
-         (doall (map #(% loom)
-           (reduce
-             (fn [result f]
-               (if (contains? (meta f) :no-block)
-                 (conj result f)
-                 (concat result [push-block f])))
-             [(first fns)] (rest fns))))
+         (let [block-no-block (group-by #(contains? (meta %) :no-block) fns),
+               blocks (block-no-block false []),
+               non-blocks (block-no-block true [])]
+           (doall (map #(% loom)
+                    (into non-blocks
+                          (when (not (empty? blocks))
+                            (reduce
+                              (fn [result f]
+                                (into result [push-block f]))
+                              [(first blocks)] (rest blocks)))))))
          (add-triples loom [
            (->Triple sub "/type/essay" nil {})
            (->Triple sub "/essay/title" title {})]))
@@ -294,7 +297,10 @@
        (knot-under-construction [loom]
          (knot-text loom ["TODO"])
          (add-triples loom
-           (->Triple essay-sub "/essay/label" :under-construction {})))))))
+           (->Triple essay-sub "/essay/label" :under-construction {})))
+       (knot-sub-title [loom sub-title]
+         (add-triples loom
+           (->Triple essay-sub "/essay/subtitle" sub-title {})))))))
 
 (defn f
   "Returns a virtual sub that produces footnote names"
@@ -446,3 +452,7 @@
 (defn under-construction
   []
   (fn [t] (knot-under-construction t)))
+
+(defn subtitle
+  [title]
+  ^{:no-block true} (fn [t] (knot-sub-title t title)))

@@ -175,8 +175,8 @@
 (defn jigsaw-puzzle
   []
   (essay :jigsaw-puzzle "The Jigsaw Puzzle"
-    ; TODO - Add sub-titles.
-    ; (aka "Katamai Damacy of Knowledge")
+    (subtitle "Katamari Damacy of Knowledge")
+
     (text
       "I loved learning as a child. I was the kind of kid who, at 6:30 am on a"
       "Saturday morning, would sneak down into the living room, pull the atlas"
@@ -204,8 +204,6 @@
         "trivial, and start being meaningful. Once you've got enough of it, you"
         "realize that it all fits together into a unified whole, and the more"
         "of it you pick up, the easier it is to pick up still more."))
-
-    ; TODO - image of a giant ball of accumulated knowledge
 
     (text
       "After a long enough time of growing my personal katamari ball of"

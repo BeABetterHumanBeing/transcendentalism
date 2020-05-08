@@ -42,7 +42,8 @@
     "Takes some HTML, and passes it straight-through, effectively by-passing the
      schema layer. This should only be used for bespoke content.")
   (knot-definition [loom word part-of-speech definitions])
-  (knot-under-construction [loom] "Marks an essay as being under construction"))
+  (knot-under-construction [loom] "Marks an essay as being under construction")
+  (knot-sub-title [loom sub-title] "Adds a sub-title to an essay"))
 
 (defn sub-suffix
   [sub suffix]
