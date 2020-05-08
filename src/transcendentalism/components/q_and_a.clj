@@ -37,7 +37,7 @@
             (str "<i>" (render-sub params graph q-block) "</i>")
             (div {"class" "q_and_a_header"} "A:")
             (div {} (render-sub params graph a-block)))))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (str/join "\n" [
           (css "div" {"class" "q_and_a"}
             (display "grid")

@@ -79,7 +79,7 @@
     "Returns the priority of this renderer. If no renderer is explicitly called
      for, the highest-priority wins.")
   (render-html [renderer params graph sub] "Produces HTML rendering the given sub")
-  (render-css [renderer] "Produces CSS required by the HTML")
+  (render-css [renderer is-mobile] "Produces CSS required by the HTML")
   (render-js [renderer] "Produces JS required by the HTML"))
 
 (def fn-renderer
@@ -87,7 +87,7 @@
     (get-renderer-name [renderer] "fn")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-fn sub))
-    (render-css [renderer] "")
+    (render-css [renderer is-mobile] "")
     (render-js [renderer] "")))
 
 (def bool-renderer
@@ -95,7 +95,7 @@
     (get-renderer-name [renderer] "bool")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-bool sub))
-    (render-css [renderer] "")
+    (render-css [renderer is-mobile] "")
     (render-js [renderer] "")))
 
 (def string-renderer
@@ -103,7 +103,7 @@
     (get-renderer-name [renderer] "string")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-string sub))
-    (render-css [renderer] "")
+    (render-css [renderer is-mobile] "")
     (render-js [renderer] "")))
 
 (def number-renderer
@@ -111,7 +111,7 @@
     (get-renderer-name [renderer] "number")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-number))
-    (render-css [renderer] "")
+    (render-css [renderer is-mobile] "")
     (render-js [renderer] "")))
 
 (def time-renderer
@@ -119,7 +119,7 @@
     (get-renderer-name [renderer] "time")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-time sub))
-    (render-css [renderer] "")
+    (render-css [renderer is-mobile] "")
     (render-js [renderer] "")))
 
 (def enum-renderer
@@ -127,7 +127,7 @@
     (get-renderer-name [renderer] "enum")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-enum sub))
-    (render-css [renderer] "")
+    (render-css [renderer is-mobile] "")
     (render-js [renderer] "")))
 
 (def type-renderer
@@ -135,7 +135,7 @@
     (get-renderer-name [renderer] "type")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-default graph sub))
-    (render-css [renderer] "")
+    (render-css [renderer is-mobile] "")
     (render-js [renderer] "")))
 
 (defn- invalid-renderer
@@ -145,7 +145,7 @@
     (get-priority [renderer] 0)
     (render-html [renderer params graph sub]
       (str sub " cannot be rendered as " name))
-    (render-css [renderer] "")
+    (render-css [renderer is-mobile] "")
     (render-js [renderer] "")))
 
 (def default-renderer
@@ -153,7 +153,7 @@
     (get-renderer-name [renderer] "default")
     (get-priority [renderer] 1)
     (render-html [renderer params graph sub] (render-default graph sub))
-    (render-css [renderer] "")
+    (render-css [renderer is-mobile] "")
     (render-js [renderer] "")))
 
 (defn- get-renderers

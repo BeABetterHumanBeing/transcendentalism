@@ -28,7 +28,7 @@
           (str/join "\n"
             (map #(p {"class" "poem-line"} (read-v graph %))
                  (get-ordered-objs graph sub "/item/poem/line")))))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (str/join "\n" [
           (css "div" {"class" "poem"}
             (text-align "center"))

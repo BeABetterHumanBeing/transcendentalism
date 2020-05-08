@@ -42,7 +42,7 @@
               "/"
               (a {"href" (str "mailto:" email-address),
                   "target" "_top"} "Mail")))))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (str/join "\n" [
           (css "div" {"class" "contact-centered"}
             (width "150px")

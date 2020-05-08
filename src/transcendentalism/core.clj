@@ -40,14 +40,18 @@
   "Collects all CSS and JS from the graph's renderers, and puts them in
    styles.css and script.js respectively"
   [graph]
-  (clear-directory "resources/output")
-  (let [all-renderers (get-all-renderers graph)]
-    (let [css-filename "resources/output/styles.css"]
-      (io/make-parents css-filename)
-      (spit css-filename
-            (apply str/join "\n"
-                   [(filter #(not (empty? %)) (map render-css all-renderers))]))
-      (spit "resources/output/script.js"
+  (let [dir "resources/output"]
+    (clear-directory dir)
+    (let [all-renderers (get-all-renderers graph),
+          collect-css (fn [is-mobile]
+                        (apply str/join "\n"
+                          [(filter #(not (empty? %))
+                                   (map #(render-css % is-mobile)
+                                        all-renderers))]))]
+      (io/make-parents (str dir "/tmp"))
+      (spit (str dir "/styles.css") (collect-css false))
+      (spit (str dir "/mobile_styles.css") (collect-css true))
+      (spit (str dir "/script.js")
             (apply str/join "\n"
                    [(filter #(not (empty? %)) (map render-js all-renderers))]))
       (when (flag :aws)

@@ -151,7 +151,7 @@
       (get-priority [renderer] 10)
       (render-html [renderer params graph sub]
         (unique-or-nil graph sub "/item/raw_html/contains"))
-      (render-css [renderer] "")
+      (render-css [renderer is-mobile] "")
       (render-js [renderer] ""))))
 
 (def component-graph

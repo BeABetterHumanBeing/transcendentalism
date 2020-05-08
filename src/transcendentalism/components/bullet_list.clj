@@ -47,7 +47,7 @@
               {"class" "bullet_list"}
               (into [] (map #(li {} (render-sub params graph %))
                             point-blocks))))))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (css "" {"class" "bullet_list"}
           (margin-block-start "5px")
           (margin-block-end "5px")))

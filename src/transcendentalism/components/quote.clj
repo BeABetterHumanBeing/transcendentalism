@@ -35,7 +35,7 @@
           (div {"class" "quote"}
             (p {} (str "\"" quote-text "\""))
             (p {"class" "author"} (str "-" author)))))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (str/join "\n" [
           (css "div" {"class" "quote"}
             (padding "0px" "75px")

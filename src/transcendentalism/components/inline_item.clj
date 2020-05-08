@@ -97,7 +97,7 @@
                                (js-str (:id (footnote-map tangent))))}
               (str text " "
                 (render-footnote-idx (:ancestry (footnote-map tangent))))))))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (str/join "\n" [
           (css "span" {"class" "def-tangent"}
             (color (to-css-color red))

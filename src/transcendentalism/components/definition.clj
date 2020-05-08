@@ -50,7 +50,7 @@
             (apply ul {"class" "bullet_list"}
               (str/join "\n"
                 (map #(li {} (read-v graph %)) definitions)))))))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (css "div" {"class" "definition"}
           (border-color (to-css-color red))
           (border-width "1px")

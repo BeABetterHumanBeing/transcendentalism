@@ -347,7 +347,7 @@
                 (div {"id" (seg-id id "buffer"),
                       "class" "buffer"})))
             (maybe-load-homes params graph sub))))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (str/join "\n" [
           (media "min-width: 1000px"
             (css "div" {"class" "essay"}
@@ -372,8 +372,9 @@
             (background-size "150px" "150px"))
           (css "button" {"class" "link_segment"}
             (border "none")
-            (font-size "medium")
-            (margin "3px"))
+            (font-size (if is-mobile "2em" "1em"))
+            (margin "3px")
+            (background-color (to-css-color white)))
           (css "button" {"class" "up"}
             (color (to-css-color purple)))
           (css "button" {"class" "down"}

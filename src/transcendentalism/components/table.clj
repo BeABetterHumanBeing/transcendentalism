@@ -83,7 +83,7 @@
                                             (render-sub params graph target)))))
                                 (range -1 (inc col-max)))))))
                    (range -1 (inc row-max)))))))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (str/join "\n" [
           (css "table" {"class" "t"}
             (border-collapse "collapse")

@@ -52,7 +52,7 @@
                              (if (nil? image-height)
                                  ""
                                  (str "height:" image-height "px")))})))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (css "img" {}
           (margin "0" "auto")
           (display "block")))

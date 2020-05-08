@@ -25,7 +25,7 @@
       (render-html [renderer params graph sub]
         (div {"class" "emoji"}
           (unique-or-nil graph sub "/item/big_emoji/emoji")))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (css "div" {"class" "emoji"}
           (font-size "100px")
           (text-align "center")))

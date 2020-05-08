@@ -217,7 +217,7 @@
                      ""
                      (render-sub new-params graph next-block)))
                ]))))
-       (render-css [renderer]
+       (render-css [renderer is-mobile]
          (str/join "\n" [
            (css "div" {"class" "block"}
              (padding "10px" "25px"))

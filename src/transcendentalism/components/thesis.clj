@@ -26,7 +26,7 @@
       (render-html [renderer params graph sub]
         (div {"class" "thesis"}
           (unique-or-nil graph sub "/item/thesis/contains")))
-      (render-css [renderer]
+      (render-css [renderer is-mobile]
         (css "div" {"class" "thesis"}
           (border-style "solid")
           (border-width "2px")
