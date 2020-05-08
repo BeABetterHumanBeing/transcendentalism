@@ -2,8 +2,7 @@
   (:require [amazonica.aws.s3 :as s3]
             [amazonica.aws.s3transfer :as s3transfer]
             [clojure.java.io :as io]
-            [clojure.set :as set]
-            [environ.core :refer [env]]))
+            [clojure.set :as set]))
 
 (def bucket "transcendental-metaphysics-resources")
 
@@ -16,11 +15,15 @@
             (conj result name))))
     #{} (.listFiles dir)))
 
-(defn sync-resources
+(defn- get-keys-in-cloud
+  []
+  (let [objs (s3/list-objects-v2 {:bucket-name bucket})]
+    (into #{} (map :key (:object-summaries objs)))))
+
+(defn sync-resources-up
   "Syncs the contents of resources/ to the cloud"
   []
-  (let [objs (s3/list-objects-v2 {:bucket-name bucket}),
-        old-resources (into #{} (map :key (:object-summaries objs))),
+  (let [old-resources (get-keys-in-cloud),
         new-resources (get-filenames (io/file "resources")),
         to-delete (set/difference old-resources new-resources),
         to-add (set/difference new-resources old-resources)]
@@ -36,3 +39,17 @@
                             :key filename
                             :file (io/file (str "resources/" filename))))
            to-add))))
+
+(defn sync-resources-down
+  "Syncs the contents of the cloud to resources/"
+  []
+  (let [resources (get-keys-in-cloud),
+        dirname "resources"]
+    (io/make-parents (str dirname "/tmp"))
+    (doall
+      (map (fn [key]
+             (let [raw-stream (s3/get-object bucket key)]
+               (println "Downloading" key)
+               (io/copy (:object-content raw-stream) (io/file (str dirname "/" key)))
+               (. (:object-content raw-stream) close)))
+           resources))))

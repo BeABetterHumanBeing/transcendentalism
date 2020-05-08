@@ -49,14 +49,16 @@
                    [(filter #(not (empty? %)) (map render-css all-renderers))]))
       (spit "resources/output/script.js"
             (apply str/join "\n"
-                   [(filter #(not (empty? %)) (map render-js all-renderers))])))))
+                   [(filter #(not (empty? %)) (map render-js all-renderers))]))
+      (when (flag :aws)
+        (time-msg "Downloading Resources" (sync-resources-down))))))
 
 (defn -main
   "Validates the website's graph, and generates its files"
   [& args]
   (apply set-flags args)
   (if (flag :sync)
-      (time-msg "Syncing" (sync-resources))
+      (time-msg "Syncing" (sync-resources-up))
       (let [graph-v1 (time-msg "Construct Graph" (collect-essays)),
             graph-v3 (time-msg "V1->V3" (graph-to-v3 graph-v1)),
             [v3-errors graph-final-v3] (time-msg "ValidateV3"

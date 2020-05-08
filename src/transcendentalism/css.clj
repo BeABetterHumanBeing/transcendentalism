@@ -1,8 +1,9 @@
 (ns transcendentalism.css
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [transcendentalism.color :refer :all]
+            [transcendentalism.xml :refer :all]))
 
-(use 'transcendentalism.color
-     'transcendentalism.xml)
+; TODO - check out making a dark mode.
 
 (defn css
   [tagname attrs & contents]
