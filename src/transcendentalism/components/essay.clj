@@ -224,6 +224,54 @@
         item-to-item-pathable])
    "/item/inline/see_also"])
 
+(defn render-essay-html
+  [params graph sub]
+  (let [id (name sub)]
+    (str
+      (maybe-add-home-div sub)
+      (div {"id" id,
+            "class" "essay"}
+        (div {} "") ; Empty div occupies first cell in grid.
+        (div {}
+          (let [labels (read-os graph sub "/essay/label")]
+            (str/join "\n" [
+              (let [title (unique-or-nil graph sub "/essay/title")]
+                (h1 {"class" "header"}
+                  (if (contains? labels :invisible)
+                      (str "[" title "]")
+                      title)))
+              (let [subtitle (unique-or-nil graph sub "/essay/subtitle")]
+                (if (nil? subtitle)
+                    ""
+                    (h1 {"class" "subheader"} subtitle)))
+              (if (contains? labels :invisible)
+                  ""
+                  (str/join "\n" [
+                    (hr)
+                    (if (contains? labels :under-construction)
+                      (under-construction-splash)
+                      (let [content (unique-or-nil graph sub "/essay/contains")]
+                        (render-sub (assoc params "essay" sub)
+                                    graph content)))]))]))
+          (hr)
+          (div {"id" (seg-id id "footer")}
+            (let [cxns (sort-by-cxn-type (build-cxns graph sub))]
+              (str/join " " (map #(generate-link sub %) cxns))))
+          (div {"id" (seg-id id "buffer"),
+                "class" "buffer"})))
+      (maybe-load-homes params graph sub))))
+
+; Because essay-rendering composes the bulk of the work the website does, and
+; because essays cannot change while the server is running, we cache the results
+; with a memoize call.
+;
+; At the time when this was put into place, rendering the average essay took
+; 0.05 secs, and :empirical-science-example (a corner case with >1000 subs) took
+; an average of 2.8 secs. Subsequent memoized calls took an average of 3.3E-5
+; secs (across the board), yielding a 1500x speedup on the average essay, and
+; 85000x speedup on :empirical-science-example.
+(def memoized-render-essay-html (memoize render-essay-html))
+
 (defn essay-component
   [graph]
   (build-component graph :essay-type #{}
@@ -322,40 +370,7 @@
       (get-renderer-name [renderer] "essay")
       (get-priority [renderer] 10)
       (render-html [renderer params graph sub]
-        (let [id (name sub)]
-          (str
-            (maybe-add-home-div sub)
-            (div {"id" id,
-                  "class" "essay"}
-              (div {} "") ; Empty div occupies first cell in grid.
-              (div {}
-                (let [labels (read-os graph sub "/essay/label")]
-                  (str/join "\n" [
-                    (let [title (unique-or-nil graph sub "/essay/title")]
-                      (h1 {"class" "header"}
-                        (if (contains? labels :invisible)
-                            (str "[" title "]")
-                            title)))
-                    (let [subtitle (unique-or-nil graph sub "/essay/subtitle")]
-                      (if (nil? subtitle)
-                          ""
-                          (h1 {"class" "subheader"} subtitle)))
-                    (if (contains? labels :invisible)
-                        ""
-                        (str/join "\n" [
-                          (hr)
-                          (if (contains? labels :under-construction)
-                            (under-construction-splash)
-                            (let [content (unique-or-nil graph sub "/essay/contains")]
-                              (render-sub (assoc params "essay" sub)
-                                          graph content)))]))]))
-                (hr)
-                (div {"id" (seg-id id "footer")}
-                  (let [cxns (sort-by-cxn-type (build-cxns graph sub))]
-                    (str/join " " (map #(generate-link sub %) cxns))))
-                (div {"id" (seg-id id "buffer"),
-                      "class" "buffer"})))
-            (maybe-load-homes params graph sub))))
+        (memoized-render-essay-html params graph sub))
       (render-css [renderer is-mobile]
         (str/join "\n" [
           (media "min-width: 1000px"

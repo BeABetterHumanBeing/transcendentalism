@@ -1,7 +1,6 @@
 (ns transcendentalism.server
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
-            ; [java.util.regex :refer :all]
             [ring.adapter.jetty :as ring]
             [ring.middleware.content-type :refer :all]
             [ring.middleware.file :refer :all]
@@ -97,7 +96,6 @@
                     ; Include JQuery from Google CDN.
                     (xml-tag "script" {"src" "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"} "")
                     (xml-tag "script" {"src" "output/script.js"} "")
-                    ; TODO - favicon is broken in AWS
                     (xml-open "link" {"rel" "icon",
                                       "type" "image/png",
                                       "href" "monad_icon_small.png"})
