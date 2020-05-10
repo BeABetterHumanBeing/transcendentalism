@@ -12,6 +12,12 @@
 (defn glossary-sub [word] (sub-suffix :def word))
 
 (def glossary {
+  "Alchemical Ideology" {
+    :pos :noun,
+    :defs [
+      (adef "The distillation of the world into its essential characteristics, "
+            "and its reconstruction through their combination.")],
+  },
   "Cosmology" {
     :pos :noun,
     :defs [
@@ -22,6 +28,12 @@
     :defs [
       (adef "A person who knows more and more about less and less, until they"
             "know absolutely everything about nothing.")],
+  },
+  "Ideological Scaffolding" {
+    :pos :noun,
+    :defs [
+      (adef "The idealized schematic organization of the world into a consistent"
+            "and cohesive whole.")],
   },
   "Interstitial" {
     :pos :adjective,
@@ -63,6 +75,13 @@
     :pos :adjective,
     :defs [
       (adef "Existing as a property of an observer in relation to some object.")],
+  },
+  "Utilitarianism" {
+    :pos :noun,
+    :defs [
+      (adef "The belief that emotions that feel good (like pleasure, joy, and"
+            "excitement) are good, and that emotions that feel bad (like"
+            "sadness, pain, and suffering) are bad.")],
   },
   })
 

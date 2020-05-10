@@ -1,5 +1,6 @@
 (ns transcendentalism.essays.epistemology
   (:require [transcendentalism.essay :refer :all]
+            [transcendentalism.glossary :refer :all]
             [transcendentalism.html :refer :all]))
 
 ; Epistemology
@@ -108,10 +109,186 @@
     (image "tree_of_knowledge_1.png" "An image of a tree")
 
     (root-menu :epistemology "Epistemology")
-    (file-under :metaphysics)
-  ))
+    (file-under :metaphysics)))
+
+(defn alchemical-ideology
+  []
+  (essay :alchemical-ideology "Alchemical Ideology"
+    (block-definition "Alchemical Ideology")
+    (text
+      "Each and every single one of us wanders through our lives, taking in the"
+      "richness of the world in all its experiences, all its perceptions. As we"
+      "go, we make sense of it in part by collapsing it, teasing out of the"
+      "whole the patterns and rhythms that make up its very roots. The entirety,"
+      "in all its glorious complexity, is reduced and refined to simple rules"
+      "and theories. I like to think of the process as a sort of \"distillation\","
+      "since it turns a great mixture into its purified essences through the"
+      "process of subtraction. The whole is constrained and confined; aspects"
+      "are separated and drawn off; messy impurities are selectively filtered"
+      "out; distracting noise is cancelled and removed. The result is an idea:"
+      "a single insight through which so much of the whole makes sense.")
+
+    (text
+      "From these basic ideas, ideologies are formed through selective mixing"
+      "and re-combination, as ideas that have great chemistry with each other are"
+      "carefully put together to yield a clear and cohesive image of the whole."
+      "The end result resembles that from which it originated, but with a"
+      "conciseness that makes it easier to grasp, easier to understand and to"
+      "talk about, and ultimately easier to work with.")
+
+    (paragraph
+      (text
+        "In this perspective, each and every single one of us is an alchemist."
+        "We all are constantly going through the process of breaking down the"
+        "world into its essences, and using these essences to better understand"
+        "the whole. While everyone wanders through the same world, everyone"
+        "wanders on their own path, and for this reason, the result of my"
+        "distillation may be very different from yours. Some of the more common"
+        "experiences yield ")
+      (tangent (f 0) "more common ideologies")
+      (text ", whereas uncommon experiences yield ")
+      (tangent (f 1) "uncommon ideologies") dot)
+
+    (footnote (f 0)
+      (paragraph
+        (text "For example, ") (inline-definition "Utilitarianism" "utilitarianism")
+        (text " is a very common ideology, because its constituent"
+              "experiences (pleasure and pain) are very common experiences.")))
+    (footnote (f 1)
+      (paragraph
+        (text "In contrast, ") (inline-definition "Solipsism" "solipsism")
+        (text " is a very uncommon ideology, because its constituent experience"
+              "(disconnect from all others) is a very uncommon experience.")))
+
+    ; TODO - image of distilling the world, then reconstructing it
+
+    (text
+      "In the alchemical perspective of ideology, ideological essences are"
+      "understood to not exist to the exclusion of each other. Instead, they are"
+      "more like Pok&eacute;mon: the master alchemist is the one who has collected"
+      "them all. All ideas start from the same unified whole; what separates"
+      "them is not their origin, but the process through which the whole was"
+      "selectively filtered and discarded to arrive at the end result. Each"
+      "procedure yields its own end, and while not all essences are equally pure"
+      "and useful, the existence of one procedure by no means eliminates the"
+      "existence of other procedures.")
+
+    (text
+      "One way to becoming a master alchemist is to have as many experiences as"
+      "possible. Those who have traveled and traveled widely tend to have more"
+      "well-rounded collections of ideas.")
+
+    (text
+      "Another way to become a master alchemist is to try as many combinations"
+      "as possible. Those who have spent a long time reflecting on what they"
+      "know, and who have followed all their ideas to their logical conclusions"
+      "tend to have more intricate and accurate ideologies.")
+
+    (text
+      "In any case, an aspiring master alchemist never tries to close themselves"
+      "off to new ideas, never ceases to open their eyes and ears to new"
+      "perceptions, and is always willing to consider new procedures and"
+      "combinations.")
+
+    ; TODO - image of the bizarre bazaar, where ideologies are being openly
+    ; traded
+
+    (bullet-list
+      (text
+        "In the alchemical perspective, ideological diversity is a sort of"
+        "bizarre bazaar, a place where recipes and experiences are shared. It is"
+        "truly the most worderous of marketplaces, the market to end all markets:")
+      (text "The air reverberates with every chirp and twitter, all hoots and"
+            "howls, and all manner of chanting and singing.")
+      (text "The light shines down on all the colors of the rainbow, patterns of"
+            "the most mesmerizing and ecstatic variety draping over every surface.")
+      (text "Here the tongue can taste all varieties of spices, both near and"
+            "far, and the nose delights to the smell of every aroma, is tickled"
+            "by every perfume, and is assaulted by every pepper."))
+
+    (text
+      "Note that an alchemist's collection is a " (i "personal") " collection."
+      "What essences I have gained are not the same essences that you have gained,"
+      "whatever their (perhaps striking) similarities. For this reason, essences"
+      "in themselves cannot be directly traded or shared. Instead, the medium"
+      "of the bizarre is the spoken and written word, where alchemists from"
+      "every corner tell of what sights they've seen and what noises they've"
+      "heard. The share the logic that forms the basis of their recipes of"
+      "distillation, the steps that they've taken to arrive at the understandings"
+      "they now carry with them.")
+
+    (text
+      "Ideological diversity is best captured in the alchemical perspective by"
+      "the bizarre bazaar: diversity is created by the sharing of knowledge, by"
+      "giving and receiving, by exchange of story without exchange of coin.")
+
+    ; TODO - symbols of transformation
+
+    (text
+      "Like real-life alchemy, ideology in the alchemical perspective is"
+      "preposessed by symbols of transformation, the magic rituals by which ideas"
+      "are arrived at, and by which ideas are combined into wholes much greater"
+      "than the sum of their essential parts. The power of ideologies lies all"
+      "in how they're put together, what consequential insights they provide,"
+      "what courses of action they recommend. New knowledge takes the mundane,"
+      "and renders it extraordinary.")
+
+    (text
+      "Like real-life alchemy, ideology is concerned not with " (i "outer")
+      " transformations, but with " (i "inner") " transformations. The goal isn't"
+      "to turn a block of lead into a block of gold, but to turn a leadened mind"
+      "into a golden one. The essences live within the alchemist, and when"
+      "combined, it is the alchemist which is transformed by the process.")
+
+    (text
+      "Transformations can be tremendous and awe-inspiring. Some alchemists"
+      "emerge from their new creations as if changed people. But alchemy is not"
+      "without its risks; not all transformations leave the alchemist a greater"
+      "person: some recipes result in great explosions. That said, the chemistry"
+      "of the interaction of ideas is personal to the alchemist who performs them."
+      "What for one person may be a debilitating explosion may, for another, be"
+      "resolutely contained within the thin walls of a glass vial. A part of"
+      "becoming a master alchemist is to understand the transformation as it"
+      "unfolds, and to not be overcome by it.")
+    (file-under :epistemology)))
+
+(defn ideological-scaffolding
+  []
+  (essay :ideological-scaffolding "Ideological Scaffolding"
+    (block-definition "Ideological Scaffolding")
+
+    (under-construction)
+
+    (file-under :epistemology)))
+
+(defn ideological-rescue
+  []
+  (essay :ideological-rescue "Ideological Rescue"
+    (under-construction)
+; *   Ideologies exist within contexts, and in those contexts they make sense.
+; *   Why is this ideology compelling?
+; *   What are the foundations upon which this ideology is built?
+; *   What are the assumptions, predicates, and greater contexts in which this
+;     ideology is situated?
+; *   What are the limitations of the ideology?
+; *   Where is the ideology appropriate to apply, and where is it
+;     inappropriate to apply?
+    (file-under :epistemology)))
+
+(defn orthodoxy-v-heterodoxy
+  []
+  (essay :orthodoxy-v-heterodoxy "Orthodoxy vs. Heterodoxy"
+    (under-construction)
+; *   Recognizing that each individual is ideologically diverse within
+;     themselves.
+; *   Recognizing that that which you do not know, and do not understand, is
+;     also that which you can learn from.
+; *   Recognizing that your ideology is somebody else's diversity, but only if
+;     it's actually shared.
+    (file-under :epistemology)))
 
 (defn epistemology-essays
   []
   [(essay-series [:the-truth])
-   (the-truth)])
+   (the-truth) (alchemical-ideology) (ideological-scaffolding)
+   (ideological-rescue) (orthodoxy-v-heterodoxy)])
