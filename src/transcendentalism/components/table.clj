@@ -91,10 +91,12 @@
           (css "td" {"class" "label"}
             (font-style "italic")
             (text-align "center")
+            (font-size (if is-mobile "2em" "1em"))
             (padding "5px"))
           (css "td" {"class" "cell"}
             (border-style "solid")
             (border-width "1px")
             (border-color (to-css-color light-gray))
+            (font-size (if is-mobile "2em" "1em"))
             (padding "5px"))]))
       (render-js [renderer] ""))))

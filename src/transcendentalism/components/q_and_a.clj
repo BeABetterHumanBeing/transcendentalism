@@ -41,7 +41,8 @@
         (str/join "\n" [
           (css "div" {"class" "q_and_a"}
             (display "grid")
-            (grid-template-columns "30px" "[qa_separator]" "auto")
+            (grid-template-columns
+              (if is-mobile "50px" "30px") "[qa_separator]" "auto")
             (grid-row-gap "8px"))
           (css "div" {"class" "q_and_a_header"}
             (font-weight "bold"))]))
