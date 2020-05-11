@@ -3,6 +3,7 @@
             [transcendentalism.css :refer :all]
             [transcendentalism.color :refer :all]
             [transcendentalism.constraint :refer :all]
+            [transcendentalism.flags :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.js :refer :all]
@@ -191,10 +192,19 @@
   "Returns a div that shows that the segment is under construction"
   []
   (div {"class" "construction-back"}
-    (div {"class" "construction-front"}
+    (div {"class" "splash-front"}
       (h2 {} "UNDER CONSTRUCTION")
-      (div {"class" "construction-separator"})
+      (div {"class" "splash-separator"})
       (p {} "Connect with me if you want me to expedite its work"))))
+
+(defn- private-splash
+  "Returns a div that shows that the segment is private"
+  []
+  (div {"class" "private-back"}
+    (div {"class" "splash-front"}
+      (h2 {} "PRIVATE")
+      (div {"class" "splash-separator"})
+      (p {} "Not publicly available"))))
 
 (def segment-to-item-pathable
   "Returns a pathable that expands from /type/segment to all /type/item that
@@ -248,11 +258,13 @@
                   ""
                   (str/join "\n" [
                     (hr)
-                    (if (contains? labels :under-construction)
-                      (under-construction-splash)
-                      (let [content (unique-or-nil graph sub "/essay/contains")]
-                        (render-sub (assoc params "essay" sub)
-                                    graph content)))]))]))
+                    (cond
+                      (and (contains? labels :private)
+                           (flag :aws)) (private-splash)
+                      (contains? labels :under-construction) (under-construction-splash)
+                      :else (let [content (unique-or-nil graph sub "/essay/contains")]
+                              (render-sub (assoc params "essay" sub)
+                                          graph content)))]))]))
           (hr)
           (div {"id" (seg-id id "footer")}
             (let [cxns (sort-by-cxn-type (build-cxns graph sub))]
@@ -359,10 +371,8 @@
             :invisible
             ; Content is under construction.
             :under-construction
-            ; Content is religious.
-            :religion
-            ; Content is political.
-            :politics}
+            ; Content is private.
+            :private}
         },
       },
     }
@@ -429,13 +439,28 @@
             (height "300px")
             (margin "50px" "50px")
             (position "relative"))
-          (css "div" {"class" "construction-separator"}
+          (css "div" {"class" "private-back"}
+            (let [red (to-css-color red),
+                  black (to-css-color black),
+                  white (to-css-color white)]
+              (background
+                (repeating-linear-gradient
+                  "45deg"
+                  black (str black " 20px")
+                  (str white " 20px") (str white " 25px")
+                  (str red " 25px") (str red " 45px")
+                  (str white " 45px") (str white " 50px"))))
+            (width "700px")
+            (height "300px")
+            (margin "50px" "50px")
+            (position "relative"))
+          (css "div" {"class" "splash-separator"}
             (width "460px")
             (margin "0" "0" "0" "70px")
             (border-style "dashed")
             (border-width "1px")
             (border-color "gray"))
-          (css "div" {"class" "construction-front"}
+          (css "div" {"class" "splash-front"}
             (background-color (to-css-color white))
             (width "600px")
             (height "170px")

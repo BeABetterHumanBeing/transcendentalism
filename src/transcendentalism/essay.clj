@@ -296,8 +296,10 @@
                (range (count definitions)))])))
        (knot-under-construction [loom]
          (knot-text loom ["TODO"])
+         (knot-label loom :under-construction))
+       (knot-label [loom label]
          (add-triples loom
-           (->Triple essay-sub "/essay/label" :under-construction {})))
+           (->Triple essay-sub "/essay/label" label {})))
        (knot-sub-title [loom sub-title]
          (add-triples loom
            (->Triple essay-sub "/essay/subtitle" sub-title {})))))))
@@ -452,6 +454,10 @@
 (defn under-construction
   []
   (fn [t] (knot-under-construction t)))
+
+(defn private
+  []
+  ^{:no-block true} (fn [t] (knot-label t :private)))
 
 (defn subtitle
   [title]

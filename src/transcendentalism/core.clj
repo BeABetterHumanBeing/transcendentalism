@@ -11,6 +11,7 @@
             [transcendentalism.essays.miscellaneous :refer :all]
             [transcendentalism.essays.morality :refer :all]
             [transcendentalism.essays.ontology :refer :all]
+            [transcendentalism.essays.personal :refer :all]
             [transcendentalism.essays.physics :refer :all]
             [transcendentalism.essays.politics :refer :all]
             [transcendentalism.essays.religion :refer :all]
@@ -34,7 +35,7 @@
       meta-directives (glossary-essay) (intro-essays) (physics-essays)
       (ontology-essays) (epistemology-essays) (morality-essays) (religion-essays)
       (politics-essays) (consciousness-essays) (miscellaneous-essays)
-      (love-essays))))
+      (love-essays) (personal-essays))))
 
 (defn- prep-output
   "Collects all CSS and JS from the graph's renderers, and puts them in

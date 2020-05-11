@@ -43,6 +43,7 @@
      schema layer. This should only be used for bespoke content.")
   (knot-definition [loom word part-of-speech definitions])
   (knot-under-construction [loom] "Marks an essay as being under construction")
+  (knot-label [loom label] "Marks an essay with a label")
   (knot-sub-title [loom sub-title] "Adds a sub-title to an essay"))
 
 (defn sub-suffix
