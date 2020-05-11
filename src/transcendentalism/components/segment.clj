@@ -260,6 +260,7 @@
              (width "100px")
              (left "-110px")
              (direction "rtl")
+             (font-size (if is-mobile "2em" "1em"))
              (color (to-css-color yellow)))
            (css "span" {"class" "footnote-chain"}
              (border-style "dashed")
@@ -267,7 +268,7 @@
              (border-width "1px" "0px" "0px" "0px")
              (position "absolute")
              (left "98px")
-             (top "9px"))
+             (top (if is-mobile "19px" "9px")))
            (css "div" {"class" "glossary-definition"}
              (display "none"))]))
        (render-js [renderer] ""))))

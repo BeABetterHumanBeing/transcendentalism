@@ -52,12 +52,14 @@
           (css "input" {"class" "contact"}
             (border-style "none")
             (font-size "large")
-            (height "20px")
-            (width "220px")
+            (height (if is-mobile "40px" "20px"))
+            (width (if is-mobile "440px" "220px"))
             (position "absolute")
             (top "50%")
             (left "50%")
-            (margin "-10px" "0" "0" "-110px")
+            (margin (if is-mobile "-20px" "-10px") "0" "0"
+                    (if is-mobile "-220px" "-110px"))
+            (font-size (if is-mobile "2em" "1em"))
             (text-align "center"))
           (css "div" {"class" "contact-dash"}
             (border-style "dashed" "none" "none" "none")
@@ -65,11 +67,13 @@
             (border-width "1px")
             (width "30px")
             (position "absolute")
-            (left "190px")
+            (left (if is-mobile "280px" "190px"))
             (top "10px"))
           (css "div" {"class" "contact-buttons"}
             (position "absolute")
-            (left "230px")
+            (font-size (if is-mobile "2em" "1em"))
+            (left (if is-mobile "320px" "230px"))
+            (top (if is-mobile "-10px" "0px"))
             (width "100px"))]))
       (render-js [renderer]
         (js-fn "copyToClipboard" ["elem_id"]

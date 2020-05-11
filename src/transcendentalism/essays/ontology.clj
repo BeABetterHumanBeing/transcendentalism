@@ -26,7 +26,7 @@
             "point: it is. The simplest ontology is also the final answer. ")
       (tangent (f 1) "Done") dot)
 
-    (image "monad_1.png" "An image of a monad")
+    (image "monad_1.png" "An image of a monad" 600 600)
 
     (footnote (f 1)
       (paragraph

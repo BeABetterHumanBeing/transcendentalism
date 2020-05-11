@@ -13,7 +13,7 @@
     (image "monad.svg"
            (str "Animation of the star flower, with changes cascading inwards "
                 "to a central point")
-           800 800)
+           600 600)
 
     (quote*
       (str/join " "
