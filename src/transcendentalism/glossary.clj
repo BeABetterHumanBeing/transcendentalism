@@ -1,7 +1,25 @@
 (ns transcendentalism.glossary
   (:require [clojure.string :as str]
             [transcendentalism.graph :refer :all]
+            [transcendentalism.html :refer :all]
             [transcendentalism.loom :refer :all]))
+
+(defn smart-join-lines
+  [lines]
+  (reduce
+    (fn [result line]
+      (if (or (= (count line) 0)
+              (= (.charAt line 0) \<)
+              (= (count result) 0)
+              (= (.charAt result (dec (count result))) \>))
+          (str result line)
+          (str result " " line)))
+    (first lines) (rest lines)))
+
+(defn ex
+  "Include an example"
+  [& lines]
+  (str (span {"class" "ex"} "Ex:") " " (i (str "\"" (smart-join-lines lines) "\""))))
 
 (defn definition
   [word part-of-speech & definitions]
@@ -22,6 +40,11 @@
     :pos :noun,
     :defs [
       (adef "The higher structure and order of reality.")],
+  },
+  "Eternal" {
+    :pos :adjective,
+    :defs [
+      (adef "Existing outside of the realm of time. " (ex "Numbers"))],
   },
   "Expert" {
     :pos :noun,
@@ -63,6 +86,11 @@
     :pos :noun,
     :defs [
       (adef "A process for discovering new knowledge about reality.")],
+  },
+  "Sempiternal" {
+    :pos :adjective,
+    :defs [
+      (adef "Existing invariantly throughout time. " (ex "The present"))],
   },
   "Solipsism" {
     :pos :noun,

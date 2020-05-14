@@ -18,7 +18,7 @@
 
 (defn chain [& contents] (str/join "." contents))
 
-(defn js-str [value] (str "'" value "'"))
+(defn js-str [value] (str "'" (str/replace value #"'" "\\\\'") "'"))
 
 (defn js-array [values] (str "[" (str/join "," values) "]"))
 

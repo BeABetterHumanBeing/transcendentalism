@@ -95,28 +95,22 @@
          (add-triples loom
            (with-fork loom [loom-fork (major-key loom)]
              (doall
-               (map #(% loom-fork)
+               (map (fn [f]
+                      (when (string? f) (println f)) ; A common failure case.
+                      (f loom-fork))
                  (reduce
                    (fn [result f]
                      (concat result [push-inline f]))
                    [(first fns)] (rest fns)))))))
        (knot-text [loom lines]
          (let [sub (minor-key loom),
-               item-keyword (item-sub sub),
-               joined-lines (reduce
-                              (fn [result line]
-                                (if (or (= (count line) 0)
-                                        (= (.charAt line 0) \<)
-                                        (= (count result) 0)
-                                        (= (.charAt result (dec (count result))) \>))
-                                    (str result line)
-                                    (str result " " line)))
-                              (first lines) (rest lines))]
+               item-keyword (item-sub sub)]
            (add-triples loom
              [(->Triple sub "/type/segment" nil {})
               (->Triple sub "/segment/contains" item-keyword {})
               (->Triple item-keyword "/type/item/inline" nil {})
-              (->Triple item-keyword "/item/inline/text" joined-lines {})])))
+              (->Triple item-keyword "/item/inline/text"
+                (smart-join-lines lines) {})])))
        (knot-tangent [loom virtual-sub lines]
          (let [sub (if (fn? virtual-sub) (virtual-sub loom) virtual-sub),
                k (minor-key loom)]
@@ -377,11 +371,6 @@
   [url & lines]
   (fn [t] (knot-link t url lines)))
 
-(defn ex
-  "Include an example"
-  [& lines]
-  (str (span {"class" "ex"} "Ex:") " " (i (str "\"" (str/join " " lines) "\""))))
-
 (defn heading [line] (h2 {"class" "header"} line))
 
 ; A very commonly-used particle.
@@ -412,8 +401,8 @@
   (fn [t] (knot-contact-email t email-address)))
 
 (defn thesis
-  [line]
-  (fn [t] (knot-thesis t line)))
+  [& lines]
+  (fn [t] (knot-thesis t (smart-join-lines lines))))
 
 (defn matrix
   [rows columns contents]
