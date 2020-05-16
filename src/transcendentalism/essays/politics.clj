@@ -87,7 +87,8 @@
     (image "tug_of_war_1.png"
            (str "An image of a tug-of-war game between a team of blue players "
                 "(on the left), and a team of red players (on the right). In "
-                "the center is one person watching both sides."))
+                "the center is one person watching both sides.")
+           800 200)
 
     (text
       "In this model, the left and right are locked in a competition of strength"
@@ -150,7 +151,8 @@
     (image "tug_of_war_2.png"
            (str "Another image of a game of tug-of-war, except with the single "
                 "observer who was in the center moving from one side to the "
-                "other."))
+                "other.")
+           800 200)
 
     (text "Why would a centrist do this? Does it not seem self-defeating? The"
           "answer lies in sriking the right balance.")))
@@ -187,7 +189,8 @@
 
     (image "balance_beam.png"
            (str "An image of a gymnast on a balance beam, where their right "
-                "foot is red, and their left foot is blue."))
+                "foot is red, and their left foot is blue.")
+           400 400)
 
     (bullet-list
       (text "Some key differences between the model and reality:")
@@ -234,7 +237,8 @@
     (image "figure_skating.png"
            (str "An image of a figure skater, where their right foot is red and "
                 "their left foot is blue, and they leave red-and-blue tracks "
-                "on the ice behind them."))
+                "on the ice behind them.")
+           400 400)
 
     (text
       "In this view, the enlightened centrist sees their jobs to play the role"
@@ -502,7 +506,8 @@
 
     (image "thirty_to_one.png"
            (str "Image of a person on top of a pyramid of thirty people. For "
-                "every living human today, there are 30 dead ancestors"))
+                "every living human today, there are 30 dead ancestors")
+           400 400)
 
     (file-under :politics)
     (root-menu :conservatism "Conservatism")))
@@ -528,7 +533,8 @@
 
     (image "overlapping_responsibilities.png"
            (str "Drawing of a crowd of people with their onverlapping spheres "
-                "of responsibility, and gaps between them."))
+                "of responsibility, and gaps between them.")
+           400 400)
 
     (numbered-list
       (text "The responses to these are straight-forward:")

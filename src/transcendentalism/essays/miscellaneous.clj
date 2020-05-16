@@ -200,7 +200,8 @@
     "the portion after this elbow becomes seemingly verticle.")
 
   (image "exponential_growth.png"
-         "Diagram of exponential growth")
+         "Diagram of exponential growth"
+         400 200)
 
   (paragraph
     (text "Unfortunately, life in the vertical world ")
@@ -218,7 +219,8 @@
       "Moore's law) ends up simply being the first half of logistic growth.")
 
     (image "logistic_growth.png"
-           "Diagram of logistic growth, showing it asymptotically approaching a limit")
+           "Diagram of logistic growth, showing it asymptotically approaching a limit"
+           600 200)
 
     (text
       "Moreover, if the singularity is the elbow in the hockey stick, then it's"

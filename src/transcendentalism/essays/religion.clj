@@ -458,7 +458,7 @@
         "now you know to just keep these odd coincidences in a little pile over"
         "in the corner."))
 
-    (image "yahtzee.png" "Five dice, all sixes")
+    (image "yahtzee.png" "Five dice, all sixes" 200 200)
 
     (text
       "I sometimes see a \"miracle\" defined as a 1:1,000,000 event. By this"

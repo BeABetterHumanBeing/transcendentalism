@@ -1,5 +1,6 @@
 (ns transcendentalism.components.image
-  (:require [transcendentalism.constraint :refer :all]
+  (:require [clojure.string :as str]
+            [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
@@ -27,11 +28,13 @@
           :description "The width to render the image",
           :range-type :number,
           :unique true,
+          :required true,
         },
         "/item/image/height" {
           :description "The height to render the image",
           :range-type :number,
           :unique true,
+          :required true,
         },
       },
     }
@@ -42,18 +45,21 @@
         (let [image-url-triple (unique-or-nil graph sub "/item/image/url"),
               image-alt-text-triple (unique-or-nil graph sub "/item/image/alt_text"),
               image-width (unique-or-nil graph sub "/item/image/width"),
-              image-height (unique-or-nil graph sub "/item/image/height")]
-          (img {"src" image-url-triple,
-                "alt" image-alt-text-triple,
-                "style" (str (if (nil? image-width)
-                                 ""
-                                 (str "width:" image-width "px"))
-                             ";"
-                             (if (nil? image-height)
-                                 ""
-                                 (str "height:" image-height "px")))})))
+              image-height (unique-or-nil graph sub "/item/image/height"),
+              height (str "height:" image-height "px")]
+          (div {"class" "img-back",
+                "style" (str "width:auto;" height)}
+            (img {"src" image-url-triple,
+                  "alt" image-alt-text-triple,
+                  "style" (str (str "width:" image-width "px")
+                               ";"
+                               height)}))))
       (render-css [renderer is-mobile]
-        (css "img" {}
-          (margin "0" "auto")
-          (display "block")))
+        (str/join "\n" [
+          (css "div" {"class" "img-back"}
+            (position "relative"))
+          (css "img" {}
+            (position "absolute")
+            (left "50%")
+            (transform (translate "-50%" "0")))]))
       (render-js [renderer] ""))))

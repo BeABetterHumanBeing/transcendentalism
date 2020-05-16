@@ -23,7 +23,7 @@
       (text "I'm using the word 'paradigm' in its original sense, something"
             "akin to \"the canonical example\""))
 
-    (image "tree_of_knowledge_1.png" "An image of a tree")
+    (image "tree_of_knowledge_1.png" "An image of a tree" 400 400)
 
     (text
       T ", however, is inaccessible to us imperfect beings. Our understanding"
@@ -33,7 +33,8 @@
       T " is the only ideology, the only mirror, in which reality can be seen"
       "for exactly what it is.")
 
-    (image "tree_of_knowledge_6.png" "An image of a severely jumbled tree")
+    (image "tree_of_knowledge_6.png" "An image of a severely jumbled tree"
+           400 400)
 
     (paragraph
       (text
@@ -51,7 +52,8 @@
         "Only " T " can show the full extent of an ideology, and we do not have"
         "access to " T "."))
 
-    (image "tree_of_knowledge_5.png" "An image of a significantly jumbled tree")
+    (image "tree_of_knowledge_5.png" "An image of a significantly jumbled tree"
+           400 400)
 
     (text
       "Any ideology worth its salt pretends to be " T ", because that is the"
@@ -73,7 +75,7 @@
       "is not sufficient to spread its shattered pieces among the people, but"
       "will break the glass of anything that reveals its limitations.")
 
-    (image "tree_of_knowledge_4.png" "An image of a jumbled tree")
+    (image "tree_of_knowledge_4.png" "An image of a jumbled tree" 400 400)
 
     (text
       "When a person lives within the limitations imposed by an ideology, they"
@@ -84,7 +86,8 @@
       "enslaved to reality by means of " T " as an image in a mirror is to that"
       "which it reflects.")
 
-    (image "tree_of_knowledge_3.png" "An image of a slightly jumbled tree")
+    (image "tree_of_knowledge_3.png" "An image of a slightly jumbled tree"
+           400 400)
 
     (text
       "Friction and suffering are the result of passing over flaws and holes in"
@@ -96,7 +99,8 @@
       "to " (i "It") " leads to no suffering. This is another reason why it is"
       "the most perfect slavery.")
 
-    (image "tree_of_knowledge_2.png" "An image of a tree that's almost correct")
+    (image "tree_of_knowledge_2.png" "An image of a tree that's almost correct"
+           400 400)
 
     (text
       "When we are borne into reality, our being is illuminated by the light of"
@@ -106,7 +110,7 @@
       "desire to assemble those pieces again, so that we may once more look at"
       "ourselves as exactly who we are: flawless and perfect.")
 
-    (image "tree_of_knowledge_1.png" "An image of a tree")
+    (image "tree_of_knowledge_1.png" "An image of a tree" 400 400)
 
     (root-menu :epistemology "Epistemology")
     (file-under :metaphysics)))

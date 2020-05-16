@@ -81,3 +81,7 @@
     (str (str/join ", " pts) " {")
     (str/join "\n" contents)
     "}"]))
+
+(defn translate
+  [width height]
+  (str "translate(" width ", " height ")"))

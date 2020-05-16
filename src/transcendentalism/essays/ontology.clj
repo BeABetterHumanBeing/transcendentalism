@@ -66,7 +66,8 @@
 
     (image "two_mirrors.png"
            (str "Image of two mirrors with objects between them, reflecting "
-                "back and forth"))
+                "back and forth")
+           400 200)
 
     (text
       "Where the nature of reality really departs from our metaphor of \"two"
@@ -80,7 +81,8 @@
 
     (image "self_separating_mirror.png"
            (str "Image of a red ball emerging from a red dot, with reflective "
-                "echoes to either side"))
+                "echoes to either side")
+           400 400)
 
     (add-home :it-is)
     ))
@@ -411,7 +413,7 @@
             "proof of its ")
       (tangent (f 0) "existence") dot)
 
-    (image "cosmos_1.png" "An image of a black dot")
+    (image "cosmos_1.png" "An image of a black dot" 200 200)
 
     (footnote (f 0)
       (text
@@ -437,7 +439,7 @@
     (text "The binary is formed by relating two unities. Relationships come in"
           "two forms: symmetric and asymmetric.")
 
-    (image "cosmos_2_symmetric.png" "An image of two black dots")
+    (image "cosmos_2_symmetric.png" "An image of two black dots" 200 200)
 
     (text
       "In a symmetric binary, the two halves are indistinguishable " (i "except")
@@ -446,7 +448,8 @@
       "\"po-tay-toe v. po-tah-toe\"), because they only happen when the"
       "distinction being drawn is meaningless.")
 
-    (image "cosmos_2_asymmetric.png" "An image of a black dot and a red dot")
+    (image "cosmos_2_asymmetric.png" "An image of a black dot and a red dot"
+           200 200)
 
     (paragraph
       (text

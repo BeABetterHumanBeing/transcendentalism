@@ -13,7 +13,7 @@
     (image "monad.svg"
            (str "Animation of the star flower, with changes cascading inwards "
                 "to a central point")
-           600 600)
+           800 800)
 
     (quote*
       (str/join " "
@@ -106,7 +106,8 @@
       "hair, and I went home from the hospital wearing little yellow socks.")
 
     (image "yellow_socks.png"
-           "Drawing of yellow socks")
+           "Drawing of yellow socks"
+           200 200)
 
     (text
       "In life, we often overlook the smaller, sentimental details. A person is"

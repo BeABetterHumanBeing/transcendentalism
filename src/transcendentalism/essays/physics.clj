@@ -255,7 +255,8 @@
     (str/join " " [
       "Four points, A, B, C, and D, with rays of light connecting A and B,"
       "A and C, B and D, and C and D."
-    ])))
+    ])
+    200 200))
 
 (defn universal-order
   []
@@ -573,7 +574,8 @@
         "the same journey. In the first, there is enough time for light to have"
         "another interaction Z. In the second, it cannot. And in the third, it"
         "cannot even make it to the interaction Y."
-      ]))
+      ])
+      200 200)
 
     (text
       "The third case shows why the speed of light cannot be exceeded: the"
@@ -777,7 +779,8 @@
           "An image of a ship, labeled \"the ship of state\", sailing between"
           "two rocks, only labeled \"revolution\", and the other \"reaction\"."
           "Above it reads \"hold course\", and beneath it \"steer clear the"
-          "populist tides\"."]))))
+          "populist tides\"."])
+        322 467)))
 
     (text "In general, analogies should be used for pedagogy only. If a person"
           "doesn't know much about a thing, comparing it to an analogous thing"
@@ -833,13 +836,14 @@
       (text "The principal one being the brain stem, but some senses arrive via"
             "their own conduit, esp. the eyes, ears, and nose."))
 
-    (image "bowl_of_fruit_1.png" "A pixelated image of bright colors")
+    (image "bowl_of_fruit_1.png" "A pixelated image of bright colors" 200 200)
     (image "bowl_of_fruit_2.png"
-           "The same image, but with black outlines of some objects")
+           "The same image, but with black outlines of some objects" 200 200)
     (image "bowl_of_fruit_3.png"
-           "The same image, segmented into some oranges, bananas, grapes, and a bowl")
+           "The same image, segmented into some oranges, bananas, grapes, and a bowl"
+           200 200)
     (image "bowl_of_fruit_4.png"
-           "The same image; a bowl of delicious fruit")
+           "The same image; a bowl of delicious fruit" 200 200)
 
     (text
       "The key construction to note, however, is that this filter is recursive:"
@@ -875,7 +879,7 @@
 
     (image "perspective_glasses.png"
            (str "A drawing of a globe with glasses overlaid on it. Each one "
-                "shows the world in a different light."))
+                "shows the world in a different light.") 400 400)
 
     (footnote (f 1)
       (paragraph
@@ -1572,7 +1576,7 @@
            (str/join " " [
               "A visual distribution of the collected data over a calendar year,"
               "delimited by months and zodiac signs."])
-           700 150)
+           900 165)
   ))
 
 (defn phenomenological-science

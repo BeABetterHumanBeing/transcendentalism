@@ -162,12 +162,8 @@
                [(->Triple sub "/type/item/image" nil {})
                 (->Triple sub "/item/image/url" image-url {})
                 (->Triple sub "/item/image/alt_text" alt-text {})
-                (if (nil? width)
-                  []
-                  (->Triple sub "/item/image/width" width {}))
-                (if (nil? height)
-                  []
-                  (->Triple sub "/item/image/height" height {}))]))))
+                (->Triple sub "/item/image/width" width {})
+                (->Triple sub "/item/image/height" height {})]))))
        (knot-quote [loom q author]
          (knot-block-item loom
            (fn [sub]
@@ -339,9 +335,8 @@
   (fn [t] (knot-poem t lines)))
 
 (defn image
-  ([url alt-text] (image url alt-text nil nil))
-  ([url alt-text width height]
-    (fn [t] (knot-image t url alt-text width height))))
+  [url alt-text width height]
+    (fn [t] (knot-image t url alt-text width height)))
 
 (defn quote*
   ([q] (quote* q nil))
