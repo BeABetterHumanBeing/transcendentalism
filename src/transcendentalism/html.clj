@@ -9,6 +9,8 @@
 
 (defn body [attrs & contents] (xml-tag "body" attrs (apply str contents)))
 
+(defn script [attrs & contents] (xml-tag "script" attrs (apply str contents)))
+
 (defn div [attrs & contents] (xml-tag "div" attrs (apply str contents)))
 
 (defn p [attrs contents] (xml-tag "p" attrs contents))

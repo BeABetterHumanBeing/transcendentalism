@@ -94,8 +94,8 @@
                                                  "output/mobile_styles.css"
                                                  "output/styles.css")})
                     ; Include JQuery from Google CDN.
-                    (xml-tag "script" {"src" "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"} "")
-                    (xml-tag "script" {"src" "output/script.js"} "")
+                    (script {"src" "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"} "")
+                    (script {"src" "output/script.js"} "")
                     (xml-open "link" {"rel" "icon",
                                       "type" "image/png",
                                       "href" "monad_icon_small.png"})

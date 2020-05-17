@@ -94,26 +94,44 @@
 (defn- generate-link
   "Returns the HTML for a link in the footer"
   [sub cxn]
-  (if (= (:type cxn) :random)
-      (button {"class" (str "link_segment " (to-css-class (:type cxn))),
-               "onclick" (call-js "openRandomSegment"
-                           (js-str (name sub))
-                           (js-array (map #(js-str (name %)) (:dest cxn))))}
-              "? Random")
-      (let [link-id (str (name sub) "-" (name (:dest cxn))),
-            full-name (str (case (:type cxn)
-                             :up "&#8593 ",
-                             :down "&#8595 ",
-                             :across "&#8594 ",
-                             "")
-                           (:name cxn))]
-        (button {"id" link-id,
-                 "class" (str "link_segment " (to-css-class (:type cxn))),
-                 "onclick" (call-js "openSegment"
-                             (js-str (name sub))
-                             (js-str (name (:dest cxn)))
-                             (js-str (:name cxn)))}
-                full-name))))
+  (let [btn
+        (if (= (:type cxn) :random)
+            (button {"class" (str "link_segment " (to-css-class (:type cxn))),
+                     "onclick" (call-js "openRandomSegment"
+                                 (js-str (name sub))
+                                 (js-array (map #(js-str (name %)) (:dest cxn))))}
+                    "? Random")
+            (let [link-id (str (name sub) "-" (name (:dest cxn))),
+                  full-name (str (case (:type cxn)
+                                   :up "&#8593 ",
+                                   :down "&#8595 ",
+                                   :across "&#8594 ",
+                                   "")
+                                 (:name cxn))]
+              (button {"id" link-id,
+                       "class" (str "link_segment " (to-css-class (:type cxn))),
+                       "onclick" (call-js "openSegment"
+                                   (js-str (name sub))
+                                   (js-str (name (:dest cxn)))
+                                   (js-str (:name cxn)))}
+                      full-name))),
+        show-btn (script {"defer" "true"}
+                   (chain (jq (js-str ".link_segment"))
+                          (c "css" (js-str "display") (js-str "inline")))),
+        no-btn
+        (xml-tag "noscript" {}
+          (if (= (:type cxn) :random)
+              "" ; Random button doesn't work w/o JS, full-stop
+              (let [full-name (str (case (:type cxn)
+                                     :up "&#8593 ",
+                                     :down "&#8595 ",
+                                     :across "&#8594 ",
+                                     "")
+                                   (:name cxn))]
+                (a {"href" (:dest cxn),
+                    "class" (str "simple_link " (to-css-class (:type cxn)))}
+                   full-name))))]
+    (str btn show-btn no-btn)))
 
 (def load-with
   (js-fn "loadWith" ["elem" "url" "callback"]
@@ -234,6 +252,12 @@
         item-to-item-pathable])
    "/item/inline/see_also"])
 
+(def no-js-warn
+  (xml-tag "noscript" {}
+    (div {"class" "no_js"}
+      (b "WARNING")
+      ": Your browser's JavaScript is disabled. Some features may not work.")))
+
 (defn render-essay-html
   [params graph sub]
   (let [id (name sub)]
@@ -258,6 +282,7 @@
                   ""
                   (str/join "\n" [
                     (hr)
+                    no-js-warn
                     (cond
                       (and (contains? labels :private)
                            (flag :aws)) (private-splash)
@@ -410,20 +435,31 @@
             (background-repeat "no-repeat")
             (background-size "150px" "150px"))
           (css "button" {"class" "link_segment"}
+            (display "none") ; Made visible by JS script.
             (border "none")
             (font-size (if is-mobile "2em" "1em"))
             (margin "3px")
             (background-color (to-css-color white)))
-          (css "button" {"class" "up"}
+          (css "a" {"class" "simple_link"}
+            (font-size (if is-mobile "2em" "1em"))
+            (margin "3px"))
+          (css "" {"class" "up"}
             (color (to-css-color purple)))
-          (css "button" {"class" "down"}
+          (css "" {"class" "down"}
             (color (to-css-color red)))
-          (css "button" {"class" "across"}
+          (css "" {"class" "across"}
             (color (to-css-color yellow)))
-          (css "button" {"class" "menu"}
+          (css "" {"class" "menu"}
             (color "gray"))
           (css "button" {"selector" "hover"}
             (text-decoration "underline"))
+          (css "div" {"class" "no_js"}
+            (border-style "solid")
+            (border-width "1px")
+            (border-color (to-css-color red))
+            (margin "0" "auto")
+            (text-align "center")
+            (padding "2px"))
           (css "div" {"class" "construction-back"}
             (let [yellow (to-css-color yellow),
                   black (to-css-color black),
