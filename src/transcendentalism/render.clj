@@ -35,6 +35,10 @@
   [pred]
   (span {"style" (str "color:" (to-css-color gray))} pred))
 
+(defn- render-sub-link
+  [sub]
+  (a {"href" (str sub "?renderer=default")} sub))
+
 (defn- render-primitive
   [graph sub]
   (cond
@@ -44,7 +48,7 @@
     (number? sub) (render-number sub)
     (is-valid-time sub) (render-time sub)
     :else (if (contains? (get-raw-data graph) sub)
-              sub
+              (render-sub-link sub)
               (render-enum sub))))
 
 (defn render-default
