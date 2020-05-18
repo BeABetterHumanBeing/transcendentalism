@@ -1,5 +1,5 @@
 (ns transcendentalism.tablet
-  (:require [transcendentalism.graph-v3 :refer :all]
+  (:require [transcendentalism.graph :refer :all]
             [transcendentalism.toolbox :refer :all]))
 
 (defprotocol Tablet

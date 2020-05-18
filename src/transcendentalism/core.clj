@@ -17,7 +17,7 @@
             [transcendentalism.essays.religion :refer :all]
             [transcendentalism.flags :refer :all]
             [transcendentalism.glossary :refer :all]
-            [transcendentalism.graph-v3 :as g3]
+            [transcendentalism.graph :refer :all]
             [transcendentalism.render :refer :all]
             [transcendentalism.schema :refer :all]
             [transcendentalism.server :refer :all]
@@ -60,11 +60,10 @@
   (if (flag :sync)
       (time-msg "Syncing" (sync-resources-up))
       (let [triples (time-msg "Construct Graph" (collect-triples)),
-            graph-v3 (time-msg "V1->V3" (triples-to-graph-v3 triples)),
-            [v3-errors graph-final-v3] (time-msg "ValidateV3"
-                                                 (validate-graph-v3 graph-v3))]
-        (if (empty? v3-errors)
-          (let [flattened-graph (g3/flatten-graph graph-final-v3)]
+            graph (time-msg "Triples->Graph" (triples-to-graph triples)),
+            [errors graph-final] (time-msg "Validate" (validate-graph graph))]
+        (if (empty? errors)
+          (let [flattened-graph (flatten-graph graph-final)]
             (do (prep-output flattened-graph)
                 (launch-server flattened-graph)))
           (println "Graph fails validation!")))))

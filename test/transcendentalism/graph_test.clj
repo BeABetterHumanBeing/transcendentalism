@@ -1,9 +1,9 @@
-(ns transcendentalism.graph-v3-test
+(ns transcendentalism.graph-test
   (:require [clojure.test :refer :all]
-            [transcendentalism.graph-v3 :refer :all]))
+            [transcendentalism.graph :refer :all]))
 
 (deftest graph-read-write-test
-  (let [graph (-> (create-graph-v3)
+  (let [graph (-> (create-graph)
                   (write-v :a 7)
                   (write-v :b 8)
                   (write-o :a "/foo" "lol")
@@ -25,13 +25,13 @@
       (is (empty? (read-os graph :a #"/\d*"))))))
 
 (deftest graph-overlay-test
-  (let [base-graph (-> (create-graph-v3)
+  (let [base-graph (-> (create-graph)
                        (write-v :a 7)
                        (write-v :b 8)
                        (write-v :c 9)
                        (write-o :a "/foo" "lol")
                        (write-o :a "/bar" "kek")),
-        graph (-> (create-graph-v3 {} base-graph)
+        graph (-> (create-graph {} base-graph)
                   (write-v :a 10)
                   (write-o :a "/bar" "eke")
                   (write-o :b "/foo" "nom")

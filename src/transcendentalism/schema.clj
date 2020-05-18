@@ -17,7 +17,7 @@
             [transcendentalism.components.thesis :refer :all]
             [transcendentalism.constraint :refer :all]
             [transcendentalism.encoding :refer :all]
-            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.graph :refer :all]
             [transcendentalism.render :refer :all]))
 
 (defn- write-preds
@@ -59,8 +59,8 @@
     "/type/item/thesis" :thesis-type
     (assert false (str pred " not supported"))))
 
-(defn triples-to-graph-v3
-  "Converts triples to V3 graph"
+(defn triples-to-graph
+  "Converts triples to graph"
   [triples]
   (reduce
     (fn [graph triple]
@@ -71,7 +71,7 @@
           (let [obj-sub (keyword (gen-key 10))]
             (write-o (write-preds graph obj-sub (:obj triple) (:p-vs triple))
                      (:sub triple) (:pred triple) obj-sub))))
-    (create-graph-v3) triples))
+    (create-graph) triples))
 
 (defn item-component
   [graph]
@@ -105,13 +105,13 @@
 
 (def component-graph
   (reduce #(merge-graph %1 (%2 %1))
-    (write-v (create-graph-v3) :monad-shadow :monad)
+    (write-v (create-graph) :monad-shadow :monad)
     [event-component essay-component segment-component item-component
      inline-item-component image-component quote-component poem-component
      big-emoji-component q-and-a-component bullet-list-component contact-component
      definition-component table-component raw-html-component thesis-component]))
 
-(defn validate-graph-v3
+(defn validate-graph
   "Validates a graph. If errors occur, but new graph was generated, re-runs
    validation (to catch the event where the new graph satisfied the errors)"
   [initial-graph]

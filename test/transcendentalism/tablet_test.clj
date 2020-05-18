@@ -1,11 +1,11 @@
 (ns transcendentalism.tablet-test
   (:require [clojure.test :refer :all]
-            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.graph :refer :all]
             [transcendentalism.tablet :refer :all]
             [transcendentalism.toolbox :refer :all]))
 
 (deftest tablet-test
-  (let [graph (-> (create-graph-v3)
+  (let [graph (-> (create-graph)
                   (write-v :a1 7)
                   (write-v :a2 8)
                   (write-o :a1 "/foo" "blah")
@@ -15,13 +15,13 @@
                   (write-o :b1 "/bar" "blue")
                   (write-o :b2 "/bar" "yellow")),
         tablet-a (-> (create-read-write-tablet
-                       {} {:c 100, :d 200} (create-graph-v3 {} graph))
+                       {} {:c 100, :d 200} (create-graph {} graph))
                      (add-entry :a1 {:my-meta "cat"})
                      (add-entry :a2 {:my-meta "dog"})
                      (write-v :a1 701)
                      (write-v :a2 801)),
         tablet-b (-> (create-read-write-tablet
-                       {} {:e 300} (create-graph-v3 {} graph))
+                       {} {:e 300} (create-graph {} graph))
                      (add-entry :b1 {:my-meta "mouse"})
                      (add-entry :b2 {:my-meta "rat"})
                      (update-entry :b1 :b3 {:my-meta "cow"})
@@ -56,7 +56,7 @@
       (is (= #{"scissors"} (read-os tablet-ab :b3 "/baz"))))))
 
 (deftest graph-path-test
-  (let [graph (create-graph-v3),
+  (let [graph (create-graph),
         ret-1 (fn [_] 1), ; Some closure
         ret-a3 (fn [_] :a3), ; A virtual sub
         tablet (follow-all (create-read-write-tablet {:a1 {}}
@@ -122,7 +122,7 @@
 
 (deftest simplified-graph-path-test
   (let [footnoter (fn [sub] (keyword (str (name sub) "-f"))),
-        graph (write-path (create-graph-v3) #{:a1} {:no-val "X"}
+        graph (write-path (create-graph) #{:a1} {:no-val "X"}
                 [:no-val {"/foo" :a2,
                           "/bar" :a5}
                  #{["/foo" :no-val {"/f" footnoter,

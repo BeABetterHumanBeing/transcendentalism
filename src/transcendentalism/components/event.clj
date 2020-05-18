@@ -1,6 +1,6 @@
 (ns transcendentalism.components.event
   (:require [transcendentalism.constraint :refer :all]
-            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.graph :refer :all]
             [transcendentalism.time :refer :all]))
 
 (defn event-component

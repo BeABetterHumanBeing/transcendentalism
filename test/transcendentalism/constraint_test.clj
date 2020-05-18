@@ -1,7 +1,7 @@
 (ns transcendentalism.constraint-test
   (:require [clojure.test :refer :all]
             [transcendentalism.constraint :refer :all]
-            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.graph :refer :all]
             [transcendentalism.tablet :refer :all]
             [transcendentalism.time :refer :all]))
 
@@ -12,7 +12,7 @@
 
 (deftest test-range-constraint
   (let [t (get-hours-ago 20),
-        graph (write-path (build-component (create-graph-v3) :t #{} {})
+        graph (write-path (build-component (create-graph) :t #{} {})
                           :a {}
                           {"/num" 7,
                            "/str" "blah",
@@ -103,7 +103,7 @@
 (deftest test-required-constraint
   (let [req-no-default (required-pred-constraint "/foo"),
         req-w-default (required-pred-constraint "/bar" 5),
-        noncompliant-graph (write-v (create-graph-v3) :a 3),
+        noncompliant-graph (write-v (create-graph) :a 3),
         compliant-graph (write-path noncompliant-graph :a {} {"/foo" 2,
                                                               "/bar" 3}),
         fixed-graph (write-o noncompliant-graph :a "/bar" 5)]
@@ -119,7 +119,7 @@
 
 (deftest test-unique-constraint
   (let [unique (unique-pred-constraint "/foo"),
-        zero-graph (write-v (create-graph-v3) :a 3),
+        zero-graph (write-v (create-graph) :a 3),
         one-graph (write-o zero-graph :a "/foo" 1),
         multi-graph (write-o one-graph :a "/foo" 2)]
     (testing "Test unique constraint"
@@ -133,8 +133,8 @@
 (deftest test-excluding-constraint
   (let [mutually-exclusive (exclusive-pred-constraint #{"/foo" "/bar"}),
         singly-exclusive (exclusive-pred-constraint "/foo" #{"/bar"}),
-        foo-graph (write-o (create-graph-v3) :a "/foo" 1),
-        bar-graph (write-o (create-graph-v3) :a "/bar" 2),
+        foo-graph (write-o (create-graph) :a "/foo" 1),
+        bar-graph (write-o (create-graph) :a "/bar" 2),
         foo-bar-graph (write-o foo-graph :a "/bar" 3)]
     (testing "Test exclusive constraint"
       (is (= [#{} foo-graph]
@@ -178,7 +178,7 @@
         },
         constraint (schema-to-constraint schema)]
     (testing "Test constraint generated from schema"
-      (let [graph (write-path (create-graph-v3) :a {}
+      (let [graph (write-path (create-graph) :a {}
                               "not a num" {"/bar" 7,
                                            "/baz" "not a number",
                                            "/fip" 9,
@@ -190,13 +190,13 @@
                   "not a num does not match value type :number"}
                 (get-raw-data (write-o graph :a "/foo" 12))]
                (check-constraint-raw-data constraint graph :a))))
-      (let [graph (write-path (create-graph-v3) :a {}
+      (let [graph (write-path (create-graph) :a {}
                               3 {"/foo" #{13 14}})]
         (is (= [#{"/foo is unique on :a, but multiple present"
                   "/baz is required on :a, but not present"}
                 (get-raw-data graph)]
                (check-constraint-raw-data constraint graph :a))))
-      (let [graph (write-path (create-graph-v3) :a {}
+      (let [graph (write-path (create-graph) :a {}
                               3 {"/baz" 8,
                                  "/fip" 9})]
         (is (= [#{} (get-raw-data (write-o graph :a "/foo" 12))]
@@ -232,7 +232,7 @@
         other-range-type-root (reify TypeRoot
                                 (get-constraint [root] nil)
                                 (is-abstract [root] false)),
-        base-graph (-> (create-graph-v3)
+        base-graph (-> (create-graph)
                        (write-path :b {}
                                    {"/type" :range-type}
                                    "/type" range-type-root)
@@ -275,20 +275,20 @@
                         },
                      })]
     (testing "Test order validation"
-      (let [graph (write-path (create-graph-v3) :a {}
+      (let [graph (write-path (create-graph) :a {}
                               {"/point" :b1}
                               "/point" "My String")]
         (is (= [#{"/order is required on :b1, but not present"}
                 (get-raw-data graph)]
                (check-constraint-raw-data constraint graph :a))))
-      (let [graph (-> (create-graph-v3)
+      (let [graph (-> (create-graph)
                       (write-path :a {} {"/point" #{:b1 :b2}})
                       (write-path :b1 {} "One" {"/order" 2})
                       (write-path :b2 {} "Two" {"/order" 2}))]
         (is (= [#{":a /point has non-distinct ordinals (2 2)"}
                 (get-raw-data graph)]
                (check-constraint-raw-data constraint graph :a))))
-      (let [graph (-> (create-graph-v3)
+      (let [graph (-> (create-graph)
                       (write-path :a {} {"/point" #{:b1 :b2 :b3}})
                       (write-path :b1 {} "One" {"/order" 1})
                       (write-path :b2 {} "Two" {"/order" 2})
@@ -298,7 +298,7 @@
 
 (deftest test-schema-validation
   (let [type-graph
-          (-> (create-graph-v3)
+          (-> (create-graph)
               (build-component :building-type #{}
                                {
                                  :abstract true,
@@ -371,7 +371,7 @@
         (is (= [#{"three does not match range type :number"
                   "/size is required on :my-building, but not present"
                   "/coal is required on :i, but not present"}
-                (get-raw-data (write-o (create-graph-v3) :i "/iron" 3))]
+                (get-raw-data (write-o (create-graph) :i "/iron" 3))]
                (validate-raw-data graph))))
       (let [graph (write-path type-graph :my-slot {}
                               :water {"/type" :slot-type,

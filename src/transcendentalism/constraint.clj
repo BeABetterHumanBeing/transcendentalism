@@ -1,7 +1,7 @@
 (ns transcendentalism.constraint
   (:require [clojure.set :as set]
             [transcendentalism.encoding :refer :all]
-            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.graph :refer :all]
             [transcendentalism.tablet :refer :all]
             [transcendentalism.time :refer :all]
             [transcendentalism.toolbox :refer :all]))
@@ -249,7 +249,7 @@
 (defn validate
   "Validates a graph, returning [#{errors} graph]"
   [base-graph]
-  (let [graph (create-graph-v3 {} base-graph)]
+  (let [graph (create-graph {} base-graph)]
     (reduce-all result [#{} graph]
                 [[sub (read-ss graph)]
                  [type (get-types graph sub)]]

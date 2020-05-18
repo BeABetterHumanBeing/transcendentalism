@@ -1,7 +1,7 @@
 (ns transcendentalism.components.big-emoji
   (:require [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
-            [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.render :refer :all]))
 
