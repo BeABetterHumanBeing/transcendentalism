@@ -358,7 +358,7 @@
                                      "/contains" :my-building}
                               "/contains" "A Building" {"/type" :building-type,
                                                         "/size" 100})]
-        (is (= [#{":my-building has no non-abstract type"} (get-raw-data graph)]
+        (is (= [#{":my-building has no non-abstract type"} {}]
                (validate-raw-data graph))))
       (let [graph (write-path type-graph :my-slot {}
                               :water {"/type" :slot-type,
@@ -370,7 +370,7 @@
         (is (= [#{"three does not match range type :number"
                   "/size is required on :my-building, but not present"
                   "/coal is required on :i, but not present"}
-                (get-raw-data (write-o graph :i "/iron" 3))]
+                (get-raw-data (write-o (create-graph-v3) :i "/iron" 3))]
                (validate-raw-data graph))))
       (let [graph (write-path type-graph :my-slot {}
                               :water {"/type" :slot-type,
@@ -381,5 +381,5 @@
                                                           "/output" :o}
                               #{["/input" {"/iron" 3, "/coal" 2}]
                                 ["/output" {"/steel" 3}]})]
-        (is (= [#{} (get-raw-data graph)]
+        (is (= [#{} {}]
                (validate-raw-data graph)))))))
