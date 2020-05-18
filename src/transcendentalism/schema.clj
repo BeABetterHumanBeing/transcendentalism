@@ -17,7 +17,6 @@
             [transcendentalism.components.thesis :refer :all]
             [transcendentalism.constraint :refer :all]
             [transcendentalism.encoding :refer :all]
-            [transcendentalism.graph :as g1]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.render :refer :all]))
 
@@ -59,33 +58,6 @@
     "/type/item/raw_html" :raw-html-type
     "/type/item/thesis" :thesis-type
     (assert false (str pred " not supported"))))
-
-(defn- convert-from-type
-  [sub objs]
-  (let [obj (if (= (count objs) 1)
-                (first objs)
-                (first (set/difference objs #{:item-type})))]
-    (g1/->Triple sub
-                 (case obj
-                   :type "/type"
-                   :event-type "/type/event"
-                   :essay-type "/type/essay"
-                   :segment-type "/type/segment"
-                   :item-type "/type/item"
-                   :inline-item-type "/type/item/inline"
-                   :image-type "/type/item/image"
-                   :quote-type "/type/item/quote"
-                   :poem-type "/type/item/poem"
-                   :big-emoji-type "/type/item/big_emoji"
-                   :q-and-a-type "/type/item/q_and_a"
-                   :bullet-list-type "/type/item/bullet_list"
-                   :contact-type "/type/item/contact"
-                   :definition-type "/type/item/definition"
-                   :table-type "/type/item/table"
-                   :raw-html-type "/type/item/raw_html"
-                   :thesis-type "/type/item/thesis"
-                   (assert false (str obj " not supported")))
-                 nil {})))
 
 (defn triples-to-graph-v3
   "Converts triples to V3 graph"

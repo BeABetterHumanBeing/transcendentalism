@@ -1,8 +1,7 @@
 (ns transcendentalism.essays.miscellaneous
   (:require [clojure.string :as str]
             [transcendentalism.essay :refer :all]
-            [transcendentalism.html :refer :all]
-            [transcendentalism.graph :refer :all]))
+            [transcendentalism.html :refer :all]))
 
 ; Miscellaneous essays are essays that aren't organized elsewhere in the
 ; hierarchy. They may be linked-to via see-also, but otherwise the only way to

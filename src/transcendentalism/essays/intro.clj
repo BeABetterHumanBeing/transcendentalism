@@ -1,7 +1,6 @@
 (ns transcendentalism.essays.intro
   (:require [clojure.string :as str]
             [transcendentalism.essay :refer :all]
-            [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.loom :refer :all]))
 

@@ -1,6 +1,5 @@
 (ns transcendentalism.essays.consciousness
   (:require [transcendentalism.essay :refer :all]
-            [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]))
 
 (defn awareness-and-attention

@@ -1,6 +1,5 @@
 (ns transcendentalism.glossary
   (:require [clojure.string :as str]
-            [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.loom :refer :all]))
 

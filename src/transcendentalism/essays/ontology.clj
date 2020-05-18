@@ -2,7 +2,6 @@
   (:require [clojure.string :as str]
             [transcendentalism.essay :refer :all]
             [transcendentalism.glossary :refer :all]
-            [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]))
 
 ; Ontology

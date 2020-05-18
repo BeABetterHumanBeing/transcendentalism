@@ -2,7 +2,6 @@
   (:require [clojure.string :as str]
             [transcendentalism.encoding :refer :all]
             [transcendentalism.glossary :refer :all]
-            [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.loom :refer :all]))
 
@@ -22,6 +21,8 @@
     :else (throw (IllegalArgumentException.
                    "with-fork only allows Symbols in bindings"))))
 
+(defrecord Triple [sub pred obj p-vs])
+
 (defn create-loom
   ([essay-sub]
     (let [t (create-loom essay-sub essay-sub)]
@@ -32,7 +33,7 @@
          triples (atom [])]
      (reify Loom
        (add-triples [loom new-triples]
-         (if (instance? transcendentalism.graph.Triple new-triples)
+         (if (instance? Triple new-triples)
            (reset! triples (conj @triples new-triples))
            (reset! triples (concat @triples (flatten new-triples))))
          nil)
