@@ -25,14 +25,13 @@
             [transcendentalism.toolbox :refer :all])
   (:gen-class))
 
-(defn collect-essays
+(defn collect-triples
   []
-  (construct-graph
-    (flatten
-      [(glossary-essay) (intro-essays) (physics-essays) (ontology-essays)
-       (epistemology-essays) (morality-essays) (religion-essays)
-       (politics-essays) (consciousness-essays) (miscellaneous-essays)
-       (love-essays) (personal-essays) (randomness-essays)])))
+  (flatten
+    [(glossary-essay) (intro-essays) (physics-essays) (ontology-essays)
+     (epistemology-essays) (morality-essays) (religion-essays)
+     (politics-essays) (consciousness-essays) (miscellaneous-essays)
+     (love-essays) (personal-essays) (randomness-essays)]))
 
 (defn- prep-output
   "Collects all CSS and JS from the graph's renderers, and puts them in
@@ -61,8 +60,8 @@
   (apply set-flags args)
   (if (flag :sync)
       (time-msg "Syncing" (sync-resources-up))
-      (let [graph-v1 (time-msg "Construct Graph" (collect-essays)),
-            graph-v3 (time-msg "V1->V3" (graph-to-v3 graph-v1)),
+      (let [triples (time-msg "Construct Graph" (collect-triples)),
+            graph-v3 (time-msg "V1->V3" (triples-to-graph-v3 triples)),
             [v3-errors graph-final-v3] (time-msg "ValidateV3"
                                                  (validate-graph-v3 graph-v3))]
         (if (empty? v3-errors)

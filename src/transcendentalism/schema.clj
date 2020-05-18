@@ -87,42 +87,19 @@
                    (assert false (str obj " not supported")))
                  nil {})))
 
-(defn graph-to-v3
-  "Converts V1 to V3 graph"
-  [graph-v1]
-  (let [triples (g1/all-triples graph-v1)]
-    (reduce
-      (fn [graph triple]
-        (if (empty? (:p-vs triple))
-            (if (str/starts-with? (:pred triple) "/type")
-                (write-o graph (:sub triple) "/type" (convert-to-type (:pred triple)))
-                (write-o graph (:sub triple) (:pred triple) (:obj triple)))
-            (let [obj-sub (keyword (gen-key 10))]
-              (write-o (write-preds graph obj-sub (:obj triple) (:p-vs triple))
-                       (:sub triple) (:pred triple) obj-sub))))
-      (create-graph-v3) triples)))
-
-(defn graph-to-v1
-  [graph-v3]
-  (g1/construct-graph
-    (reduce
-      (fn [result sub]
-        (if (nil? (read-v graph-v3 sub))
-            (reduce
-              (fn [result pred]
-                (if (= pred "/type")
-                    (conj result (convert-from-type sub (read-os graph-v3 sub pred)))
-                    (reduce
-                      (fn [result obj]
-                        (if (or (not (keyword? obj))
-                                (nil? (read-v graph-v3 obj)))
-                            (conj result (g1/->Triple sub pred obj {}))
-                            (conj result (g1/->Triple sub pred (read-v graph-v3 obj)
-                                                               (read-preds graph-v3 obj)))))
-                      result (read-os graph-v3 sub pred))))
-              result (read-ps graph-v3 sub))
-            result))
-      [] (read-ss graph-v3))))
+(defn triples-to-graph-v3
+  "Converts triples to V3 graph"
+  [triples]
+  (reduce
+    (fn [graph triple]
+      (if (empty? (:p-vs triple))
+          (if (str/starts-with? (:pred triple) "/type")
+              (write-o graph (:sub triple) "/type" (convert-to-type (:pred triple)))
+              (write-o graph (:sub triple) (:pred triple) (:obj triple)))
+          (let [obj-sub (keyword (gen-key 10))]
+            (write-o (write-preds graph obj-sub (:obj triple) (:p-vs triple))
+                     (:sub triple) (:pred triple) obj-sub))))
+    (create-graph-v3) triples))
 
 (defn item-component
   [graph]
