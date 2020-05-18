@@ -2,6 +2,7 @@
   (:require [clojure.set :as set]
             [transcendentalism.encoding :refer :all]
             [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.tablet :refer :all]
             [transcendentalism.time :refer :all]
             [transcendentalism.toolbox :refer :all]))
 

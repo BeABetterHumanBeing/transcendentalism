@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [transcendentalism.constraint :refer :all]
             [transcendentalism.graph-v3 :refer :all]
+            [transcendentalism.tablet :refer :all]
             [transcendentalism.time :refer :all]))
 
 (defn check-constraint-raw-data

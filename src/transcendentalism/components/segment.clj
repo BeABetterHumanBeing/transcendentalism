@@ -7,6 +7,7 @@
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.render :refer :all]
+            [transcendentalism.tablet :refer :all]
             [transcendentalism.toolbox :refer :all]))
 
 (defmacro assoc*

@@ -8,6 +8,7 @@
             [transcendentalism.html :refer :all]
             [transcendentalism.js :refer :all]
             [transcendentalism.render :refer :all]
+            [transcendentalism.tablet :refer :all]
             [transcendentalism.toolbox :refer :all]
             [transcendentalism.xml :refer :all]))
 
