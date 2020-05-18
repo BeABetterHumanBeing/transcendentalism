@@ -87,39 +87,33 @@
             (cxns-by-type :up [])
             (cxns-by-type :random []))))
 
-(defn- to-css-class
-  [type]
-  (case type
-    :up "up"
-    :down "down"
-    :across "across"
-    :menu "menu"
-    :random "random"))
+(defn- full-cxn-name
+  [cxn]
+  (str (case (:type cxn)
+         :up "&#8593 ",
+         :down "&#8595 ",
+         :across "&#8594 ",
+         "")
+       (:name cxn)))
 
 (defn- generate-link
   "Returns the HTML for a link in the footer"
   [sub cxn]
   (let [btn
         (if (= (:type cxn) :random)
-            (button {"class" (str "link_segment " (to-css-class (:type cxn))),
+            (button {"class" (str "link_segment " (name (:type cxn))),
                      "onclick" (call-js "openRandomSegment"
                                  (js-str (name sub))
                                  (js-array (map #(js-str (name %)) (:dest cxn))))}
                     "? Random")
-            (let [link-id (str (name sub) "-" (name (:dest cxn))),
-                  full-name (str (case (:type cxn)
-                                   :up "&#8593 ",
-                                   :down "&#8595 ",
-                                   :across "&#8594 ",
-                                   "")
-                                 (:name cxn))]
+            (let [link-id (str (name sub) "-" (name (:dest cxn)))]
               (button {"id" link-id,
-                       "class" (str "link_segment " (to-css-class (:type cxn))),
+                       "class" (str "link_segment " (name (:type cxn))),
                        "onclick" (call-js "openSegment"
                                    (js-str (name sub))
                                    (js-str (name (:dest cxn)))
                                    (js-str (:name cxn)))}
-                      full-name))),
+                      (full-cxn-name cxn)))),
         show-btn (script {"defer" "true"}
                    (chain (jq (js-str ".link_segment"))
                           (c "css" (js-str "display") (js-str "inline")))),
@@ -127,15 +121,9 @@
         (xml-tag "noscript" {}
           (if (= (:type cxn) :random)
               "" ; Random button doesn't work w/o JS, full-stop
-              (let [full-name (str (case (:type cxn)
-                                     :up "&#8593 ",
-                                     :down "&#8595 ",
-                                     :across "&#8594 ",
-                                     "")
-                                   (:name cxn))]
-                (a {"href" (:dest cxn),
-                    "class" (str "simple_link " (to-css-class (:type cxn)))}
-                   full-name))))]
+              (a {"href" (:dest cxn),
+                  "class" (str "simple_link " (name (:type cxn)))}
+                 (full-cxn-name cxn))))]
     (str btn show-btn no-btn)))
 
 (def load-with
@@ -352,7 +340,6 @@
                  (let [menu (read-v graph o),
                        title (unique-or-nil graph o "/title")]
                    (if (nil? (get-graphlet graph menu))
-                       ;(println "Creating menu" menu "under" sub)
                        (write-path result #{menu} {}
                          [{"/type" :essay-type,
                             "/essay/title" title,
@@ -376,7 +363,6 @@
              (let [o (unique-or-nil graph sub "/essay/flow/home")]
                (if (= (unique-or-nil graph o "/label") :menu)
                    (let [home (read-v graph o)]
-                     ; (println "Filing" sub "under" home)
                      (write-path graph #{home} {}
                        {"/essay/flow/see_also" sub}))
                    graph))]))
