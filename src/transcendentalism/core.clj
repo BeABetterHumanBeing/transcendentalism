@@ -2,7 +2,6 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [transcendentalism.amazon :refer :all]
-            [transcendentalism.directive :refer :all]
             [transcendentalism.essay :refer :all]
             [transcendentalism.essays.consciousness :refer :all]
             [transcendentalism.essays.epistemology :refer :all]
@@ -26,17 +25,14 @@
             [transcendentalism.toolbox :refer :all])
   (:gen-class))
 
-(def meta-directives
-  [directive-label-menus])
-
 (defn collect-essays
   []
   (construct-graph
-    (apply-directives
-      meta-directives (glossary-essay) (intro-essays) (physics-essays)
-      (ontology-essays) (epistemology-essays) (morality-essays) (religion-essays)
-      (politics-essays) (consciousness-essays) (miscellaneous-essays)
-      (love-essays) (personal-essays) (randomness-essays))))
+    (flatten
+      [(glossary-essay) (intro-essays) (physics-essays) (ontology-essays)
+       (epistemology-essays) (morality-essays) (religion-essays)
+       (politics-essays) (consciousness-essays) (miscellaneous-essays)
+       (love-essays) (personal-essays) (randomness-essays)])))
 
 (defn- prep-output
   "Collects all CSS and JS from the graph's renderers, and puts them in

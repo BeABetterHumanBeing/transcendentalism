@@ -163,7 +163,15 @@
      definition-component table-component raw-html-component thesis-component]))
 
 (defn validate-graph-v3
-  [graph]
-  (let [[errors final-graph] (validate (merge-graph graph component-graph))]
-    (doall (map #(println %) errors))
-    [errors final-graph]))
+  "Validates a graph. If errors occur, but new graph was generated, re-runs
+   validation (to catch the event where the new graph satisfied the errors)"
+  [initial-graph]
+  ; TODO - Multiple attempts are inefficient. Validation ought to be smart
+  ; enough to remember *which* subs failed, and whiche nodes were modified, and
+  ; only re-validate just those.
+  (loop [graph initial-graph]
+    (let [[errors final-graph] (validate (merge-graph graph component-graph))]
+      (if (or (= initial-graph final-graph) (empty? errors))
+          (do (doall (map println errors))
+              [errors final-graph])
+          (recur final-graph)))))

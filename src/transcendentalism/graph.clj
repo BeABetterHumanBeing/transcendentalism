@@ -7,10 +7,6 @@
 ; by means of a predicate.
 (defrecord Triple [sub pred obj p-vs])
 
-(defn property
-  [triple pred default]
-  ((:p-vs triple) pred default))
-
 (defn index-by-sub
   "Indexes a collection of triples by their subjects"
   [triples]

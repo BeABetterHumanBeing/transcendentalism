@@ -3,6 +3,7 @@
             [transcendentalism.css :refer :all]
             [transcendentalism.color :refer :all]
             [transcendentalism.constraint :refer :all]
+            [transcendentalism.encoding :refer :all]
             [transcendentalism.flags :refer :all]
             [transcendentalism.graph-v3 :refer :all]
             [transcendentalism.html :refer :all]
@@ -342,6 +343,43 @@
                 [#{} graph]
                 [#{}
                  (write-o graph :monad "/essay/flow/random" sub)])))
+        ; Create any necessary menus with the minimum required properties.
+        (reify Constraint
+          (check-constraint [constraint graph sub]
+            [#{}
+             (reduce
+               (fn [result o]
+                 (let [menu (read-v graph o),
+                       title (unique-or-nil graph o "/title")]
+                   (if (nil? (get-graphlet graph menu))
+                       ;(println "Creating menu" menu "under" sub)
+                       (write-path result #{menu} {}
+                         [{"/type" :essay-type,
+                            "/essay/title" title,
+                            "/essay/flow/home" (keyword (gen-key 10)),
+                            "/essay/label" :invisible,
+                            "/essay/contains" (keyword (gen-key 10))}
+                          #{["/essay/flow/home" sub {"/label" :none}]
+                            ["/essay/contains"
+                             {"/type" :segment-type,
+                              "/segment/contains" (keyword (gen-key 10))}
+                             "/segment/contains"
+                             {"/type" :inline-item-type,
+                              "/item/inline/text" "PLACEHOLDER-TEXT"}]}])
+                       result)))
+               graph (read-os graph sub "/essay/flow/menu"))]))
+        ; If the essay is filed under a menu, add that essay to the menu's
+        ; see-also list.
+        (reify Constraint
+          (check-constraint [constraint graph sub]
+            [#{}
+             (let [o (unique-or-nil graph sub "/essay/flow/home")]
+               (if (= (unique-or-nil graph o "/label") :menu)
+                   (let [home (read-v graph o)]
+                     ; (println "Filing" sub "under" home)
+                     (write-path graph #{home} {}
+                       {"/essay/flow/see_also" sub}))
+                   graph))]))
       ],
       :preds {
         "/essay/title" {
