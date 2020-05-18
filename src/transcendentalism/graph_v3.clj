@@ -49,8 +49,12 @@
                  result
                  (assoc result
                    sub (->Graphlet (:v graphlet)
-                                   (merge (:p-os (sub result))
-                                          (:p-os graphlet))))))
+                                   (reduce-kv
+                                     (fn [result p os]
+                                         (assoc result
+                                                p (set/union (result p #{}) os)))
+                                     (:p-os (sub result) {}) (:p-os graphlet))
+                                   ))))
            raw-data (get-raw-data other))
          base-graph))
      (flatten-graph [graph]

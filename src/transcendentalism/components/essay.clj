@@ -49,16 +49,19 @@
       [(->Cxn :connections "Connections" :across)]
       (let [flow-preds (filter #(str/starts-with? % "/essay/flow")
                                (read-ps graph sub)),
-            flow-objs (reduce-all result {}
-                                  [[pred flow-preds]
-                                   [o (read-os graph sub pred)]]
-                        (if (set? o)
-                            (assoc result o pred)
-                            (let [val (read-v graph o),
-                                  target (if (nil? val) o val)]
-                              (assoc result
-                                     target
-                                     (priority-flow pred (result target pred))))))]
+            flow-objs (reduce
+                        (fn [result pred]
+                          (if (= pred "/essay/flow/random")
+                              (assoc result (read-os graph sub pred) pred)
+                              (reduce
+                                (fn [result o]
+                                  (let [val (read-v graph o),
+                                        target (if (nil? val) o val)]
+                                    (assoc result
+                                           target
+                                           (priority-flow pred (result target pred)))))
+                                result (read-os graph sub pred))))
+                        {} flow-preds)]
         (reduce-kv
           (fn [result obj pred]
             (if (= pred "/essay/flow/random")
@@ -324,6 +327,7 @@
                   [#{} graph]
                   [#{(str sub " /essay/flow/home does not lead to :monad")}
                    graph])))),
+        ; Add see-also links at essay-level for any see-also segments within it.
         (reify Constraint
           (check-constraint [constraint graph sub]
             [#{}
@@ -331,6 +335,13 @@
                (fn [result see-also]
                  (write-o result sub "/essay/flow/see_also" see-also))
                graph (read-path graph sub essay-to-see-also-pathable))]))
+        ; Add the essay to the list of randomly accessible essays.
+        (reify Constraint
+          (check-constraint [constraint graph sub]
+            (if (= sub :monad)
+                [#{} graph]
+                [#{}
+                 (write-o graph :monad "/essay/flow/random" sub)])))
       ],
       :preds {
         "/essay/title" {
@@ -381,8 +392,7 @@
         },
         "/essay/flow/random" {
           :description "Relation to a random essay",
-          ; TODO - range ought to be a set of essays
-          :range-type nil,
+          :range-type :essay-type,
         },
         "/essay/contains" {
           :description "Relation from an essay to the segment it contains",
