@@ -650,9 +650,105 @@
 
     (file-under :politics)))
 
+(defn electoral-college
+  []
+  (essay :electoral-college "Land Does Vote"
+    (paragraph
+      (text "Recently (this is 2020), I've been seeing a surge of \"Land doesn't"
+            "vote, people do\" sentiments w.r.t. the US's ")
+      (tangent (f 0) "electoral college")
+      (text ". The sentiment, expressed mostly by supporters of the Democratic"
+            "Party, is that the electoral college is unfair, because it weighs"
+            "voters' votes in a way that gives ")
+      (tangent (f 1) "a distinct advantage")
+      (text " to people from less populous states over more populous ones."))
+
+    (footnote (f 0)
+      (paragraph
+        (text "In the United States, the president is elected not directly by"
+              "the populace, but indirectly by means of the ")
+        (link "https://en.wikipedia.org/wiki/United_States_Electoral_College"
+              "Electoral College")
+        (text
+          ". In this scheme, votes are collected at the state-level, and the"
+          "state sends electors to vote on their behalf. Most states award "
+          (i "all") " electors to whomever won the state-level popular vote;"
+          "Maine and Nebraska split their electors by relative proportions.")))
+
+    (footnote (f 1)
+      (text "Assuming even voting probabilities, the vote of a Wyomingan is"
+            "worth 3.72 times as much as that of a Californian."))
+
+    (text
+      "Having lost multiple presidential elections in living memory despite"
+      "having had the popular vote, this has generated some ire in the Democratic"
+      "party towards the institution of the electoral college, and there's a"
+      "rising popular sentiment to do away with it.")
+
+    (text
+      "Setting aside the issue of whether the electoral college should be abolished,"
+      "I want to address the sentiment directly: " (b "land does vote") ".")
+
+    (paragraph
+      (text
+        "The size of the electoral college (538) is not arbitrary. It equals the"
+        "size of congress, provided that the District of Columbia were a state."
+        "Each state has two state senators, and the 435 members of the House of"
+        "Representatives (capped at that number ")
+      (link "https://history.house.gov/Historical-Highlights/1901-1950/The-Permanent-Apportionment-Act-of-1929/"
+            "in 1929")
+      (text ") are apportioned by population of the state, under the requirement"
+            "that each state have a minimum of one."))
+
+    (paragraph
+      (text "The electoral college, in other words, represents an additive hybrid"
+            "of two separate systems of representation: ")
+      (tangent (f 2) "political and popular")
+      (text ". Each one has its own separate notion of " (i "fairness") ", and"
+            "the combination of the two obeys its own; this is the reason it"
+            "appears to be 'unfair' when compared against the standard of only"
+            "one of its two halves. In a political union, each constituent polity"
+            "(i.e. state) is equivalently powerful. In a popular union, each""
+            constituent person is ")
+      (tangent (f 3) "equivalently powerful") dot)
+
+    (footnote (f 2)
+      (text "Where the popular system is given 4.27 times the weight (436 to 102)."))
+
+    (footnote (f 3)
+      (text "Up to a rounding error."))
+
+    (text "When a voter goes to the polls, they are effectively voting " (i "twice")
+          ": once on behalf of themselves, and once on behalf of the state to"
+          "which they belong. The idea that \"land doesn't vote\" comes from"
+          "forgetting this second part.")
+
+    (paragraph
+      (text "For what it's worth, many Americans don't have a strong sense of"
+            "state-identity. ")
+      (link "https://www.citylab.com/life/2019/03/mobile-stuck-us-geography-map-where-americans-moving/584083/"
+            "41.5%")
+      (text " live in a state other than the one ")
+      (tangent (f 4) "in which they were born")
+      (text " (excluding immigrants). The populists who call for the elimination"
+            "of the electoral college, moreover, often fall further on the"
+            "federalist-confederate spectrum, valuing nation-level authority"
+            "over state-level authority."))
+
+    (footnote (f 4)
+      (text
+        "Interestingly, the states with the highest proportion of static residency"
+        "include most of the traditional 'battleground' states: Iowa, Ohio,"
+        "Wisconsin, Michigan, and Pennsylvania. These are the states that stand"
+        "to lose the most if the political union were removed from the electoral"
+        "college, in terms of sheer influence on the election's outcome. That"
+        "they would also stand to lose the most in terms of state identity"
+        "appears to be a peculiar coincidence."))
+    (file-under :politics)))
+
 (defn politics-essays
   []
   [(essay-series [:enlightened-centrism :tug-of-war :balance-beam :figure-skating])
    (enlightened-centrism) (tug-of-war) (balance-beam) (figure-skating)
    (red-white-black) (conservatism-101) (personal-responsibility)
-   (natural-aristocracies)])
+   (natural-aristocracies) (electoral-college)])
