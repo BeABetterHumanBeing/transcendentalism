@@ -21,16 +21,21 @@
             [transcendentalism.render :refer :all]
             [transcendentalism.schema :refer :all]
             [transcendentalism.server :refer :all]
+            [transcendentalism.tablet-v2 :refer :all]
             [transcendentalism.toolbox :refer :all])
   (:gen-class))
 
-(defn collect-triples
+(defn collect-graph
   []
-  (flatten
-    [(glossary-essay) (intro-essays) (physics-essays) (ontology-essays)
-     (epistemology-essays) (morality-essays) (religion-essays)
-     (politics-essays) (consciousness-essays) (miscellaneous-essays)
-     (love-essays) (personal-essays) (randomness-essays)]))
+  (reduce
+    (fn [result tablet]
+      (commit-txn tablet result))
+    component-graph
+    (flatten
+      [(glossary-essay) (intro-essays) (physics-essays) (ontology-essays)
+       (epistemology-essays) (morality-essays) (religion-essays)
+       (politics-essays) (consciousness-essays) (miscellaneous-essays)
+       (love-essays) (personal-essays) (randomness-essays)])))
 
 (defn- prep-output
   "Collects all CSS and JS from the graph's renderers, and puts them in
@@ -59,11 +64,7 @@
   (apply set-flags args)
   (if (flag :sync)
       (time-msg "Syncing" (sync-resources-up))
-      (let [triples (time-msg "Construct Graph" (collect-triples)),
-            graph (time-msg "Triples->Graph" (triples-to-graph triples)),
-            [errors graph-final] (time-msg "Validate" (validate-graph graph))]
-        (if (empty? errors)
-          (let [flattened-graph (flatten-graph graph-final)]
-            (do (prep-output flattened-graph)
-                (launch-server flattened-graph)))
-          (println "Graph fails validation!")))))
+      (let [graph (time-msg "Construct Graph" (collect-graph)),
+            flattened-graph (flatten-graph graph)]
+        (prep-output flattened-graph)
+        (launch-server flattened-graph))))

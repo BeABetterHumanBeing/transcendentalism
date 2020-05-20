@@ -2,7 +2,8 @@
 
 (defprotocol Loom
   (add-triples [loom new-triples] "Adds some triples to the thread")
-  (essay-triples [loom] "Returns the triples on the thread")
+  (get-tablet [loom] "Returns the tablet on the thread")
+  (merge-tablet [loom tablet] "Merges another tablet with the current one")
   (get-essay-sub [loom] "Returns the top-level essay sub")
   (fork-loom [loom new-sub]
     "Returns a new essay thread with the same essay sub")

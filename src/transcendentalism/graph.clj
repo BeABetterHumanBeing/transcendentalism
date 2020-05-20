@@ -61,7 +61,7 @@
        (if (nil? base-graph)
            graph
            (create-graph (merge (get-raw-data (flatten-graph base-graph))
-                                   raw-data))))
+                                raw-data))))
      ReadGraph
      (read-ss [graph]
        (let [my-subs (into #{} (keys raw-data))]
@@ -92,6 +92,20 @@
                          (assoc p-os pred
                            (conj (p-os pred #{}) obj))))
            base-graph))))))
+
+(defn read-protected-write-v
+  "A version of write-v that only writes non-idempotent vals"
+  [graph sub val]
+  (if (= (read-v graph sub) val)
+      graph
+      (write-v graph sub val)))
+
+(defn read-protected-write-o
+  "A version of write-o that only writes non-idempotent pred-objs"
+  [graph sub pred obj]
+  (if (contains? (read-os graph sub pred) obj)
+      graph
+      (write-o graph sub pred obj)))
 
 (defn unique-or-nil
   [graph sub pred]

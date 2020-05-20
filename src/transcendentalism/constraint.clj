@@ -245,16 +245,3 @@
                (merge {"/type" :type}
                       (if (empty? supertypes) {} {"/supertype" supertypes})
                       (if (nil? renderer) {} {"/renderer" renderer})))))
-
-(defn validate
-  "Validates a graph, returning [#{errors} graph]"
-  [base-graph]
-  (let [graph (create-graph {} base-graph)]
-    (reduce-all result [#{} graph]
-                [[sub (read-ss graph)]
-                 [type (get-types graph sub)]]
-      (let [type-root (read-v graph type)]
-        (if (satisfies? TypeRoot type-root)
-            (accumulate-constraint result
-              (check-constraint (get-constraint type-root) graph sub))
-            result)))))

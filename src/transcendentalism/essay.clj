@@ -2,8 +2,10 @@
   (:require [clojure.string :as str]
             [transcendentalism.encoding :refer :all]
             [transcendentalism.glossary :refer :all]
+            [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]
-            [transcendentalism.loom :refer :all]))
+            [transcendentalism.loom :refer :all]
+            [transcendentalism.tablet-v2 :refer :all]))
 
 (defn item-sub [sub] (sub-suffix sub "i"))
 
@@ -17,7 +19,7 @@
     (= (count bindings) 0) `(do ~@body)
     (symbol? (bindings 0)) `(let [~(bindings 0) (fork-loom ~loom ~(bindings 1))]
                               (with-fork ~loom ~(subvec bindings 2) ~@body)
-                              (add-triples ~loom (essay-triples ~(bindings 0))))
+                              (merge-tablet ~loom (get-tablet ~(bindings 0))))
     :else (throw (IllegalArgumentException.
                    "with-fork only allows Symbols in bindings"))))
 
@@ -30,14 +32,26 @@
       t))
   ([essay-sub sub]
    (let [key-gen (create-key-gen sub),
-         triples (atom [])]
+         tablet (atom (create-tablet-v2))]
      (reify Loom
        (add-triples [loom new-triples]
          (if (instance? Triple new-triples)
-           (reset! triples (conj @triples new-triples))
-           (reset! triples (concat @triples (flatten new-triples))))
+           (reset! tablet (add-triple @tablet (:sub new-triples)
+                                              (:pred new-triples)
+                                              (:obj new-triples)
+                                              (:p-vs new-triples)))
+           (reset! tablet (reduce
+                            (fn [result triple]
+                              (add-triple result (:sub triple)
+                                                 (:pred triple)
+                                                 (:obj triple)
+                                                 (:p-vs triple)))
+                            @tablet (flatten new-triples))))
          nil)
-       (essay-triples [loom] @triples)
+       (get-tablet [loom] @tablet)
+       (merge-tablet [loom other]
+         (reset! tablet (add-graph @tablet (tablet-as-graph other)))
+         nil)
        (get-essay-sub [loom] essay-sub)
        (fork-loom [loom new-sub]
          (create-loom essay-sub new-sub))
@@ -313,19 +327,26 @@
   [sub title & fns]
   (let [t (create-loom sub)]
     (knot-essay t sub title fns)
-    (essay-triples t)))
+    (get-tablet t)))
 
 (defn essay-series
   "Adds triples connecting a series of essay segments. The first segment will
    be used as the home for the rest of the series."
   [subs]
   (let [home (first subs)]
-    (concat
-      (into [] (map #(->Triple % "/essay/flow/home" home {"/label" :none})
-                    (rest subs)))
-      (into [] (map #(->Triple
-                      (get subs %) "/essay/flow/next" (get subs (inc %)) {})
-                    (range (dec (count subs))))))))
+    (reduce
+      (fn [result triple]
+        (add-triple result (:sub triple)
+                           (:pred triple)
+                           (:obj triple)
+                           (:p-vs triple)))
+      (create-tablet-v2)
+      (concat
+        (into [] (map #(->Triple % "/essay/flow/home" home {"/label" :none})
+                      (rest subs)))
+        (into [] (map #(->Triple
+                        (get subs %) "/essay/flow/next" (get subs (inc %)) {})
+                      (range (dec (count subs)))))))))
 
 (defn footnote
   [virtual-sub & fns]

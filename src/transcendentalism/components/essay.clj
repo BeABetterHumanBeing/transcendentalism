@@ -322,7 +322,7 @@
             [#{}
              (reduce
                (fn [result see-also]
-                 (write-o result sub "/essay/flow/see_also" see-also))
+                 (read-protected-write-o result sub "/essay/flow/see_also" see-also))
                graph (read-path graph sub essay-to-see-also-pathable))]))
         ; Add the essay to the list of randomly accessible essays.
         (reify Constraint
@@ -330,7 +330,7 @@
             (if (= sub :monad)
                 [#{} graph]
                 [#{}
-                 (write-o graph :monad "/essay/flow/random" sub)])))
+                 (read-protected-write-o graph :monad "/essay/flow/random" sub)])))
         ; Create any necessary menus with the minimum required properties.
         (reify Constraint
           (check-constraint [constraint graph sub]
@@ -363,8 +363,7 @@
              (let [o (unique-or-nil graph sub "/essay/flow/home")]
                (if (= (unique-or-nil graph o "/label") :menu)
                    (let [home (read-v graph o)]
-                     (write-path graph #{home} {}
-                       {"/essay/flow/see_also" sub}))
+                     (read-protected-write-o graph home "/essay/flow/see_also" sub))
                    graph))]))
       ],
       :preds {
