@@ -8,14 +8,15 @@
 (defn css
   [tagname attrs & contents]
   (let [selector
-        (str (if (contains? attrs "class")
-               (str "." (attrs "class"))
-               (if (contains? attrs "id")
-                 (str "#" (attrs "id"))
-                 ""))
-             (if (contains? attrs "selector")
-               (str ":" (attrs "selector"))
-               ""))]
+        (apply str
+          (reduce-kv
+            (fn [result k v]
+              (conj result
+                (case k
+                  "class" (str "." v)
+                  "id" (str "#" v)
+                  "selector" (str ":" v))))
+            [] attrs))]
     (str/join "\n" [(str tagname selector " {") (str/join "\n" contents) "}"])))
 
 (defn- style [name content] (str name ": " content ";"))

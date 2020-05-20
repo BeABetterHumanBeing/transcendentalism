@@ -1,6 +1,7 @@
 (ns transcendentalism.render
   (:require [clojure.string :as str]
             [transcendentalism.color :refer :all]
+            [transcendentalism.css :refer :all]
             [transcendentalism.constraint :refer :all]
             [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]
@@ -9,35 +10,36 @@
 
 (defn- render-fn
   [sub]
-  (span {} "(" (span {"style" (str "color:" (to-css-color red))} sub) ")"))
+  (span {} "(" (span {"class" "fn"} sub) ")"))
 
 (defn- render-bool
   [sub]
-  (span {"style" (str "color:" (to-css-color orange))} (if sub "true" "false")))
+  (span {"class" "bool"} (if sub "true" "false")))
 
 (defn- render-string
   [sub]
-  (span {"style" (str "color:" (to-css-color yellow))} "\"" sub "\""))
+  (span {"class" "str"} "\"" sub "\""))
 
 (defn- render-number
   [sub]
-  (span {"style" (str "color:" (to-css-color light-blue))} sub))
+  (span {"class" "num"} sub))
 
 (defn- render-time
   [sub]
-  (span {"style" (str "color:" (to-css-color green))} (str sub)))
+  (span {"class" "time"} (str sub)))
 
 (defn- render-enum
   [sub]
-  (span {"style" (str "color:" (to-css-color purple))} sub))
+  (span {"class" "enum"} sub))
 
 (defn- render-pred
   [pred]
-  (span {"style" (str "color:" (to-css-color gray))} pred))
+  (span {"class" "pred"} pred))
 
 (defn- render-sub-link
   [sub]
-  (a {"href" (str sub "?renderer=default")} sub))
+  (a {"class" "sub_link",
+      "href" (str sub "?renderer=default")} sub))
 
 (defn- render-primitive
   [graph sub]
@@ -54,7 +56,7 @@
 (defn render-default
   [graph sub]
   (div {"id" sub,
-        "style" "margin:0 auto;text-align:left;"}
+        "class" "sub"}
     sub " " (let [v (read-v graph sub)]
               (if (nil? v)
                   ""
@@ -91,7 +93,9 @@
     (get-renderer-name [renderer] "fn")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-fn sub))
-    (render-css [renderer is-mobile] "")
+    (render-css [renderer is-mobile]
+      (css "span" {"class" "fn"}
+        (color (to-css-color red))))
     (render-js [renderer] "")))
 
 (def bool-renderer
@@ -99,7 +103,9 @@
     (get-renderer-name [renderer] "bool")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-bool sub))
-    (render-css [renderer is-mobile] "")
+    (render-css [renderer is-mobile]
+      (css "span" {"class" "bool"}
+        (color (to-css-color orange))))
     (render-js [renderer] "")))
 
 (def string-renderer
@@ -107,7 +113,9 @@
     (get-renderer-name [renderer] "string")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-string sub))
-    (render-css [renderer is-mobile] "")
+    (render-css [renderer is-mobile]
+      (css "span" {"class" "str"}
+        (color (to-css-color yellow))))
     (render-js [renderer] "")))
 
 (def number-renderer
@@ -115,7 +123,9 @@
     (get-renderer-name [renderer] "number")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-number))
-    (render-css [renderer is-mobile] "")
+    (render-css [renderer is-mobile]
+      (css "span" {"class" "num"}
+        (color (to-css-color light-blue))))
     (render-js [renderer] "")))
 
 (def time-renderer
@@ -123,7 +133,9 @@
     (get-renderer-name [renderer] "time")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-time sub))
-    (render-css [renderer is-mobile] "")
+    (render-css [renderer is-mobile]
+      (css "span" {"class" "time"}
+        (color (to-css-color green))))
     (render-js [renderer] "")))
 
 (def enum-renderer
@@ -131,7 +143,9 @@
     (get-renderer-name [renderer] "enum")
     (get-priority [renderer] 2)
     (render-html [renderer params graph sub] (render-enum sub))
-    (render-css [renderer is-mobile] "")
+    (render-css [renderer is-mobile]
+      (css "span" {"class" "enum"}
+        (color (to-css-color purple))))
     (render-js [renderer] "")))
 
 (def type-renderer
@@ -157,7 +171,19 @@
     (get-renderer-name [renderer] "default")
     (get-priority [renderer] 1)
     (render-html [renderer params graph sub] (render-default graph sub))
-    (render-css [renderer is-mobile] "")
+    (render-css [renderer is-mobile]
+      (str/join "\n" [
+        (css "div" {"class" "sub"}
+          (margin "0" "auto")
+          (text-align "left"))
+        (css "a" {"class" "sub_link"}
+          (color (to-css-color black))
+          (text-decoration "none"))
+        (css "a" {"class" "sub_link",
+                  "selector" "hover"}
+          (text-decoration "underline"))
+        (css "span" {"class" "pred"}
+          (color (to-css-color gray)))]))
     (render-js [renderer] "")))
 
 (defn- get-renderers
@@ -168,7 +194,7 @@
     :string #{string-renderer}
     :number #{number-renderer}
     :time #{time-renderer}
-    :type #{type-renderer}
+    :type #{type-renderer default-renderer}
     (if (contains? (get-raw-data graph) type)
         (conj (read-os graph type "/renderer") default-renderer)
         #{enum-renderer})))
@@ -184,6 +210,7 @@
                      (assoc result (get-renderer-name renderer) renderer)),
          renderer (if (contains? params "renderer")
                       (let [name (params "renderer")]
+                        (println "Selecting renderer" sub renderers name)
                         (if (contains? renderers name)
                             (renderers name)
                             (invalid-renderer name)))
@@ -195,4 +222,6 @@
   (reduce
     (fn [result sub]
       (into result (read-os graph sub "/renderer")))
-    [] (read-ss graph)))
+    [fn-renderer bool-renderer string-renderer number-renderer time-renderer
+     enum-renderer type-renderer default-renderer]
+    (read-ss graph)))
