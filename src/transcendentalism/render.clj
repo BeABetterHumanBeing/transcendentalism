@@ -1,5 +1,6 @@
 (ns transcendentalism.render
-  (:require [clojure.string :as str]
+  (:require [clojure.edn :as edn]
+            [clojure.string :as str]
             [transcendentalism.color :refer :all]
             [transcendentalism.css :refer :all]
             [transcendentalism.constraint :refer :all]
@@ -37,41 +38,51 @@
   (span {"class" "pred"} pred))
 
 (defn- render-sub-link
-  [sub]
+  [params sub]
   (a {"class" "sub_link",
-      "href" (str sub "?renderer=default")} sub))
-
-(defn- render-primitive
-  [graph sub]
-  (cond
-    (fn? sub) (render-fn sub)
-    (instance? Boolean sub) (render-bool sub)
-    (string? sub) (render-string sub)
-    (number? sub) (render-number sub)
-    (is-valid-time sub) (render-time sub)
-    :else (if (contains? (get-raw-data graph) sub)
-              (render-sub-link sub)
-              (render-enum sub))))
+      "href" (str sub "?"
+                  (str/join "&"
+                    (concat []
+                      (map #(str (first %) "=" (second %))
+                           params))))} sub))
 
 (defn render-default
-  [graph sub]
-  (div {"id" sub,
-        "class" "sub"}
-    sub " " (let [v (read-v graph sub)]
-              (if (nil? v)
-                  ""
-                  (render-primitive graph v)))
-    (str/join " "
-      (reduce
-        (fn [result pred]
-          (conj result
-            (apply div {} (render-pred pred) " "
-              (str/join ", "
-                (reduce
-                  (fn [result obj]
-                    (conj result (render-primitive graph obj)))
-                  [] (read-os graph sub pred))))))
-        [] (read-ps graph sub)))))
+  [params graph sub]
+  (letfn [(render-primitive [og-params params graph sub]
+            (cond
+              (fn? sub) (render-fn sub)
+              (instance? Boolean sub) (render-bool sub)
+              (string? sub) (render-string sub)
+              (number? sub) (render-number sub)
+              (is-valid-time sub) (render-time sub)
+              :else (if (contains? (get-raw-data graph) sub)
+                        (if (= (params "depth" 0) 0)
+                            (render-sub-link og-params sub)
+                            (inner-render-default og-params params graph sub))
+                        (render-enum sub))))
+          (inner-render-default [og-params params graph sub]
+            (let [depth (params "depth" 1),
+                  new-params (assoc params "depth" (dec depth))]
+              (div {"id" sub,
+                    "class" "sub"}
+                sub " " (let [v (read-v graph sub)]
+                          (if (nil? v)
+                              ""
+                              (render-primitive og-params new-params graph v)))
+                (str/join " "
+                  (reduce
+                    (fn [result pred]
+                      (conj result
+                        (apply div {"class" "pred_tree"}
+                          (str (render-pred pred) " ")
+                          (str/join (div {}) ; Empty div to fill first grid column.
+                            (reduce
+                              (fn [result obj]
+                                (conj result
+                                  (render-primitive og-params new-params graph obj)))
+                              [] (read-os graph sub pred))))))
+                    [] (read-ps graph sub))))))]
+    (inner-render-default params params graph sub)))
 
 (defn render-footnote-idx
   [ancestry]
@@ -152,7 +163,7 @@
   (reify Renderer
     (get-renderer-name [renderer] "type")
     (get-priority [renderer] 2)
-    (render-html [renderer params graph sub] (render-default graph sub))
+    (render-html [renderer params graph sub] (render-default params graph sub))
     (render-css [renderer is-mobile] "")
     (render-js [renderer] "")))
 
@@ -170,12 +181,17 @@
   (reify Renderer
     (get-renderer-name [renderer] "default")
     (get-priority [renderer] 1)
-    (render-html [renderer params graph sub] (render-default graph sub))
+    (render-html [renderer params graph sub] (render-default params graph sub))
     (render-css [renderer is-mobile]
       (str/join "\n" [
         (css "div" {"class" "sub"}
-          (margin "0" "auto")
-          (text-align "left"))
+          (margin "0" "auto" "0" "0")
+          (text-align "left")
+          (white-space "nowrap"))
+        (css "div" {"class" "pred_tree"}
+          (display "grid")
+          (grid-template-columns "min-content" "min-content")
+          (grid-column-gap "5px"))
         (css "a" {"class" "sub_link"}
           (color (to-css-color black))
           (text-decoration "none"))
@@ -199,6 +215,22 @@
         (conj (read-os graph type "/renderer") default-renderer)
         #{enum-renderer})))
 
+(defn- sanitize-params
+  "Converts params from string values into expected types, type-checking as it
+   goes"
+  [params]
+  (reduce-kv
+    (fn [result k v]
+      (assoc result k
+        (case k
+          "depth" (let [parsed-v (edn/read-string v)]
+                    (if (and (integer? parsed-v)
+                             (> parsed-v 0))
+                        parsed-v
+                        1))
+          v)))
+    {} params))
+
 (defn render-sub
   ([graph sub] (render-sub {} graph sub))
   ([params graph sub]
@@ -210,12 +242,11 @@
                      (assoc result (get-renderer-name renderer) renderer)),
          renderer (if (contains? params "renderer")
                       (let [name (params "renderer")]
-                        (println "Selecting renderer" sub renderers name)
                         (if (contains? renderers name)
                             (renderers name)
                             (invalid-renderer name)))
                       (apply max-key #(get-priority %) (vals renderers)))]
-     (render-html renderer params graph sub))))
+     (render-html renderer (sanitize-params params) graph sub))))
 
 (defn get-all-renderers
   [graph]
