@@ -746,9 +746,540 @@
         "appears to be a peculiar coincidence."))
     (file-under :politics)))
 
+(defn universal-basic-income
+  []
+  (essay :universal-basic-income "Universal Basic Income"
+    (paragraph
+      (text
+        (b "Universal Basic Income") " is in vogue. In the last few years, it's"
+        "gone from a fairly niche idea in social engineering to a policy with"
+        "earnest advocates. I've ridden this train already quite some distance;"
+        "when I first started agitating for this, nobody I knew had ever even"
+        "heard of it (at least as far as I'm aware of). ")
+      (tangent (f 0) "Hipster credentials aside")
+      (text
+        ", I do want to say that I continue to be a huge fan of it, but also"
+        "that my initial optimism has been substantially tempered by the time"
+        "that I've taken to reflect on it and turn it over in my mind."
+        "Specifically, I'm worried that when we get around to instituting a basic"
+        "income, we will do it " (i "wrong") ". There's a reason why my proposal"
+        "is called a " (i "Lateral Income Transfer Filter") ", and not a "
+        (i "Universal Basic Income") ". What I now advocate for is different"
+        "enough from the common conception that I don't want to overload the name."))
+
+    (footnote (f 0)
+      (bullet-list
+        (text
+          "Thank you who/eivind for suggestions on how to improve this essay"
+          "series. As-yet unimplemented improvements are listed below:")
+        (text "Examples of how this would affect people at various income levels.")
+        (text "For marketing, show what existing taxes could be reasonably removed"
+              "with " (i "alpha") " set at various levels.")
+        (text
+          "Traditionally most taxes are done progressively - the higher the"
+          "income, the higher the percentage tax.  This could be done with a LITF"
+          "too, so there should be a rationale for choosing a linear function"
+          "for the taxation instead of a progressive one (and possibly a"
+          "comparison with what happens with either).")))
+
+    (text
+      "Before I get around to talking about LITFs (as I will abbreviate them),"
+      "first we shall cover UBIs. There is no single definition of what"
+      "constitutes a UBI, so bear with me, and if you have disagreements, please"
+      "keep them in mind, but don't let them cloud your understanding.")
+
+    (paragraph
+      (text
+        (heading "Basic Income") " is a kind of unearned income. \"Unearned\" income"
+        "can be contrasted with \"earned\" income, for which the recipient has"
+        "provided some service, exchanged some good, or performed some labor."
+        "Normally, when we think about incomes, earned incomes are what we have in"
+        "mind. This is the sort of income that you (if you are in the workforce)"
+        "most likely receive, and if you are not ")
+      (tangent (f 1) "terribly wealthy")
+      (text ", likely makes up the majority of your income."))
+
+    (footnote (f 1)
+      (text
+        "The caveat for \"not terribly wealthy\" is because in capitalist"
+        "economies, there are substantial other sources of unearned income,"
+        "namely income in the form of dividends on owned capital, rental income,"
+        "and income made through arbitrage in trading capital (e.g. money"
+        "gained on the stock market). Even though I'm classifying capital returns"
+        "as \"unearned\" income, you could think of it as being \"earned\""
+        "through the right of ownership; it's not free money for nuthin'."))
+
+    (paragraph
+      (text
+        "Basic income takes this one step further: it " (i "is") " free money for"
+        "nuthin'. Or, if you have a pedantic personality, it is earned through"
+        "the right of mere existence. No labor, no services, no goods, no trading,"
+        "no owning, no nuthin'. Because of this, basic incomes can be categorized"
+        "as a kind of " (i "welfare") ", a monetary support similar to the"
+        "allowance some parents ")
+      (tangent (f 2) "give their children") dot)
+
+    (footnote (f 2)
+      (text "Supposing that one isn't the kind of parent who, in trying to teach"
+            "their child the value of work, makes them earn their allowance."))
+
+    (file-under :politics)))
+
+(defn liberal-universal-welfare
+  []
+  (essay :liberal-universal-welfare "Liberal vs. Universal Welfare"
+    (text (i "Welfare") " is a loaded term, but an appropriate label to apply to"
+          "basic incomes. In the very least, other forms of welfare can, through"
+          "conversion to monetary sums, be thought of as kinds of income of"
+          "varying degrees of base-ness.")
+
+    (bullet-list
+      (text
+        "The principal divide in welfare is between " (b "liberal") " welfare and "
+        (b "universal") " welfare. Liberal welfare is " (i "means tested")
+        " welfare, or monies that are given based on some kind of perceived"
+        "need to those who deserve it. Most forms of welfare practiced in the"
+        "world today are liberal: food stamps are for people who demonstrate"
+        "food insecurity, medicaid is for people who cannot afford healthcare,"
+        "housing subsidies are for people who cannot afford housing, and so on."
+        "Liberal welfare regimes tend to predominate for a variety of reasons,"
+        "such as:")
+      (text "By clearly attaching the welfare received to a need being met,"
+            "the welfare justifies its expense.")
+      (text "By being conditional, they are cheaper as they only apply to a"
+            "subset of all people."))
+
+    (paragraph
+      (text "Universal welfare is welfare that is not means tested, meaning that"
+            "it is given irrespective of the needs of the recipient. Social"
+            "security and veterans' healthcare are both ")
+      (tangent (f 0) "good examples") dot)
+
+    (footnote (f 0)
+      (paragraph
+        (text "Technically, both social security and veterans' healthcare can be"
+              "thought of as liberal welfares, in the sense that there are"
+              "conditions that must be met in order to be ")
+        (tangent (f 1) "eligible")
+        (text ". The reason why I am still counting them as universal here, is"
+              "because nobody is too wealthy to receive either benefit; most"
+              "liberal welfare dispensations use wealth and/or income as a"
+              "crucial variable in their logic.")))
+
+    (footnote (f 1)
+      (text "One must spend a minimum period of time in the workforce, or have"
+            "been enlisted in the armed forces, respectively."))
+
+    (bullet-list
+      (text "Universal welfare is sometimes more attractive than its liberal"
+            "counterpart for reasons such as:")
+      (text "Since there is no means-testing, its administration tends to be"
+            "dramatically cheaper for the amount of money dispensed.")
+      (text "There are fewer thorny political questions about where to draw the"
+            "line for who receives it, and who doesn't.")
+      (text "It doesn't create poverty traps. When a person's income rises, the"
+            "liberal welfare they receive dries up, sometimes leaving them"
+            "equivalently situated despite their improved income."))
+
+    (paragraph
+      (text "For these reasons, when basic income is considered as a policy, it"
+            "usually (")
+      (tangent (f 2) "but not always")
+      (text ") takes the form of a " (i "universal") " basic income, rather than"
+            "a " (i "liberal") " basic income."))
+
+    (footnote (f 2)
+      (paragraph
+        (text "Because most people are unaware of this distinction, liberal basic"
+              "income schemes are often erroneously called universal. Because"
+              "basic income ")
+        (tangent (f 3) "tends to be expensive")
+        (text ", the most common way that their proponents will try to make them"
+              "feasible are to make them means-tested, a move that strips the"
+              "scheme of its universal qualifier.")))
+
+    (footnote (f 3)
+      (paragraph
+        (text "This is the elephant in the room, the one item on ")
+        (see-also :why-have-a-ubi "the list")
+        (text
+          " that, more than any other consideration, threatens to keep UBIs in"
+          "the realm of fiction. From the perspective of the recipients of a"
+          "UBI, they are getting money for nuthin', but the money itself has to"
+          "actually come from somewhere. Since USD is a fiat currency, the"
+          "government could " (i "in theory") " print money to meet its"
+          "obligations, but this is an economically disasterous path when so"
+          "much money is involved. Thus any serious and pragmatic UBI will"
+          "actually have to find the trillions of USD required to fund it."))
+
+      (text
+        "Since money is fungible, its sources could be many and varied, however"
+        "such large figures are difficult to meet through nickel-and-diming."
+        "Most proporents of a UBI either believe it could be adequately covered"
+        "by eliminating existing forms of welfare (that it would replace), or"
+        "point to some large government expenses (typically military) as a source"
+        "for this income.")
+
+      (text
+        "I am wholely unsatisfied with all proposed sources I have ever seen."
+        "Our example 'measely' $10K basic income, costing $3T, exceeds the total"
+        "sum of all other government welfare programs and exceeds e.g. military"
+        "expenditures by almost an order of magnitude. The US government budget"
+        "for 2019 is ~$4.4T; a UBI simply will not fit without being balanced"
+        "against some new tremendous source of revenue to fund it.")
+
+      (text
+        "It is for this reason that I no longer recommend implementing a"
+        "Universal Basic Income, and why I think any implementation along the"
+        "lines of the schemes that have been publicly floated so far would be a"
+        "disaster: " (b "basic incomes are fundamentally unbalanced")))
+    ))
+
+(defn why-have-a-ubi
+  []
+  (essay :why-have-a-ubi "Why have a Universal Basic Income?"
+    (thesis "So why bother with having a UBI at all? Doesn't the world seem to"
+            "work just fine without one? What benefits will it bring, and what"
+            "costs come with it?")
+    (bullet-list
+      (paragraph
+        (text
+          "These questions are heavily debated, and your answer to them will be"
+          "the greatest determinant for whether you think having a UBI is a"
+          "fantastic idea or an idiotic pipe-dream. Since I've already declared"
+          "that I'm a big proponent, and since I've simultaneously declared that"
+          "I'm worried people will implement it wrong, I'm going to present these"
+          "considerations mixed into a single list. My goal here is to try to be"
+          "circumspect; I'm not yet at ")
+        (see-also :lateral-income-transfer-filter "the point")
+        (text " where I try to sell you on anything specific."))
+      (text
+        "Basic incomes can replace other kinds of welfare, thus simplifying the"
+        "way welfare is dispensed. If you receive " (b "$") " for food and "
+        (b "$$") " for housing through separate programs, why not simply receive "
+        (b "$$$") " through a single program instead? It'll be cheaper to"
+        "administer, easier to conceptualize, and simplifies welfare paperwork"
+        "etc...")
+      (text
+        "It gives welfare recipients greater control over how they spend the"
+        "money they receive. Requiring that certain sums of money are spent in a"
+        "certain way restricts individual choice for the person the welfare is"
+        "supposed to be helping. Irrespective of a welfare program's intentions,"
+        "their awareness of an individual's specific situation and needs is dim"
+        "enough that they typically are not the best judge for how the money"
+        "should be spent. The obvious downside is that the individual who's"
+        "receiving the welfare may not be any better a judge themselves. In"
+        "particular, individuals whose predicament is partially caused by their"
+        "own lack of judgement (e.g. an expensive drug addiction, or gambling)"
+        "may find a basic income to be less supportive for their needs.")
+      (text
+        "UBIs respect the monotonicity of earned income. This just means that if"
+        "you earn more income (say through a raise, or a switch to a more"
+        "profitable job), your overall income (after including the UBI) is"
+        "guaranteed to increase. There is no povery trap of receding welfare.")
+      (text
+        "There's a certain intangible unifying benefit to universal experiences."
+        "Knowing that everyone sitting around a table earns the same basic income"
+        "lessens the divide among the participants. That said, many people may not"
+        "find such benefits in other universal experiences, like jury duty, or"
+        "paying taxes.")
+      (text
+        "UBIS are " (b "exorbitantly") " expensive. A UBI in the United States"
+        "paying out a measly $10,000 annually would require more than"
+        "$3,000,000,000,000 (3 " (i "trillion") " USD) annually to fund.")
+      (text
+        "UBIs decrease income inequality by raising the income floor. This has"
+        "a similar benefit to universal experiences in that it lessens the divide"
+        "between participants in the income scheme. Note that while income"
+        "inequality is associated with a variety of negative factors, it should"
+        "not be taken to be inherently a bad thing.")
+      (bullet-list
+        (text
+          "Basic income may discourage earned income by displacing it. Participants"
+          "may work less or work for less if they have a guaranteed income that"
+          "requires no effort on their part. This can present itself in a variety"
+          "of ways:")
+        (text
+          "Participants who can make do on the basic income through their own"
+          "frugality may cease working altogether or, to a less extreme degree,"
+          "may simply work less. For people who value leisure, this may present"
+          "itself as a boon since it allows them to adjust their work-life balance"
+          "towards the latter, however society functions because of work, and"
+          "lower productivity means a generally lower standard of living above"
+          "and beyond the lower standard of living a frugal participant accepts"
+          "for themself.")
+        (text
+          "Participants may be less willing to take low-paying jobs if their"
+          "need for income is diminished. This can cause many low-paying jobs to"
+          "go unfilled (causing the workflows that depend on these jobs to"
+          "underperform), but may also force employers to raise wages in order"
+          "to compensate to the benefit of the employee and the detriment of"
+          "the employer."))
+      (bullet-list
+        (text
+          "Basic income encourages dependence on the state. This is true for all"
+          "kinds of welfare, not just UBIs, but a UBI would be much larger than"
+          "almost any other kind of welfare. Participants whose ratio of basic"
+          "to other income is high enough may start to constitute a political"
+          "class with the following characteristics:")
+        (text
+          "Relative poverty, which is to say that the new class would be an"
+          "underclass.")
+        (text
+          "Dependency on UBI amounts. If the income amount is raised or lowered,"
+          "it stands to significantly and intimately impact them. Politicians"
+          "would have plenty of political incentives to make promises to raise"
+          "it, and plenty of political disincentives to ever lower it even if"
+          "it becomes unmaintainable.")
+        (text
+          "Democratic states are supposed to derive their power from the"
+          "governed, and this relationship experiences a priority inversion"
+          "w.r.t. the new political class."))
+      (text
+        "Having a UBI may allow for certain income-affecting regulations (like"
+        "minimum wage) to be lifted. This makes the job market more flexibly by"
+        "imposing fewer restrictions on it, and allows more jobs to be offered"
+        "that wouldn't have been possible before because the value they provide"
+        "was less than the minimum cost they have for an employer. Whether this"
+        "is possible depends on how generous the UBI is; idealistic scenarios"
+        "suppose that a UBI could aspire to offering livable wages (the same bar"
+        "minimum wage tries for), but realistic scenarios always fall far short."
+        "Living off a basic income alone would likely amount to a kind of penury.")
+      (text
+        "Cost of living varies participant-to-participant, and designing a UBI"
+        "that takes this gracefully into account is an almost impossible task."
+        "People who live in cheap locations will get more freedom and flexibility"
+        "out of a UBI than people who live in expensive locations, if the UBI is"
+        "fixed between them. If the UBI is not fixed between them, it creates"
+        "arbitrage opportunities by which people will be incentivized to move to"
+        "where they can get more bang for their buck. Since people will generally"
+        "always move along the gradient that most greatly benefits them, whoever"
+        "foots the bill can expect the bill to rise.")
+      (text
+        "Implementing a UBI dramatically alters the size, shape, and function of"
+        "the economy. Any such significant change introduces vast new unknown"
+        "unknowns into all economic reasoning, and with these unknowns, risk."
+        "The overall stability of the economy may be adversely affected, and"
+        "the flux generated by starting a UBI (if it is not gradually ramped up"
+        "from $0) may present a severe de-stabilitizing influence. Change is"
+        "unsettling, and on such a " (i "universal") " scale, the ante is hard"
+        "to under-estimate."))
+    ))
+
+(defn lateral-income-transfer-filter
+  []
+  (essay :lateral-income-transfer-filter "Lateral Income Transfer Filter"
+    (subtitle "Universal Basic Income meets Negative Income Tax")
+
+    (text
+      "Enter the " (b "Lateral Income Transfer Filter") " (LITF). A dry name,"
+      "perhaps, but an accurate one. This is something I put together, but it's"
+      "both simple enough and obvious enough that I expect others to eventually"
+      "reach something similar as their own conclusion to this paying-for-a-UBI"
+      "puzzle.")
+
+    (bullet-list
+      (paragraph
+        (text
+          "A LITF fixes (and funds) a UBI by pairing it with an income tax of"
+          "identical size. The two are tightly coupled; between them they share"
+          "a single free parameter, " (m "alpha") " (range " (b "0") " to "
+          (b "1") " inclusive), and together they constitute a ")
+        (tangent (f 0) "closed system")
+        (text " with no side-inputs or -outputs. ")
+        (tangent (f 1) "Here's")
+        (text " how it works:"))
+      (text
+        "Let " (m "P") " be a group of individuals of size " (m "n") ", the "
+        (i "participants") ", in the LITF. Each participant has an income.")
+      (text
+        "Insert the LITF across the participants' income streams. This makes the"
+        "LITF a filter with " (m "n") " inputs and " (m "n") " outputs. The"
+        "filter should be inserted after all of a participant's various incomes"
+        "are accounted for. Exemptions (adding income downstream to where the"
+        "filter has been applied) are not impacted by the filter; the math allows"
+        "them, but they do undermine the purpose and efficacy of the LITF.")
+      (text "The LITF applies an income tax of " (m "alpha") " to each stream.")
+      (text
+        "The LITF applies a UBI of " (m "alpha * average_income") " to each stream."))
+
+    (footnote (f 0)
+      (text "I generally describe the LITF using signal processing as my paradigm."
+            "I know that most people aren't that familiar with signal processing,"
+            "so I will try to describe concepts as they arise."))
+
+    (footnote (f 1)
+      (bullet-list
+        (paragraph
+          (text "I am using a slightly simplified model for the purpose of"
+                "explanation. This simplified model assumes that incomes are all"
+                "known and fixed at the time that the LITF is applied. In reality,"
+                "incomes arrive in irregularly spaced and variably sized chunks. As"
+                "a result, in order to apply the LITF in real time, incomes are being"
+                "treated as ")
+          (tangent (f 2) "discretized signals")
+          (text ". The filter still applies as expected: when a chunk of income"
+                "(say a paycheque) arrives, some amount is taxed, and some basic"
+                "income is added. The differences are two-fold:"))
+        (text "Incomes are per-unit-time based. Your basic income will still add"
+              "up to the same amount, but if you receive infrequent incomes, it'll"
+              "be dispensed in larger chunks than if you receive frequent incomes.")
+        (text "The 'average' income, on which basic income is based, is estimated."))
+      (paragraph
+        (text
+          "It is this second aspect, of estimated basic income, which is more"
+          "interesting. The estimator incurs a " (i "group delay") " between its"
+          "value and the theoretical actual value. This represents a small"
+          "difference in time between when a impulse in the populations' income"
+          "signal hits the population, and when it shows up in the estimator. An"
+          "example of such an 'impulse' could be e.g. a tax break, a recession,"
+          "etc. Recursive filters (like a ")
+        (link "https://en.wikipedia.org/wiki/Butterworth_filter"
+              "Butterworth filter")
+        (text ") can be used to keep this group delay small.")))
+
+    (footnote (f 2)
+      (text "'Discretized' here means that the signal comes in distinguishable"
+            "pieces, rather than as a continuous flow. The difference between"
+            "using buckets and using a hose to transport water."))
+
+    ; TODO(gierl): Add some diagrams to illustrate the LITF visually.
+
+    (text "That's it! Two steps, and nothing more complicated than computing an"
+          "average is involved.")
+
+    (html-passthrough (hr))
+
+    (bullet-list
+      (paragraph
+        (text "I'll now explore some " (i "filter characteristics") " of the"
+              "LITF, which will give you an idea of both its effect on"
+              "participants' incomes and the ")
+        (tangent (f 3) "guarantees")
+        (text " that it makes."))
+      (text
+        "The filter has a gain of 1. Gain is the factor by which the magnitude"
+        "of the signal changes, or the ratio of the output to the input. This"
+        "means that the sum of money flowing into the filter equals the sum of"
+        "money flowing out of the filter, or that no money is created or destroyed"
+        "by the LITF. This shows that an LITF requires no additional money over"
+        "its administrative costs to run.")
+      (text "The filter's profile is continuous. There are no steps, cliffs, or"
+            "other discontinuities that participants may use to try to conduct"
+            "arbitrage.")
+      (text
+        "The filter preserves monotonicity in participants' incomes. If a"
+        "participant's pre-filtered income rises, their post-filter income is"
+        "guaranteed to also rise. Symmetrically, if their pre-filter income falls,"
+        "their post-filter income will also fall.")
+      (text
+        "The filter preserves income ordering. If participant " (m "a") " has a"
+        "higher pre-filter income than participant " (m "b") ", then " (m "a")
+        "'s post-filter income is guaranteed to be higher than " (b "b") "'s"
+        "post-filter income. This means that if you were to order the participants"
+        "by their incomes, the filter would not disturb this order.")
+      (text "The filter narrows the spread between its inputs. The difference"
+            "between " (m "a") "'s income and " (m "b") "'s income is guaranteed"
+            "to decrease across the filter. This means that the filter decreases"
+            "income inequality.")
+      (text "The filter dampens a participant's income signal. The rises don't"
+            "raise so much, but so too the falls don't cut so deep. It generally"
+            "makes all participant's income streams more stable and less volatile.")
+      (text
+        "The filter introduces no group delay. This means that when a participant's"
+        "pre-filter income changes, their post-filter income will change in the"
+        "immediately succeeding step without introducing lag. Note that this"
+        "result only holds for our simplified LITF model; averaging is not"
+        "instantaneous, and there will be a group delay in any real-world LITF"
+        "implementation."))
+
+    (footnote (f 3)
+      (text "Some of the guarantees above are violated at the corner cases where "
+            (m "alpha") " is " (m "0") " or " (m "1") "."))
+
+    (bullet-list
+      (paragraph
+        (text (m "Alpha") " is the LITF's ")
+        (tangent (f 4) "free parameter")
+        (text ". It has a range from " (m "0") " to " (m "1") " (inclusive), and"
+              "can be treated as though it were a knob that can be used to adjust"
+              "the opacity or strength of a LITF. Here are our corner/boundary"
+              "cases:"))
+      (text (b (m "0")) ". The LITF is completely transparent. Participants'"
+        "pre-filter incomes are exactly equal to their post-filter incomes"
+        "(specifically, their income is taxed 0% and then they are paid a UBI"
+        "of $0). When " (m "alpha") " is set to this value, it is as though the"
+        "filter doesn't even exist. This setting is good for turning the LITF"
+        "off, and for instantiating and destroying it.")
+      (text (b (m "1")) ". The LITF is completely opaque. Participants' post-filter"
+        "incomes are all exactly equal, irrespective of their pre-filter incomes"
+        "(specifically, their income is taxed 100%, and they are paid a UBI of"
+        "whatever the group average income is). This setting is good for"
+        "guaranteeing equity between participants."))
+
+    (footnote (f 4)
+      (text "There is no 'correct' value for " (m "alpha") ", hence it being a"
+        "free parameter, however my general suggestion is that when a LITF is"
+        "implemented, it should start at " (m "0") ", and be slowly adjusted up"
+        "to somewhere in the neighborhood of " (m "0.4") "."))
+
+    (text (m "Alpha") " determines the amount by which participants' incomes are"
+      "shifted towards the group's average. Higher values result in larger shifts"
+      "that make the filter more opaque, and lower values vice versa.")
+
+    (html-passthrough (hr))
+
+    (bullet-list
+      (text "Any given LITF is a function of the participants " (m "P") " that"
+        "compose it. A single participant may however belong to more than one"
+        "LITF. When there is an overlap, the LITFs are said to " (i "intersect")
+        ". Intersections come in a variety of shapes:")
+      (text "The " (i "total") " intersection, in which two separate LITFs have"
+        "identical sets of participants. In this case, the two can be combined"
+        "into a single LITF. If the two LITFs have " (m "alpha_a") " and "
+        (m "alpha_b") " as their respective parameters, the combined single LITF"
+        "has a parameter of "
+        (m "alpha_intersection = alpha_a + alpha_b - alpha_a * alpha_b") ".")
+      (text "The " (i "covered") " intersection, in which one set of participants"
+        "is a strict subset of the other. Because LITFs averaging effects (where"
+        "participants' incomes are shifted towards their collective average) are"
+        "multiplicative, participants who belong to both LITFs will see a"
+        "stronger effect than those belonging to just one.")
+      ; TODO - formula for alpha.
+      )
+
+    (paragraph
+      (text "A LITF ends up producing some interesting ")
+      (see-also :litf-participation-and-incentives "incentives for participation")
+      (text ", as well as some interesting ")
+      (see-also :litf-bonuses "bonuses") dot)
+    ))
+
+(defn litf-participation-and-incentives
+  []
+  (essay :litf-participation-and-incentives "LITF Participation and Incentives"
+    (under-construction)
+    ; TODO(gierl): Explore the reasons why people would join or leave LITFs.
+    ; TODO(gierl): Nash Equilibrium and sinking filter.
+    ; TODO(gierl): How might this be implemented.
+    ))
+
+(defn litf-bonuses
+  []
+  (essay :litf-bonuses "LITF Bonuses"
+    (under-construction)
+    ; TODO(gierl): Inflation control.
+    ; TODO(gierl): Quantitative easing.
+    ; TODO(gierl): Fuzzing, or adding noise.
+    ))
+
 (defn politics-essays
   []
   [(essay-series [:enlightened-centrism :tug-of-war :balance-beam :figure-skating])
+   (essay-series [:universal-basic-income :liberal-universal-welfare
+                  :why-have-a-ubi :lateral-income-transfer-filter])
    (enlightened-centrism) (tug-of-war) (balance-beam) (figure-skating)
    (red-white-black) (conservatism-101) (personal-responsibility)
-   (natural-aristocracies) (electoral-college)])
+   (natural-aristocracies) (electoral-college) (universal-basic-income)
+   (liberal-universal-welfare) (why-have-a-ubi) (lateral-income-transfer-filter)
+   (litf-participation-and-incentives) (litf-bonuses)])

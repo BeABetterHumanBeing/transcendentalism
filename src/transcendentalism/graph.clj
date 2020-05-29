@@ -45,16 +45,17 @@
        (create-graph
          (reduce-kv
            (fn [result sub graphlet]
-             (if (= (sub result) graphlet)
-                 result
-                 (assoc result
-                   sub (->Graphlet (:v graphlet)
-                                   (reduce-kv
-                                     (fn [result p os]
-                                         (assoc result
-                                                p (set/union (result p #{}) os)))
-                                     (:p-os (sub result) {}) (:p-os graphlet))
-                                   ))))
+             (let [base-graphlet (get-graphlet graph sub)]
+               (if (= base-graphlet graphlet)
+                   result
+                   (assoc result
+                     sub (->Graphlet (:v graphlet)
+                                     (reduce-kv
+                                       (fn [result p os]
+                                           (assoc result
+                                                  p (set/union (result p #{}) os)))
+                                       (:p-os base-graphlet {}) (:p-os graphlet))
+                                     )))))
            raw-data (get-raw-data other))
          base-graph))
      (flatten-graph [graph]
