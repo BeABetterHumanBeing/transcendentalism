@@ -302,7 +302,71 @@
       "your actions as being 'correct' by the virtue that they occurred.")
     ))
 
+(defn redress-prevent-revenge
+  []
+  (essay :redress-prevent-revenge "Three-Part Justice"
+    (numbered-list
+      (text "I've found it useful to think of justice as being composed of"
+            "three aspects:")
+      (text "Redress of grievances")
+      (text "Prevention of future wrongs")
+      (text "Revenge"))
+    (text (b "Redress of grievances") " is fairly straight-forward: to put things"
+      "back the way they were before whatever wrongs were committed.")
+    (text (b "Prevention of future wrongs") " is similarly straight-forward: to"
+      "ensure that whatever wrongs do not happen again.")
+    (text (b "Revenge") " is the interesting one. It serves as the 'free weight'"
+      "by which failures of justice to fulfill the first two aspects can be"
+      "balanced out s.t. the aggrieved feels okay with the final result. "
+      (ex "In cases of murder, it is generally not possible to bring the victim"
+        "back to life."))
+    (paragraph
+      (text "I've observed that the specific weight of revenge is, moreover, a"
+        "function of the ego of the person who is seeking justice. People with"
+        "smaller egos tend to prefer justice with ")
+      (tangent (f 0) "little to no elements of revenge")
+      (text ", whereas people with larger egos tend to prefer justice with ")
+      (tangent (f 1) "outsized or magnified elements of revenge") dot)
+
+    (footnote (f 0)
+      (text "And even less of the two principle aspects. For some, merely being"
+        "put right is enough, with no requirement that wrongs cannot happen"
+        "again. In the most magnanimous case, they may even want no real elements"
+        "of redress, even if it were possible."))
+
+    (footnote (f 1)
+      (paragraph
+        (text "When revenge becomes an outsized element, and the punishment becomes"
+          "greater than the crime, this is often considered to be a new injustice"
+          "in its own right. The degenerate corner case is when two parties ")
+        (tangent (f 2) "both insist")
+        (text " on outsized punishments against each other, which is liable to"
+          "spin off into ")
+        (tangent (f 3) "a cycle of escalating conflict") dot))
+
+    (footnote (f 2)
+      (text "Sometimes, on account of trying to save-face or one-up each other,"
+        "but more often for the mundane reason of inability to judge the"
+        "proportionateness of response. Punishments have the tendency to weigh"
+        "more heavily than rewards of identical size. If both parties believe"
+        "they are being fair, the discrepancy in their perception of 'fairness'"
+        "may be enough."))
+
+    (footnote (f 3)
+      (paragraph
+        (text "Consider the ")
+        (link "https://yesteryearsnews.wordpress.com/2009/07/21/notable-kentucky-feuds/"
+              "Baker-Howard feud")
+        (text " in Kentucky.")))
+
+    (text "In the United States, civil lawsuits tend to use monetary sums to"
+      "balance the books, making distinguishing the relative weights of the"
+      "three aspects difficult where not itemized. In criminal cases, time in"
+      "prison, or other penal institutions serves the same, though it usually"
+      "is incapable of fulfilling 'redress of grievances'.")
+    (file-under :morality)))
+
 (defn morality-essays
   []
   [(essay-series [:dominant-theory :conditions-of-acceptance])
-   (dominant-theory) (conditions-of-acceptance)])
+   (dominant-theory) (conditions-of-acceptance) (redress-prevent-revenge)])
