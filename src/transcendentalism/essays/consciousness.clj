@@ -883,10 +883,111 @@
 
     ))
 
+(defn madness-is-incomprehensibility
+  []
+  (essay :madness-is-incomprehensibility "Madness is Incomprehensibility"
+    (thesis "What is madness except incomprehensibility?")
+
+    (text "I observed that people use the words " (i "mad") ", " (i "crazy") ", "
+      (i "insane") " and the like to refer above all else to that which they do"
+      "not understand. It's a mental convenience, a way to draw the line in the"
+      "sand and declare \"no further!\". Crazy people are impossible to follow,"
+      "impossible to understand. You can stand there all day, nodding your head"
+      "and saying \"yeah, I know, I know\", but at the end of that long day it's"
+      "all just gibberish to the listener.")
+
+    (bullet-list nil
+      (text "The man stands at the corner, talking to nobody in particular. Half"
+        "their conversation cannot be heard, and the other half makes no sense"
+        "in its absence. " (i "The man is mad") ".")
+      (text "The woman jumps from topic to topic, tangent upon tangent, each one"
+        "so minimally connected to that which came before that she simply cannot"
+        "be followed. " (i "The woman is mad") ".")
+      (text "The child cries and talks of creatures in their closet, but no"
+        "creatures can be found. Nevertheless, the child is inconsolable over the"
+        "nonexistent source of their distress. " (i "The child is mad") ".")
+      (text "The academics stand around and trade jargon with each other. They"
+        "might as well be making things up as they go along, too proud to ever"
+        "admit to not understanding each other. " (i "The academics are mad") "."))
+
+    (text "It's remarkable to think that we find it easier to declare other"
+      "people \"insane\" than to admit to any short-coming on our part. I've"
+      "generally found that everybody is sane and reasonable, but sane and"
+      "reasonable in their own context, from their own perspectives. When you"
+      "are so far from those perspectives, when you are so lacking in context,"
+      "they appear to be insane. When taken to its logical conclusion, I stand"
+      "watching the homeless man on the street corner, arguing with their personal"
+      "demons, and I wonder not what madness afflicts them, but what perspective"
+      "they must be living with.")
+    (file-under :consciousness)))
+
+(defn madness-is-a-defense
+  []
+  (essay :madness-is-a-defense "Madness is a Defense"
+    (text "Declaring that particular people or ideas are " (i "mad") ", "
+      (i "crazy") ", or " (i "insane") " is a defense mechanism, a way to draw"
+      "the line in the sand and declare \"no further!\". That line is your sanity,"
+      "and its sense is retained by the existence of that which lies outside of"
+      "it, that which is insane. There are a lot of uncomfortable thoughts out"
+      "there, and not straying beyond one's own line is a way to ensure that"
+      "these thoughts are never thought; you follow the madman until they stray"
+      "cross the line, and you cut it there, labeling them " (i "mad") " so that"
+      "you are excused from trailing after them into the void.")
+
+    (text "Society at large engages in this sort of defensiveness. At any given"
+      "time, there are the taboo topics that cannot be discussed, that lay beyond"
+      "the collective line. This does not mean that no truth can be found on the"
+      "other side, only that society has collectively decided to not think about"
+      "it, to deny it in order to preserve its own sense of sanity.")
+
+    (bullet-list nil
+      (text "The man stands on a street corner, carrying a sign that reads: DOOM."
+        "He preaches of the apocalypse, the end of times, and the crowd moves"
+        "past him, blissfully believing that if they don't address the problem,"
+        "it's not a real problem. " (i "The man is mad") ".")
+      (paragraph
+        (text "The woman discusses free will. She says that it's an illusion, that"
+          "you don't have any, that you were damned and doomed and destined ")
+        (tangent (f 0) "from the moment of your birth")
+        (text ", and that there's nothing you can do about it. You don't listen"
+          "to her, whether by your own choice or not. " (i "The woman is mad") "."))
+      (text "The child has quite an imagination. They're talking about playing"
+        "\"games\" with daddy, and they've learned some lewd gestures from the"
+        "other children at the playground. You've read stories about creeps sure,"
+        "but your husband is no  creep. " (i "The child is mad") ".")
+      (text "The generals have disposed of the government, torn its rotten roots"
+        "from the earth and cast its corrupt and effete officials down. They were"
+        "democratically elected, the magistrates of order and justice. "
+        (i "The generals are mad") "."))
+
+    (footnote (f 0)
+      (text "This is called predestination, and is one of the cornerstones of"
+        "Calvinist doctrine."))
+
+    (text "Most of the time, the defense against madness is a defense against"
+      "that which lies without, that which sits on edge of the shadows and"
+      "threatens to encroach in. The defense serves the purpose of keeping it"
+      "out of the light, of maintaining the order of sanity.")
+    (text "Sometime however, the order of sanity has already fallen. In these"
+      "cases, the defense against madness is a defense against being brought into"
+      "the light, of having to wake up and deal with the reality that the world"
+      "no longer lies within the lines of sanity.")
+
+    (bullet-list nil
+      (text "When the Khmer Rouge entered Phnom Penh, and ordered the population"
+        "back to their ancestral villages, the populace looked at one another,"
+        "and asked \"is this really happening?\" " (i "It was madness") ".")
+      (text "When the French aristocracy heard of rebellion in the countryside,"
+        "they tittered about it in their ballrooms. An advisor to Marie Antoinette,"
+        "upon hearing that the peasants said there was no bread to be eaten,"
+        "famously espoused \"let them eat brioche!\" " (i "It was madness") "."))
+    (file-under :consciousness)))
+
 (defn consciousness-essays
   []
   [(essay-series [:ego-development-theory :level-1 :level-2 :level-3 :level-4
                   :level-5 :level-6])
    (awareness-and-attention) (ego-development-theory) (level-1-ego) (level-2-ego)
    (level-3-ego) (level-4-ego) (level-4-5-ego) (level-5-ego) (level-6-ego)
-   (mental-ladders) (mental-traps) (drugs)])
+   (mental-ladders) (mental-traps) (drugs) (madness-is-incomprehensibility)
+   (madness-is-a-defense)])
