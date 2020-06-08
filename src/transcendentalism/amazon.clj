@@ -2,7 +2,8 @@
   (:require [amazonica.aws.s3 :as s3]
             [amazonica.aws.s3transfer :as s3transfer]
             [clojure.java.io :as io]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [transcendentalism.toolbox :refer :all]))
 
 (def bucket "transcendental-metaphysics-resources")
 
@@ -20,7 +21,7 @@
   (let [objs (s3/list-objects-v2 {:bucket-name bucket})]
     (into #{} (map :key (:object-summaries objs)))))
 
-(defn sync-resources-up
+(defn- sync-resources-up
   "Syncs the contents of resources/ to the cloud"
   []
   (let [old-resources (get-keys-in-cloud),
@@ -53,3 +54,8 @@
                (io/copy (:object-content raw-stream) (io/file (str dirname "/" key)))
                (. (:object-content raw-stream) close)))
            resources))))
+
+(defn -main
+  "Sync's cloud resources to match local resources"
+  [& args]
+  (time-msg "Syncing" (sync-resources-up)))

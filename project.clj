@@ -17,5 +17,6 @@
   :aot [transcendentalism.core]
   ; Development flags are set here. AWS flags are set in flags.clj
   :jvm-opts ["-Daws=false" "-Dserver=80"]
-  :profiles {:uberjar {}}
+  :profiles {:uberjar {},
+             :sync {:main transcendentalism.amazon}}
   :repl-options {:init-ns transcendentalism.core})

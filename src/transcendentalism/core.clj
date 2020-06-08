@@ -1,7 +1,7 @@
 (ns transcendentalism.core
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [transcendentalism.amazon :refer :all]
+            [transcendentalism.amazon :as amzn]
             [transcendentalism.essay :refer :all]
             [transcendentalism.essays.consciousness :refer :all]
             [transcendentalism.essays.epistemology :refer :all]
@@ -56,15 +56,13 @@
             (apply str/join "\n"
                    [(filter #(not (empty? %)) (map render-js all-renderers))]))
       (when (flag :aws)
-        (time-msg "Downloading Resources" (sync-resources-down))))))
+        (time-msg "Downloading Resources" (amzn/sync-resources-down))))))
 
 (defn -main
   "Validates the website's graph, and generates its files"
   [& args]
   (apply set-flags args)
-  (if (flag :sync)
-      (time-msg "Syncing" (sync-resources-up))
-      (let [graph (time-msg "Construct Graph" (collect-graph)),
-            flattened-graph (flatten-graph graph)]
-        (prep-output flattened-graph)
-        (launch-server flattened-graph))))
+  (let [graph (time-msg "Construct Graph" (collect-graph)),
+        flattened-graph (flatten-graph graph)]
+    (prep-output flattened-graph)
+    (launch-server flattened-graph)))
