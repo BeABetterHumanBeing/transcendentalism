@@ -1,5 +1,6 @@
 (ns transcendentalism.components.bullet-list
-  (:require [transcendentalism.constraint :refer :all]
+  (:require [clojure.string :as str]
+            [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
             [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]
@@ -45,7 +46,8 @@
             (apply
               (if (or (nil? is_ordered) (not is_ordered)) ul ol)
               {"class" "bullet_list"}
-              (into [] (map #(li {} (render-sub params graph %))
+              (into [] (map #(li {"class" "list-item"}
+                              (render-sub (assoc params "min-block" true) graph %))
                             point-blocks))))))
       (render-css [renderer is-mobile]
         (css "" {"class" "bullet_list"}

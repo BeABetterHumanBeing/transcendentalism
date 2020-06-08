@@ -86,6 +86,13 @@
          (add-triples loom [
            (->Triple sub "/type/essay" nil {})
            (->Triple sub "/essay/title" title {})]))
+       (knot-segments [loom fns]
+         (doall (map #(% loom)
+                  (when (not (empty? fns))
+                    (reduce
+                      (fn [result f]
+                        (into result [push-block f]))
+                      [(first fns)] (rest fns))))))
        (knot-root-menu [loom label title]
          (add-triples loom
            (->Triple (get-essay-sub loom) "/essay/flow/menu" label {"/title" title})))
@@ -347,6 +354,10 @@
         (into [] (map #(->Triple
                         (get subs %) "/essay/flow/next" (get subs (inc %)) {})
                       (range (dec (count subs)))))))))
+
+(defn segments
+  [& fns]
+  (fn [t] (knot-segments t fns)))
 
 (defn footnote
   [virtual-sub & fns]

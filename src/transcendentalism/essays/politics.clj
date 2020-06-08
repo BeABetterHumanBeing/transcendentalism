@@ -129,8 +129,10 @@
               "one of the most deadly sports out there") dot))
 
     (footnote (f 3)
-      (text "I.e. independents. A vanishing breed in our increasingly polarized"
-            "world."))
+      (paragraph
+        (text "I.e. independents. A vanishing breed in our increasingly ")
+        (see-also :polarization "polarized")
+        (text "world.")))
 
     (text
       (i "So where is the place of the centrist in this model?") " It might be"
@@ -251,7 +253,8 @@
       (text
         ", by better presenting the exchange through time. A balance beam may"
         "make one think of steady, evenly matched efforts between the two, when"
-        "instead it works better as a playful and skillful alteration."))
+        "instead it works better as ")
+      (see-also :belief-tacking "a playful and skillful alteration") dot)
 
     (paragraph
       (text

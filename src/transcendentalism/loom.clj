@@ -14,6 +14,7 @@
   (major-key [loom] "Returns the current major key")
   (minor-key [loom] "returns the current minor key")
   (knot-essay [loom sub title fns])
+  (knot-segments [loom fns])
   (knot-root-menu [loom label title]
     "Marks a given essay as the root of some label")
   (knot-file-under [loom label] "Files the given essay under some label")

@@ -76,10 +76,21 @@
       (adef "The deeply-rooted philosophy or world-view that reality is solely"
             "composed of material.")],
   },
+  "Normal" {
+    :pos :adjective,
+    :defs [
+      (adef "When a group of beliefs all have a high alignment with each other.")],
+  },
   "Objective" {
     :pos :adjective,
     :defs [
       (adef "Existing as a property of an object, independent of any observer.")],
+  },
+  "Schizophrenic" {
+    :pos :adjective,
+    :defs [
+      (adef "When a group of beliefs are all disparate, or have little agreement"
+        "or alignment with each other.")],
   },
   "Science" {
     :pos :noun,

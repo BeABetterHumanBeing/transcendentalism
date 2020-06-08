@@ -38,8 +38,9 @@
      (p* [(inc-meta :in-item)
           #{"/item/q_and_a/question"
             "/item/q_and_a/answer"
-            ["/item/table/cell" (prop-to-meta :row "/row" -1)
-                                (prop-to-meta :col "/col" -1) "/"]
+            [#"/item/table/cell|/item/table/label"
+              (prop-to-meta :row "/row" -1)
+              (prop-to-meta :col "/col" -1) "/"]
             "/item/bullet_list/header"
             ; TODO - nested bullet lists are not necessarily returned in the
             ; correct order (I suspect they are clobbering each other)
@@ -178,7 +179,9 @@
                                                 (params "definition-map" {}))))
                footnote-map (new-params "footnote-map" {}),
                definition-map (new-params "definition-map" {}),
-               inline-params (assoc new-params "no-block" true),
+               inline-params (-> new-params
+                                 (assoc "no-block" true)
+                                 (assoc "min-block" false)),
                contents (str (render-sub inline-params graph
                                (unique-or-nil graph sub "/segment/contains"))
                              (let [inline (unique-or-nil graph sub "/segment/flow/inline")]
@@ -196,8 +199,12 @@
                                                  (str/join ", " authors))
                                                contents))]
                  (if (params "no-block" false)
-                     (str anchor
-                          authorized-contents)
+                     (if (params "min-block" false)
+                       (div {"class" "min-block"}
+                            anchor
+                            authorized-contents)
+                       (str anchor
+                            authorized-contents))
                      (div {"class" "block"}
                        anchor
                        authorized-contents
@@ -222,6 +229,8 @@
          (str/join "\n" [
            (css "div" {"class" "block"}
              (padding "10px" "25px"))
+           (css "div" {"class" "min-block"}
+             (padding "5px" "0px"))
            (css "div" {"class" "authors-parent"}
              (position "relative")
              (border-style "none" "solid" "none" "none")

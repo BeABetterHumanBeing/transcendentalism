@@ -183,8 +183,9 @@
     (satisfies? GraphPath pathable) pathable,
     (= "" pathable) (path-nil),
     (= "/" pathable) (read-self),
-    (and (string? pathable)
-         (= (.charAt pathable 0) \/)) (read-pred pathable),
+    (or (and (string? pathable)
+             (= (.charAt pathable 0) \/))
+        (instance? java.util.regex.Pattern pathable)) (read-pred pathable),
     (vector? pathable) (apply path-chain (map build-path pathable)),
     (set? pathable) (apply path-all (map build-path pathable)),
     (map? pathable) (apply path-chain
