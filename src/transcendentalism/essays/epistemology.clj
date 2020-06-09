@@ -1125,10 +1125,12 @@
 (defn epistemology-essays
   []
   [(essay-series [:the-truth])
-   (essay-series [:normalization-vs-schizophrenia :belief-dimensions
-     :finding-normal :sharding-over-beliefs :sharding-over-population
-     :power-gradients :normalization :counter-culture :totalitarianism
-     :polarization :anarchy :us-culture :belief-tacking :ideological-transparency])
+   (essay-series [:normalization-vs-schizophrenia :belief-dimensions])
+   (essay-series [:finding-normal :sharding-over-beliefs :sharding-over-population
+     :power-gradients])
+   (essay-series [:normalization :counter-culture :totalitarianism])
+   (essay-series [:polarization :anarchy :us-culture])
+   (essay-series [:belief-tacking :ideological-transparency])
    (the-truth) (alchemical-ideology) (ideological-scaffolding)
    (ideological-rescue) (orthodoxy-v-heterodoxy) (normalization-vs-schizophrenia)
    (belief-dimensions) (finding-normal) (sharding-over-beliefs)

@@ -245,3 +245,37 @@
                (merge {"/type" :type}
                       (if (empty? supertypes) {} {"/supertype" supertypes})
                       (if (nil? renderer) {} {"/renderer" renderer})))))
+
+(defn validate
+  "Validates a graph, returning [#{errors} graph]"
+  [base-graph]
+  ; (let [graph (create-graph {} base-graph)]
+  ;   (reduce-all result [#{} graph]
+  ;               [[sub (read-ss graph)]
+  ;                [type (get-types graph sub)]]
+  ;     (let [type-root (read-v graph type)]
+  ;       (if (satisfies? TypeRoot type-root)
+  ;           (accumulate-constraint result
+  ;             (check-constraint (get-constraint type-root) graph sub))
+  ;           result))))
+  (loop [graph (create-graph {} base-graph),
+         subs-to-check (read-ss base-graph)]
+    (let [; validation-graph (create-graph {} initial-graph),
+          [errors final-graph]
+          (reduce-all result [#{} graph]
+                      [[sub subs-to-check]
+                       [type (get-types graph sub)]]
+            (let [type-root (read-v graph type)]
+              (if (satisfies? TypeRoot type-root)
+                  (accumulate-constraint result
+                    (check-constraint
+                      (get-constraint type-root) graph sub))
+                  result)))]
+      (if (empty? errors)
+          final-graph
+          (if (= graph final-graph)
+              (do (doall (map println errors))
+                  (assert false "Graph failed validation!"))
+              (recur final-graph
+                     (keys (get-raw-data final-graph)))))))
+  )

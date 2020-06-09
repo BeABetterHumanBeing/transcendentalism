@@ -18,5 +18,7 @@
   ; Development flags are set here. AWS flags are set in flags.clj
   :jvm-opts ["-Daws=false" "-Dserver=80"]
   :profiles {:uberjar {},
-             :sync {:main transcendentalism.amazon}}
+             :sync {:main transcendentalism.amazon}
+             :gen-graph {:jvm-opts ["-Dvalidate=true"],
+                         :main transcendentalism.generate-web-graph}}
   :repl-options {:init-ns transcendentalism.core})

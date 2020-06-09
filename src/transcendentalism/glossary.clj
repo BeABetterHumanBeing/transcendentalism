@@ -26,7 +26,7 @@
 
 (defn adef [& lines] (str/join " " lines))
 
-(defn glossary-sub [word] (sub-suffix :def word))
+(defn glossary-sub [word] (sub-suffix :def (str/replace word #" " "")))
 
 (def glossary {
   "Alchemical Ideology" {

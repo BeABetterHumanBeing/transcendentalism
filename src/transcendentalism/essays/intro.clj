@@ -117,7 +117,7 @@
         "I do have a diary, but it's not on this website. If you read ")
       (tangent (f 1) "enough of this")
       (text
-        ", you will surely get a great sense of who I am, but it's not"
+        ", you will surely get a great sense of who I am, but it's not "
         "<i>really</i> supposed to be about me. Given this opportunity to toot"
         "my own horn, I'd much rather be known as \"the guy who went home from"
         "the hospital in yellow socks\" than anything else."))
