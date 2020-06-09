@@ -37,6 +37,22 @@
             (apply str/join "\n"
                    [(filter #(not (empty? %)) (map render-js all-renderers))])))))
 
+(defn- warm-cache
+  "Pre-renders all essays so that their memoized versions are stored"
+  [graph]
+  (let [essay-subs (reduce
+                     (fn [result sub]
+                       (if (contains? (read-os graph sub "/type") :essay-type)
+                           (conj result sub)
+                           result))
+                     [] (read-ss graph))]
+    (doall
+      (map (fn [essay-sub]
+             (println "Warming" essay-sub)
+             (render-sub graph essay-sub)
+             (render-sub {"html-only" "true"} graph essay-sub))
+           essay-subs))))
+
 (defn -main
   "Reads a graph, validates it, and starts serving it"
   [& args]
@@ -47,4 +63,5 @@
         final-graph (flatten-graph (time-msg "Validate Graph"
                                              (validate typed-graph)))]
     (prep-output final-graph)
+    (time-msg "Warming cache" (warm-cache final-graph))
     (launch-server final-graph)))
