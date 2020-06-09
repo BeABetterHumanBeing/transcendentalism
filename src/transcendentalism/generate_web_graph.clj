@@ -14,6 +14,7 @@
             [transcendentalism.essays.randomness :refer :all]
             [transcendentalism.essays.religion :refer :all]
             [transcendentalism.flags :refer :all]
+            [transcendentalism.garden :refer :all]
             [transcendentalism.graph :refer :all]
             [transcendentalism.schema :refer :all]
             [transcendentalism.tablet-v2 :refer :all]
@@ -32,11 +33,6 @@
        (love-essays) (personal-essays) (randomness-essays)
        ])))
 
-(defn- write-graph
-  [graph]
-  (spit (flag :graph-file) (pr-str (get-raw-data graph)))
-  (println "Saved graph to" (flag :graph-file)))
-
 (defn -main
   "Generates the website's graph, and saves it to graph-file"
   [& args]
@@ -47,4 +43,4 @@
           (time-msg "Validate Graph" (validate
                                        (merge-graph flattened-graph
                                                     component-graph))))
-    (write-graph flattened-graph)))
+    (write-flower flattened-graph (flag :graph-name))))

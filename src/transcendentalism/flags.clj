@@ -20,7 +20,7 @@
 
 (defonce flags (atom {
   ; AWS flags are set here. Dev flags are set in project.clj
-  :graph-file "output/graph.clj",
+  :graph-name "public",
   :server 5000,
   :aws true,
   }))
