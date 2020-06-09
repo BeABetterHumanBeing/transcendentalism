@@ -23,6 +23,7 @@
   :graph-name "public",
   :server 5000,
   :aws true,
+  :warm-cache true,
   }))
 
 (defn set-flags

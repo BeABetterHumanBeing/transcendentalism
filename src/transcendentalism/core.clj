@@ -63,5 +63,6 @@
         final-graph (flatten-graph (time-msg "Validate Graph"
                                              (validate typed-graph)))]
     (prep-output final-graph)
-    (time-msg "Warming cache" (warm-cache final-graph))
+    (when (flag :warm-cache)
+          (time-msg "Warming cache" (warm-cache final-graph)))
     (launch-server final-graph)))
