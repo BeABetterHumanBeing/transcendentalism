@@ -45,12 +45,22 @@
       "Righteous anger is an attractive force, one that lays barriers, and"
       "nothing but barriers, to waste.")
 
-    (text "Moreover, righteous anger has remarkable clarity. It is not rash. It"
-      "is not impulsive. Nor is it brooding, nor calculating. It sees the"
-      "situation in unambiguous terms, at the nexus of all its various contexts."
-      "This is what makes it righteous: the blindness and impartiality of justice"
-      "give way to the prescience and fairness of judgement. What makes it anger?"
-      "The conviction to destroy evil.")
+    (paragraph
+      (text "Moreover, righteous anger has remarkable clarity. It is not rash. It"
+        "is not impulsive. Nor is it brooding, nor calculating. It sees the"
+        "situation in unambiguous terms, at the nexus of all its various contexts."
+        "This is what makes it righteous: the blindness and impartiality of justice"
+        "give way to the ")
+      (tangent (f 0) "prescience")
+      (text " and fairness of judgement. What makes it anger? The conviction to"
+        "destroy evil."))
+
+    (footnote (f 0)
+      (text "My word choice here is very intentional. Prescience refers to"
+        "knowledge of the future. It is a kind of prefiguration. What makes the"
+        "actions undertaken in a state of righteous anger so determined, and"
+        "what makes the feeling possess such conviction is because it already "
+        (i "knows") " the outcome, and all its ramifications."))
 
     (text "And just it is. Righteous anger goes as far as it needs to go, "
       (i "and not a single step further") ". Righteous anger does not damage the"

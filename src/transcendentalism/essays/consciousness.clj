@@ -5,7 +5,83 @@
 (defn awareness-and-attention
   []
   (essay :awareness-and-attention "Awareness and Attention"
-    (under-construction)
+    (text "The basic two pieces that compose the phenomenon of consciousness"
+      "are " (i "awareness") " and " (i "attention") ".")
+
+    (paragraph
+      (text (heading "Awareness") " consists of the total sum of things over which"
+        "consciousness has access to " (i "at a given moment") ". It contains ")
+      (tangent (f 0) "all peripheral experiences")
+      (text ", irrespective of their sort, kind, or number. The experiences that"
+        "exist along its boundary is referred to as being " (i "liminal") "; they"
+        "have the characteristic of coming and going, of half-existing, of"
+        "verging on the merely imagined."))
+
+    (footnote (f 0)
+      (text "As well as non-peripheral experiences. Like most things, it is"
+        "defined principally by its boundary.")
+      (text "Note that the periphery here is across all senses, including internal"
+        "senses. It is just as much a matter of small visual details, as it is"
+        "proprioception, inner thoughts, and even difficult-to-describe ones,"
+        "like " (i "a sense of well-being") "."))
+
+    (paragraph
+      (text (heading "Attention") " is the subset of awareness that is in focus "
+        (i "at a given moment") ". It is closer to the locus of intention; and"
+        "forms the object of intentional conscious interaction."))
+
+    ; TODO - drawing of a circle representing awareness, and attention at its
+    ; center.
+
+    (html-passthrough (hr))
+
+    (text "A useful model for considering the two is to consider consciousness"
+      "as a work-bench, where awareness encompasses all the things that are on"
+      "the bench, and attention is whichever of those things that is being"
+      "worked upon.")
+
+    (paragraph
+      (text "The role of awareness is to be an assistant to attention, holding"
+        "those things attention may find interesting. This principally includes"
+        "those things ")
+      (tangent (f 1) "that were recently attended to")
+      (text ", as well as those things ")
+      (tangent (f 2) "which will shortly be attended to") dot)
+
+    (footnote (f 1)
+      (paragraph
+        (text (i "Least Recently Used") " happens to be a fantastic heuristic for"
+          "approximating " (i "next to be used") ". Computers make use of this"
+          "strategy for caching, and without special knowledge of the given"
+          "domain, it is the best possible strategy for ")
+        (tangent (f 3) "anyone who doesn't know the future") dot))
+
+    (footnote (f 2)
+      (text "Sometimes this time horizon is very short. When a new thing appears"
+        "on the work-bench, the more novel or intrusive it is, the more likely"
+        "it is to capture and redirect attention to it as a form of surprise."))
+
+    (footnote (f 3)
+      ; TODO - Add see-also, once I've written more on the topic.
+      (text "A group of people that does not actually include you. Humans have"
+        "a limited capacity for prefiguration, but that's a topic for another"
+        "time."))
+
+    ; TODO - drawing of a work-bench, highlighting the difference.
+
+    (html-passthrough (hr))
+
+    (text "Awareness and attention work in tandem with each other, but both"
+      "represent skillsets that can be expanded through practice. Awareness can"
+      "come to encompass a larger range of experiences, by pushing the liminal"
+      "boundary out, as well as down (i.e. towards smaller experiences)."
+      "Attention can be trained to cover larger and smaller subsets of awareness,"
+      "as well as to be a more faithful servant to the intentions that direct"
+      "it, by succumbing less frequently to superfluous distractions, as well"
+      "as to hold an object more steadily and for longer periods of time.")
+
+    (text (heading "Mindfulness") " is the practice of expanding these skillsets,"
+      "and forms the basis of most meditative techniques.")
 
     (root-menu :consciousness "Consciousness")
     (file-under :metaphysics)))
