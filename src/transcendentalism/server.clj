@@ -1,6 +1,8 @@
 (ns transcendentalism.server
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
+            [compojure.core :refer :all]
+            [compojure.route :as route]
             [ring.adapter.jetty :as ring]
             [ring.middleware.content-type :refer :all]
             [ring.middleware.file :refer :all]
@@ -50,25 +52,27 @@
 
 (defn- uri-to-sub
   [uri]
-  (if (contains? #{"/" "/index" "/index.html"} uri)
+  (if (contains? #{"/" "index" "index.html"} uri)
       :monad
       (let [v (-> uri
                   (str/replace #"%22" "\"")
                   (str/replace #"%20" " "))]
-        (try (edn/read-string (subs v 1))
+        (try (edn/read-string v)
              (catch Exception e :monad)))))
 
 (defn- page-404
-  [graph sub]
-  {:status 404
-   :headers {"Content-Type" "text/html"}
-   :body (div {"style" "text-align:center;padding-top:100px;"}
-           (h1 {"style" "margin:0 auto;"} "404")
-           (img {"src" "void.png"
-                 "style" "margin:0 auto;width:200px;height:200px;"})
-           (div {"style" "margin:0 auto;"}
-             (span {} (str "\"" sub "\" was not found in "))
-             (a {"href" "/"} "this universe")))})
+  ([request]
+   (page-404 request (:uri request "")))
+  ([request sub]
+   {:status 404
+    :headers {"Content-Type" "text/html"}
+    :body (div {"style" "text-align:center;padding-top:100px;"}
+            (h1 {"style" "margin:0 auto;"} "404")
+            (img {"src" "/void.png"
+                  "style" "margin:0 auto;width:200px;height:200px;"})
+            (div {"style" "margin:0 auto;"}
+              (span {} (str "\"" sub "\" was not found in "))
+              (a {"href" "/"} "this universe")))}))
 
 (defn- page-200
   [content]
@@ -77,13 +81,12 @@
    :body content})
 
 (defn- base-sub-handler
-  [graph]
+  [graph sub]
   (fn
     [request]
-    (let [sub (uri-to-sub (:uri request)),
-          types (get-types graph sub)]
+    (let [types (get-types graph sub)]
       (if (empty? types)
-          (page-404 graph sub)
+          (page-404 request sub)
           (page-200
             (let [html (render-sub (:params request) graph sub types)]
               (if ((:params request) "html-only" false)
@@ -98,17 +101,40 @@
                     (script {"src" "output/script.js"} "")
                     (xml-open "link" {"rel" "icon",
                                       "type" "image/png",
-                                      "href" "monad_icon_small.png"})
+                                      "href" "/monad_icon_small.png"})
                     html))))))))
 
 (defn- render-sub-handler
-  [graph]
-  (-> (base-sub-handler graph)
+  [graph sub]
+  (-> (base-sub-handler graph sub)
       (wrap-params)
       (wrap-file "resources")
       (wrap-content-type)
       (wrap-not-modified)))
 
+(def output-handler
+  (-> (fn [request]
+        {:status 200
+         :headers {"Content-Type" "text/html"}
+         :body "Output"})
+      (wrap-file "resources")
+      (wrap-content-type)
+      (wrap-not-modified)))
+
+(def not-found-handler
+  (-> (fn [request] (page-404 request))
+      (wrap-file "resources")
+      (wrap-content-type)
+      (wrap-not-modified)))
+
+(defn app
+  [graph]
+  (routes
+    (GET "/output/:o" [o] output-handler)
+    (GET "/:uri" [uri] (render-sub-handler graph (uri-to-sub uri)))
+    (GET "/" [] (render-sub-handler graph :monad))
+    (route/not-found not-found-handler)))
+
 (defn launch-server
   [graph]
-  (ring/run-jetty (render-sub-handler graph) {:port (flag :server)}))
+  (ring/run-jetty (app graph) {:port (flag :server)}))
