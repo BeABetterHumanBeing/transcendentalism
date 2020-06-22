@@ -1,7 +1,8 @@
 (ns transcendentalism.access
   (:require (cemerick.friend [credentials :as creds])
             [transcendentalism.flags :refer :all]
-            [transcendentalism.html :refer :all]))
+            [transcendentalism.html :refer :all]
+            [transcendentalism.http :refer :all]))
 
 ; While the feature is being developed, there is a single test account hard-coded
 ; within the server.
@@ -13,35 +14,25 @@
 
 (def login-page
   (if (flag :enable-sovereigns)
-    {:status 200,
-     :headers {"Content-Type" "text/html"}
-     :body (div {}
-             (form {"action" "login",
-                    "method" "post"}
-               (div {}
-                 "Name"
-                 (input {"type" "text",
-                         "name" "username"}))
-               (div {}
-                 "Password"
-                 (input {"type" "password",
-                         "name" "password"}))
-               (div {}
-                 (input {"type" "submit",
-                         "value" "Login"}))))}
-     {:status 501, ; Not supported
-      :headers {"Content-Type" "text/html"}
-      :body (div {"style" "text-align:center;padding-top:100px;"}
-              (h1 {"style" "margin:0 auto;"} "501")
-              ; TODO - swap out this image for a more appropriate one
-              (img {"src" "/void.png"
-                    "style" "margin:0 auto;width:200px;height:200px;"})
-              (div {"style" "margin:0 auto;"}
-                (span {} (str "Sovereign access is not enabled in "))
-                (a {"href" "/"} "this universe")))}))
+      (-> (str site-icon
+            (div {}
+              (form {"action" "login",
+                     "method" "post"}
+                (div {}
+                  "Name"
+                  (input {"type" "text",
+                          "name" "username"}))
+                (div {}
+                  "Password"
+                  (input {"type" "password",
+                          "name" "password"}))
+                (div {}
+                  (input {"type" "submit",
+                          "value" "Login"})))))
+          (status-page 200))
+      (error-page 501
+        (str (span {} (str "Sovereign access is not enabled in "))
+             (a {"href" "/"} "this universe")))))
 
 (def unauthorized-handler
-  (-> (fn [request]
-        {:status 401,
-         :headers {"Content-Type" "text/html"},
-         :body "Unauthorized page."})))
+  (-> (fn [request] (status-page "Unauthorized access" 401))))

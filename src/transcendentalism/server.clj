@@ -17,6 +17,7 @@
             [transcendentalism.constraint :refer :all]
             [transcendentalism.flags :refer :all]
             [transcendentalism.html :refer :all]
+            [transcendentalism.http :refer :all]
             [transcendentalism.render :refer :all]
             [transcendentalism.xml :refer :all]))
 
@@ -70,21 +71,13 @@
   ([request]
    (page-404 request (:uri request "")))
   ([request sub]
-   {:status 404
-    :headers {"Content-Type" "text/html"}
-    :body (div {"style" "text-align:center;padding-top:100px;"}
-            (h1 {"style" "margin:0 auto;"} "404")
-            (img {"src" "/void.png"
-                  "style" "margin:0 auto;width:200px;height:200px;"})
-            (div {"style" "margin:0 auto;"}
-              (span {} (str "\"" sub "\" was not found in "))
-              (a {"href" "/"} "this universe")))}))
+   (error-page 404
+     (str (span {} (str "\"" sub "\" was not found in "))
+          (a {"href" "/"} "this universe")))))
 
 (defn- page-200
   [content]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body content})
+  (status-page content 200))
 
 (defn- base-sub-handler
   [graph sub]
@@ -105,9 +98,7 @@
                     ; Include JQuery from Google CDN.
                     (script {"src" "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"} "")
                     (script {"src" "output/script.js"} "")
-                    (link {"rel" "icon",
-                           "type" "image/png",
-                           "href" "/monad_icon_small.png"})
+                    site-icon
                     html))))))))
 
 (defn- render-sub-handler
@@ -118,10 +109,7 @@
       (wrap-not-modified)))
 
 (def output-handler
-  (-> (fn [request]
-        {:status 200
-         :headers {"Content-Type" "text/html"}
-         :body "Output"})
+  (-> (fn [request] (status-page "Output Placeholder" 200))
       (wrap-file "resources")
       (wrap-content-type)
       (wrap-not-modified)))
@@ -136,7 +124,8 @@
   [graph]
   (routes
     ; Sovereign URIs
-    (GET "/sovereign" request (friend/authorize #{::sovereign} "Sovereign page."))
+    (GET "/sovereign" request
+      (friend/authorize #{:transcendentalism.access/sovereign} "Sovereign page."))
     (GET "/login" request login-page)
     (friend/logout (ANY "/logout" request (resp/redirect "/")))
     ; Public URIs
