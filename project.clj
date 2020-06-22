@@ -9,6 +9,7 @@
                  [clojure.java-time "0.3.2"]
                  [com.amazonaws/aws-java-sdk-core "1.11.775"]
                  [com.amazonaws/aws-java-sdk-s3 "1.11.775"]
+                 [com.cemerick/friend "0.2.3"]
                  [compojure "1.6.1"]
                  [org.clojure/clojure "1.10.0"]
                  [org.clojure/math.numeric-tower "0.0.4"]
@@ -17,7 +18,10 @@
   :main transcendentalism.core
   :aot [transcendentalism.core]
   ; Development flags are set here. AWS flags are set in flags.clj
-  :jvm-opts ["-Daws=false" "-Dserver=80" "-Dwarm-cache=false"]
+  :jvm-opts ["-Daws=false"
+             "-Dserver=80"
+             "-Dwarm-cache=false"
+             "-Denable-sovereigns=true"]
   :profiles {:uberjar {},
              :sync {:main transcendentalism.amazon}
              :gen-graph {:jvm-opts ["-Dvalidate=true"],

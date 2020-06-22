@@ -1,5 +1,8 @@
 (ns transcendentalism.server
-  (:require [clojure.edn :as edn]
+  (:require [cemerick.friend :as friend]
+            (cemerick.friend [workflows :as workflows]
+                             [credentials :as creds])
+            [clojure.edn :as edn]
             [clojure.string :as str]
             [compojure.core :refer :all]
             [compojure.route :as route]
@@ -8,6 +11,9 @@
             [ring.middleware.file :refer :all]
             [ring.middleware.not-modified :refer :all]
             [ring.middleware.params :refer :all]
+            [ring.middleware.session :refer :all]
+            [ring.util.response :as resp]
+            [transcendentalism.access :refer :all]
             [transcendentalism.constraint :refer :all]
             [transcendentalism.flags :refer :all]
             [transcendentalism.html :refer :all]
@@ -107,7 +113,6 @@
 (defn- render-sub-handler
   [graph sub]
   (-> (base-sub-handler graph sub)
-      (wrap-params)
       (wrap-file "resources")
       (wrap-content-type)
       (wrap-not-modified)))
@@ -130,11 +135,26 @@
 (defn app
   [graph]
   (routes
+    ; Sovereign URIs
+    (GET "/sovereign" request (friend/authorize #{::sovereign} "Sovereign page."))
+    (GET "/login" request login-page)
+    (friend/logout (ANY "/logout" request (resp/redirect "/")))
+    ; Public URIs
     (GET "/output/:o" [o] output-handler)
     (GET "/:uri" [uri] (render-sub-handler graph (uri-to-sub uri)))
     (GET "/" [] (render-sub-handler graph :monad))
     (route/not-found not-found-handler)))
 
+(defn secured-app
+  [graph]
+  (-> (app graph)
+      (friend/authenticate {:credential-fn (partial creds/bcrypt-credential-fn sovereigns),
+                            :workflows [(workflows/interactive-form)],
+                            :unauthorized-handler unauthorized-handler,
+                            :default-landing-uri "/"})
+      (wrap-session)
+      (wrap-params)))
+
 (defn launch-server
   [graph]
-  (ring/run-jetty (app graph) {:port (flag :server)}))
+  (ring/run-jetty (secured-app graph) {:port (flag :server)}))

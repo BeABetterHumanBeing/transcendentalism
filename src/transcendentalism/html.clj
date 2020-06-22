@@ -39,6 +39,8 @@
 
 (defn button [attrs contents] (xml-tag "button" attrs contents))
 
+(defn form [attrs & contents] (xml-tag "form" attrs (apply str contents)))
+
 (defn input [attrs] (xml-open "input" attrs))
 
 (defn table [attrs contents] (xml-tag "table" attrs contents))

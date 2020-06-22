@@ -24,6 +24,7 @@
   :server 5000,
   :aws true,
   :warm-cache true,
+  :enable-sovereigns false,
   }))
 
 (defn set-flags
