@@ -48,3 +48,5 @@
 (defn tr [attrs contents] (xml-tag "tr" attrs contents))
 
 (defn td [attrs contents] (xml-tag "td" attrs contents))
+
+(defn link [attrs] (xml-open "link" attrs))
