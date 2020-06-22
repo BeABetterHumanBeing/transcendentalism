@@ -60,18 +60,18 @@
     nil))
 
 (def site-icon
-  (link {"rel" "icon",
-         "type" "image/png",
-         "href" "/monad_icon_small.png"}))
+  (link* {"rel" "icon",
+          "type" "image/png",
+          "href" "/monad_icon_small.png"}))
 
 (defn error-page
   [request status message]
   (-> (str
         site-icon
-        (link {"rel" "stylesheet",
-               "href" (if (mobile-browser? request)
-                          "output/mobile_server_styles.css"
-                          "output/server_styles.css")})
+        (link* {"rel" "stylesheet",
+                "href" (if (mobile-browser? request)
+                           "output/mobile_server_styles.css"
+                           "output/server_styles.css")})
         (div {"class" "status-box"}
           (h1 {"class" "status-number"} status)
           (if-let [name (error-page-name status)]

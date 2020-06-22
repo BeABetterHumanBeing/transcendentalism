@@ -55,10 +55,10 @@
               (if ((:params request) "html-only" false)
                   html
                   (str
-                    (link {"rel" "stylesheet",
-                           "href" (if (mobile-browser? request)
-                                      "output/mobile_styles.css"
-                                      "output/styles.css")})
+                    (link* {"rel" "stylesheet",
+                            "href" (if (mobile-browser? request)
+                                       "output/mobile_styles.css"
+                                       "output/styles.css")})
                     ; Include JQuery from Google CDN.
                     (script {"src" "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"} "")
                     (script {"src" "output/script.js"} "")

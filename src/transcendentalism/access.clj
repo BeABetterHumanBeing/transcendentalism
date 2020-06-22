@@ -18,10 +18,10 @@
   [request]
   (if (flag :enable-sovereigns)
       (-> (str site-icon
-            (link {"rel" "stylesheet",
-                   "href" (if (mobile-browser? request)
-                              "output/mobile_server_styles.css"
-                              "output/server_styles.css")})
+            (link* {"rel" "stylesheet",
+                    "href" (if (mobile-browser? request)
+                               "output/mobile_server_styles.css"
+                               "output/server_styles.css")})
             (div {"class" "login-box"}
               (h1 {"class" "login-title"} "Sovereign Access")
               (img {"src" "crown.jpeg",

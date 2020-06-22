@@ -49,4 +49,4 @@
 
 (defn td [attrs contents] (xml-tag "td" attrs contents))
 
-(defn link [attrs] (xml-open "link" attrs))
+(defn link* [attrs] (xml-open "link" attrs))

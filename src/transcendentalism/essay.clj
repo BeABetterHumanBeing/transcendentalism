@@ -149,6 +149,11 @@
            (knot-text loom lines)
            (add-triples loom
              (->Triple (item-sub k) "/item/inline/url" url {}))))
+       (knot-sovereign [loom sub lines]
+         (let [k (minor-key loom)]
+           (knot-text loom lines)
+           (add-triples loom
+             (->Triple (item-sub k) "/item/inline/sovereign" sub {}))))
        (knot-inline-definition [loom word word-as-written]
          (let [word-data (glossary word),
                sub (glossary-sub word),
@@ -398,6 +403,10 @@
 (defn link
   [url & lines]
   (fn [t] (knot-link t url lines)))
+
+(defn human
+  [sub & lines]
+  (fn [t] (knot-sovereign t sub lines)))
 
 (defn heading [line] (h2 {"class" "header"} line))
 

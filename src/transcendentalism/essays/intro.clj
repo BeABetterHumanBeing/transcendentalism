@@ -31,12 +31,14 @@
   (essay :welcome "Welcome"
     (big-emoji "&#x1f44b") ; Waving hand emoji
 
-    (text
-      "Hi there! I'm Daniel Gierl, and I'd like to welcome you to my personal"
-      "website, Transcendental Metaphysics! I use this space to explore"
-      "questions of philosophy, religion, politics, you name it. It is my"
-      "sincere hope that you leave feeling enriched by the experience, and that"
-      "the time you spend here is time well spent.")
+    (paragraph
+      (text "Hi there! I'm ")
+      (human :dan "Daniel Gierl")
+      (text ", and I'd like to welcome you to my personal website, " tm
+        "! I use this space to explore questions of philosophy, religion,"
+        "politics, you name it. It is my sincere hope that you leave feeling"
+        "enriched by the experience, and that the time you spend here is time"
+        "well spent."))
 
     (paragraph
       (text

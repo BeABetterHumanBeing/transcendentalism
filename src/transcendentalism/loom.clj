@@ -25,6 +25,7 @@
   (knot-tangent [loom virtual-sub lines])
   (knot-see-also [loom essay-sub lines])
   (knot-link [loom url lines])
+  (knot-sovereign [loom sub lines])
   (knot-inline-definition [loom word word-as-written])
   (knot-credit [loom whom f]
     "Adds /credit property to all /item/segments produced by some function")

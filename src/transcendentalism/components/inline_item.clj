@@ -60,6 +60,11 @@
           :range-type :segment-type,
           :unique true,
         },
+        "/item/inline/sovereign" {
+          :description "A reference to a sovereign entity",
+          :range-type :sovereign-type,
+          :unique true,
+        },
       },
     }
     (reify Renderer
@@ -71,13 +76,17 @@
               see-also (unique-or-nil graph sub "/item/inline/see_also"),
               link (unique-or-nil graph sub "/item/inline/url"),
               definition (unique-or-nil graph sub "/item/inline/definition"),
+              sovereign (unique-or-nil graph sub "/item/inline/sovereign"),
               footnote-map (params "footnote-map" {}),
               definition-map (params "definition-map" {})]
           (if (nil? tangent)
             (if (nil? see-also)
               (if (nil? link)
                 (if (nil? definition)
-                  (span {} text)
+                  (if (nil? sovereign)
+                      (span {} text)
+                      (a {"href" sovereign,
+                          "class" "sovereign-cxn"} text))
                   (span {"class" "def-tangent",
                          "onclick" (call-js "toggleFootnote"
                                      (js-str (:id (definition-map definition))))}
@@ -108,6 +117,12 @@
           (css "span" {"class" "see-also"}
             (color (to-css-color yellow))
             (cursor "pointer"))
+          (css "a" {"class" "sovereign-cxn"}
+            (color (to-css-color red))
+            (text-decoration "none"))
+          (css "a" {"class" "sovereign-cxn",
+                    "selector" "hover"}
+            (text-decoration "underline"))
           (css "span" {"class" "mono"}
             (font-family "Monaco" "monospace")
             (font-size "small")
