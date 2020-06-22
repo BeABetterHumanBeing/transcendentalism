@@ -70,8 +70,8 @@
         site-icon
         (link {"rel" "stylesheet",
                "href" (if (mobile-browser? request)
-                          "output/mobile_status_styles.css"
-                          "output/status_styles.css")})
+                          "output/mobile_server_styles.css"
+                          "output/server_styles.css")})
         (div {"class" "status-box"}
           (h1 {"class" "status-number"} status)
           (if-let [name (error-page-name status)]

@@ -288,7 +288,10 @@
             (let [cxns (sort-by-cxn-type (build-cxns graph sub))]
               (str/join " " (map #(generate-link sub %) cxns))))
           (div {"id" (seg-id id "buffer"),
-                "class" "buffer"})))
+                "class" "buffer"}
+            (a {"href" "sovereign"}
+              (img {"src" "/crown.jpeg",
+                    "class" "sovereign-access"})))))
       (maybe-load-homes params graph sub))))
 
 ; Because essay-rendering composes the bulk of the work the website does, and
@@ -463,11 +466,11 @@
             (font-size "large")
             (display "inline"))
           (css "div" {"class" "buffer"}
-            (height "600px")
-            (background-image "url(\"../crown.jpeg\")")
-            (background-position "center")
-            (background-repeat "no-repeat")
-            (background-size "150px" "150px"))
+            (height "600px"))
+          (css "img" {"class" "sovereign-access"}
+            (width "150px")
+            (height "150px")
+            (margin "225px" "auto"))
           (css "button" {"class" "link_segment"}
             (display "none") ; Made visible by JS script.
             (border "none")

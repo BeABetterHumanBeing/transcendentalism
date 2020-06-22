@@ -1,5 +1,7 @@
 (ns transcendentalism.access
   (:require (cemerick.friend [credentials :as creds])
+            [clojure.string :as str]
+            [transcendentalism.css :refer :all]
             [transcendentalism.flags :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.http :refer :all]))
@@ -16,20 +18,27 @@
   [request]
   (if (flag :enable-sovereigns)
       (-> (str site-icon
-            (div {}
+            (link {"rel" "stylesheet",
+                   "href" (if (mobile-browser? request)
+                              "output/mobile_server_styles.css"
+                              "output/server_styles.css")})
+            (div {"class" "login-box"}
+              (h1 {"class" "login-title"} "Sovereign Access")
+              (img {"src" "crown.jpeg",
+                    "class" "login-img"})
               (form {"action" "login",
                      "method" "post"}
-                (div {}
-                  "Name"
-                  (input {"type" "text",
-                          "name" "username"}))
-                (div {}
-                  "Password"
-                  (input {"type" "password",
-                          "name" "password"}))
-                (div {}
-                  (input {"type" "submit",
-                          "value" "Login"})))))
+                (input {"type" "text",
+                        "name" "username",
+                        "placeholder" "Username",
+                        "class" "login-input"})
+                (input {"type" "password",
+                        "name" "password",
+                        "placeholder" "Password",
+                        "class" "login-input"})
+                (input {"type" "submit",
+                        "value" "Login",
+                        "class" "login-button"}))))
           (status-page 200))
       (error-page request 501
         (str (span {} (str "Sovereign access is not enabled in "))
@@ -37,3 +46,27 @@
 
 (def unauthorized-handler
   (-> (fn [request] (status-page "Unauthorized access" 401))))
+
+(defn access-css
+  [is-mobile]
+  (str/join "\n" [
+    (css "div" {"class" "login-box"}
+      (text-align "center")
+      (padding-top (if is-mobile "200px" "100px"))
+      (font-size (if is-mobile "2em" "1em")))
+    (css "h1" {"class" "login-title"}
+      (margin "0" "auto"))
+    (css "img" {"class" "login-img"}
+      (margin "0" "auto")
+      (width (if is-mobile "400px" "200px"))
+      (height (if is-mobile "400px" "200px")))
+    (css "input" {"class" "login-input"}
+      (margin (if is-mobile "20px" "10px") "auto")
+      (padding (if is-mobile "10px" "5px"))
+      (display "block")
+      (width (if is-mobile "400px" "200px"))
+      (font-size (if is-mobile "1.5em" "1em"))
+      (border-width (if is-mobile "2px" "1px")))
+    (css "input" {"class" "login-button"}
+      (margin (if is-mobile "20px" "10px"))
+      (font-size (if is-mobile "1.5em" "1em")))]))

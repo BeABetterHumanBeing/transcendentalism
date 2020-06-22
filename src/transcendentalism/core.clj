@@ -1,6 +1,7 @@
 (ns transcendentalism.core
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [transcendentalism.access :refer :all]
             [transcendentalism.amazon :as amzn]
             [transcendentalism.constraint :refer :all]
             [transcendentalism.flags :refer :all]
@@ -19,6 +20,12 @@
     (doall (map #(time-msg (str "Downloading " %) (amzn/sync-group-down %))
                 ["resources" "graphs"]))))
 
+(defn- server-css
+  [is-mobile]
+  (str/join "\n" [
+    (status-css is-mobile)
+    (access-css is-mobile)]))
+
 (defn- prep-output
   "Collects all CSS and JS from the graph's renderers, and puts them in
    styles.css and script.js respectively"
@@ -34,8 +41,8 @@
       (io/make-parents (str dir "/tmp"))
       (spit (str dir "/styles.css") (collect-css false))
       (spit (str dir "/mobile_styles.css") (collect-css true))
-      (spit (str dir "/status_styles.css") (status-css false))
-      (spit (str dir "/mobile_status_styles.css") (status-css true))
+      (spit (str dir "/server_styles.css") (server-css false))
+      (spit (str dir "/mobile_server_styles.css") (server-css true))
       (spit (str dir "/script.js")
             (apply str/join "\n"
                    [(filter #(not (empty? %)) (map render-js all-renderers))])))))
