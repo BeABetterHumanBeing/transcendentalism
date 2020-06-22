@@ -6,6 +6,7 @@
             [transcendentalism.flags :refer :all]
             [transcendentalism.garden :refer :all]
             [transcendentalism.graph :refer :all]
+            [transcendentalism.http :refer :all]
             [transcendentalism.render :refer :all]
             [transcendentalism.schema :refer :all]
             [transcendentalism.server :refer :all]
@@ -33,6 +34,8 @@
       (io/make-parents (str dir "/tmp"))
       (spit (str dir "/styles.css") (collect-css false))
       (spit (str dir "/mobile_styles.css") (collect-css true))
+      (spit (str dir "/status_styles.css") (status-css false))
+      (spit (str dir "/mobile_status_styles.css") (status-css true))
       (spit (str dir "/script.js")
             (apply str/join "\n"
                    [(filter #(not (empty? %)) (map render-js all-renderers))])))))

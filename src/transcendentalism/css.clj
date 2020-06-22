@@ -59,7 +59,7 @@
   margin-block-end display position text-align vertical-align background
   background-color background-image background-position background-repeat
   transform animation-name animation-duration grid-row-gap grid-column-gap
-  border-collapse white-space)
+  border-collapse white-space padding-top)
 (contents-N ", " font-family)
 (contents-N " "
   border-style border-width padding margin background-size grid-template-columns)

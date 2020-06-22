@@ -12,7 +12,8 @@
                          :password (creds/hash-bcrypt "test123")
                          :roles #{::sovereign}}})
 
-(def login-page
+(defn login-page
+  [request]
   (if (flag :enable-sovereigns)
       (-> (str site-icon
             (div {}
@@ -30,7 +31,7 @@
                   (input {"type" "submit",
                           "value" "Login"})))))
           (status-page 200))
-      (error-page 501
+      (error-page request 501
         (str (span {} (str "Sovereign access is not enabled in "))
              (a {"href" "/"} "this universe")))))
 
