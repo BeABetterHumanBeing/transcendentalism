@@ -43,6 +43,14 @@
   [content]
   (status-page content 200))
 
+(defn- sovereign-page
+  [graph]
+  (-> (str
+        site-icon
+        (script {"src" "output/cljs-main.js"} "")
+        (div {} "Sovereign page"))
+      (status-page 200)))
+
 (defn- base-sub-handler
   [graph sub]
   (fn
@@ -89,7 +97,8 @@
   (routes
     ; Sovereign URIs
     (GET "/sovereign" request
-      (friend/authorize #{:transcendentalism.access/sovereign} "Sovereign page."))
+      (friend/authorize #{:transcendentalism.access/sovereign}
+                        (sovereign-page graph)))
     (GET "/login" request (login-page request))
     (friend/logout (ANY "/logout" request (resp/redirect "/")))
     ; Public URIs

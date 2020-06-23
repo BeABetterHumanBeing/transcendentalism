@@ -31,7 +31,9 @@
    styles.css and script.js respectively"
   [graph]
   (let [dir "resources/output"]
-    (clear-directory dir)
+    (clear-directory dir
+      ; Exceptions
+      "cljs-main.js")
     (let [all-renderers (get-all-renderers graph),
           collect-css (fn [is-mobile]
                         (apply str/join "\n"

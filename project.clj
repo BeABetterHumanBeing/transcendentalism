@@ -12,9 +12,12 @@
                  [com.cemerick/friend "0.2.3"]
                  [compojure "1.6.1"]
                  [org.clojure/clojure "1.10.0"]
+                 [org.clojure/clojurescript "1.10.764"]
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [ring/ring-core "1.8.0"]
                  [ring/ring-jetty-adapter "1.8.0"]]
+  :plugins [[lein-cljsbuild "1.1.8"]]
+  :hooks [leiningen.cljsbuild]
   :main transcendentalism.core
   :aot [transcendentalism.core]
   ; Development flags are set here. AWS flags are set in flags.clj
@@ -26,4 +29,12 @@
              :sync {:main transcendentalism.amazon}
              :gen-graph {:jvm-opts ["-Dvalidate=true"],
                          :main transcendentalism.generate-web-graph}}
-  :repl-options {:init-ns transcendentalism.core})
+  :repl-options {:init-ns transcendentalism.core}
+  :cljsbuild {
+    :builds [{
+        :source-paths ["src/transcendentalism/cljs"]
+        :jar true
+        :compiler {
+          :output-to "resources/output/cljs-main.js"
+          :optimizations :whitespace
+          :pretty-print true}}]})

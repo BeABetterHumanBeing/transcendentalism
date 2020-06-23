@@ -47,6 +47,8 @@
      ret#))
 
 (defn clear-directory
-  [dirname]
-  (doseq [file (.listFiles (io/as-file dirname))]
-    (io/delete-file file)))
+  [dirname & except]
+  (let [exceptions (into #{} except)]
+    (doseq [file (.listFiles (io/as-file dirname))]
+      (when (not (contains? exceptions (.getName file)))
+        (io/delete-file file)))))
