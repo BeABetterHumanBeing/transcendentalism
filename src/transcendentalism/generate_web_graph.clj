@@ -1,5 +1,6 @@
 (ns transcendentalism.generate-web-graph
-  (:require [transcendentalism.constraint :refer :all]
+  (:require [transcendentalism.access :refer :all]
+            [transcendentalism.constraint :refer :all]
             [transcendentalism.essay :refer :all]
             [transcendentalism.essays.consciousness :refer :all]
             [transcendentalism.essays.epistemology :refer :all]
@@ -31,6 +32,7 @@
        (epistemology-essays) (morality-essays) (religion-essays)
        (politics-essays) (consciousness-essays) (miscellaneous-essays)
        (love-essays) (personal-essays) (randomness-essays)
+       (sovereign-data)
        ])))
 
 (defn -main

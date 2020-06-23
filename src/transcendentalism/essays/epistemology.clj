@@ -530,9 +530,7 @@
       "of the two normals present in the first block are further subdivided. If"
       "we take our submatrix to have the columns from all three groups, and three"
       "individuals in each one, our population appears to be schizophrenic with"
-      "four heads.")
-
-    (file-under :belief-matrices)))
+      "four heads.")))
 
 (defn finding-normal
   []
@@ -723,9 +721,7 @@
       "are attached to such a power structure, they tend to form gradients in"
       "which everyone within the structure tries to imitate their superior's"
       "beliefs, and the belief vector of the group's normal shifts in the"
-      "direction of its leadership.")
-
-    (file-under :belief-matrices)))
+      "direction of its leadership.")))
 
 (defn normalization
   []
@@ -1119,8 +1115,7 @@
       "find themselves in situations where they need to understand each other."
       "Consider, if you will, the many ways you don't suffer for not understanding"
       "Swahili (even if you do, you still understand the point that I'm making).")
-
-    (file-under :belief-matrices)))
+    ))
 
 (defn epistemology-essays
   []

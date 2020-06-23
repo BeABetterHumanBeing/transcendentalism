@@ -3,8 +3,11 @@
             [clojure.string :as str]
             [transcendentalism.css :refer :all]
             [transcendentalism.flags :refer :all]
+            [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]
-            [transcendentalism.http :refer :all]))
+            [transcendentalism.http :refer :all]
+            [transcendentalism.tablet :refer :all]
+            [transcendentalism.tablet-v2 :refer :all]))
 
 ; While the feature is being developed, there is a single test account hard-coded
 ; within the server.
@@ -70,3 +73,11 @@
     (css "input" {"class" "login-button"}
       (margin (if is-mobile "20px" "10px"))
       (font-size (if is-mobile "1.5em" "1em")))]))
+
+(defn sovereign-data
+  []
+  (create-tablet-v2
+    (write-path (create-graph) :dan {}
+      {"/type" :sovereign-type,
+       "/sovereign/username" "dan",
+       "/sovereign/fullname" "Daniel Gierl"})))

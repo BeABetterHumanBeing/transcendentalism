@@ -13,6 +13,7 @@
             [transcendentalism.components.quote :refer :all]
             [transcendentalism.components.q-and-a :refer :all]
             [transcendentalism.components.segment :refer :all]
+            [transcendentalism.components.sovereign :refer :all]
             [transcendentalism.components.table :refer :all]
             [transcendentalism.components.thesis :refer :all]
             [transcendentalism.constraint :refer :all]
@@ -56,4 +57,5 @@
     [event-component essay-component segment-component item-component
      inline-item-component image-component quote-component poem-component
      big-emoji-component q-and-a-component bullet-list-component contact-component
-     definition-component table-component raw-html-component thesis-component]))
+     definition-component table-component raw-html-component thesis-component
+     sovereign-component]))

@@ -267,4 +267,4 @@
               (do (doall (map println errors))
                   (assert false "Graph failed validation!"))
               (recur final-graph
-                     (keys (get-raw-data final-graph))))))))
+                     (read-ss final-graph)))))))

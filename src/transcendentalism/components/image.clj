@@ -49,7 +49,8 @@
               height (str "height:" image-height "px")]
           (div {"class" "img-back",
                 "style" (str "width:auto;" height)}
-            (img {"src" image-url-triple,
+            (img {"class" "img-item",
+                  "src" image-url-triple,
                   "alt" image-alt-text-triple,
                   "style" (str (str "width:" image-width "px")
                                ";"
@@ -58,7 +59,7 @@
         (str/join "\n" [
           (css "div" {"class" "img-back"}
             (position "relative"))
-          (css "img" {}
+          (css "img" {"class" "img-item"}
             (position "absolute")
             (left "50%")
             (transform (translate "-50%" "0")))]))

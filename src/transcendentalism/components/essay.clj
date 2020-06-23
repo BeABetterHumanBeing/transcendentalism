@@ -291,7 +291,7 @@
                 "class" "buffer"}
             (a {"href" "sovereign"}
               (img {"src" "/crown.jpeg",
-                    "class" "sovereign-access"})))))
+                    "class" "sovereign-access img-item"})))))
       (maybe-load-homes params graph sub))))
 
 ; Because essay-rendering composes the bulk of the work the website does, and
