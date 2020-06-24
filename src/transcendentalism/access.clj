@@ -1,6 +1,7 @@
 (ns transcendentalism.access
   (:require (cemerick.friend [credentials :as creds])
             [clojure.string :as str]
+            [transcendentalism.color :refer :all]
             [transcendentalism.css :refer :all]
             [transcendentalism.flags :refer :all]
             [transcendentalism.graph :refer :all]
@@ -12,29 +13,39 @@
 (defn login-page
   [request]
   (if (flag :enable-sovereigns)
-      (-> (str site-icon
-            (link* {"rel" "stylesheet",
-                    "href" (if (mobile-browser? request)
-                               "output/mobile_server_styles.css"
-                               "output/server_styles.css")})
-            (div {"class" "login-box"}
-              (h1 {"class" "login-title"} "Sovereign Access")
-              (img {"src" "crown.jpeg",
-                    "class" "login-img"})
-              (form {"action" "login",
-                     "method" "post"}
-                (input {"type" "text",
-                        "name" "username",
-                        "placeholder" "Username",
-                        "class" "login-input"})
-                (input {"type" "password",
-                        "name" "password",
-                        "placeholder" "Password",
-                        "class" "login-input"})
-                (input {"type" "submit",
-                        "value" "Login",
-                        "class" "login-button"}))))
-          (status-page 200))
+      (let [login-failed ((:params request) "login_failed" false)]
+        (-> (str site-icon
+              (link* {"rel" "stylesheet",
+                      "href" (if (mobile-browser? request)
+                                 "output/mobile_server_styles.css"
+                                 "output/server_styles.css")})
+              (div {"class" "login-box"}
+                (h1 {"class" "login-title"} "Sovereign Access")
+                (img {"src" "crown.jpeg",
+                      "class" "login-img"})
+                (form {"action" "login",
+                       "method" "post"}
+                  (let [username-input {"type" "text",
+                                        "name" "username",
+                                        "class" "login-input"}]
+                    (input (if login-failed
+                               (assoc username-input
+                                      "value" ((:params request) "username"))
+                               (assoc username-input
+                                      "placeholder" "Username"))))
+                  (let [password-input {"type" "password",
+                                        "name" "password",
+                                        "placeholder" "Password",
+                                        "class" "login-input"}]
+                    (input (if login-failed
+                               (assoc password-input
+                                      "style" (str "border-color: "
+                                                   (to-css-color red)))
+                               password-input)))
+                  (input {"type" "submit",
+                          "value" "Login",
+                          "class" "login-button"}))))
+            (status-page 200)))
       (error-page request 501
         (str (span {} (str "Sovereign access is not enabled in "))
              (a {"href" "/"} "this universe")))))
