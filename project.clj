@@ -14,6 +14,7 @@
                  [org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.764"]
                  [org.clojure/math.numeric-tower "0.0.4"]
+                 [reagent "1.0.0-alpha2"]
                  [ring/ring-core "1.8.0"]
                  [ring/ring-jetty-adapter "1.8.0"]]
   :plugins [[lein-cljsbuild "1.1.8"]]

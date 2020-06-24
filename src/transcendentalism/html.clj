@@ -3,6 +3,8 @@
 
 (use 'transcendentalism.xml)
 
+; TODO - eventually replace all of this with hiccup
+
 (defn html [& contents] (xml-tag "html" {} (apply str contents)))
 
 (defn head [contents] (xml-tag "head" {} contents))

@@ -47,8 +47,10 @@
   [graph]
   (-> (str
         site-icon
-        (script {"src" "output/cljs-main.js"} "")
-        (div {} "Sovereign page"))
+        ; Reagent DOM inserts into the point below. Must appear before the
+        ; JS code that uses it.
+        (div {"id" "insertion-pt"})
+        (script {"src" "output/cljs-main.js"} ""))
       (status-page 200)))
 
 (defn- base-sub-handler
