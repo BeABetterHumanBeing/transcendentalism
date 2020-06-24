@@ -19,6 +19,12 @@
           :required true,
           :unique true,
         },
+        "/sovereign/salted_password" {
+          :description "The user's salted password, suitable for storing",
+          :range-type :string,
+          :required true,
+          :unique true,
+        },
         "/sovereign/fullname" {
           :description "The sovereign's full name",
           :range-type :string,

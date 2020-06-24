@@ -111,13 +111,15 @@
 
 (defn secured-app
   [graph]
-  (-> (app graph)
-      (friend/authenticate {:credential-fn (partial creds/bcrypt-credential-fn sovereigns),
-                            :workflows [(workflows/interactive-form)],
-                            :unauthorized-handler unauthorized-handler,
-                            :default-landing-uri "/"})
-      (wrap-session)
-      (wrap-params)))
+  (let [users (users-in-graph graph)]
+    (-> (app graph)
+        (friend/authenticate {:credential-fn (partial creds/bcrypt-credential-fn
+                                                      users),
+                              :workflows [(workflows/interactive-form)],
+                              :unauthorized-handler unauthorized-handler,
+                              :default-landing-uri "/"})
+        (wrap-session)
+        (wrap-params))))
 
 (defn launch-server
   [graph]

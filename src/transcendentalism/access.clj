@@ -9,14 +9,6 @@
             [transcendentalism.tablet :refer :all]
             [transcendentalism.tablet-v2 :refer :all]))
 
-; While the feature is being developed, there is a single test account hard-coded
-; within the server.
-; TODO - Replace with a system that looks for users within the graph, and
-; populates the list with what they find there.
-(def sovereigns {"test" {:username "test"
-                         :password (creds/hash-bcrypt "test123")
-                         :roles #{::sovereign}}})
-
 (defn login-page
   [request]
   (if (flag :enable-sovereigns)
@@ -74,10 +66,31 @@
       (margin (if is-mobile "20px" "10px"))
       (font-size (if is-mobile "1.5em" "1em")))]))
 
+; While the feature is being developed, there is a single test account hard-coded
+; within the server.
 (defn sovereign-data
   []
   (create-tablet-v2
     (write-path (create-graph) :dan {}
       {"/type" :sovereign-type,
        "/sovereign/username" "dan",
+       "/sovereign/salted_password" (creds/hash-bcrypt "test123"),
        "/sovereign/fullname" "Daniel Gierl"})))
+
+; TODO - Replace with a system that looks for users within the graph, and
+; populates the list with what they find there.
+; (def sovereigns {"test" {:username "test"
+;                          :password (creds/hash-bcrypt "test123")
+;                          :roles #{::sovereign}}})
+(defn users-in-graph
+  [graph]
+  (reduce
+    (fn [result sub]
+      (if (contains? (read-os graph sub "/type") :sovereign-type)
+          (let [username (unique-or-nil graph sub "/sovereign/username")]
+            (assoc result
+                   username {:username username
+                             :password (unique-or-nil graph sub "/sovereign/salted_password")
+                             :roles #{::sovereign}}))
+          result))
+    {} (read-ss graph)))
