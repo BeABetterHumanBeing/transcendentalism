@@ -1,6 +1,7 @@
 (ns transcendentalism.access
   (:require (cemerick.friend [credentials :as creds])
             [clojure.string :as str]
+            [ring.util.anti-forgery :as anti-forgery]
             [transcendentalism.color :refer :all]
             [transcendentalism.css :refer :all]
             [transcendentalism.flags :refer :all]
@@ -25,6 +26,7 @@
                       "class" "login-img"})
                 (form {"action" "login",
                        "method" "post"}
+                  (anti-forgery/anti-forgery-field)
                   (let [username-input {"type" "text",
                                         "name" "username",
                                         "class" "login-input"}]
@@ -88,11 +90,6 @@
        "/sovereign/salted_password" (creds/hash-bcrypt "test123"),
        "/sovereign/fullname" "Daniel Gierl"})))
 
-; TODO - Replace with a system that looks for users within the graph, and
-; populates the list with what they find there.
-; (def sovereigns {"test" {:username "test"
-;                          :password (creds/hash-bcrypt "test123")
-;                          :roles #{::sovereign}}})
 (defn users-in-graph
   [graph]
   (reduce

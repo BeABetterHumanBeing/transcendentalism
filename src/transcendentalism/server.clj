@@ -6,9 +6,11 @@
             [clojure.string :as str]
             [compojure.core :refer :all]
             [compojure.route :as route]
-            [ring.adapter.jetty :as ring]
+            [org.httpkit.server :as http-kit]
+            [ring.middleware.anti-forgery :as anti-forgery]
             [ring.middleware.content-type :refer :all]
             [ring.middleware.file :refer :all]
+            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.not-modified :refer :all]
             [ring.middleware.params :refer :all]
             [ring.middleware.session :refer :all]
@@ -19,6 +21,7 @@
             [transcendentalism.html :refer :all]
             [transcendentalism.http :refer :all]
             [transcendentalism.render :refer :all]
+            [transcendentalism.sente :refer :all]
             [transcendentalism.xml :refer :all]))
 
 (defn- uri-to-sub
@@ -50,6 +53,11 @@
         ; Reagent DOM inserts into the point below. Must appear before the
         ; JS code that uses it.
         (div {"id" "insertion-pt"})
+        ; Include CSRF anti-forgery token.
+        (let [csrf-token
+          (force anti-forgery/*anti-forgery-token*)]
+          (div {"id" "sente-csrf-token",
+                "data-csrf-token" csrf-token}))
         (script {"src" "output/cljs-main.js"} ""))
       (status-page 200)))
 
@@ -103,6 +111,9 @@
                         (sovereign-page graph)))
     (GET "/login" request (login-page request))
     (friend/logout (ANY "/logout" request (resp/redirect "/")))
+    ; Sente's routing endpoints
+    (GET  "/chsk" req (ring-ajax-get-or-ws-handshake req))
+    (POST "/chsk" req (ring-ajax-post                req))
     ; Public URIs
     (GET "/output/:o" [o] output-handler)
     (GET "/:uri" [uri] (render-sub-handler graph (uri-to-sub uri)))
@@ -118,9 +129,11 @@
                               :workflows [(workflows/interactive-form)],
                               :unauthorized-handler unauthorized-handler,
                               :default-landing-uri "/"})
+        (anti-forgery/wrap-anti-forgery)
         (wrap-session)
+        (wrap-keyword-params)
         (wrap-params))))
 
 (defn launch-server
   [graph]
-  (ring/run-jetty (secured-app graph) {:port (flag :server)}))
+  (http-kit/run-server (secured-app graph) {:port (flag :server)}))
