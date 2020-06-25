@@ -1,7 +1,8 @@
 (ns transcendentalism.sente
   (:require [taoensso.sente :as sente]
             [taoensso.sente.server-adapters.http-kit :refer (get-sch-adapter)]
-            [transcendentalism.access :refer :all]))
+            [transcendentalism.access :refer :all]
+            [transcendentalism.graph :refer :all]))
 
 ; Sente's server-side handlers.
 (let [{:keys [ch-recv send-fn connected-uids
@@ -27,14 +28,13 @@
 
 (defn event-msg-handler
   "Wraps `-event-msg-handler` with logging, error catching, etc."
-  [{:as ev-msg :keys [id ?data event]}]
-  (-event-msg-handler ev-msg) ; Handle event-msgs on a single thread
-  ;; (future (-event-msg-handler ev-msg)) ; Handle event-msgs on a thread pool
-  )
+  [graph]
+  (fn [{:as ev-msg :keys [id ?data event]}]
+    (-event-msg-handler ev-msg graph)))
 
 (defmethod -event-msg-handler
   :default ; Default/fallback case (no other matching handler)
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]} graph]
   (let [event-id (first event)]
     ; Log interesting unhandled events.
     (when (not (contains? #{:chsk/ws-ping} ; Websocket ping.
@@ -44,28 +44,27 @@
     (?reply-fn {:umatched-event-as-echoed-from-server event})))
 
 (defmethod -event-msg-handler :sovereign/get-user-sub
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]} graph]
   (when ?reply-fn
     (?reply-fn (@username-to-sub (get-in ring-req [:session
                                                    :cemerick.friend/identity
                                                    :current])))))
 
 (defmethod -event-msg-handler :data/read-sub
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]} graph]
   (println "Received read-sub event" event id ?data)
   (when ?reply-fn
-    (?reply-fn {:a "a" :b "b"})))
+    (let [graphlet ((get-raw-data graph) (:sub ?data))]
+      (?reply-fn {:v (:v graphlet),
+                  :p-os (:p-os graphlet)}))))
 
 ; TODO - other event-msg-handlers go here.
 
 ; Sente's event router.
 (defonce router_ (atom nil))
-(defn  stop-router! [] (when-let [stop-fn @router_] (stop-fn)))
-(defn start-router! []
-  (stop-router!)
+(defn  stop-sente-router! [] (when-let [stop-fn @router_] (stop-fn)))
+(defn start-sente-router! [graph]
+  (stop-sente-router!)
   (reset! router_
     (sente/start-server-chsk-router!
-      ch-chsk event-msg-handler)))
-
-; Start the Sente router
-(defonce _start-once (start-router!))
+      ch-chsk (event-msg-handler graph))))

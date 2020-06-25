@@ -11,7 +11,7 @@
       (fn [sub]
         (when (keyword? sub)
           (reset! user-sub sub)
-          (sente/chsk-send! [:data/read-sub sub] 5000
+          (sente/chsk-send! [:data/read-sub {:sub sub}] 5000
             (fn [data]
               (reset! user-data data))))))
     (fn []

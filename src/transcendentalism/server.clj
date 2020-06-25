@@ -136,4 +136,5 @@
 
 (defn launch-server
   [graph]
+  (start-sente-router! graph)
   (http-kit/run-server (secured-app graph) {:port (flag :server)}))
