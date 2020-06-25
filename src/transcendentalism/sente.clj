@@ -1,6 +1,7 @@
 (ns transcendentalism.sente
   (:require [taoensso.sente :as sente]
-            [taoensso.sente.server-adapters.http-kit :refer (get-sch-adapter)]))
+            [taoensso.sente.server-adapters.http-kit :refer (get-sch-adapter)]
+            [transcendentalism.access :refer :all]))
 
 ; Sente's server-side handlers.
 (let [{:keys [ch-recv send-fn connected-uids
@@ -34,17 +35,26 @@
 (defmethod -event-msg-handler
   :default ; Default/fallback case (no other matching handler)
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (let [session (:session ring-req)
-        uid     (:uid     session)]
-    (println "Unhandled event:" event)
-    (when ?reply-fn
-      (?reply-fn {:umatched-event-as-echoed-from-server event}))))
-
-(defmethod -event-msg-handler :test/get-username
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (println "Received test-get-username event" event id)
+  (let [event-id (first event)]
+    ; Log interesting unhandled events.
+    (when (not (contains? #{:chsk/ws-ping} ; Websocket ping.
+                          event-id))
+      (println "Unhandled event:" event)))
   (when ?reply-fn
-    (?reply-fn "my-test-username")))
+    (?reply-fn {:umatched-event-as-echoed-from-server event})))
+
+(defmethod -event-msg-handler :sovereign/get-user-sub
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when ?reply-fn
+    (?reply-fn (@username-to-sub (get-in ring-req [:session
+                                                   :cemerick.friend/identity
+                                                   :current])))))
+
+(defmethod -event-msg-handler :data/read-sub
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (println "Received read-sub event" event id ?data)
+  (when ?reply-fn
+    (?reply-fn {:a "a" :b "b"})))
 
 ; TODO - other event-msg-handlers go here.
 

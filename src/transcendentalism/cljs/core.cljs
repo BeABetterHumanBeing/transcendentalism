@@ -5,28 +5,25 @@
             [transcendentalism.sente :as sente]))
 
 (defn human-head-component []
-  (let [username (r/atom "placeholder")]
-    (sente/chsk-send! [:test/get-username] 5000
-      (fn [cb-reply]
-        (reset! username cb-reply)))
+  (let [user-sub (r/atom nil)
+        user-data (r/atom {})]
+    (sente/chsk-send! [:sovereign/get-user-sub] 5000
+      (fn [sub]
+        (when (keyword? sub)
+          (reset! user-sub sub)
+          (sente/chsk-send! [:data/read-sub sub] 5000
+            (fn [data]
+              (reset! user-data data))))))
     (fn []
       [:div
-        [:span "username: " @username]
+        [:span @user-sub ": " @user-data]
         [:span "TODO command bar"]
         [:a {:href "logout"} "Logout"]])))
-
-(defn attention-set-component []
-  [:div "TODO attention set"])
-
-(defn robot-head-component []
-  [:div [:span "TODO current graph"]])
 
 (defn master-component []
   [:div {:style {:margin "0 auto"
                  :padding-top 100}}
-    [human-head-component]
-    [attention-set-component]
-    [robot-head-component]])
+    [human-head-component]])
 
 (defn render-page
   []

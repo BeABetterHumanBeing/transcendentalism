@@ -2,6 +2,7 @@
   (:require (cemerick.friend [credentials :as creds])
             [clojure.string :as str]
             [ring.util.anti-forgery :as anti-forgery]
+            [ring.util.request :as req]
             [transcendentalism.color :refer :all]
             [transcendentalism.css :refer :all]
             [transcendentalism.flags :refer :all]
@@ -15,6 +16,7 @@
   [request]
   (if (flag :enable-sovereigns)
       (let [login-failed ((:params request) "login_failed" false)]
+        ; TODO - set focus automatically to username field
         (-> (str site-icon
               (link* {"rel" "stylesheet",
                       "href" (if (mobile-browser? request)
@@ -90,12 +92,15 @@
        "/sovereign/salted_password" (creds/hash-bcrypt "test123"),
        "/sovereign/fullname" "Daniel Gierl"})))
 
+(def username-to-sub (atom {}))
+
 (defn users-in-graph
   [graph]
   (reduce
     (fn [result sub]
       (if (contains? (read-os graph sub "/type") :sovereign-type)
           (let [username (unique-or-nil graph sub "/sovereign/username")]
+            (reset! username-to-sub (assoc @username-to-sub username sub))
             (assoc result
                    username {:username username
                              :password (unique-or-nil graph sub "/sovereign/salted_password")
