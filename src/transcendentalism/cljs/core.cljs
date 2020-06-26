@@ -4,6 +4,19 @@
             [reagent.dom :as rd]
             [transcendentalism.sente :as sente]))
 
+; Note that most CSS is being inlined, except that which cannot, which is being
+; supplied via the insertion-pt, and specified in render.clj
+
+(defn dot []
+  [:div {:class "dot"
+         :style {:display "inline-block"
+                 :background "black"
+                 :border-style "solid"
+                 :border-width 3
+                 :border-radius "50%"
+                 :width 10
+                 :height 10}}])
+
 (defn human-head-component []
   (let [user-sub (r/atom nil)
         user-data (r/atom {})]
@@ -15,14 +28,20 @@
             (fn [data]
               (reset! user-data data))))))
     (fn []
-      [:div
-        [:span @user-sub ": " @user-data]
-        [:span "TODO command bar"]
-        [:a {:href "logout"} "Logout"]])))
+      [:div {:style {:position "relative"}}
+        [:div {:style {:position "absolute"
+                       :left -20}} "X"]
+        [dot] ":" @user-sub]
+      ; [:div
+      ;   [:span @user-sub ": " @user-data]
+      ;   [:span "TODO command bar"]
+      ;   [:a {:href "logout"} "Logout"]]
+        )))
 
 (defn master-component []
-  [:div {:style {:margin "0 auto"
-                 :padding-top 100}}
+  [:div {:style {:margin "100 auto auto 100"
+                 ; :padding-top 100
+                 }}
     [human-head-component]])
 
 (defn render-page

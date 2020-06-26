@@ -24,7 +24,8 @@
   [is-mobile]
   (str/join "\n" [
     (status-css is-mobile)
-    (access-css is-mobile)]))
+    (access-css is-mobile)
+    (cljs-css is-mobile)]))
 
 (defn- prep-output
   "Collects all CSS and JS from the graph's renderers, and puts them in

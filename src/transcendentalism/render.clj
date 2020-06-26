@@ -256,3 +256,14 @@
     [fn-renderer bool-renderer string-renderer number-renderer time-renderer
      enum-renderer type-renderer default-renderer]
     (read-ss graph)))
+
+; TODO - Move all this to the appropriate components, once the new frontend's
+; framework is settled enough to be stable.
+(defn cljs-css
+  [is-mobile]
+  (str/join "\n" [
+    (css "div" {"class" "dot"}
+      (border-color (to-css-color white)))
+    (css "div" {"class" "dot",
+                "selector" "hover"}
+      (border-color (to-css-color yellow)))]))

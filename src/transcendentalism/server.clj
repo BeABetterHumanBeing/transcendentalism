@@ -47,9 +47,13 @@
   (status-page content 200))
 
 (defn- sovereign-page
-  [graph]
+  [graph request]
   (-> (str
         site-icon
+        (link* {"rel" "stylesheet",
+                "href" (if (mobile-browser? request)
+                           "output/mobile_server_styles.css"
+                           "output/server_styles.css")})
         ; Reagent DOM inserts into the point below. Must appear before the
         ; JS code that uses it.
         (div {"id" "insertion-pt"})
@@ -108,7 +112,7 @@
     ; Sovereign URIs
     (GET "/sovereign" request
       (friend/authorize #{:transcendentalism.access/sovereign}
-                        (sovereign-page graph)))
+                        (sovereign-page graph request)))
     (GET "/login" request (login-page request))
     (friend/logout (ANY "/logout" request (resp/redirect "/")))
     ; Sente's routing endpoints
