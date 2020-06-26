@@ -1,5 +1,6 @@
 (ns transcendentalism.core
   (:require [clojure.string :as str]
+            [goog.string :as gstring]
             [reagent.core :as r]
             [reagent.dom :as rd]
             [transcendentalism.sente :as sente]))
@@ -7,15 +8,39 @@
 ; Note that most CSS is being inlined, except that which cannot, which is being
 ; supplied via the insertion-pt, and specified in render.clj
 
-(defn dot []
-  [:div {:class "dot"
-         :style {:display "inline-block"
-                 :background "black"
-                 :border-style "solid"
-                 :border-width 3
-                 :border-radius "50%"
-                 :width 10
-                 :height 10}}])
+(defn dot [name]
+  (let [mode (r/atom :closed)]
+    (fn []
+      [:div {:style {:position "relative"
+                     :display "inline-block"}}
+        [:div {:class "dot-action"
+               :style {:display "inline-block"
+                       :background "black"
+                       :border-style "solid"
+                       :border-width 3
+                       :border-radius "50%"
+                       :width 10
+                       :height 10}
+               :on-click #(reset! mode (if (= @mode :closed) :open :closed))}]
+        [:span {:style {:position "absolute"
+                        :top -2}}
+          name]
+        (when (= @mode :open)
+          [:div {:class "dot-action"
+                 :style {:position "absolute"
+                         :left -16
+                         :top 0
+                         :border-style "solid"
+                         :border-width 3
+                         :width 10
+                         :height 10}}
+            [:a {:href "logout"
+                 :style {:position "absolute"
+                         :top -5
+                         :text-decoration "none"
+                         :color "black"}
+                 :title "Logout"}
+              (gstring/unescapeEntities "&#215;")]])])))
 
 (defn human-head-component []
   (let [user-sub (r/atom nil)
@@ -28,20 +53,16 @@
             (fn [data]
               (reset! user-data data))))))
     (fn []
-      [:div {:style {:position "relative"}}
-        [:div {:style {:position "absolute"
-                       :left -20}} "X"]
-        [dot] ":" @user-sub]
-      ; [:div
-      ;   [:span @user-sub ": " @user-data]
-      ;   [:span "TODO command bar"]
-      ;   [:a {:href "logout"} "Logout"]]
-        )))
+      (let [sub @user-sub]
+        (if (nil? sub)
+            [:div "You are logged out. " [:a {:href "login"} "Login"]]
+            [:div
+              [dot (str sub)]
+              ; [:span "TODO command bar"]
+              ])))))
 
 (defn master-component []
-  [:div {:style {:margin "100 auto auto 100"
-                 ; :padding-top 100
-                 }}
+  [:div {:style {:margin "100 auto auto 100"}}
     [human-head-component]])
 
 (defn render-page

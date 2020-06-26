@@ -132,7 +132,7 @@
                                                       users),
                               :workflows [(workflows/interactive-form)],
                               :unauthorized-handler unauthorized-handler,
-                              :default-landing-uri "/"})
+                              :default-landing-uri "/sovereign"})
         (anti-forgery/wrap-anti-forgery)
         (wrap-session)
         (wrap-keyword-params)
