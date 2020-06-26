@@ -29,7 +29,8 @@
                 (form {"action" "login",
                        "method" "post"}
                   (anti-forgery/anti-forgery-field)
-                  (let [username-input {"type" "text",
+                  (let [username-input {"autofocus" "true",
+                                        "type" "text",
                                         "name" "username",
                                         "class" "login-input"}]
                     (input (if login-failed
