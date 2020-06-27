@@ -52,9 +52,8 @@
 
 (defmethod -event-msg-handler :data/read-sub
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]} graph]
-  (println "Received read-sub event" event id ?data)
   (when ?reply-fn
-    (let [graphlet ((get-raw-data graph) (:sub ?data))]
+    (let [graphlet (get-graphlet graph (:sub ?data))]
       (?reply-fn {:v (:v graphlet),
                   :p-os (:p-os graphlet)}))))
 

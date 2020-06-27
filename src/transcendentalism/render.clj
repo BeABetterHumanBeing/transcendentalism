@@ -262,9 +262,9 @@
 (defn cljs-css
   [is-mobile]
   (str/join "\n" [
-    (css "div" {"class" "dot-action"}
+    (css "div" {"class" "node-action"}
       (border-color (to-css-color white)))
-    (css "div" {"class" "dot-action"
+    (css "div" {"class" "node-action"
                 "selector" "hover"}
       (border-color (to-css-color yellow))
       (cursor "pointer"))]))
