@@ -264,6 +264,7 @@
   (str/join "\n" [
     (css "div" {"class" "dot-action"}
       (border-color (to-css-color white)))
-    (css "div" {"class" "dot-action",
+    (css "div" {"class" "dot-action"
                 "selector" "hover"}
-      (border-color (to-css-color yellow)))]))
+      (border-color (to-css-color yellow))
+      (cursor "pointer"))]))

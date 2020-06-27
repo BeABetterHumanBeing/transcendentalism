@@ -9,38 +9,79 @@
 ; supplied via the insertion-pt, and specified in render.clj
 
 (defn dot [name]
-  (let [mode (r/atom :closed)]
+  (let [target (r/atom {:btn 0
+                        :search 0
+                        :opacity "0"
+                        :visibility "hidden"})
+        ]
     (fn []
-      [:div {:style {:position "relative"
-                     :display "inline-block"}}
-        [:div {:class "dot-action"
-               :style {:display "inline-block"
-                       :background "black"
-                       :border-style "solid"
-                       :border-width 3
-                       :border-radius "50%"
-                       :width 10
-                       :height 10}
-               :on-click #(reset! mode (if (= @mode :closed) :open :closed))}]
-        [:span {:style {:position "absolute"
-                        :top -2}}
-          name]
-        (when (= @mode :open)
+      (let [t @target,
+            anim {:visibility (:visibility t)
+                  :opacity (:opacity t)
+                  :transition "0.5s"}]
+        [:div {:style {:position "relative"}}
+          ; The node itself.
           [:div {:class "dot-action"
-                 :style {:position "absolute"
-                         :left -16
-                         :top 0
+                 :style {:display "inline-block"
+                         :background "black"
                          :border-style "solid"
                          :border-width 3
+                         :border-radius "50%"
                          :width 10
-                         :height 10}}
+                         :height 10}
+                 :on-click #(if (= (:btn t) 0)
+                             (reset! target {:btn 10
+                                             :search 150
+                                             :visibility "visible"
+                                             :opacity "1.0"})
+                             (reset! target {:btn 0
+                                             :search 0
+                                             :visibility "hidden"
+                                             :opacity "0"}))}]
+          ; Triangle to expand the node's edges.
+          [:div {:class "dot-action"
+                 :style (merge anim
+                          {:display "inline-block"
+                           :border-style "solid"
+                           :border-width 3
+                           :width (:btn t)
+                           :height 10})}
+            [:a {:style {:position "absolute"
+                         :top 0
+                         :text-decoration "none"
+                         :color "black"}}
+              (gstring/unescapeEntities "&#9657;")]]
+          ; Sub name.
+          [:div {:style {:display "inline-block"
+                         :margin-left -1
+                         :transform "translate(0px, -3px)"}}
+            name]
+          ; Search field.
+          [:input {:type "text"
+                   :style (merge anim
+                            {:margin "2px"
+                             :border-style "solid"
+                             :border-width 1
+                             :width (:search t)
+                             :height 22
+                             :transform "translate(0px, -3px)"})
+                   :placeholder ":example"}]
+          ; Button to logout.
+          [:div {:class "dot-action"
+                 :style (merge anim
+                          {:display "inline-block"
+                           :border-style "solid"
+                           :border-width 3
+                           :width (:btn t)
+                           :height 10
+                           :top -15})}
             [:a {:href "logout"
                  :style {:position "absolute"
-                         :top -5
+                         :top 0
                          :text-decoration "none"
                          :color "black"}
                  :title "Logout"}
-              (gstring/unescapeEntities "&#215;")]])])))
+              (gstring/unescapeEntities "&#215;")]]]))))
 
 (defn human-head-component []
   (let [user-sub (r/atom nil)
@@ -56,10 +97,7 @@
       (let [sub @user-sub]
         (if (nil? sub)
             [:div "You are logged out. " [:a {:href "login"} "Login"]]
-            [:div
-              [dot (str sub)]
-              ; [:span "TODO command bar"]
-              ])))))
+            [dot (str sub)])))))
 
 (defn master-component []
   [:div {:style {:margin "100 auto auto 100"}}
