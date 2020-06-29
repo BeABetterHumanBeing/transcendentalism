@@ -17,7 +17,7 @@
             [transcendentalism.components.table :refer :all]
             [transcendentalism.components.thesis :refer :all]
             [transcendentalism.constraint :refer :all]
-            [transcendentalism.encoding :refer :all]
+            [transcendentalism.cljc.encoding :refer :all]
             [transcendentalism.graph :refer :all]
             [transcendentalism.render :refer :all]))
 

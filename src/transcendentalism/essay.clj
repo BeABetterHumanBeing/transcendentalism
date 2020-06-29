@@ -1,6 +1,6 @@
 (ns transcendentalism.essay
   (:require [clojure.string :as str]
-            [transcendentalism.encoding :refer :all]
+            [transcendentalism.cljc.encoding :refer :all]
             [transcendentalism.glossary :refer :all]
             [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]

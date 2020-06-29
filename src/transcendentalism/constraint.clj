@@ -1,6 +1,6 @@
 (ns transcendentalism.constraint
   (:require [clojure.set :as set]
-            [transcendentalism.encoding :refer :all]
+            [transcendentalism.cljc.encoding :refer :all]
             [transcendentalism.graph :refer :all]
             [transcendentalism.tablet :refer :all]
             [transcendentalism.time :refer :all]

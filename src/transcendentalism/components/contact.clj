@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [transcendentalism.constraint :refer :all]
             [transcendentalism.css :refer :all]
-            [transcendentalism.encoding :refer :all]
+            [transcendentalism.cljc.encoding :refer :all]
             [transcendentalism.graph :refer :all]
             [transcendentalism.html :refer :all]
             [transcendentalism.js :refer :all]
